@@ -19,6 +19,12 @@ describe("simple", function() {
 				done();
 			});
 		});
+		it("should resolve itself sync " + pathToIt[2], function() {
+			var filename = resolve.sync(pathToIt[0], pathToIt[1]);
+			should.exist(filename);
+			filename.should.be.a("string");
+			filename.should.be.eql(path.join(__dirname, "..", "lib", "resolve.js"));
+		});
 	});
 
 });

@@ -6,4 +6,13 @@ Offers a async require.resolve function. It's highly configurable.
 
 More documentation coming soon...
 
+``` javascript
+var resolve = require("enhanced-resolve");
+
+resolve(string context, string identifier, object options, function callback(err, result))
+resolve.sync(string context, string identifier, object options)
+resolve.context(string context, string identifier, object options, function callback(err, result))
+resolve.context.sync(string context, string identifier, object options)
+```
+
 *It is used in [webpack](/webpack/webpack)*
