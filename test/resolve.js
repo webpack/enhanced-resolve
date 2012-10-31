@@ -42,6 +42,9 @@ function testResolveContext(name, context, moduleName, result) {
 	});
 }
 describe("resolve", function() {
+	testResolve("absolute path",
+		fixtures, path.join(fixtures, "main1.js"), path.join(fixtures, "main1.js"));
+
 	testResolve("file with .js",
 		fixtures, "./main1.js", path.join(fixtures, "main1.js"));
 	testResolve("file without extension",
@@ -65,6 +68,11 @@ describe("resolve", function() {
 		fixtures, "./main1.js?query", path.join(fixtures, "main1.js") + "?query");
 	testResolve("file in module with query",
 		fixtures, "m1/a?query", path.join(fixtures, "node_modules", "m1", "a.js") + "?query");
+
+	testResolve("absolute path with loader",
+		fixtures,
+		path.join(fixtures, "node_modules", "m1", "a.js") + "!!" + path.join(fixtures, "main1.js"),
+		path.join(fixtures, "node_modules", "m1", "a.js") + "!" + path.join(fixtures, "main1.js"));
 
 	testResolve("loader",
 		fixtures, "m1/a!./main1.js", path.join(fixtures, "node_modules", "m1", "a.js") + "!" + path.join(fixtures, "main1.js"));
