@@ -6,11 +6,18 @@ var should = require("should");
 var path = require("path");
 var resolve = require("../");
 
+var options = {
+	loaders: [
+		{test: ".load1$", loader: "m2/b"},
+		{test: ".load2$", loader: "m1/a!m2/b"}
+	]
+}
+
 var fixtures = path.join(__dirname, "fixtures");
 function testResolve(name, context, moduleName, result) {
 	describe(name, function() {
 		it("should resolve async correctly", function(done) {
-			resolve(context, moduleName, {}, function(err, filename) {
+			resolve(context, moduleName, options, function(err, filename) {
 				if(err) done(err);
 				should.exist(filename);
 				filename.should.equal(result);
@@ -18,7 +25,7 @@ function testResolve(name, context, moduleName, result) {
 			});
 		});
 		it("should resolve sync correctly", function() {
-			var filename = resolve.sync(context, moduleName, {});
+			var filename = resolve.sync(context, moduleName, options);
 			should.exist(filename);
 			filename.should.equal(result);
 		});
@@ -88,6 +95,24 @@ describe("resolve", function() {
 			path.join(fixtures, "node_modules", "m1", "b.js") + "?q2!" +
 			path.join(fixtures, "node_modules", "m2-loader", "b.js") + "?q3!" +
 			path.join(fixtures, "main1.js") + "?q4");
+
+	testResolve("automatic one loader",
+		fixtures, "./file.load1",
+		path.join(fixtures, "node_modules", "m2-loader", "b.js") + "!" +
+		path.join(fixtures, "file.load1"));
+	testResolve("automatic two loader",
+		fixtures, "./file.load2",
+		path.join(fixtures, "node_modules", "m1", "a.js") + "!" +
+		path.join(fixtures, "node_modules", "m2-loader", "b.js") + "!" +
+		path.join(fixtures, "file.load2"));
+	testResolve("overwrite automatic loader",
+		fixtures, "m1/a!./file.load1",
+		path.join(fixtures, "node_modules", "m1", "a.js") + "!" +
+		path.join(fixtures, "file.load1"));
+	testResolve("disable automatic loader",
+		fixtures, "!./file.load1",
+		path.join(fixtures, "file.load1"));
+
 
 	testResolveContext("context for fixtures",
 		fixtures, "./", fixtures);
