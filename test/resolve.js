@@ -61,6 +61,11 @@ describe("resolve", function() {
 	testResolve("from submodule to file in sibling of parent module",
 		path.join(fixtures, "node_modules", "complexm", "web_modules", "m1"), "m2/b.js", path.join(fixtures, "node_modules", "m2", "b.js"));
 
+	testResolve("file with query",
+		fixtures, "./main1.js?query", path.join(fixtures, "main1.js") + "?query");
+	testResolve("file in module with query",
+		fixtures, "m1/a?query", path.join(fixtures, "node_modules", "m1", "a.js") + "?query");
+
 	testResolve("loader",
 		fixtures, "m1/a!./main1.js", path.join(fixtures, "node_modules", "m1", "a.js") + "!" + path.join(fixtures, "main1.js"));
 	testResolve("loader with prefix",
@@ -70,6 +75,11 @@ describe("resolve", function() {
 			path.join(fixtures, "node_modules", "m1", "b.js") + "!" +
 			path.join(fixtures, "node_modules", "m2-loader", "b.js") + "!" +
 			path.join(fixtures, "main1.js"));
+	testResolve("multiple loaders with queries",
+		fixtures, "m1/a?q1!m1/b?q2!m2/b?q3!./main1.js?q4", path.join(fixtures, "node_modules", "m1", "a.js") + "?q1!" +
+			path.join(fixtures, "node_modules", "m1", "b.js") + "?q2!" +
+			path.join(fixtures, "node_modules", "m2-loader", "b.js") + "?q3!" +
+			path.join(fixtures, "main1.js") + "?q4");
 
 	testResolveContext("context for fixtures",
 		fixtures, "./", fixtures);
@@ -81,4 +91,9 @@ describe("resolve", function() {
 		fixtures, "m1/a!m2/b.js!../", path.join(fixtures, "node_modules", "m1", "a.js") + "!" +
 			path.join(fixtures, "node_modules", "m2-loader", "b.js") + "!" +
 			path.join(fixtures, ".."));
+
+	testResolveContext("context for fixtures with query",
+		fixtures, "./?query", fixtures + "?query");
+	testResolveContext("context with loader and query",
+		fixtures, "m1/a?q1!./?q2", path.join(fixtures, "node_modules", "m1", "a.js") + "?q1!" + fixtures + "?q2");
 });
