@@ -4,7 +4,7 @@
 */
 var should = require("should");
 var path = require("path");
-var resolve = require("../lib/resolve");
+var resolve = require("../");
 
 var fixtures = path.join(__dirname, "fixtures");
 function testResolve(name, context, moduleName, result) {

@@ -1,4 +1,4 @@
-var resolve = require("../lib/resolve");
+var resolve = require("../");
 var should = require("should");
 var path = require("path");
 

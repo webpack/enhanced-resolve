@@ -18,7 +18,7 @@
 	"engines": {
 		"node":  ">=0.6"
 	},
-	"main": "lib/resolve.js",
+	"main": "lib/cachedFsResolve.js",
 	"homepage": "http://github.com/webpack/enhanced-resolve",
 	"scripts": {
 		"test": "node node_modules/mocha/bin/_mocha --reporter spec"
