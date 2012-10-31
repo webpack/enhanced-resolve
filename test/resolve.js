@@ -9,7 +9,7 @@ var resolve = require("../lib/resolve");
 var fixtures = path.join(__dirname, "fixtures");
 function testResolve(name, context, moduleName, result) {
 	describe(name, function() {
-		it("should resolve correctly", function(done) {
+		it("should resolve async correctly", function(done) {
 			resolve(context, moduleName, {}, function(err, filename) {
 				if(err) done(err);
 				should.exist(filename);
@@ -17,17 +17,27 @@ function testResolve(name, context, moduleName, result) {
 				done();
 			});
 		});
+		it("should resolve sync correctly", function() {
+			var filename = resolve.sync(context, moduleName, {});
+			should.exist(filename);
+			filename.should.equal(result);
+		});
 	});
 }
 function testResolveContext(name, context, moduleName, result) {
 	describe(name, function() {
-		it("should resolve correctly", function(done) {
+		it("should resolve async correctly", function(done) {
 			resolve.context(context, moduleName, {}, function(err, filename) {
 				if(err) done(err);
 				should.exist(filename)
 				filename.should.equal(result);
 				done();
 			});
+		});
+		it("should resolve sync correctly", function() {
+			var filename = resolve.context.sync(context, moduleName, {});
+			should.exist(filename)
+			filename.should.equal(result);
 		});
 	});
 }
