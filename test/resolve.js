@@ -96,6 +96,11 @@ describe("resolve", function() {
 			path.join(fixtures, "node_modules", "m2-loader", "b.js") + "?q3!" +
 			path.join(fixtures, "main1.js") + "?q4");
 
+	testResolve("loader without resource",
+		fixtures, "m1/a?q1!", path.join(fixtures, "node_modules", "m1", "a.js") + "?q1!");
+	testResolve("loader without resource but query",
+		fixtures, "m1/a?q1!?q2", path.join(fixtures, "node_modules", "m1", "a.js") + "?q1!?q2");
+
 	testResolve("automatic one loader",
 		fixtures, "./file.load1",
 		path.join(fixtures, "node_modules", "m2-loader", "b.js") + "!" +
