@@ -149,6 +149,18 @@ type Completion { // examples for "loader!module/dir/fi*?query"
    context: [],
    // same as postprocess.normal but for contextes
   }
+
+  disableLoaders: false,
+  // disallow loaders
+
+  disableResourceQuery: false,
+  // disallow query at resource
+
+  disableResourcePureQuery: false,
+  // disallow only query without resource
+
+  disableLoaderQuery: false,
+  // disallow queries at loaders
 }
 ```
 
