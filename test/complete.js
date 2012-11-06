@@ -51,6 +51,9 @@ var testCases = {
 	],
 	"./lib/complex2*": [],
 	"./*ib": [{ insert: "l", seqment: "lib", part: "./lib", result: "./lib" }],
+	"./li*": [
+		{ insert: "b", seqment: "lib", part: "./lib", result: "./lib" }
+	],
 	"./lib*": [
 		{ insert: "", seqment: "lib", part: "./lib", result: "./lib" },
 		{ insert: "/", seqment: "lib/", part: "./lib/", result: "./lib/" }
@@ -80,6 +83,11 @@ var testCases = {
 		{ insert: "", seqment: "b", part: "m2/b", result: "m2/b" },
 		{ insert: ".js", seqment: "b.js", part: "m2/b.js", result: "m2/b.js" }
 	],
+	"m2*": [
+		{ insert: "", seqment: "m2", part: "m2", result: "m2" },
+		{ insert: "-loader", seqment: "m2-loader", part: "m2-loader", result: "m2-loader" },
+		{ insert: "/", seqment: "m2/", part: "m2/", result: "m2/" }
+	],
 	"invalidPa*": [
 		{ insert: "ckageJson", seqment: "invalidPackageJson", part: "invalidPackageJson", result: "invalidPackageJson" }
 	],
@@ -95,8 +103,7 @@ var testCases = {
 		{ insert: "mp", seqment: "complexm", part: "complexm/step1", result: "complexm/step1" }
 	],
 	"./shortcut*": [
-		{ insert: "dir.js", seqment: "shortcutdir.js", part: "./shortcutdir.js", result: "./shortcutdir.js" },
-		{ insert: "dir.js/", seqment: "shortcutdir.js/", part: "./shortcutdir.js/", result: "./shortcutdir.js/" }
+		{ insert: "dir.js", seqment: "shortcutdir.js", part: "./shortcutdir.js", result: "./shortcutdir.js" }
 	],
 	"./*cutdir": [],
 	"./*cutdir.js": [
@@ -104,6 +111,10 @@ var testCases = {
 	],
 	"./shortcutdir*/": [
 		{ insert: ".js", seqment: "shortcutdir.js", part: "./shortcutdir.js/", result: "./shortcutdir.js/" }
+	],
+	"./shortcutdir.js*": [
+		{ insert: "", seqment: "shortcutdir.js", part: "./shortcutdir.js", result: "./shortcutdir.js" },
+		{ insert: "/", seqment: "shortcutdir.js/", part: "./shortcutdir.js/", result: "./shortcutdir.js/" }
 	]
 }
 
