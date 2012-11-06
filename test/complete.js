@@ -93,16 +93,35 @@ var testCases = {
 	],
 	"co*lexm/step1": [
 		{ insert: "mp", seqment: "complexm", part: "complexm/step1", result: "complexm/step1" }
+	],
+	"./shortcut*": [
+		{ insert: "dir.js", seqment: "shortcutdir.js", part: "./shortcutdir.js", result: "./shortcutdir.js" },
+		{ insert: "dir.js/", seqment: "shortcutdir.js/", part: "./shortcutdir.js/", result: "./shortcutdir.js/" }
+	],
+	"./*cutdir": [],
+	"./*cutdir.js": [
+		{ insert: "short", seqment: "shortcutdir.js", part: "./shortcutdir.js", result: "./shortcutdir.js" }
+	],
+	"./shortcutdir*/": [
+		{ insert: ".js", seqment: "shortcutdir.js", part: "./shortcutdir.js/", result: "./shortcutdir.js/" }
 	]
 }
 
 describe("complete", function() {
 	Object.keys(testCases).forEach(function(testCase) {
 		var result = testCases[testCase];
-		it("should complete " + testCase, function() {
+		it("should complete " + testCase + " (sync)", function() {
 			var results = resolve.complete.sync(fixtures, testCase, options);
 			should.exist(results);
 			results.should.be.eql(result);
+		});
+		it("should complete " + testCase + " (async)", function(done) {
+			resolve.complete(fixtures, testCase, options, function(err, results) {
+				if(err) throw err;
+				should.exist(results);
+				results.should.be.eql(result);
+				done();
+			});
 		});
 	});
 });

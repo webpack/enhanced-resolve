@@ -2,9 +2,16 @@
 
 Offers a async require.resolve function. It's highly configurable.
 
-[![Build Status](https://secure.travis-ci.org/webpack/enhanced-resolve.png?branch=master)](http://travis-ci.org/webpack/enhanced-resolve)
 
-More documentation coming soon...
+## Features
+
+* sync and async versions
+* loaders and query strings
+* normal resolve
+* context resolve (resolve a directory)
+* loaders resolve
+* code completion
+
 
 ## Request Format
 
@@ -27,29 +34,48 @@ Example: `raw!./customLoader?evil,strict!C:\fail\loader?fail=big!../file.js?char
 var resolve = require("enhanced-resolve");
 
 // Resolve a normal request
-resolve(context: String, identifier: String, options: Object, callback: (err: Error, result: String) => void) => void
-resolve.sync(context: String, identifier: String, options: Object) => String
+resolve(context: String, identifier: String, options?: Object, callback: (err: Error, result: String))
+resolve.sync(context: String, identifier: String, options?: Object) => String
 
 // Resolve a context request, which means the result should be a folder
-resolve.context(context: String, identifier: String, options: Object, callback: (err: Error, result: String) => void) => void
-resolve.context.sync(context: String, identifier: String, options: Object) => String
+resolve.context(context: String, identifier: String, options?: Object, callback: (err: Error, result: String))
+resolve.context.sync(context: String, identifier: String, options?: Object) => String
 
 // Only resolve loaders, a array of resolved loaders is the result
-resolve.loaders(context: String, identifier: String, options: Object, callback: (err: Error, result: String[]) => void) => void
-resolve.loaders.sync(context: String, identifier: String, options: Object) => String[]
+resolve.loaders(context: String, identifier: String, options?: Object, callback: (err: Error, result: String[]))
+resolve.loaders.sync(context: String, identifier: String, options?: Object) => String[]
+
+// Autocomplete a incomplete require expression.
+// identifier must contain exactly one "*", which indicates the insert position
+resolve.complete(context: String, identifier: String, options?: Object, callback: (err: Error, result: Completion[]))
+resolve.complete.sync(context: String, identifier: String, options?: Object) => Completion[]
 
 // parse a request
 resolve.parse(identifier: String) => {loaders: Part[], resource: Part}
 
+// parse only a part
+resolve.parse.part(identifierPart: String) => Part
+
 // stringify a parsed request
 resolve.stringify(parsed: {loaders: Part[], resource: Part}) => String
+
+// stringify only a part
+resolve.stringify.part(part: Part) => String
+
+// checks if a request part is a module
+resolve.parse.isModule(identifierPart: String) => Boolean
 
 // the type used for parse and stringify
 type Part { path: String, query: String, module: Boolean }
 
-// checks if a request part is a module
-resolve.parse.isModule(identifierPart: String)
+type Completion { // examples for "loader!module/dir/fi*?query"
+	insert: String,   // i. e. "le.js"
+	seqment: String,  // i. e. "file.js"
+	part: String,     // i. e. "module/dir/file.js?query"
+	result: String    // i. e. "loader!module/dir/file.js?query"
+}
 ```
+
 
 ## Options
 
@@ -127,4 +153,17 @@ resolve.parse.isModule(identifierPart: String)
 ```
 
 
-*It is used i. e. in [webpack](https://github.com/webpack/webpack) and [Scripted](https://github.com/scripted-editor/scripted)*
+## Tests
+
+``` javascript
+npm test
+```
+
+[![Build Status](https://secure.travis-ci.org/webpack/enhanced-resolve.png?branch=master)](http://travis-ci.org/webpack/enhanced-resolve)
+
+
+## License
+
+Copyright (c) 2012 Tobias Koppers
+
+MIT (http://www.opensource.org/licenses/mit-license.php)
