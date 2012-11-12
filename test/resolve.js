@@ -7,6 +7,9 @@ var path = require("path");
 var resolve = require("../");
 
 var options = {
+	alias: {
+		"recursive-module": "recursive-module/file"
+	},
 	loaders: [
 		{test: ".load1$", loader: "m2/b"},
 		{test: ".load2$", loader: "m1/a!m2/b"}
@@ -134,4 +137,12 @@ describe("resolve", function() {
 		fixtures, "./?query", fixtures + "?query");
 	testResolveContext("context with loader and query",
 		fixtures, "m1/a?q1!./?q2", path.join(fixtures, "node_modules", "m1", "a.js") + "?q1!" + fixtures + "?q2");
+
+	testResolve("infinite loop by alias",
+		fixtures, "recursive-module", path.join(fixtures, "node_modules", "recursive-module", "file.js"));
+
+	testResolve("differ between directory and file, resolve file",
+		fixtures, "./dirOrFile", path.join(fixtures, "dirOrFile.js"));
+	testResolve("differ between directory and file, resolve directory",
+		fixtures, "./dirOrFile/", path.join(fixtures, "dirOrFile", "index.js"));
 });
