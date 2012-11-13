@@ -6,7 +6,11 @@ var should = require("should");
 var path = require("path");
 var resolve = require("../");
 
-var options = {};
+var options = {
+	alias: {
+		aliasmod: "m1"
+	}
+};
 
 var fixtures = path.join(__dirname, "fixtures");
 
@@ -102,6 +106,25 @@ var testCases = {
 	"co*lexm/step1": [
 		{ insert: "mp", seqment: "complexm", part: "complexm/step1", result: "complexm/step1" }
 	],
+
+	"aliasmod/a*": [
+		{ insert: "", seqment: "a", part: "aliasmod/a", result: "aliasmod/a" },
+		{ insert: ".js", seqment: "a.js", part: "aliasmod/a.js", result: "aliasmod/a.js" }
+	],
+	"aliasmod/*": [
+		{ insert: "a", seqment: "a", part: "aliasmod/a", result: "aliasmod/a" },
+		{ insert: "a.js", seqment: "a.js", part: "aliasmod/a.js", result: "aliasmod/a.js" },
+		{ insert: "b", seqment: "b", part: "aliasmod/b", result: "aliasmod/b" },
+		{ insert: "b.js", seqment: "b.js", part: "aliasmod/b.js", result: "aliasmod/b.js" }
+	],
+	"aliasm*": [
+		{ insert: "od", seqment: "aliasmod", part: "aliasmod", result: "aliasmod" }
+	],
+	"aliasmod*": [
+		{ insert: "", seqment: "aliasmod", part: "aliasmod", result: "aliasmod" },
+		{ insert: "/", seqment: "aliasmod/", part: "aliasmod/", result: "aliasmod/" }
+	],
+
 	"./shortcut*": [
 		{ insert: "dir.js", seqment: "shortcutdir.js", part: "./shortcutdir.js", result: "./shortcutdir.js" }
 	],
