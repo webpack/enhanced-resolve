@@ -4,6 +4,7 @@ function ConstFileSystem(content) {
 module.exports = ConstFileSystem;
 
 ConstFileSystem.prototype.get = function(path) {
+	if(path == "/") return this.content;
 	var seqments = path.split(/[\/\\]/g);
 	if(seqments[0] != "") throw new Error("path is not absolute");
 	var current = this.content;
