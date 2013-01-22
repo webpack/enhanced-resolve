@@ -24,6 +24,23 @@ function testResolve(name, context, moduleName, result) {
 		});
 	});
 }
+function testResolveLoader(name, context, moduleName, result) {
+	describe(name, function() {
+		it("should resolve sync correctly", function() {
+			var filename = resolve.loader.sync(context, moduleName);
+			should.exist(filename);
+			filename.should.equal(result);
+		});
+		it("should resolve async correctly", function(done) {
+			resolve.loader(context, moduleName, function(err, filename) {
+				if(err) done(err);
+				should.exist(filename);
+				filename.should.equal(result);
+				done();
+			});
+		});
+	});
+}
 function testResolveContext(name, context, moduleName, result) {
 	describe(name, function() {
 		it("should resolve async correctly", function(done) {
@@ -83,4 +100,9 @@ describe("resolve", function() {
 		fixtures, "./dirOrFile", path.join(fixtures, "dirOrFile.js"));
 	testResolve("differ between directory and file, resolve directory",
 		fixtures, "./dirOrFile/", path.join(fixtures, "dirOrFile", "index.js"));
+
+	testResolveLoader("loader with template without extension",
+		fixtures, "m2/b", path.join(fixtures, "node_modules", "m2-loader", "b.js"));
+	testResolveLoader("loader with template as file",
+		fixtures, "l", path.join(fixtures, "node_loaders", "l-loader.js"));
 });
