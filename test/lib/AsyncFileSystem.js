@@ -22,9 +22,9 @@ AsyncFileSystem.prototype.readdir = function(path, callback) {
 	}.bind(this), callback);
 }
 
-AsyncFileSystem.prototype.readFile = function(path, encoding, callback) {
+AsyncFileSystem.prototype.readFile = function(path, callback) {
 	asAsync(function() {
-		return this.fs.readFileSync(path, encoding);
+		return this.fs.readFileSync(path);
 	}.bind(this), callback);
 }
 

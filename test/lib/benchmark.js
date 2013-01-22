@@ -4,13 +4,12 @@ var CachedFileSystem = require("./CachedFileSystem");
 var AsyncFileSystem = require("./AsyncFileSystem");
 var DebugFileSystem = require("./DebugFileSystem");
 var TestContents = require("./TestContents");
-var customResolveFactory = require("./customResolveFactory");
-
-var defaultOptions = {
-	modulesDirectories: ["web_modules", "node_modules"],
-	extensions: ["", ".webpack.js", ".web.js", ".js"],
-	packageMains: ["webpack", "browserify", "web", "main"],
-}
+var Resolver = require("../../lib/Resolver");
+var ModulesInDirectoriesPlugin = require("../../lib/ModulesInDirectoriesPlugin");
+var ModuleAsDirectoryPlugin = require("../../lib/ModuleAsDirectoryPlugin");
+var ModuleDefaultFilePlugin = require("../../lib/ModuleDefaultFilePlugin");
+var ModuleDescriptionFilePlugin = require("../../lib/ModuleDescriptionFilePlugin");
+var FileAppendPlugin = require("../../lib/FileAppendPlugin");
 
 var cases = [
 	{
@@ -67,9 +66,17 @@ var i = 0;
 (function next() {
 	var testCase = cases[i++];
 	if(!testCase) return;
-	var loggedFs = new LoggedFileSystem(/*new DebugFileSystem*/(new ConstFileSystem(TestContents[testCase.content])));
+	var loggedFs = new LoggedFileSystem(new DebugFileSystem(new ConstFileSystem(TestContents[testCase.content])));
 	var fs = new AsyncFileSystem(new CachedFileSystem(loggedFs));
-	var resolve = customResolveFactory(fs);
+	var resolver = new Resolver(fs);
+	resolver.apply(
+		new ModulesInDirectoriesPlugin("node", ["web_modules", "node_modules"]),
+		new ModuleAsDirectoryPlugin("node"),
+		new ModuleDescriptionFilePlugin("package.json", ["webpack", "browserify", "web", "main"]),
+		new ModuleDefaultFilePlugin(["index"]),
+		new FileAppendPlugin(["", ".web.js", ".js"])
+	);
+
 	var stopTick = false;
 	var ticks = 0;
 	process.nextTick(function tick() {
@@ -78,10 +85,10 @@ var i = 0;
 		// console.log("tick");
 		process.nextTick(tick);
 	});
-	resolve(testCase.context, testCase.resolve, testCase.options || defaultOptions, function(err, result) {
+	resolver.resolve(testCase.context, testCase.resolve, function(err, result) {
 		console.log(testCase.title + ": " + testCase.resolve + " in " + testCase.context);
 		if(err) console.log("err -> " + err);
-		else console.log("-> " +result);
+		else console.log("-> " + result);
 		console.log("stat: " + loggedFs.count.stat +
 			", readFile: " + loggedFs.count.readFile +
 			", readdir: " + loggedFs.count.readdir +
