@@ -1,6 +1,6 @@
 {
 	"name": "enhanced-resolve",
-	"version": "0.5.1",
+	"version": "0.5.2",
 	"author": "Tobias Koppers @sokra",
 	"description": "Offers a async require.resolve function. It's highly configurable.",
 	"dependencies": {
@@ -23,6 +23,5 @@
 	"homepage": "http://github.com/webpack/enhanced-resolve",
 	"scripts": {
 		"test": "mocha --reporter spec"
-	},
-	"license": "MIT"
+	}
 }
