@@ -1,6 +1,6 @@
 {
 	"name": "enhanced-resolve",
-	"version": "0.5.14",
+	"version": "0.5.15",
 	"author": "Tobias Koppers @sokra",
 	"description": "Offers a async require.resolve function. It's highly configurable.",
 	"dependencies": {
@@ -14,7 +14,7 @@
 	],
 	"devDependencies": {
 		"mocha": "1.8.x",
-		"should": "1.1.x"
+		"should": "2.0.x"
 	},
 	"engines": {
 		"node":  ">=0.6"

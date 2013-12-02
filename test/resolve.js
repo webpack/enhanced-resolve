@@ -80,6 +80,10 @@ describe("resolve", function() {
 		path.join(fixtures, "node_modules", "complexm"), "m2/b.js", path.join(fixtures, "node_modules", "m2", "b.js"));
 	testResolve("from submodule to file in sibling of parent module",
 		path.join(fixtures, "node_modules", "complexm", "web_modules", "m1"), "m2/b.js", path.join(fixtures, "node_modules", "m2", "b.js"));
+	testResolve("from nested directory to overwritten file in module",
+		path.join(fixtures, "multiple_modules"), "m1/a.js", path.join(fixtures, "multiple_modules", "node_modules", "m1", "a.js"));
+	testResolve("from nested directory to not overwritten file in module",
+		path.join(fixtures, "multiple_modules"), "m1/b.js", path.join(fixtures, "node_modules", "m1", "b.js"));
 
 	testResolve("file with query",
 		fixtures, "./main1.js?query", path.join(fixtures, "main1.js") + "?query");
