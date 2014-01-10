@@ -50,8 +50,8 @@ describe("alias", function() {
 		resolver.apply(
 			new ModuleAliasPlugin({
 				aliasA: "a",
-				b: "a/index",
-				c: "/a/index",
+				"b$": "a/index",
+				"c$": "/a/index",
 				recursive: "recursive/dir"
 			}),
 			new ModulesInRootPlugin("module", "/"),
