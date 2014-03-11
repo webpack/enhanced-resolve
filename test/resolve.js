@@ -109,4 +109,7 @@ describe("resolve", function() {
 		fixtures, "m2/b", path.join(fixtures, "node_modules", "m2-loader", "b.js"));
 	testResolveLoader("loader with template as file",
 		fixtures, "l", path.join(fixtures, "node_loaders", "l-loader.js"));
+
+	testResolve("find node_modules outside of node_modules",
+		path.join(fixtures, "browser-module", "node_modules"), "m1/a", path.join(fixtures, "node_modules", "m1", "a.js"));
 });
