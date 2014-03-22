@@ -29,16 +29,20 @@ describe("mainField", function () {
 		);
 	});
 	
-	it("should resolve array value", function () {
+	it("should resolve array with single element", function () {
 		resolver.resolveSync(p(), "with-array").should.be.eql(p("bower_components", "with-array", "a.js"));
 	});
 	
-	it("should resolve multiple array value", function () {
+	it("should resolve array with multiple values", function () {
 		resolver.resolveSync(p(), "with-array-multi/a2").should.be.eql(p("bower_components", "with-array-multi", "a2.js"));
 		resolver.resolveSync(p(), "with-array-multi/a2.css").should.be.eql(p("bower_components", "with-array-multi", "a2.css"));
 	});
 	
-	it("should resolve string value", function () {
+	it("should resolve first value in array as default module", function () {
+		resolver.resolveSync(p(), "with-array-multi").should.be.eql(p("bower_components", "with-array-multi", "a2.js"));
+	});
+	
+	it("should resolve string", function () {
 		resolver.resolveSync(p(), "with-string").should.be.eql(p("bower_components", "with-string", "s.js"));
 	});
 });
