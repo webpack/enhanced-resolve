@@ -4,7 +4,8 @@
 	"author": "Tobias Koppers @sokra",
 	"description": "Offers a async require.resolve function. It's highly configurable.",
 	"dependencies": {
-		"tapable": "0.1.x"
+		"tapable": "0.1.x",
+		"graceful-fs": "~2.0.3"
 	},
 	"licenses": [
 		{
