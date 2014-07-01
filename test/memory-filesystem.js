@@ -1,28 +1,28 @@
-var MemoryInputFileSystem = require("../lib/MemoryInputFileSystem");
+var MemoryFileSystem = require("memory-fs");
 var should = require("should");
 
 describe("memory-filesystem", function() {
 	var fileSystem;
 
 	beforeEach(function() {
-		fileSystem = new MemoryInputFileSystem({
+		fileSystem = new MemoryFileSystem({
 			"": true,
 			a: {
 				"": true,
-				index: "1", // /a/index
+				index: new Buffer("1"), // /a/index
 				dir: {
 					"": true,
-					index: "2" // /a/dir/index
+					index: new Buffer("2") // /a/dir/index
 				}
 			},
 			"C:": {
 				"": true,
 				a: {
 					"": true,
-					index: "3",  // C:\files\index
+					index: new Buffer("3"),  // C:\files\index
 					dir: {
 						"": true,
-						index: "4"  // C:\files\a\index
+						index: new Buffer("4")  // C:\files\a\index
 					}
 				}
 			}
@@ -45,8 +45,8 @@ describe("memory-filesystem", function() {
 			fileSystem.readdirSync("/a/dir").should.be.eql(["index"]);
 		});
 		it("should readdir directories", function() {
-			fileSystem.readFileSync("/a/index").should.be.eql("1");
-			fileSystem.readFileSync("/a/dir/index").should.be.eql("2");
+			fileSystem.readFileSync("/a/index", "utf-8").should.be.eql("1");
+			fileSystem.readFileSync("/a/dir/index", "utf-8").should.be.eql("2");
 		});
 		it("should also accept multi slashs", function() {
 			fileSystem.statSync("/a///dir//index").isFile().should.be.eql(true);
@@ -69,8 +69,8 @@ describe("memory-filesystem", function() {
 			fileSystem.readdirSync("C:\\a\\dir").should.be.eql(["index"]);
 		});
 		it("should readdir directories", function() {
-			fileSystem.readFileSync("C:\\a\\index").should.be.eql("3");
-			fileSystem.readFileSync("C:\\a\\dir\\index").should.be.eql("4");
+			fileSystem.readFileSync("C:\\a\\index", "utf-8").should.be.eql("3");
+			fileSystem.readFileSync("C:\\a\\dir\\index", "utf-8").should.be.eql("4");
 		});
 		it("should also accept multi slashs", function() {
 			fileSystem.statSync("C:\\\\a\\\\\\dir\\\\index").isFile().should.be.eql(true);

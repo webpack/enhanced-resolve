@@ -4,45 +4,46 @@ var ModuleAsDirectoryPlugin = require("../lib/ModuleAsDirectoryPlugin");
 var ModulesInRootPlugin = require("../lib/ModulesInRootPlugin");
 var DirectoryDefaultFilePlugin = require("../lib/DirectoryDefaultFilePlugin");
 var FileAppendPlugin = require("../lib/FileAppendPlugin");
-var MemoryInputFileSystem = require("../lib/MemoryInputFileSystem");
+var MemoryInputFileSystem = require("memory-fs");
 var should = require("should");
 
 describe("alias", function() {
 	var resolver;
 
 	beforeEach(function() {
+		var buf = new Buffer("");
 		var fileSystem = new MemoryInputFileSystem({
 			"": true,
 			a: {
 				"": true,
-				index: "",
+				index: buf,
 				dir: {
 					"": true,
-					index: ""
+					index: buf
 				}
 			},
 			recursive: {
 				"": true,
-				index: "",
+				index: buf,
 				dir: {
 					"": true,
-					index: ""
+					index: buf
 				}
 			},
 			b: {
 				"": true,
-				index: "",
+				index: buf,
 				dir: {
 					"": true,
-					index: ""
+					index: buf
 				}
 			},
 			c: {
 				"": true,
-				index: "",
+				index: buf,
 				dir: {
 					"": true,
-					index: ""
+					index: buf
 				}
 			}
 		});
