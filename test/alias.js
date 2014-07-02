@@ -4,7 +4,7 @@ var ModuleAsDirectoryPlugin = require("../lib/ModuleAsDirectoryPlugin");
 var ModulesInRootPlugin = require("../lib/ModulesInRootPlugin");
 var DirectoryDefaultFilePlugin = require("../lib/DirectoryDefaultFilePlugin");
 var FileAppendPlugin = require("../lib/FileAppendPlugin");
-var MemoryInputFileSystem = require("memory-fs");
+var MemoryFileSystem = require("memory-fs");
 var should = require("should");
 
 describe("alias", function() {
@@ -12,7 +12,7 @@ describe("alias", function() {
 
 	beforeEach(function() {
 		var buf = new Buffer("");
-		var fileSystem = new MemoryInputFileSystem({
+		var fileSystem = new MemoryFileSystem({
 			"": true,
 			a: {
 				"": true,
