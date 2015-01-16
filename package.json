@@ -5,7 +5,7 @@
 	"description": "Offers a async require.resolve function. It's highly configurable.",
 	"dependencies": {
 		"tapable": "0.1.x",
-		"memory-fs": "~0.1.0",
+		"memory-fs": "~0.2.0",
 		"graceful-fs": "~2.0.3"
 	},
 	"licenses": [
