@@ -30,13 +30,29 @@ describe("missing", function() {
 		]],
 	];
 	testCases.forEach(function(testCase) {
-		it("should tall about missing file when trying to resolve " + testCase[1], function(done) {
+		it("should tell about missing file when trying to resolve " + testCase[1], function(done) {
 			var callback = function(err, filename) {
+				if(err) {
+					err.missing.sort().should.containDeep(testCase[2].sort());
+					callback.missing.sort().should.containDeep(testCase[2].sort());
+					resolve(testCase[0], testCase[1], function(err) {
+						err.missing.sort().should.containDeep(testCase[2].sort());
+						done();
+					});
+					return;
+				}
 				callback.missing.sort().should.containDeep(testCase[2].sort());
 				done();
 			};
 			callback.missing = [];
 			resolve(testCase[0], testCase[1], callback);
+		});
+		it("should tell about missing file when trying to resolve sync " + testCase[1], function() {
+			try {
+				resolve.sync(testCase[0], testCase[1]);
+			} catch(err) {
+				err.missing.sort().should.containDeep(testCase[2].sort());
+			}
 		});
 	});
 
