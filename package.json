@@ -4,9 +4,9 @@
 	"author": "Tobias Koppers @sokra",
 	"description": "Offers a async require.resolve function. It's highly configurable.",
 	"dependencies": {
-		"tapable": "0.1.x",
-		"memory-fs": "~0.2.0",
-		"graceful-fs": "~2.0.3"
+		"tapable": "^0.1.8",
+		"memory-fs": "^0.2.0",
+		"graceful-fs": "^3.0.5"
 	},
 	"licenses": [
 		{
@@ -16,8 +16,8 @@
 	],
 	"devDependencies": {
 		"istanbul": "^0.3.5",
-		"mocha": "1.8.x",
-		"should": "2.0.x"
+		"mocha": "^2.1.0",
+		"should": "^4.6.0"
 	},
 	"engines": {
 		"node":  ">=0.6"
