@@ -30,11 +30,15 @@ describe("symlink", function() {
 				fs.symlinkSync(path.join(__dirname, "..", "lib", "node.js"), path.join(tempPath, "node.js"), "file");
 				fs.symlinkSync(path.join(__dirname, "..", "lib"), path.join(tempPath, "lib"), "dir");
 				fs.symlinkSync(path.join(__dirname, ".."), path.join(tempPath, "this"), "dir");
+				fs.symlinkSync(path.join("..", "..", "lib", "node.js"), path.join(tempPath, "node.relative.js"), "file");
+				fs.symlinkSync(path.join(".", "node.relative.js"), path.join(tempPath, "node.relative.sym.js"), "file");
 			} catch(e) {}
 		});
 		
 		after(function() {
 			fs.unlinkSync(path.join(tempPath, "node.js"));
+			fs.unlinkSync(path.join(tempPath, "node.relative.js"));
+			fs.unlinkSync(path.join(tempPath, "node.relative.sym.js"));
 			fs.unlinkSync(path.join(tempPath, "lib"));
 			fs.unlinkSync(path.join(tempPath, "this"));
 			fs.rmdirSync(tempPath);
@@ -42,6 +46,8 @@ describe("symlink", function() {
 		
 		[
 			[tempPath, "./node.js", "with a symlink to a file"],
+			[tempPath, "./node.relative.js", "with a relative symlink to a file"],
+			[tempPath, "./node.relative.sym.js", "with a relative symlink to a symlink to a file"],
 			[tempPath, "./lib/node.js", "with a symlink to a directory 1"],
 			[tempPath, "./this/lib/node.js", "with a symlink to a directory 2"],
 			[tempPath, "./this/test/temp/node.js", "with multiple symlinks in the path 1"],
