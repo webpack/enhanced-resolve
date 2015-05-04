@@ -62,4 +62,8 @@ describe("browserField", function() {
 		resolver.resolveSync(p(), "module-b").should.be.eql(p("node_modules", "module-c.js"));
 		resolver.resolveSync(p("lib"), "module-b").should.be.eql(p("node_modules", "module-c.js"));
 	});
+
+	it("should resolve main module", function() {
+		resolver.resolveSync(p(), ".").should.be.eql(p("lib", "browser.js"));
+	});
 });

@@ -4,5 +4,6 @@
 		"./lib/replaced.js": "./lib/browser",
 		"module-a": "./browser/module-a.js",
 		"module-b": "module-c"
-	}
+	},
+  "main": ["./lib/browser"]
 }
