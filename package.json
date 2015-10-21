@@ -9,7 +9,7 @@
   "dependencies": {
     "tapable": "^0.1.8",
     "memory-fs": "^0.2.0",
-    "graceful-fs": "^3.0.5"
+    "graceful-fs": "^4.1.2"
   },
   "licenses": [
     {
