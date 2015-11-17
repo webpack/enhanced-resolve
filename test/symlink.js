@@ -64,7 +64,7 @@ describe("symlink", function() {
 			[path.join(tempPath, "this"), "./test/temp/lib/node.js", "with symlinked directory as context and in path"],
 			[path.join(tempPath, "this", "lib"), "./node.js", "with symlinked directory in context path"],
 			[path.join(tempPath, "this", "test"), "./temp/node.js", "with symlinked directory in context path and symlinked file"],
-			[path.join(tempPath, "this", "test"), "./temp/lib/node.js", "with symlinked directory in context path and symlinked directory (chained)"],
+			[path.join(tempPath, "this", "test"), "./temp/lib/node.js", "with symlinked directory in context path and symlinked directory"],
 			[path.join(tempPath, "that"), "./lib/node.js", "with symlinked directory as context 2 (chained)"],
 			[path.join(tempPath, "that"), "./test/temp/lib/node.js", "with symlinked directory as context and in path (chained)"],
 			[path.join(tempPath, "that", "lib"), "./node.js", "with symlinked directory in context path (chained)"],
