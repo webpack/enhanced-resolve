@@ -7,8 +7,10 @@
     "lib"
   ],
   "dependencies": {
+    "beautify-lint": "^1.0.3",
     "tapable": "^0.1.8",
     "memory-fs": "^0.2.0",
+    "js-beautify": "^1.5.10",
     "graceful-fs": "^4.1.2"
   },
   "licenses": [
@@ -28,7 +30,12 @@
   "main": "lib/node.js",
   "homepage": "http://github.com/webpack/enhanced-resolve",
   "scripts": {
+    "beautify-lint": "beautify-lint lib/**.js test/*.js",
+    "beautify": "beautify-rewrite lib/**.js test/*.js",
+    "lint": "eslint lib test",
+    "pretest": "npm run lint && npm run beautify-lint",
     "test": "mocha --reporter spec",
+    "precover": "npm run lint && npm run beautify-lint",
     "cover": "istanbul cover node_modules/mocha/bin/_mocha -- -R spec"
   },
   "repository": {

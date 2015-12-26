@@ -4,7 +4,7 @@ var should = require("should");
 describe("CachedInputFileSystem", function() {
 	this.timeout(3000);
 	var fs;
-	
+
 	beforeEach(function() {
 		fs = new CachedInputFileSystem({
 			stat: function(path, callback) {
@@ -16,7 +16,7 @@ describe("CachedInputFileSystem", function() {
 		fs.purge();
 	});
 
-	
+
 	it("should join accesses", function(done) {
 		fs.stat("a", function(err, result) {
 			result.a = true;
@@ -26,7 +26,7 @@ describe("CachedInputFileSystem", function() {
 			done();
 		});
 	});
-	
+
 	it("should cache accesses", function(done) {
 		fs.stat("a", function(err, result) {
 			result.a = true;
@@ -51,7 +51,7 @@ describe("CachedInputFileSystem", function() {
 			sync = false;
 		});
 	});
-	
+
 	it("should recover after passive periods", function(done) {
 		fs.stat("a", function(err, result) {
 			result.a = true;
@@ -75,7 +75,7 @@ describe("CachedInputFileSystem", function() {
 			}, 500);
 		});
 	});
-	
+
 	it("should restart after timeout", function(done) {
 		fs.stat("a", function(err, result) {
 			result.a = true;
