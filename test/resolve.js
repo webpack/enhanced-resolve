@@ -7,6 +7,7 @@ var path = require("path");
 var resolve = require("../");
 
 var fixtures = path.join(__dirname, "fixtures");
+
 function testResolve(name, context, moduleName, result) {
 	describe(name, function() {
 		it("should resolve sync correctly", function() {
@@ -24,6 +25,7 @@ function testResolve(name, context, moduleName, result) {
 		});
 	});
 }
+
 function testResolveLoader(name, context, moduleName, result) {
 	describe(name, function() {
 		it("should resolve sync correctly", function() {
@@ -41,6 +43,7 @@ function testResolveLoader(name, context, moduleName, result) {
 		});
 	});
 }
+
 function testResolveContext(name, context, moduleName, result) {
 	describe(name, function() {
 		it("should resolve async correctly", function(done) {

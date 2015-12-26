@@ -8,14 +8,15 @@ describe("CachedInputFileSystem", function() {
 	beforeEach(function() {
 		fs = new CachedInputFileSystem({
 			stat: function(path, callback) {
-				setTimeout(callback.bind(null, null, {path: path}), 100);
+				setTimeout(callback.bind(null, null, {
+					path: path
+				}), 100);
 			}
 		}, 1000);
 	});
 	afterEach(function() {
 		fs.purge();
 	});
-
 
 	it("should join accesses", function(done) {
 		fs.stat("a", function(err, result) {

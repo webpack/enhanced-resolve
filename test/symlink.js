@@ -11,16 +11,24 @@ describe("symlink", function() {
 		fs.mkdirSync(tempPath);
 		fs.symlinkSync(path.join(__dirname, "..", "lib", "node.js"), path.join(tempPath, "test"), "file");
 		fs.symlinkSync(path.join(__dirname, "..", "lib"), path.join(tempPath, "test2"), "dir");
-	} catch(e) {isAdmin=false;}
+	} catch(e) {
+		isAdmin = false;
+	}
 	try {
 		fs.unlinkSync(path.join(tempPath, "test"));
-	} catch(e) {isAdmin=false;}
+	} catch(e) {
+		isAdmin = false;
+	}
 	try {
 		fs.unlinkSync(path.join(tempPath, "test2"));
-	} catch(e) {isAdmin=false;}
+	} catch(e) {
+		isAdmin = false;
+	}
 	try {
 		fs.rmdirSync(tempPath);
-	} catch(e) {isAdmin=false;}
+	} catch(e) {
+		isAdmin = false;
+	}
 
 	if(isAdmin) {
 		before(function() {
@@ -35,7 +43,7 @@ describe("symlink", function() {
 				fs.symlinkSync(path.join(".", "node.relative.js"), path.join(tempPath, "node.relative.sym.js"), "file");
 			} catch(e) {}
 		});
-		
+
 		after(function() {
 			fs.unlinkSync(path.join(tempPath, "node.js"));
 			fs.unlinkSync(path.join(tempPath, "node.relative.js"));
@@ -45,7 +53,7 @@ describe("symlink", function() {
 			fs.unlinkSync(path.join(tempPath, "that"));
 			fs.rmdirSync(tempPath);
 		});
-		
+
 		[
 			[tempPath, "./node.js", "with a symlink to a file"],
 			[tempPath, "./node.relative.js", "with a relative symlink to a file"],
