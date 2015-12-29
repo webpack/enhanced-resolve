@@ -85,6 +85,8 @@ describe("concord", function() {
 			["./**/*.js", "./dir/abc.js", true],
 			["./**/*.js", "./abc.js", true],
 			["./**.js", "./dir/abc.js", false],
+			["./**", "./dir/abc.js", true],
+			["./**", "./abc.js", true],
 			["./???.js", "./abc.js", true],
 			["./???.js", "./abcd.js", false],
 			["./???.js", "./ab.js", false],
@@ -123,6 +125,8 @@ describe("concord", function() {
 			["./*(a|b|c).js", "./ab.js", true],
 			["./a|b.js", "./a.js", false],
 			["./a|b.js", "./a|b.js", true],
+			["(\\.js$)", "./dir/abc.js", true],
+			["(\\.js$)", "./dir/abc.js.css", false],
 		];
 		TESTS.forEach(function(testCase) {
 			it("should say '" + testCase[1] + "' is " + (testCase[2] ? "matched" : "not matched") + " in '" + testCase[0] + "'", function() {
@@ -133,8 +137,9 @@ describe("concord", function() {
 
 	describe("isConditionMatched", function() {
 		var context = {
-			supportedResourceTypes: ["promise+lazy/*", "stylesheet/sass+mixins"],
-			environments: ["web+es5+dom+xhr", "web+es5+xhr"]
+			supportedResourceTypes: ["promise+lazy/*", "stylesheet/sass+mixins", "stylesheet/sass+functions/incorrect"],
+			environments: ["web+es5+dom+xhr", "web+es5+xhr"],
+			referrer: "./main.css"
 		}
 		var TESTS = {
 			"web": true,
@@ -154,6 +159,14 @@ describe("concord", function() {
 			"stylesheet/sass+mixins": true,
 			"stylesheet/sass+functions": false,
 			"stylesheet/sass+mixins+functions": false,
+			"referrer:*.css": true,
+			"referrer:  *.css": true,
+			"referrer:*.js": false,
+			"referrer: *.js": false,
+			"referrer:./**/*": true,
+			"referrer:./**": true,
+			"referrer:!./**": false,
+			"unknown:any": false,
 		};
 		Object.keys(TESTS).forEach(function(key) {
 			var expected = TESTS[key];
@@ -166,7 +179,8 @@ describe("concord", function() {
 	describe("getMain", function() {
 		var context = {
 			supportedResourceTypes: [],
-			environments: ["web+es5+dom+xhr"]
+			environments: ["web+es5+dom+xhr"],
+			referrer: "module"
 		};
 		var TESTS = [{
 			"main": "yes"
@@ -187,6 +201,9 @@ describe("concord", function() {
 			"[ node ] main": "no"
 		}, {
 			"main": "no",
+			"[ referrer: module ] main": "yes"
+		}, {
+			"main": "no",
 			"[ web] main": "no",
 			"[*+es5 ] main": "yes"
 		}];
@@ -204,6 +221,83 @@ describe("concord", function() {
 			}).should.be.eql([".js"]);
 		});
 	});
+
+	describe("matchModule", function() {
+		var context = {
+			supportedResourceTypes: [],
+			environments: ["web+es5+dom+xhr"]
+		};
+		var config1 = {
+			modules: {
+				"./a.js": "./new-a.js",
+				"./b.js": "./new/b.js",
+				"./ccc/c.js": "./c.js",
+				"./ddd/d.js": "./ddd/dd.js",
+				"./dir/**": "./new/**",
+				"./empty.js": false,
+				"module": "./replacement-module.js",
+				"templates/**": "./templates/**",
+				"fs": "fake-fs",
+				"abc": "./abc",
+				"abc/**": "./dir-abc/**",
+				"xyz/*.js": "./not-used.js",
+				"xyz/*.css": "./xxx/*.css",
+				"fff/**/*.css": "./ggg/**/*.js"
+			}
+		};
+		var config2 = {
+			modules: {
+				"./overwrite.*": "./overwritten.*",
+				"./overwrite.js": "./wrong",
+				"./*.css": "./*.match",
+				"./*.match": "./success-*.matched-css",
+				"(regexp-([^\-]*))": "regexp/$1"
+			}
+		}
+		var TESTS = [
+			[{}, "./no-field.js", "./no-field.js"],
+			[config1, "./normal.js", "./normal.js"],
+			[config1, "./a.js", "./new-a.js"],
+			[config1, "./b.js", "./new/b.js"],
+			[config1, "./ccc/c.js", "./c.js"],
+			[config1, "./ddd/d.js", "./ddd/dd.js"],
+			[config1, "./dir/c.js", "./new/c.js"],
+			[config1, "./dir/sub/c.js", "./new/sub/c.js"],
+			[config1, "./empty.js", false],
+			[config1, "module", "./replacement-module.js"],
+			[config1, "templates/abc.ring", "./templates/abc.ring"],
+			[config1, "fs", "fake-fs"],
+			[config1, "abc", "./abc"],
+			[config1, "abc/def", "./dir-abc/def"],
+			[config1, "abc/def/ghi", "./dir-abc/def/ghi"],
+			[config1, "xyz/rrr.js", "./not-used.js"],
+			[config1, "xyz/rrr.css", "./xxx/rrr.css"],
+			[config1, "fff/wfe.css", "./ggg/wfe.js"],
+			[config1, "fff/jht/wfe.css", "./ggg/jht/wfe.js"],
+			[config1, "fff/jht/222/wfe.css", "./ggg/jht/222/wfe.js"],
+			[config2, "./overwrite.js", "./overwritten.js"],
+			[config2, "./matched-again.css", "./success-matched-again.matched-css"],
+			[config2, "./some/regexp-match.js", "./some/regexp/match.js"],
+			[config2, "./overwrite.regexp-test.css", "./success-overwritten.regexp/test.matched-css"],
+		];
+		TESTS.forEach(function(testCase) {
+			it("should map '" + testCase[1] + "' to '" + testCase[2] + "'", function() {
+				var actual = concord.matchModule(context, testCase[0], testCase[1]);
+				actual.should.be.eql(testCase[2]);
+			});
+		});
+		it("should throw an exception on recursive configuration", function() {
+			(function() {
+				concord.matchModule({}, {
+					modules: {
+						"a": "b",
+						"b": "c",
+						"c": "a"
+					}
+				}, "b")
+			}).should.throw("Request 'b' matches recursively");
+		})
+	})
 
 	describe("matchType", function() {
 		var context = {
@@ -251,6 +345,12 @@ describe("concord", function() {
 					"*.test": "hello/world"
 				}
 			}, "hello/world"],
+			["should get a type with star match", {
+				"types": {
+					"./abc.test": "hello/world",
+					"*.test": "super/*"
+				}
+			}, "super/hello/world"],
 			["should get a type without types field", {}, undefined],
 		];
 		TESTS.forEach(function(testCase) {
@@ -261,6 +361,15 @@ describe("concord", function() {
 				else
 					(typeof result).should.be.eql(typeof testCase[2]);
 			})
+		});
+		it("should throw an exception on incomplete star match", function() {
+			(function() {
+				concord.matchType({}, {
+					types: {
+						"*.test": "super/*"
+					}
+				}, "./abc.test");
+			}).should.throw("value ('super/*') of key '*.test' contains '*', but there is no previous value defined");
 		});
 	})
 });
