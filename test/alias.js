@@ -1,9 +1,4 @@
-var Resolver = require("../lib/Resolver");
-var ModuleAliasPlugin = require("../lib/ModuleAliasPlugin");
-var ModuleAsDirectoryPlugin = require("../lib/ModuleAsDirectoryPlugin");
-var ModulesInRootPlugin = require("../lib/ModulesInRootPlugin");
-var DirectoryDefaultFilePlugin = require("../lib/DirectoryDefaultFilePlugin");
-var FileAppendPlugin = require("../lib/FileAppendPlugin");
+var ResolverFactory = require("../lib/ResolverFactory");
 var MemoryFileSystem = require("memory-fs");
 var should = require("should");
 
@@ -47,19 +42,16 @@ describe("alias", function() {
 				}
 			}
 		});
-		resolver = new Resolver(fileSystem);
-		resolver.apply(
-			new ModuleAliasPlugin({
+		resolver = ResolverFactory.createResolver({
+			alias: {
 				aliasA: "a",
 				"b$": "a/index",
 				"c$": "/a/index",
-				recursive: "recursive/dir"
-			}),
-			new ModulesInRootPlugin("module", "/"),
-			new ModuleAsDirectoryPlugin("module"),
-			new DirectoryDefaultFilePlugin(["index"]),
-			new FileAppendPlugin([""])
-		);
+				"recursive": "recursive/dir"
+			},
+			modules: "/",
+			fileSystem: fileSystem
+		})
 	});
 
 	it("should resolve a not aliased module", function() {

@@ -24,9 +24,7 @@ describe("missing", function() {
 			path.join(__dirname, "..", "node_modules", "m1"),
 		]],
 		[path.join(__dirname, "fixtures"), "m1/a", [
-			path.join(__dirname, "fixtures", "node_modules", "m1", "a"),
-			path.join(__dirname, "fixtures", "node_modules", "m1", "a.node"),
-			path.join(__dirname, "..", "node_modules", "m1"),
+			path.join(__dirname, "fixtures", "node_modules", "m1", "a")
 		]],
 	];
 	testCases.forEach(function(testCase) {

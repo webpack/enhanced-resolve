@@ -1,14 +1,8 @@
 var path = require("path");
-var Resolver = require("../lib/Resolver");
-var DirectoryDescriptionFileFieldAliasPlugin = require("../lib/DirectoryDescriptionFileFieldAliasPlugin");
-var ModulesInDirectoriesPlugin = require("../lib/ModulesInDirectoriesPlugin");
-var ModuleAsFilePlugin = require("../lib/ModuleAsFilePlugin");
-var ModuleAsDirectoryPlugin = require("../lib/ModuleAsDirectoryPlugin");
-var DirectoryDescriptionFilePlugin = require("../lib/DirectoryDescriptionFilePlugin");
-var DirectoryDefaultFilePlugin = require("../lib/DirectoryDefaultFilePlugin");
-var FileAppendPlugin = require("../lib/FileAppendPlugin");
-var SyncNodeJsInputFileSystem = require("../lib/SyncNodeJsInputFileSystem");
 var should = require("should");
+
+var ResolverFactory = require("../lib/ResolverFactory");
+var SyncNodeJsInputFileSystem = require("../lib/SyncNodeJsInputFileSystem");
 
 var browserModule = path.join(__dirname, "fixtures", "browser-module");
 
@@ -20,16 +14,10 @@ describe("browserField", function() {
 	var resolver;
 
 	beforeEach(function() {
-		resolver = new Resolver(new SyncNodeJsInputFileSystem());
-		resolver.apply(
-			new DirectoryDescriptionFileFieldAliasPlugin("package.json", "browser"),
-			new ModulesInDirectoriesPlugin("node", ["node_modules"]),
-			new ModuleAsFilePlugin("node"),
-			new ModuleAsDirectoryPlugin("node"),
-			new DirectoryDescriptionFilePlugin("package.json", ["main"]),
-			new DirectoryDefaultFilePlugin(["index"]),
-			new FileAppendPlugin(["", ".js"])
-		);
+		resolver = ResolverFactory.createResolver({
+			aliasFields: ["browser"],
+			fileSystem: new SyncNodeJsInputFileSystem()
+		});
 	});
 
 	it("should ignore", function(done) {

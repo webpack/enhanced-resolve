@@ -17,7 +17,7 @@ function testResolve(name, context, moduleName, result) {
 		});
 		it("should resolve async correctly", function(done) {
 			resolve(context, moduleName, function(err, filename) {
-				if(err) done(err);
+				if(err) return done(err);
 				should.exist(filename);
 				filename.should.equal(result);
 				done();
@@ -35,7 +35,7 @@ function testResolveLoader(name, context, moduleName, result) {
 		});
 		it("should resolve async correctly", function(done) {
 			resolve.loader(context, moduleName, function(err, filename) {
-				if(err) done(err);
+				if(err) return done(err);
 				should.exist(filename);
 				filename.should.equal(result);
 				done();
@@ -111,7 +111,7 @@ describe("resolve", function() {
 	testResolveLoader("loader with template without extension",
 		fixtures, "m2/b", path.join(fixtures, "node_modules", "m2-loader", "b.js"));
 	testResolveLoader("loader with template as file",
-		fixtures, "l", path.join(fixtures, "node_loaders", "l-loader.js"));
+		fixtures, "l", path.join(fixtures, "node_modules", "l-loader.js"));
 
 	testResolve("find node_modules outside of node_modules",
 		path.join(fixtures, "browser-module", "node_modules"), "m1/a", path.join(fixtures, "node_modules", "m1", "a.js"));

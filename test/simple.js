@@ -12,7 +12,7 @@ describe("simple", function() {
 	pathsToIt.forEach(function(pathToIt) {
 		it("should resolve itself " + pathToIt[2], function(done) {
 			resolve(pathToIt[0], pathToIt[1], function(err, filename) {
-				if(err) return done(err);
+				if(err) return done(new Error([err.message, err.stack, err.details].join("\n")));
 				should.exist(filename);
 				filename.should.have.type("string");
 				filename.should.be.eql(path.join(__dirname, "..", "lib", "node.js"));
