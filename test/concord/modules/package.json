@@ -1,0 +1,12 @@
+{
+	"concord": {
+		"main": "module-a",
+		"modules": {
+			"module-a": "./correct.js",
+			"./wrong.js": "./correct.js",
+			"./dir1/**": "./correct.js",
+			"./dir2/*.js": "./*.js",
+			"jquery**": "./modules/jquery**"
+		}
+	}
+}

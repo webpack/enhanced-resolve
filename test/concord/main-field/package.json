@@ -1,0 +1,6 @@
+{
+	"main": "wrong.js",
+	"concord": {
+		"main": "./correct.js"
+	}
+}

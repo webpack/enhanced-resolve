@@ -244,6 +244,7 @@ describe("concord", function() {
 				"fs": "fake-fs",
 				"abc": "./abc",
 				"abc/**": "./dir-abc/**",
+				"jquery**": "./jquery**",
 				"xyz/*.js": "./not-used.js",
 				"xyz/*.css": "./xxx/*.css",
 				"fff/**/*.css": "./ggg/**/*.js"
@@ -274,6 +275,8 @@ describe("concord", function() {
 			[config1, "abc", "./abc"],
 			[config1, "abc/def", "./dir-abc/def"],
 			[config1, "abc/def/ghi", "./dir-abc/def/ghi"],
+			[config1, "jquery", "./jquery"],
+			[config1, "jquery/jquery.js", "./jquery/jquery.js"],
 			[config1, "xyz/rrr.js", "./not-used.js"],
 			[config1, "xyz/rrr.css", "./xxx/rrr.css"],
 			[config1, "fff/wfe.css", "./ggg/wfe.js"],
