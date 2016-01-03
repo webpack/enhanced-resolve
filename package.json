@@ -39,7 +39,7 @@
     "beautify": "beautify-rewrite lib/**.js test/*.js",
     "lint": "eslint lib test",
     "pretest": "npm run lint && npm run beautify-lint",
-    "test": "mocha --reporter spec",
+    "test": "mocha --full-trace --check-leaks",
     "precover": "npm run lint && npm run beautify-lint",
     "cover": "istanbul cover node_modules/mocha/bin/_mocha",
     "travis": "npm run cover -- --report lcovonly"
