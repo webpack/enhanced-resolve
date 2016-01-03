@@ -14,14 +14,14 @@ describe("missing", function() {
 			path.join(__dirname, "..", "node_modules", "missing-module"),
 		]],
 		[path.join(__dirname, "fixtures"), "missing-module/missing-file", [
-			path.join(__dirname, "fixtures", "node_modules", "missing-module"),
-			path.join(__dirname, "..", "node_modules", "missing-module"),
+			path.join(__dirname, "fixtures", "node_modules", "missing-module", "missing-file.js"),
+			path.join(__dirname, "..", "node_modules", "missing-module", "missing-file"),
 		]],
 		[path.join(__dirname, "fixtures"), "m1/missing-file", [
 			path.join(__dirname, "fixtures", "node_modules", "m1", "missing-file"),
 			path.join(__dirname, "fixtures", "node_modules", "m1", "missing-file.js"),
 			path.join(__dirname, "fixtures", "node_modules", "m1", "missing-file.node"),
-			path.join(__dirname, "..", "node_modules", "m1"),
+			path.join(__dirname, "..", "node_modules", "m1", "missing-file"),
 		]],
 		[path.join(__dirname, "fixtures"), "m1/a", [
 			path.join(__dirname, "fixtures", "node_modules", "m1", "a")
