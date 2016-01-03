@@ -1,14 +1,14 @@
 {
   "name": "enhanced-resolve",
-  "version": "0.9.1",
+  "version": "2.0.0",
   "author": "Tobias Koppers @sokra",
   "description": "Offers a async require.resolve function. It's highly configurable.",
   "files": [
     "lib"
   ],
   "dependencies": {
-    "tapable": "^0.1.8",
-    "memory-fs": "^0.2.0",
+    "tapable": "^0.2.2",
+    "memory-fs": "^0.3.0",
     "graceful-fs": "^4.1.2",
     "object-assign": "^4.0.1"
   },
@@ -22,10 +22,10 @@
     "eslint": "^1.1.0",
     "eslint-plugin-nodeca": "^1.0.3",
     "beautify-lint": "^1.0.3",
-    "istanbul": "^0.3.5",
+    "istanbul": "^0.4.1",
     "js-beautify": "^1.5.10",
-    "mocha": "^2.1.0",
-    "should": "^4.6.0"
+    "mocha": "^2.3.4",
+    "should": "^8.0.2"
   },
   "engines": {
     "node": ">=0.6"
