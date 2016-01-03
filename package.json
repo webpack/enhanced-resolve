@@ -19,9 +19,11 @@
     }
   ],
   "devDependencies": {
+    "beautify-lint": "^1.0.3",
+    "codecov.io": "^0.1.6",
+    "coveralls": "^2.11.6",
     "eslint": "^1.1.0",
     "eslint-plugin-nodeca": "^1.0.3",
-    "beautify-lint": "^1.0.3",
     "istanbul": "^0.4.1",
     "js-beautify": "^1.5.10",
     "mocha": "^2.3.4",
@@ -39,7 +41,8 @@
     "pretest": "npm run lint && npm run beautify-lint",
     "test": "mocha --reporter spec",
     "precover": "npm run lint && npm run beautify-lint",
-    "cover": "istanbul cover node_modules/mocha/bin/_mocha -- -R spec"
+    "cover": "istanbul cover node_modules/mocha/bin/_mocha",
+    "travis": "npm run cover -- --report lcovonly"
   },
   "repository": {
     "type": "git",
