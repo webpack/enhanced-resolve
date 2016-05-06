@@ -76,6 +76,10 @@ describe("alias", function() {
 		resolver.resolveSync({}, "/", "b").should.be.eql("/a/index");
 		resolver.resolveSync({}, "/", "c").should.be.eql("/a/index");
 	});
+	it("should resolve a file aliased module with a query", function() {
+		resolver.resolveSync({}, "/", "b?query").should.be.eql("/a/index?query");
+		resolver.resolveSync({}, "/", "c?query").should.be.eql("/a/index?query");
+	});
 	it("should resolve a path in a file aliased module", function() {
 		resolver.resolveSync({}, "/", "b/index").should.be.eql("/b/index");
 		resolver.resolveSync({}, "/", "b/dir").should.be.eql("/b/dir/index");
