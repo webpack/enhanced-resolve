@@ -54,6 +54,13 @@ describe("symlink", function() {
 			fs.rmdirSync(tempPath);
 		});
 
+		var resolveWithoutSymlinks = resolve.create({
+			symlinks: false
+		});
+		var resolveSyncWithoutSymlinks = resolve.create.sync({
+			symlinks: false
+		});
+
 		[
 			[tempPath, "./node.js", "with a symlink to a file"],
 			[tempPath, "./node.relative.js", "with a relative symlink to a file"],
@@ -85,7 +92,12 @@ describe("symlink", function() {
 					should.exist(filename);
 					filename.should.have.type("string");
 					filename.should.be.eql(path.join(__dirname, "..", "lib", "node.js"));
-					done();
+					resolveWithoutSymlinks(pathToIt[0], pathToIt[1], function(err, filename) {
+						if(err) return done(err);
+						filename.should.have.type("string");
+						filename.should.be.eql(path.resolve(pathToIt[0], pathToIt[1]))
+						done();
+					});
 				});
 			});
 			it("should resolve symlink to itself sync " + pathToIt[2], function() {
@@ -93,6 +105,9 @@ describe("symlink", function() {
 				should.exist(filename);
 				filename.should.have.type("string");
 				filename.should.be.eql(path.join(__dirname, "..", "lib", "node.js"));
+				filename = resolveSyncWithoutSymlinks(pathToIt[0], pathToIt[1]);
+				filename.should.have.type("string");
+				filename.should.be.eql(path.resolve(pathToIt[0], pathToIt[1]))
 			});
 		});
 	} else {
