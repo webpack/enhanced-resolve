@@ -2,23 +2,18 @@
  MIT License http://www.opensource.org/licenses/mit-license.php
  Author Tobias Koppers @sokra
  */
-import assign = require('object-assign')
-
 import DescriptionFileUtils = require('./DescriptionFileUtils')
 import createInnerCallback = require('./createInnerCallback')
 import getInnerRequest = require('./getInnerRequest')
 
 class AliasFieldPlugin {
-    constructor(source, field, target) {
-        this.source = source
-        this.field = field
-        this.target = target
+    constructor(public source: string, public field: string, public target: string) {
     }
 
     apply(resolver) {
         const target = this.target
         const field = this.field
-        resolver.plugin(this.source, (request, callback) => {
+        resolver.plugin(this.source, function (request, callback) {
             if (!request.descriptionFileData) {
                 return callback()
             }
@@ -43,12 +38,12 @@ class AliasFieldPlugin {
                 return callback()
             }
             if (data === false) {
-                const ignoreObj = assign({}, request, {
+                const ignoreObj = Object.assign({}, request, {
                     path: false
                 })
                 return callback(null, ignoreObj)
             }
-            const obj = assign({}, request, {
+            const obj = Object.assign({}, request, {
                 path: request.descriptionFileRoot,
                 request: data
             })

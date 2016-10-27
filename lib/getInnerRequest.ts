@@ -2,7 +2,12 @@
  MIT License http://www.opensource.org/licenses/mit-license.php
  Author Tobias Koppers @sokra
  */
-export = function getInnerRequest(resolver, request) {
+import Resolver = require('./Resolver')
+
+export = function getInnerRequest(resolver: Resolver, request: {
+    request: string
+    relativePath: string
+}) {
     let innerRequest
     if (request.request) {
         innerRequest = request.request

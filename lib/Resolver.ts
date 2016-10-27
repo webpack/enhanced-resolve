@@ -7,18 +7,25 @@ import memoryFsJoin = require('memory-fs/lib/join')
 
 import createInnerCallback = require('./createInnerCallback')
 
+interface Error {
+    details: string
+    missing: string[]
+    recursion: boolean
+}
+
 const notModuleRegExp = /^\.$|^\.[\\\/]|^\.\.$|^\.\.[\/\\]|^\/|^[A-Z]:[\\\/]/i
 const directoryRegExp = /[\/\\]$/i
 const memoizedJoin = {}
 
 class Resolver extends Tapable {
+    fileSystem
 
     constructor(fileSystem) {
         super()
         this.fileSystem = fileSystem
     }
 
-    resolveSync(context, path, request) {
+    resolveSync(context: string, path: string, request: string) {
         let err
         let result
         let sync = false
@@ -36,7 +43,7 @@ class Resolver extends Tapable {
         return result
     }
 
-    resolve(context, path, request, callback) {
+    resolve(context: string, path: string, request: string, callback) {
         if (arguments.length === 3) {
             throw new Error('Signature changed: context parameter added')
         }
@@ -57,7 +64,7 @@ class Resolver extends Tapable {
         const log = []
         const message = `resolve '${request}' in '${path}'`
 
-        function writeLog(msg) {
+        function writeLog(msg: string) {
             log.push(msg)
         }
 
@@ -65,7 +72,12 @@ class Resolver extends Tapable {
             return log.join('\n')
         }
 
-        function onResolved(err, result) {
+        function onResolved(
+            err, result: {
+                path: boolean | string
+                query: string
+            }
+        ) {
             if (callback.log) {
                 for (let i = 0; i < log.length; i++) callback.log(log[i])
             }
@@ -89,11 +101,22 @@ class Resolver extends Tapable {
         }, null))
     }
 
-    doResolve(type, request, message, callback) {
+    doResolve(
+        type: string,
+        request: {
+            context: string
+            path: string
+            request: string
+            query?: string
+            directory?: boolean
+            module?: boolean
+        },
+        message: string,
+        callback
+    ) {
         const resolver = this
-        const stackLine = `${type}: (${request.path}) ${request.request || ''}${request.query || ''}${request.directory
-            ? ' directory'
-            : ''}${request.module ? ' module' : ''}`
+        const stackLine = `${type}: (${request.path}) ${request.request || ''}${request.query || ''}${
+            request.directory ? ' directory' : ''}${request.module ? ' module' : ''}`
         let newStack = [stackLine]
         if (callback.stack) {
             newStack = callback.stack.concat(newStack)
@@ -163,7 +186,7 @@ class Resolver extends Tapable {
         }
     }
 
-    parse(identifier) {
+    parse(identifier: string) {
         if (identifier === '') {
             return null
         }
@@ -175,7 +198,7 @@ class Resolver extends Tapable {
             file: false
         }
         const idxQuery = identifier.indexOf('?')
-        if (idxQuery == 0) {
+        if (idxQuery === 0) {
             part.query = identifier
         }
         else if (idxQuery > 0) {
@@ -194,21 +217,25 @@ class Resolver extends Tapable {
         return part
     }
 
-    isModule(path) {
+    isModule(path: string) {
         return !notModuleRegExp.test(path)
     }
 
-    isDirectory(path) {
+    isDirectory(path: string) {
         return directoryRegExp.test(path)
     }
 
-    join(path, request) {
+    join(path: string, request: string) {
         const memoizeKey = `${path}|$${request}`
         if (!memoizedJoin[memoizeKey]) {
             memoizedJoin[memoizeKey] = memoryFsJoin(path, request)
         }
         return memoizedJoin[memoizeKey]
     }
+}
+
+interface Resolver {
+    normalize(path: string): string
 }
 
 Resolver.prototype.normalize = require('memory-fs/lib/normalize')

@@ -2,19 +2,15 @@
  MIT License http://www.opensource.org/licenses/mit-license.php
  Author Tobias Koppers @sokra
  */
-import assign = require('object-assign')
-
-import createInnerCallback = require('./createInnerCallback')
+import Resolver = require('./Resolver')
 
 class DirectoryExistsPlugin {
-    constructor(source, target) {
-        this.source = source
-        this.target = target
+    constructor(public source: string, public target: string) {
     }
 
     apply(resolver) {
         const target = this.target
-        resolver.plugin(this.source, function (request, callback) {
+        resolver.plugin(this.source, function (this: Resolver, request, callback) {
             const fs = this.fileSystem
             const directory = request.path
             fs.stat(directory, (err, stat) => {

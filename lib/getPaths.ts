@@ -2,7 +2,7 @@
  MIT License http://www.opensource.org/licenses/mit-license.php
  Author Tobias Koppers @sokra
  */
-function getPaths(path) {
+export default function getPaths(path: string) {
     const paths = [path]
     const pathSeqments = []
     const addr = [path]
@@ -19,9 +19,7 @@ function getPaths(path) {
     }
 }
 
-export = getPaths
-
-getPaths.basename = function basename(path) {
+export function basename(path) {
     return popPathSeqment([path])
 }
 

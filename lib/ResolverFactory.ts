@@ -2,12 +2,7 @@
  MIT License http://www.opensource.org/licenses/mit-license.php
  Author Tobias Koppers @sokra
  */
-import assign = require('object-assign')
-
 import Resolver = require('./Resolver')
-import NodeJsInputFileSystem = require('./NodeJsInputFileSystem')
-import SyncNodeJsInputFileSystem = require('./SyncNodeJsInputFileSystem')
-import CachedInputFileSystem = require('./CachedInputFileSystem')
 import ParsePlugin = require('./ParsePlugin')
 import DescriptionFilePlugin = require('./DescriptionFilePlugin')
 import NextPlugin = require('./NextPlugin')
@@ -31,7 +26,6 @@ import AppendPlugin = require('./AppendPlugin')
 import ResultPlugin = require('./ResultPlugin')
 import ModuleAppendPlugin = require('./ModuleAppendPlugin')
 import UnsafeCachePlugin = require('./UnsafeCachePlugin')
-import LogInfoPlugin = require('./LogInfoPlugin')
 
 export function createResolver(options) {
 
@@ -119,7 +113,7 @@ export function createResolver(options) {
                     alias: obj
                 }
             }
-            obj = assign({
+            obj = Object.assign({
                 name: key,
                 onlyModule
             }, obj)

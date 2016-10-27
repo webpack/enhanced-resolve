@@ -2,18 +2,15 @@
  MIT License http://www.opensource.org/licenses/mit-license.php
  Author Tobias Koppers @sokra
  */
-import assign = require('object-assign')
-
 class ParsePlugin {
-    constructor(source, target) {
-        this.source = source
-        this.target = target
+    constructor(public source: string, public target: string) {
     }
 
     apply(resolver) {
-        resolver.plugin(this.source, (request, callback) => {
+        const target = this.target
+        resolver.plugin(this.source, function (request, callback) {
             const parsed = resolver.parse(request.request)
-            const obj = assign({}, request, parsed)
+            const obj = Object.assign({}, request, parsed)
             if (request.query && !parsed.query) {
                 obj.query = request.query
             }
@@ -25,7 +22,7 @@ class ParsePlugin {
                     callback.log('Parsed request is a directory')
                 }
             }
-            resolver.doResolve(this.target, obj, null, callback)
+            resolver.doResolve(target, obj, null, callback)
         })
     }
 }

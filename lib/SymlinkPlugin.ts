@@ -2,15 +2,11 @@
  MIT License http://www.opensource.org/licenses/mit-license.php
  Author Tobias Koppers @sokra
  */
-import getPaths = require('./getPaths')
-
+import getPaths from './getPaths'
 import forEachBail = require('./forEachBail')
-import assign = require('object-assign')
 
 class SymlinkPlugin {
-    constructor(source, target) {
-        this.source = source
-        this.target = target
+    constructor(public source: string, public target: string) {
     }
 
     apply(resolver) {
@@ -41,7 +37,7 @@ class SymlinkPlugin {
                 }
                 const resultSeqments = typeof idx === 'number' ? pathSeqments.slice(0, idx + 1) : pathSeqments.slice()
                 const result = resultSeqments.reverse().reduce((a, b) => _this.join(a, b))
-                const obj = assign({}, request, {
+                const obj = Object.assign({}, request, {
                     path: result
                 })
                 resolver.doResolve(target, obj, `resolved symlink to ${result}`, callback)

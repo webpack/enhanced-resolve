@@ -2,23 +2,20 @@
  MIT License http://www.opensource.org/licenses/mit-license.php
  Author Tobias Koppers @sokra
  */
-import assign = require('object-assign')
-
 import createInnerCallback = require('./createInnerCallback')
 import DescriptionFileUtils = require('./DescriptionFileUtils')
 
 class DescriptionFilePlugin {
-    constructor(source, filenames, target) {
-        this.source = source
+    filenames: string[]
+
+    constructor(public source: string, filenames: string[], public target: string) {
         this.filenames = [].concat(filenames)
-        this.target = target
     }
 
     apply(resolver) {
         const filenames = this.filenames
         const target = this.target
         resolver.plugin(this.source, function (request, callback) {
-            const fs = this.fileSystem
             const directory = request.path
             DescriptionFileUtils.loadDescriptionFile(resolver, directory, filenames, (err, result) => {
                 if (err) {
@@ -36,7 +33,7 @@ class DescriptionFilePlugin {
                     return callback()
                 }
                 const relativePath = `.${request.path.substr(result.directory.length).replace(/\\/g, '/')}`
-                const obj = assign({}, request, {
+                const obj = Object.assign({}, request, {
                     descriptionFilePath: result.path,
                     descriptionFileData: result.content,
                     descriptionFileRoot: result.directory,

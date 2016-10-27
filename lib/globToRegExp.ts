@@ -2,7 +2,7 @@
  MIT License http://www.opensource.org/licenses/mit-license.php
  Author Tobias Koppers @sokra
  */
-function globToRegExp(glob) {
+function globToRegExp(glob: string) {
     // * [^\\\/]*
     // /**/ /.+/
     // ^* \./.+ (concord special)
@@ -42,7 +42,7 @@ const SIMPLE_TOKENS = {
     '}': 'closing-or'
 }
 
-function tokenize(glob) {
+function tokenize(glob: string) {
     return glob.split(/([@?+*]\(|\/\*\*\/|\*\*|[?*]|\[[\!\^]?(?:[^\]\\]|\\.)+\]|\{|,|\/|[|)}])/g)
         .map(item => {
             if (!item) {

@@ -4,13 +4,15 @@
  */
 import path = require('path')
 
-import assign = require('object-assign')
-
 class MainFieldPlugin {
-    constructor(source, options, target) {
-        this.source = source
-        this.options = options
-        this.target = target
+    constructor(
+        public source: string,
+        public options: {
+            name: string
+            forceRelative: boolean
+        },
+        public target: string
+    ) {
     }
 
     apply(resolver) {
@@ -48,7 +50,7 @@ class MainFieldPlugin {
             if (options.forceRelative && !/^\.\.?\//.test(mainModule)) {
                 mainModule = `./${mainModule}`
             }
-            const obj = assign({}, request, {
+            const obj = Object.assign({}, request, {
                 request: mainModule
             })
             return resolver.doResolve(target, obj, `use ${mainModule} from ${options.name} in ${filename}`, callback)

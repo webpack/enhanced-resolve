@@ -2,26 +2,19 @@
  MIT License http://www.opensource.org/licenses/mit-license.php
  Author Tobias Koppers @sokra
  */
-import assign = require('object-assign')
-
-import createInnerCallback = require('./createInnerCallback')
-
 class ModulesInRootPlugin {
-    constructor(source, path, target) {
-        this.source = source
-        this.path = path
-        this.target = target
+    constructor(public source: string, public path: string, public target: string) {
     }
 
     apply(resolver) {
         const target = this.target
         const path = this.path
-        resolver.plugin(this.source, (request, callback) => {
-            const obj = assign({}, request, {
+        resolver.plugin(this.source, function (request, callback) {
+            const obj = Object.assign({}, request, {
                 path,
                 request: `./${request.request}`
             })
-            resolver.doResolve(target, obj, `looking for modules in ${path}`, callback, true)
+            resolver.doResolve(target, obj, `looking for modules in ${path}`, callback)
         })
     }
 }

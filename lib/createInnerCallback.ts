@@ -2,12 +2,34 @@
  MIT License http://www.opensource.org/licenses/mit-license.php
  Author Tobias Koppers @sokra
  */
-export = function createInnerCallback(callback, options, message, messageOptional) {
+interface CallbackWrapper {
+    (): any
+    stack?: string[]
+    missing?: string[] | {}
+}
+
+interface LoggingCallbackWrapper {
+    (): any
+    log?(msg: string): void
+    stack?: string[]
+    missing?: string[] | {}
+}
+
+export = function createInnerCallback(
+    callback,
+    options: {
+        stack: string[]
+        missing: string[] | {},
+        log: (msg: string) => void
+    },
+    message?: string,
+    messageOptional?: boolean
+) {
     const log = options.log
 
     if (!log) {
         if (options.stack !== callback.stack) {
-            const callbackWrapper = function callbackWrapper() {
+            const callbackWrapper: CallbackWrapper = function callbackWrapper() {
                 return callback.apply(this, arguments)
             }
             callbackWrapper.stack = options.stack
@@ -19,7 +41,7 @@ export = function createInnerCallback(callback, options, message, messageOptiona
 
     const theLog = []
 
-    function loggingCallbackWrapper() {
+    const loggingCallbackWrapper: LoggingCallbackWrapper = function loggingCallbackWrapper() {
         if (message) {
             if (!messageOptional || theLog.length > 0) {
                 log(message)

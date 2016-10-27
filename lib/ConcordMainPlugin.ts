@@ -4,21 +4,16 @@
  */
 import path = require('path')
 
-import assign = require('object-assign')
 import concord = require('./concord')
 import DescriptionFileUtils = require('./DescriptionFileUtils')
 
 class ConcordMainPlugin {
-    constructor(source, options, target) {
-        this.source = source
-        this.options = options
-        this.target = target
+    constructor(public source: string, public options: {}, public target: string) {
     }
 
     apply(resolver) {
         const target = this.target
-        const options = this.options
-        resolver.plugin(this.source, (request, callback) => {
+        resolver.plugin(this.source, function (request, callback) {
             if (request.path !== request.descriptionFileRoot) {
                 return callback()
             }
@@ -30,7 +25,7 @@ class ConcordMainPlugin {
             if (!mainModule) {
                 return callback()
             }
-            const obj = assign({}, request, {
+            const obj = Object.assign({}, request, {
                 request: mainModule
             })
             const filename = path.basename(request.descriptionFilePath)

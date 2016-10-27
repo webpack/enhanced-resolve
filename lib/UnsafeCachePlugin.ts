@@ -2,16 +2,15 @@
  MIT License http://www.opensource.org/licenses/mit-license.php
  Author Tobias Koppers @sokra
  */
-import assign = require('object-assign')
-
 import createInnerCallback = require('./createInnerCallback')
 
 class UnsafeCachePlugin {
-    constructor(source, filterPredicate, cache, target) {
-        this.source = source
-        this.filterPredicate = filterPredicate
-        this.cache = cache || {}
-        this.target = target
+    constructor(
+        public source: string,
+        public filterPredicate: (str: string) => boolean,
+        public cache: {} = {},
+        public target: string
+    ) {
     }
 
     apply(resolver) {

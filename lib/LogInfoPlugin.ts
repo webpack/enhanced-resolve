@@ -2,17 +2,13 @@
  MIT License http://www.opensource.org/licenses/mit-license.php
  Author Tobias Koppers @sokra
  */
-import assign = require('object-assign')
-
 class LogInfoPlugin {
-    constructor(source) {
-        this.source = source
+    constructor(public source: string) {
     }
 
     apply(resolver) {
-        const target = this.target
         const source = this.source
-        resolver.plugin(this.source, (request, callback) => {
+        resolver.plugin(this.source, function (request, callback) {
             if (!callback.log) {
                 return callback()
             }

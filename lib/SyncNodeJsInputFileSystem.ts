@@ -4,8 +4,20 @@
  */
 import fs = require('graceful-fs')
 
+type Callback = (something, result) => any
+
 class SyncNodeJsInputFileSystem {
     isSync() { return true }
+}
+
+interface SyncNodeJsInputFileSystem {
+    stat(cb: Callback, ...args): void
+
+    readdir(cb: Callback, ...args): void
+
+    readFile(cb: Callback, ...args): void
+
+    readlink(cb: Callback, ...args): void
 }
 
 export = SyncNodeJsInputFileSystem

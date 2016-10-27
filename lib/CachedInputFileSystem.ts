@@ -3,8 +3,16 @@
  Author Tobias Koppers @sokra
  */
 class Storage {
-    constructor(duration) {
-        this.duration = duration
+    running: {}
+    data: {}
+    levels: string[][]
+    count: number
+    interval: NodeJS.Timer
+    needTickCheck: boolean
+    nextTick: number
+    passive: boolean
+
+    constructor(public duration: number) {
         this.running = {}
         this.data = {}
         this.levels = []
@@ -66,7 +74,7 @@ class Storage {
         this.count -= decay.length
         decay.length = 0
         this.levels.unshift(decay)
-        if (this.count == 0) {
+        if (this.count === 0) {
             clearInterval(this.interval)
             this.interval = null
             this.nextTick = null
@@ -124,6 +132,18 @@ class Storage {
 }
 
 class CachedInputFileSystem {
+    fileSystem
+    _statStorage: Storage
+    _readdirStorage: Storage
+    _readFileStorage: Storage
+    _readJsonStorage: Storage
+    _readlinkStorage: Storage
+    _stat
+    _readdir
+    _readFile
+    _readJson
+    _readlink
+
     constructor(fileSystem, duration) {
         this.fileSystem = fileSystem
         this._statStorage = new Storage(duration)
@@ -143,8 +163,9 @@ class CachedInputFileSystem {
                     if (err) {
                         return callback(err)
                     }
+                    let data
                     try {
-                        var data = JSON.parse(buffer.toString('utf-8'))
+                        data = JSON.parse(buffer.toString('utf-8'))
                     } catch (e) {
                         return callback(e)
                     }

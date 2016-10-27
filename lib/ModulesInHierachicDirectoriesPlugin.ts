@@ -2,17 +2,15 @@
  MIT License http://www.opensource.org/licenses/mit-license.php
  Author Tobias Koppers @sokra
  */
-import assign = require('object-assign')
-
+import getPaths from './getPaths'
 import createInnerCallback = require('./createInnerCallback')
 import forEachBail = require('./forEachBail')
-import getPaths = require('./getPaths')
 
 class ModulesInHierachicDirectoriesPlugin {
-    constructor(source, directories, target) {
-        this.source = source
+    directories: string[]
+
+    constructor(public source: string, directories: string[], public target: string) {
         this.directories = [].concat(directories)
-        this.target = target
     }
 
     apply(resolver) {
@@ -32,7 +30,7 @@ class ModulesInHierachicDirectoriesPlugin {
             forEachBail(addrs, (addr, callback) => {
                 fs.stat(addr, (err, stat) => {
                     if (!err && stat && stat.isDirectory()) {
-                        const obj = assign({}, request, {
+                        const obj = Object.assign({}, request, {
                             path: addr,
                             request: `./${request.request}`
                         })

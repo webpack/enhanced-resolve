@@ -2,11 +2,10 @@
  MIT License http://www.opensource.org/licenses/mit-license.php
  Author Tobias Koppers @sokra
  */
-import assign = require('object-assign')
-
 import forEachBail = require('./forEachBail')
+import Resolver = require('./Resolver')
 
-function loadDescriptionFile(resolver, directory, filenames, callback) {
+function loadDescriptionFile(resolver: Resolver, directory: string, filenames: string[], callback: (...args) => any) {
     (function findDescriptionFile() {
         forEachBail(filenames, (filename, callback) => {
             const descriptionFilePath = resolver.join(directory, filename)
@@ -26,8 +25,9 @@ function loadDescriptionFile(resolver, directory, filenames, callback) {
                     if (err) {
                         return callback()
                     }
+                    let json
                     try {
-                        var json = JSON.parse(content)
+                        json = JSON.parse(content)
                     } catch (e) {
                         onJson(e)
                     }
@@ -35,7 +35,7 @@ function loadDescriptionFile(resolver, directory, filenames, callback) {
                 })
             }
 
-            function onJson(err, content) {
+            function onJson(err, content?) {
                 if (err) {
                     if (callback.log) {
                         callback.log(`${descriptionFilePath} (directory description file): ${err}`)

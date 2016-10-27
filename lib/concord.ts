@@ -139,10 +139,11 @@ function matchModule(context, configuration, request) {
     const keys = Object.keys(modulesField)
     let iteration = 0
     let index
+    let match
     for (let i = 0; i < keys.length; i++) {
         const key = keys[i]
         const pureKey = isKeyMatched(context, key)
-        var match = matchGlob(pureKey, newRequest)
+        match = matchGlob(pureKey, newRequest)
         if (match) {
             const value = modulesField[key]
             if (typeof value !== 'string') {

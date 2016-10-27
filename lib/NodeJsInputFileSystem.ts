@@ -5,7 +5,7 @@
 import fs = require('graceful-fs')
 
 class NodeJsInputFileSystem {
-    readdir(path, callback) {
+    readdir(path: string, callback): void {
         fs.readdir(path, (err, files) => {
             callback(err, files && files.map(file => file.normalize ? file.normalize('NFC') : file))
         })
@@ -14,6 +14,12 @@ class NodeJsInputFileSystem {
     isSync() {
         return false
     }
+}
+
+interface NodeJsInputFileSystem {
+    stat(path: string, callback?: (err: NodeJS.ErrnoException, stats: fs.Stats) => any): void;
+    readFile(filename: string, encoding: string, callback: (err: NodeJS.ErrnoException, data: string) => void): void
+    readlink(path: string, callback?: (err: NodeJS.ErrnoException, linkString: string) => any): void
 }
 
 export = NodeJsInputFileSystem

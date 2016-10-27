@@ -2,8 +2,6 @@
  MIT License http://www.opensource.org/licenses/mit-license.php
  Author Tobias Koppers @sokra
  */
-import assign = require('object-assign')
-
 // Export Resolver, FileSystems and Plugins
 import ResolverFactory = require('./ResolverFactory')
 import NodeJsInputFileSystem = require('./NodeJsInputFileSystem')
@@ -108,7 +106,7 @@ resolve.loader.sync = function resolveLoaderSync(context, path, request) {
 }
 
 resolve.create = function create(options) {
-    options = assign({
+    options = Object.assign({
         fileSystem: asyncFileSystem
     }, options)
     const resolver = ResolverFactory.createResolver(options)
@@ -124,7 +122,7 @@ resolve.create = function create(options) {
 }
 
 resolve.create.sync = function createSync(options) {
-    options = assign({
+    options = Object.assign({
         fileSystem: syncFileSystem
     }, options)
     const resolver = ResolverFactory.createResolver(options)
