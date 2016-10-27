@@ -8,6 +8,9 @@ trim_trailing_whitespace = true
 insert_final_newline = true
 max_line_length = 233
 
+[*.ts]
+indent_style = space
+
 [*.json]
 indent_style = space
 indent_size = 2
