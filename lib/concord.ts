@@ -4,7 +4,18 @@
  */
 import { globToRegExp } from './globToRegExp'
 
-function parseType(type) {
+export interface Type {
+    type: string | null | undefined
+    features: string[]
+}
+
+export interface Context {
+    supportedResourceTypes?: string[]
+    environments?: string[]
+    referrer: string
+}
+
+function parseType(type: string): Type {
     const items = type.split('+')
     const t = items.shift()
     return {
@@ -13,7 +24,7 @@ function parseType(type) {
     }
 }
 
-function isTypeMatched(baseType, testedType) {
+function isTypeMatched(baseType: string | Type, testedType: string | Type) {
     if (typeof baseType === 'string') {
         baseType = parseType(baseType)
     }
@@ -23,12 +34,12 @@ function isTypeMatched(baseType, testedType) {
     if (testedType.type && testedType.type !== baseType.type) {
         return false
     }
-    return testedType.features.every(requiredFeature => baseType.features.includes(requiredFeature))
+    return testedType.features.every(requiredFeature => (<Type>baseType).features.includes(requiredFeature))
 }
 
-function isResourceTypeMatched(baseType, testedType) {
-    baseType = baseType.split('/')
-    testedType = testedType.split('/')
+function isResourceTypeMatched(rawBaseType: string, rawTestedType: string) {
+    const baseType = rawBaseType.split('/')
+    const testedType = rawTestedType.split('/')
     if (baseType.length !== testedType.length) {
         return false
     }
@@ -40,32 +51,31 @@ function isResourceTypeMatched(baseType, testedType) {
     return true
 }
 
-function isResourceTypeSupported(context, type) {
+function isResourceTypeSupported(context: Context, type: string) {
     return context.supportedResourceTypes
         && context.supportedResourceTypes.some(supportedType => isResourceTypeMatched(supportedType, type))
 }
 
-function isEnvironment(context, env) {
+function isEnvironment(context: Context, env: string | Type) {
     return context.environments && context.environments.every(environment => isTypeMatched(environment, env))
 }
 
 const globCache = {}
 
-function getGlobRegExp(glob) {
-    const regExp = globCache[glob] || (globCache[glob] = globToRegExp(glob))
-    return regExp
+function getGlobRegExp(glob: string) {
+    return globCache[glob] || (globCache[glob] = globToRegExp(glob))
 }
 
-function matchGlob(glob, relativePath) {
+function matchGlob(glob: string, relativePath: string) {
     const regExp = getGlobRegExp(glob)
     return regExp.exec(relativePath)
 }
 
-function isGlobMatched(glob, relativePath) {
+function isGlobMatched(glob: string, relativePath: string) {
     return !!matchGlob(glob, relativePath)
 }
 
-function isConditionMatched(context, condition) {
+function isConditionMatched(context: Context, condition: string) {
     const items = condition.split('|')
     return items.some(function testFn(item) {
         item = item.trim()
@@ -75,7 +85,7 @@ function isConditionMatched(context, condition) {
         }
         if (/^[a-z]+:/.test(item)) {
             // match named condition
-            const match = /^([a-z]+):\s*/.exec(item)
+            const match = <RegExpExecArray>(/^([a-z]+):\s*/.exec(item))
             const value = item.substr(match[0].length)
             const name = match[1]
             switch (name) {
@@ -96,7 +106,7 @@ function isConditionMatched(context, condition) {
     })
 }
 
-function isKeyMatched(context, key) {
+function isKeyMatched(context: Context, key: string): string | boolean {
     while (true) {
         const match = /^\[([^\]]+)\]\s*/.exec(key)
         if (!match) {
@@ -110,7 +120,7 @@ function isKeyMatched(context, key) {
     }
 }
 
-function getField(context, configuration, field) {
+function getField(context: Context, configuration, field: string) {
     let value
     Object.keys(configuration)
         .forEach(key => {
@@ -122,15 +132,15 @@ function getField(context, configuration, field) {
     return value
 }
 
-function getMain(context, configuration) {
+function getMain(context: Context, configuration) {
     return getField(context, configuration, 'main')
 }
 
-function getExtensions(context, configuration) {
+function getExtensions(context: Context, configuration) {
     return getField(context, configuration, 'extensions')
 }
 
-function matchModule(context, configuration, request) {
+function matchModule(context: Context, configuration, request: string) {
     const modulesField = getField(context, configuration, 'modules')
     if (!modulesField) {
         return request
@@ -142,7 +152,7 @@ function matchModule(context, configuration, request) {
     let match
     for (let i = 0; i < keys.length; i++) {
         const key = keys[i]
-        const pureKey = isKeyMatched(context, key)
+        const pureKey = <string>isKeyMatched(context, key)
         match = matchGlob(pureKey, newRequest)
         if (match) {
             const value = modulesField[key]
@@ -164,7 +174,7 @@ function matchModule(context, configuration, request) {
     }
     return newRequest
 
-    function replaceMatcher(find) {
+    function replaceMatcher(find: string) {
         switch (find) {
             case '/**':
                 const m = match[index++]
@@ -176,16 +186,17 @@ function matchModule(context, configuration, request) {
     }
 }
 
-function matchType(context, configuration, relativePath) {
+function matchType(context: Context, configuration, relativePath: string) {
     const typesField = getField(context, configuration, 'types')
     if (!typesField) {
         return undefined
     }
+
     let type
     Object.keys(typesField).forEach(key => {
-        const pureKey = isKeyMatched(context, key)
+        const pureKey = <string>isKeyMatched(context, key)
         if (isGlobMatched(pureKey, relativePath)) {
-            const value = typesField[key]
+            const value = (<any>typesField)[key]
             if (!type && /\/\*$/.test(value)) {
                 throw new Error(`value ('${value}') of key '${key}' contains '*', but there is no previous value defined`)
             }
@@ -195,15 +206,17 @@ function matchType(context, configuration, relativePath) {
     return type
 }
 
-export { parseType }
-export { isTypeMatched }
-export { isResourceTypeSupported }
-export { isEnvironment }
-export { isGlobMatched }
-export { isConditionMatched }
-export { isKeyMatched }
-export { getField }
-export { getMain }
-export { getExtensions }
-export { matchModule }
-export { matchType }
+export {
+    parseType,
+    isTypeMatched,
+    isResourceTypeSupported,
+    isEnvironment,
+    isGlobMatched,
+    isConditionMatched,
+    isKeyMatched,
+    getField,
+    getMain,
+    getExtensions,
+    matchModule,
+    matchType
+}

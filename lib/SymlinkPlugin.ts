@@ -4,12 +4,13 @@
  */
 import getPaths from './getPaths'
 import forEachBail = require('./forEachBail')
+import Resolver = require('./Resolver')
 
 class SymlinkPlugin {
     constructor(public source: string, public target: string) {
     }
 
-    apply(resolver) {
+    apply(resolver: Resolver) {
         const target = this.target
         resolver.plugin(this.source, function (request, callback) {
             const _this = this

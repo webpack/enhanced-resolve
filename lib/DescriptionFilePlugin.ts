@@ -4,15 +4,16 @@
  */
 import createInnerCallback = require('./createInnerCallback')
 import DescriptionFileUtils = require('./DescriptionFileUtils')
+import Resolver = require('./Resolver')
 
 class DescriptionFilePlugin {
     filenames: string[]
 
-    constructor(public source: string, filenames: string[], public target: string) {
-        this.filenames = [].concat(filenames)
+    constructor(public source: string, filenames: string[]|string, public target: string) {
+        this.filenames = (<string[]>[]).concat(filenames)
     }
 
-    apply(resolver) {
+    apply(resolver: Resolver) {
         const filenames = this.filenames
         const target = this.target
         resolver.plugin(this.source, function (request, callback) {

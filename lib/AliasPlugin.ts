@@ -4,6 +4,8 @@
  */
 import createInnerCallback = require('./createInnerCallback')
 import getInnerRequest = require('./getInnerRequest')
+import Resolver = require('./Resolver')
+import { AliasItem } from './ResolverFactory'
 
 class AliasPlugin {
     name: string
@@ -12,11 +14,7 @@ class AliasPlugin {
 
     constructor(
         public source: string,
-        public options: {
-            name: string
-            alias: string
-            onlyModule: boolean
-        },
+        public options: AliasItem,
         public target: string
     ) {
         this.name = options.name
@@ -24,7 +22,7 @@ class AliasPlugin {
         this.onlyModule = options.onlyModule
     }
 
-    apply(resolver) {
+    apply(resolver: Resolver) {
         const target = this.target
         const name = this.name
         const alias = this.alias

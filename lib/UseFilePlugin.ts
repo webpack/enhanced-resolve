@@ -2,11 +2,13 @@
  MIT License http://www.opensource.org/licenses/mit-license.php
  Author Tobias Koppers @sokra
  */
+import Resolver = require('./Resolver')
+
 class UseFilePlugin {
     constructor(public source: string, public filename: string, public target: string) {
     }
 
-    apply(resolver) {
+    apply(resolver: Resolver) {
         const filename = this.filename
         const target = this.target
         resolver.plugin(this.source, (request, callback) => {

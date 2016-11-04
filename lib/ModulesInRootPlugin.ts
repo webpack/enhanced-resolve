@@ -2,11 +2,13 @@
  MIT License http://www.opensource.org/licenses/mit-license.php
  Author Tobias Koppers @sokra
  */
+import Resolver = require('./Resolver')
+
 class ModulesInRootPlugin {
     constructor(public source: string, public path: string, public target: string) {
     }
 
-    apply(resolver) {
+    apply(resolver: Resolver) {
         const target = this.target
         const path = this.path
         resolver.plugin(this.source, function (request, callback) {

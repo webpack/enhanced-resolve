@@ -6,12 +6,7 @@ import Tapable = require('tapable')
 import memoryFsJoin = require('memory-fs/lib/join')
 
 import createInnerCallback = require('./createInnerCallback')
-
-interface Error {
-    details: string
-    missing: string[]
-    recursion: boolean
-}
+import { ReSolveError, ResolveParseResult } from './common-types'
 
 const notModuleRegExp = /^\.$|^\.[\\\/]|^\.\.$|^\.\.[\/\\]|^\/|^[A-Z]:[\\\/]/i
 const directoryRegExp = /[\/\\]$/i
@@ -85,7 +80,7 @@ class Resolver extends Tapable {
                 return callback(err)
             }
             if (!result) {
-                const error = new Error(`Can't ${message}`)
+                const error = <ReSolveError>new Error(`Can't ${message}`)
                 error.details = logAsString()
                 error.missing = localMissing
                 resolver.applyPlugins('no-resolve', obj, error)
@@ -111,7 +106,7 @@ class Resolver extends Tapable {
             directory?: boolean
             module?: boolean
         },
-        message: string,
+        message: string | null,
         callback
     ) {
         const resolver = this
@@ -122,7 +117,7 @@ class Resolver extends Tapable {
             newStack = callback.stack.concat(newStack)
             if (callback.stack.includes(stackLine)) {
                 // Prevent recursion
-                const recursionError = new Error(`Recursion in resolving\nStack:\n  ${newStack.join('\n  ')}`)
+                const recursionError = <ReSolveError>new Error(`Recursion in resolving\nStack:\n  ${newStack.join('\n  ')}`)
                 recursionError.recursion = true
                 if (callback.log) {
                     callback.log('abort resolving because of recursion')
@@ -190,7 +185,7 @@ class Resolver extends Tapable {
         if (identifier === '') {
             return null
         }
-        const part = {
+        const part: ResolveParseResult = {
             request: '',
             query: '',
             module: false,

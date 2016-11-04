@@ -80,7 +80,7 @@ function tokenize(glob: string) {
 }
 
 function createRoot() {
-    const inOr = []
+    const inOr = [] as boolean[]
     const process = createSeqment()
     let initial = true
     return token => {
@@ -119,7 +119,7 @@ function createRoot() {
 }
 
 function createSeqment() {
-    const inSeqment = []
+    const inSeqment = [] as string[]
     const process = createSimple()
     return (token, initial) => {
         switch (token.type) {

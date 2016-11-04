@@ -5,15 +5,16 @@
 import getPaths from './getPaths'
 import createInnerCallback = require('./createInnerCallback')
 import forEachBail = require('./forEachBail')
+import Resolver = require('./Resolver')
 
 class ModulesInHierachicDirectoriesPlugin {
     directories: string[]
 
     constructor(public source: string, directories: string[], public target: string) {
-        this.directories = [].concat(directories)
+        this.directories = ([] as string[]).concat(directories)
     }
 
-    apply(resolver) {
+    apply(resolver: Resolver) {
         const directories = this.directories
         const target = this.target
         resolver.plugin(this.source, function (request, callback) {

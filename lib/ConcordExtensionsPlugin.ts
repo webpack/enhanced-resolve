@@ -6,12 +6,13 @@ import concord = require('./concord')
 import DescriptionFileUtils = require('./DescriptionFileUtils')
 import forEachBail = require('./forEachBail')
 import createInnerCallback = require('./createInnerCallback')
+import Resolver = require('./Resolver')
 
 class ConcordExtensionsPlugin {
     constructor(public source: string, public options: {}, public target: string) {
     }
 
-    apply(resolver) {
+    apply(resolver: Resolver) {
         const target = this.target
         resolver.plugin(this.source, function (request, callback) {
             const concordField = DescriptionFileUtils.getField(request.descriptionFileData, 'concord')

@@ -22,7 +22,7 @@ export = function createInnerCallback(
         missing: string[] | {},
         log: (msg: string) => void
     },
-    message?: string,
+    message?: string | null,
     messageOptional?: boolean
 ) {
     const log = options.log
@@ -39,7 +39,7 @@ export = function createInnerCallback(
         return callback
     }
 
-    const theLog = []
+    const theLog: string[] = []
 
     const loggingCallbackWrapper: LoggingCallbackWrapper = function loggingCallbackWrapper() {
         if (message) {

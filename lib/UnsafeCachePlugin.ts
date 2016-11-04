@@ -3,6 +3,7 @@
  Author Tobias Koppers @sokra
  */
 import createInnerCallback = require('./createInnerCallback')
+import Resolver = require('./Resolver')
 
 class UnsafeCachePlugin {
     constructor(
@@ -13,7 +14,7 @@ class UnsafeCachePlugin {
     ) {
     }
 
-    apply(resolver) {
+    apply(resolver: Resolver) {
         const filterPredicate = this.filterPredicate
         const cache = this.cache
         const target = this.target

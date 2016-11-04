@@ -8,6 +8,8 @@
   ],
   "dependencies": {
     "@types/graceful-fs": "^2.0.29",
+    "@types/memory-fs": "^0.3.0",
+    "@types/tapable": "^0.2.0",
     "graceful-fs": "^4.1.2",
     "memory-fs": "^0.3.0",
     "object-assign": "^4.0.1",
@@ -30,7 +32,7 @@
     "mocha": "^2.3.4",
     "should": "^8.0.2",
     "tslint": "^3.15.1",
-    "typescript": "^2.0.6"
+    "typescript": "next"
   },
   "engines": {
     "node": ">=0.6"

@@ -2,13 +2,13 @@
  MIT License http://www.opensource.org/licenses/mit-license.php
  Author Tobias Koppers @sokra
  */
-export = function forEachBail(array: any, iterator: (val, cb) => void, callback) {
+export = function forEachBail(array: any[], iterator: (val, cb) => void, callback) {
     if (array.length === 0) {
         return callback()
     }
     let currentPos = array.length
     let currentResult
-    let done = []
+    let done = [] as number[]
     for (let i = 0; i < array.length; i++) {
         const itCb = createIteratorCallback(i)
         iterator(array[i], itCb)
@@ -17,7 +17,7 @@ export = function forEachBail(array: any, iterator: (val, cb) => void, callback)
         }
     }
 
-    function createIteratorCallback(i) {
+    function createIteratorCallback(i: number) {
         return function (...args) {
             if (i >= currentPos) {
                 return // ignore

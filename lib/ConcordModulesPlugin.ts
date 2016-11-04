@@ -6,12 +6,13 @@ import concord = require('./concord')
 import DescriptionFileUtils = require('./DescriptionFileUtils')
 import createInnerCallback = require('./createInnerCallback')
 import getInnerRequest = require('./getInnerRequest')
+import Resolver = require('./Resolver')
 
 class ConcordModulesPlugin {
     constructor(public source: string, public options: {}, public target: string) {
     }
 
-    apply(resolver) {
+    apply(resolver: Resolver) {
         const target = this.target
         resolver.plugin(this.source, function (request, callback) {
             const innerRequest = getInnerRequest(resolver, request)

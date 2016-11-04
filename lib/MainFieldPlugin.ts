@@ -3,6 +3,7 @@
  Author Tobias Koppers @sokra
  */
 import path = require('path')
+import Resolver = require('./Resolver')
 
 class MainFieldPlugin {
     constructor(
@@ -15,7 +16,7 @@ class MainFieldPlugin {
     ) {
     }
 
-    apply(resolver) {
+    apply(resolver: Resolver) {
         const target = this.target
         const options = this.options
         resolver.plugin(this.source, function mainField(request, callback) {

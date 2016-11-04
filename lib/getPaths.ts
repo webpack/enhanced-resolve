@@ -4,7 +4,7 @@
  */
 export default function getPaths(path: string) {
     const paths = [path]
-    const pathSeqments = []
+    const pathSeqments = [] as string[]
     const addr = [path]
     let pathSeqment = popPathSeqment(addr)
     while (pathSeqment) {
@@ -19,11 +19,11 @@ export default function getPaths(path: string) {
     }
 }
 
-export function basename(path) {
+export function basename(path: string) {
     return popPathSeqment([path])
 }
 
-function popPathSeqment(pathInArray) {
+function popPathSeqment(pathInArray: string[]) {
     const i = pathInArray[0].lastIndexOf('/')
     const j = pathInArray[0].lastIndexOf('\\')
     const p = i < 0 ? j : j < 0 ? i : i < j ? j : i

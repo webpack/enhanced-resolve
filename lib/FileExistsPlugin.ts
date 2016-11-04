@@ -8,7 +8,7 @@ class FileExistsPlugin {
     constructor(public source: string, public target: string) {
     }
 
-    apply(resolver) {
+    apply(resolver: Resolver) {
         const target = this.target
         resolver.plugin(this.source, function (this: Resolver, request, callback) {
             const fs = this.fileSystem

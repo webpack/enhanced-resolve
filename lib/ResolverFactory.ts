@@ -27,7 +27,33 @@ import ResultPlugin = require('./ResultPlugin')
 import ModuleAppendPlugin = require('./ModuleAppendPlugin')
 import UnsafeCachePlugin = require('./UnsafeCachePlugin')
 
-export function createResolver(options) {
+export interface ResolverOption {
+    modules?: string[]
+    descriptionFiles?: string[]
+    plugins?: any[]
+    mainFields?: string[]
+    aliasFields?: string[]
+    mainFiles?: string[]
+    extensions?: string[]
+    enforceExtension?: boolean
+    moduleExtensions?: string[]
+    enforceModuleExtension?: boolean
+    alias?: AliasItem[] | {}
+    symlinks?: string[]|boolean
+    resolveToContext?: boolean
+    unsafeCache?: boolean | {}
+    cachePredicate?: (val) => boolean
+    fileSystem?
+    resolver?: Resolver
+}
+
+export interface AliasItem {
+    name: string
+    alias: string
+    onlyModule: boolean
+}
+
+export function createResolver(options: ResolverOption) {
 
     //// OPTIONS ////
 
@@ -85,14 +111,14 @@ export function createResolver(options) {
 
     //// options processing ////
 
-    extensions = [].concat(extensions)
-    moduleExtensions = [].concat(moduleExtensions)
+    extensions = ([] as string[]).concat(extensions)
+    moduleExtensions = ([] as string[]).concat(moduleExtensions)
 
-    modules = mergeFilteredToArray([].concat(modules), item => !isAbsolutePath(item))
+    modules = mergeFilteredToArray(([] as string[]).concat(modules), item => !isAbsolutePath(item))
 
-    mainFields = mainFields.map(item => {
+    const mainFieldsMap = mainFields.map(item => {
         if (typeof item === 'string') {
-            item = {
+            return {
                 name: item,
                 forceRelative: true
             }
@@ -100,8 +126,9 @@ export function createResolver(options) {
         return item
     })
 
+    let aliasMap: AliasItem[]
     if (typeof alias === 'object' && !Array.isArray(alias)) {
-        alias = Object.keys(alias).map(key => {
+        aliasMap = Object.keys(alias).map(key => {
             let onlyModule = false
             let obj = alias[key]
             if (/\$$/.test(key)) {
@@ -119,6 +146,9 @@ export function createResolver(options) {
             }, obj)
             return obj
         })
+    }
+    else {
+        aliasMap = alias
     }
 
     if (unsafeCache && typeof unsafeCache !== 'object') {
@@ -143,7 +173,7 @@ export function createResolver(options) {
     plugins.push(new NextPlugin('after-parsed-resolve', 'described-resolve'))
 
     // described-resolve
-    alias.forEach(item => {
+    aliasMap.forEach(item => {
         plugins.push(new AliasPlugin('described-resolve', item, 'resolve'))
     })
     plugins.push(new ConcordModulesPlugin('described-resolve', {}, 'resolve'))
@@ -193,7 +223,7 @@ export function createResolver(options) {
 
         // existing-directory
         plugins.push(new ConcordMainPlugin('existing-directory', {}, 'resolve'))
-        mainFields.forEach(item => {
+        mainFieldsMap.forEach(item => {
             plugins.push(new MainFieldPlugin('existing-directory', item, 'resolve'))
         })
         mainFiles.forEach(item => {
@@ -216,7 +246,7 @@ export function createResolver(options) {
         })
 
         // file
-        alias.forEach(item => {
+        aliasMap.forEach(item => {
             plugins.push(new AliasPlugin('file', item, 'resolve'))
         })
         plugins.push(new ConcordModulesPlugin('file', {}, 'resolve'))
@@ -240,6 +270,7 @@ export function createResolver(options) {
     plugins.forEach(plugin => {
         resolver.apply(plugin)
     })
+
     return resolver
 }
 

@@ -3,12 +3,13 @@
  Author Tobias Koppers @sokra
  */
 import createInnerCallback = require('./createInnerCallback')
+import Resolver = require('./Resolver')
 
 class ModuleKindPlugin {
     constructor(public source: string, public target: string) {
     }
 
-    apply(resolver) {
+    apply(resolver: Resolver) {
         const target = this.target
         resolver.plugin(this.source, function (request, callback) {
             if (!request.module) {

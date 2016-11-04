@@ -71,7 +71,7 @@ function loadDescriptionFile(resolver: Resolver, directory: string, filenames: s
     })()
 }
 
-function getField(content, field) {
+function getField(content, field: string) {
     if (!content) {
         return undefined
     }
@@ -95,7 +95,7 @@ function getField(content, field) {
     }
 }
 
-function cdUp(directory) {
+function cdUp(directory: string) {
     if (directory === '/') {
         return null
     }
@@ -108,6 +108,8 @@ function cdUp(directory) {
     return directory.substr(0, p || 1)
 }
 
-export { loadDescriptionFile }
-export { getField }
-export { cdUp }
+export {
+    loadDescriptionFile,
+    getField,
+    cdUp
+}

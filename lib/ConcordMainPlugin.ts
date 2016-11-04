@@ -6,12 +6,13 @@ import path = require('path')
 
 import concord = require('./concord')
 import DescriptionFileUtils = require('./DescriptionFileUtils')
+import Resolver = require('./Resolver')
 
 class ConcordMainPlugin {
     constructor(public source: string, public options: {}, public target: string) {
     }
 
-    apply(resolver) {
+    apply(resolver: Resolver) {
         const target = this.target
         resolver.plugin(this.source, function (request, callback) {
             if (request.path !== request.descriptionFileRoot) {

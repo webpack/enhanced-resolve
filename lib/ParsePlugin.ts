@@ -2,14 +2,17 @@
  MIT License http://www.opensource.org/licenses/mit-license.php
  Author Tobias Koppers @sokra
  */
+import Resolver = require('./Resolver')
+import { ResolveParseResult } from './common-types'
+
 class ParsePlugin {
     constructor(public source: string, public target: string) {
     }
 
-    apply(resolver) {
+    apply(resolver: Resolver) {
         const target = this.target
         resolver.plugin(this.source, function (request, callback) {
-            const parsed = resolver.parse(request.request)
+            const parsed = resolver.parse(request.request) as ResolveParseResult
             const obj = Object.assign({}, request, parsed)
             if (request.query && !parsed.query) {
                 obj.query = request.query
