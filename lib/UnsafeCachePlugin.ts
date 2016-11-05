@@ -4,11 +4,12 @@
  */
 import createInnerCallback = require('./createInnerCallback')
 import Resolver = require('./Resolver')
+import { ResolverRequest, LoggingCallbackWrapper } from './common-types'
 
 class UnsafeCachePlugin {
     constructor(
         public source: string,
-        public filterPredicate: (str: string) => boolean,
+        public filterPredicate: (str: ResolverRequest) => boolean,
         public cache: {} = {},
         public target: string
     ) {
@@ -18,7 +19,7 @@ class UnsafeCachePlugin {
         const filterPredicate = this.filterPredicate
         const cache = this.cache
         const target = this.target
-        resolver.plugin(this.source, (request, callback) => {
+        resolver.plugin(this.source, function (request: ResolverRequest, callback: LoggingCallbackWrapper) {
             if (!filterPredicate(request)) {
                 return callback()
             }

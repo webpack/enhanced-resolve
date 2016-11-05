@@ -6,6 +6,7 @@ import getPaths from './getPaths'
 import createInnerCallback = require('./createInnerCallback')
 import forEachBail = require('./forEachBail')
 import Resolver = require('./Resolver')
+import { LoggingCallbackWrapper, ResolverRequest } from './common-types'
 
 class ModulesInHierachicDirectoriesPlugin {
     directories: string[]
@@ -17,7 +18,7 @@ class ModulesInHierachicDirectoriesPlugin {
     apply(resolver: Resolver) {
         const directories = this.directories
         const target = this.target
-        resolver.plugin(this.source, function (request, callback) {
+        resolver.plugin(this.source, function (request: ResolverRequest, callback: LoggingCallbackWrapper) {
             const fs = this.fileSystem
             const topLevelCallback = callback
             const addrs = getPaths(request.path).paths.map(function (p) {

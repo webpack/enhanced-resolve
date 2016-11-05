@@ -5,6 +5,7 @@
 import getPaths from './getPaths'
 import forEachBail = require('./forEachBail')
 import Resolver = require('./Resolver')
+import { LoggingCallbackWrapper, ResolverRequest } from './common-types'
 
 class SymlinkPlugin {
     constructor(public source: string, public target: string) {
@@ -12,7 +13,7 @@ class SymlinkPlugin {
 
     apply(resolver: Resolver) {
         const target = this.target
-        resolver.plugin(this.source, function (request, callback) {
+        resolver.plugin(this.source, function (request: ResolverRequest, callback: LoggingCallbackWrapper) {
             const _this = this
             const fs = _this.fileSystem
             const pathsResult = getPaths(request.path)

@@ -3,6 +3,7 @@
  Author Tobias Koppers @sokra
  */
 import Resolver = require('./Resolver')
+import { LoggingCallbackWrapper, ResolverRequest } from './common-types'
 
 class NextPlugin {
     constructor(public source: string, public target: string) {
@@ -10,7 +11,7 @@ class NextPlugin {
 
     apply(resolver: Resolver) {
         const target = this.target
-        resolver.plugin(this.source, function (request, callback) {
+        resolver.plugin(this.source, function (request: ResolverRequest, callback: LoggingCallbackWrapper) {
             resolver.doResolve(target, request, null, callback)
         })
     }

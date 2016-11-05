@@ -3,6 +3,7 @@
  Author Tobias Koppers @sokra
  */
 import Resolver = require('./Resolver')
+import { LoggingCallbackWrapper, ResolverRequest } from './common-types'
 
 class LogInfoPlugin {
     constructor(public source: string) {
@@ -10,7 +11,7 @@ class LogInfoPlugin {
 
     apply(resolver: Resolver) {
         const source = this.source
-        resolver.plugin(this.source, function (request, callback) {
+        resolver.plugin(this.source, function (request: ResolverRequest, callback: LoggingCallbackWrapper) {
             if (!callback.log) {
                 return callback()
             }

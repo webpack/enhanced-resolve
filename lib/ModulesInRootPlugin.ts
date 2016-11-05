@@ -3,6 +3,7 @@
  Author Tobias Koppers @sokra
  */
 import Resolver = require('./Resolver')
+import { LoggingCallbackWrapper, ResolverRequest } from './common-types'
 
 class ModulesInRootPlugin {
     constructor(public source: string, public path: string, public target: string) {
@@ -11,7 +12,7 @@ class ModulesInRootPlugin {
     apply(resolver: Resolver) {
         const target = this.target
         const path = this.path
-        resolver.plugin(this.source, function (request, callback) {
+        resolver.plugin(this.source, function (request: ResolverRequest, callback: LoggingCallbackWrapper) {
             const obj = Object.assign({}, request, {
                 path,
                 request: `./${request.request}`

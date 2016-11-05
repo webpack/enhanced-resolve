@@ -6,7 +6,11 @@ import Tapable = require('tapable')
 import memoryFsJoin = require('memory-fs/lib/join')
 
 import createInnerCallback = require('./createInnerCallback')
-import { ReSolveError, ResolveParseResult } from './common-types'
+import {
+    ReSolveError, ResolveParseResult, ResolveResult, ResolverRequest,
+    LoggingCallbackWrapper
+} from './common-types'
+import { Context } from './concord'
 
 const notModuleRegExp = /^\.$|^\.[\\\/]|^\.\.$|^\.\.[\/\\]|^\/|^[A-Z]:[\\\/]/i
 const directoryRegExp = /[\/\\]$/i
@@ -20,9 +24,9 @@ class Resolver extends Tapable {
         this.fileSystem = fileSystem
     }
 
-    resolveSync(context: string, path: string, request: string) {
+    resolveSync(context: Context, path: string, request: string) {
         let err
-        let result
+        let result: ResolveResult | null = null
         let sync = false
         this.resolve(context, path, request, (e, r) => {
             err = e
@@ -38,7 +42,7 @@ class Resolver extends Tapable {
         return result
     }
 
-    resolve(context: string, path: string, request: string, callback) {
+    resolve(context: Context, path: string, request: string, callback) {
         if (arguments.length === 3) {
             throw new Error('Signature changed: context parameter added')
         }
@@ -67,12 +71,7 @@ class Resolver extends Tapable {
             return log.join('\n')
         }
 
-        function onResolved(
-            err, result: {
-                path: boolean | string
-                query: string
-            }
-        ) {
+        function onResolved(err, result: ResolveResult) {
             if (callback.log) {
                 for (let i = 0; i < log.length; i++) callback.log(log[i])
             }
@@ -98,16 +97,9 @@ class Resolver extends Tapable {
 
     doResolve(
         type: string,
-        request: {
-            context: string
-            path: string
-            request: string
-            query?: string
-            directory?: boolean
-            module?: boolean
-        },
+        request: ResolverRequest,
         message: string | null,
-        callback
+        callback: LoggingCallbackWrapper
     ) {
         const resolver = this
         const stackLine = `${type}: (${request.path}) ${request.request || ''}${request.query || ''}${

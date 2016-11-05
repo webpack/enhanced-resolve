@@ -3,6 +3,7 @@
  Author Tobias Koppers @sokra
  */
 import Resolver = require('./Resolver')
+import { LoggingCallbackWrapper, ResolverRequest } from './common-types'
 
 class ModuleAppendPlugin {
     constructor(public source: string, public appending: string, public target: string) {
@@ -11,7 +12,7 @@ class ModuleAppendPlugin {
     apply(resolver: Resolver) {
         const appending = this.appending
         const target = this.target
-        resolver.plugin(this.source, function (request, callback) {
+        resolver.plugin(this.source, function (request: ResolverRequest, callback: LoggingCallbackWrapper) {
             const i = request.request.indexOf('/')
             const j = request.request.indexOf('\\')
             const p = i < 0 ? j : j < 0 ? i : i < j ? i : j

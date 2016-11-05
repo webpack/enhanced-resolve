@@ -4,6 +4,7 @@
  */
 import path = require('path')
 import Resolver = require('./Resolver')
+import { LoggingCallbackWrapper, ResolverRequest } from './common-types'
 
 class MainFieldPlugin {
     constructor(
@@ -19,12 +20,12 @@ class MainFieldPlugin {
     apply(resolver: Resolver) {
         const target = this.target
         const options = this.options
-        resolver.plugin(this.source, function mainField(request, callback) {
+        resolver.plugin(this.source, function mainField(request: ResolverRequest, callback: LoggingCallbackWrapper) {
             if (request.path !== request.descriptionFileRoot) {
                 return callback()
             }
             const content = request.descriptionFileData
-            const filename = path.basename(request.descriptionFilePath)
+            const filename = path.basename(request.descriptionFilePath as string)
             let mainModule
             const field = options.name
             if (Array.isArray(field)) {

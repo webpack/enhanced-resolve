@@ -4,6 +4,7 @@
  */
 import createInnerCallback = require('./createInnerCallback')
 import Resolver = require('./Resolver')
+import { LoggingCallbackWrapper, ResolverRequest } from './common-types'
 
 class ModuleKindPlugin {
     constructor(public source: string, public target: string) {
@@ -11,7 +12,7 @@ class ModuleKindPlugin {
 
     apply(resolver: Resolver) {
         const target = this.target
-        resolver.plugin(this.source, function (request, callback) {
+        resolver.plugin(this.source, function (request: ResolverRequest, callback: LoggingCallbackWrapper) {
             if (!request.module) {
                 return callback()
             }

@@ -3,6 +3,7 @@
  Author Tobias Koppers @sokra
  */
 import Resolver = require('./Resolver')
+import { LoggingCallbackWrapper, ResolverRequest } from './common-types'
 
 class DirectoryExistsPlugin {
     constructor(public source: string, public target: string) {
@@ -10,7 +11,7 @@ class DirectoryExistsPlugin {
 
     apply(resolver: Resolver) {
         const target = this.target
-        resolver.plugin(this.source, function (this: Resolver, request, callback) {
+        resolver.plugin(this.source, function (this: Resolver, request: ResolverRequest, callback: LoggingCallbackWrapper) {
             const fs = this.fileSystem
             const directory = request.path
             fs.stat(directory, (err, stat) => {

@@ -2,7 +2,13 @@
  MIT License http://www.opensource.org/licenses/mit-license.php
  Author Tobias Koppers @sokra
  */
-export = function forEachBail(array: any[], iterator: (val, cb) => void, callback) {
+import { LoggingCallbackWrapper } from './common-types'
+
+export = function forEachBail(
+    array: any[],
+    iterator: (val, cb: LoggingCallbackWrapper) => void,
+    callback: (...args) => any
+) {
     if (array.length === 0) {
         return callback()
     }

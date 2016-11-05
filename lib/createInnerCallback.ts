@@ -2,26 +2,17 @@
  MIT License http://www.opensource.org/licenses/mit-license.php
  Author Tobias Koppers @sokra
  */
+import { LoggingCallbackWrapper, LoggingCallbackTools } from './common-types'
+
 interface CallbackWrapper {
     (): any
     stack?: string[]
     missing?: string[] | {}
 }
 
-interface LoggingCallbackWrapper {
-    (): any
-    log?(msg: string): void
-    stack?: string[]
-    missing?: string[] | {}
-}
-
 export = function createInnerCallback(
     callback,
-    options: {
-        stack: string[]
-        missing: string[] | {},
-        log: (msg: string) => void
-    },
+    options: LoggingCallbackTools,
     message?: string | null,
     messageOptional?: boolean
 ) {

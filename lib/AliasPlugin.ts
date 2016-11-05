@@ -6,6 +6,7 @@ import createInnerCallback = require('./createInnerCallback')
 import getInnerRequest = require('./getInnerRequest')
 import Resolver = require('./Resolver')
 import { AliasItem } from './ResolverFactory'
+import { LoggingCallbackWrapper, ResolverRequest } from './common-types'
 
 class AliasPlugin {
     name: string
@@ -27,7 +28,7 @@ class AliasPlugin {
         const name = this.name
         const alias = this.alias
         const onlyModule = this.onlyModule
-        resolver.plugin(this.source, function (request, callback) {
+        resolver.plugin(this.source, function (request: ResolverRequest, callback: LoggingCallbackWrapper) {
             const innerRequest = getInnerRequest(resolver, request)
             if (!innerRequest) {
                 return callback()

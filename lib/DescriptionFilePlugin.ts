@@ -5,6 +5,7 @@
 import createInnerCallback = require('./createInnerCallback')
 import DescriptionFileUtils = require('./DescriptionFileUtils')
 import Resolver = require('./Resolver')
+import { LoggingCallbackWrapper, ResolverRequest } from './common-types'
 
 class DescriptionFilePlugin {
     filenames: string[]
@@ -16,16 +17,17 @@ class DescriptionFilePlugin {
     apply(resolver: Resolver) {
         const filenames = this.filenames
         const target = this.target
-        resolver.plugin(this.source, function (request, callback) {
+        resolver.plugin(this.source, function (request: ResolverRequest, callback: LoggingCallbackWrapper) {
             const directory = request.path
             DescriptionFileUtils.loadDescriptionFile(resolver, directory, filenames, (err, result) => {
                 if (err) {
                     return callback(err)
                 }
                 if (!result) {
-                    if (callback.missing) {
-                        filenames.forEach(filename => {
-                            callback.missing.push(resolver.join(directory, filename))
+                    const missing = callback.missing
+                    if (missing) {
+                        filenames.forEach(function (filename) {
+                            missing.push(resolver.join(directory, filename))
                         })
                     }
                     if (callback.log) {

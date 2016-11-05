@@ -7,6 +7,8 @@ import ResolverFactory = require('./ResolverFactory')
 import NodeJsInputFileSystem = require('./NodeJsInputFileSystem')
 import SyncNodeJsInputFileSystem = require('./SyncNodeJsInputFileSystem')
 import CachedInputFileSystem = require('./CachedInputFileSystem')
+import { Context } from './concord'
+import { LoggingCallbackWrapper, ResolveResult } from './common-types'
 
 const asyncFileSystem = new CachedInputFileSystem(new NodeJsInputFileSystem(), 4000)
 const syncFileSystem = new CachedInputFileSystem(new SyncNodeJsInputFileSystem(), 4000)
@@ -20,7 +22,10 @@ const asyncResolver = ResolverFactory.createResolver({
     fileSystem: asyncFileSystem
 })
 
-function resolve(context, path, request, callback) {
+function resolve(path: string, request: string, callback: LoggingCallbackWrapper): void
+function resolve(context: Context, path: string, request: string, callback: LoggingCallbackWrapper): void
+
+function resolve(context, path, request, callback?) {
     if (typeof context === 'string') {
         callback = request
         request = path
@@ -36,7 +41,11 @@ const syncResolver = ResolverFactory.createResolver({
     extensions: ['.js', '.json', '.node'],
     fileSystem: syncFileSystem
 });
-resolve.sync = function resolveSync(context, path, request) {
+
+function resolveSync(path: string, request: string): ResolveResult
+function resolveSync(context: Context, path: string, request: string): ResolveResult
+
+function resolveSync(context, path, request?) {
     if (typeof context === 'string') {
         request = path
         path = context
@@ -44,13 +53,18 @@ resolve.sync = function resolveSync(context, path, request) {
     }
     return syncResolver.resolveSync(context, path, request)
 }
+resolve.sync = resolveSync
 
 const asyncContextResolver = ResolverFactory.createResolver({
     extensions: ['.js', '.json', '.node'],
     resolveToContext: true,
     fileSystem: asyncFileSystem
 });
-resolve.context = function resolveContext(context, path, request, callback) {
+
+function resolveContext(path: string, request: string, callback: LoggingCallbackWrapper): void
+function resolveContext(context: Context, path: string, request: string, callback: LoggingCallbackWrapper): void
+
+function resolveContext(context, path, request, callback?) {
     if (typeof context === 'string') {
         callback = request
         request = path
@@ -59,13 +73,18 @@ resolve.context = function resolveContext(context, path, request, callback) {
     }
     asyncContextResolver.resolve(context, path, request, callback)
 }
+resolve.context = resolveContext
 
 const syncContextResolver = ResolverFactory.createResolver({
     extensions: ['.js', '.json', '.node'],
     resolveToContext: true,
     fileSystem: syncFileSystem
 });
-resolve.context.sync = function resolveContextSync(context, path, request) {
+
+function resolveContextSync(path: string, request: string): ResolveResult
+function resolveContextSync(context: Context, path: string, request: string): ResolveResult
+
+function resolveContextSync(context, path, request?) {
     if (typeof context === 'string') {
         request = path
         path = context
@@ -73,6 +92,7 @@ resolve.context.sync = function resolveContextSync(context, path, request) {
     }
     return syncContextResolver.resolveSync(context, path, request)
 }
+resolve.context.sync = resolveContextSync
 
 const asyncLoaderResolver = ResolverFactory.createResolver({
     extensions: ['.js', '.json', '.node'],
@@ -80,7 +100,11 @@ const asyncLoaderResolver = ResolverFactory.createResolver({
     mainFields: ['loader', 'main'],
     fileSystem: asyncFileSystem
 });
-resolve.loader = function resolveLoader(context, path, request, callback) {
+
+function resolveLoader(path: string, request: string, callback: LoggingCallbackWrapper): void
+function resolveLoader(context: Context, path: string, request: string, callback: LoggingCallbackWrapper): void
+
+function resolveLoader(context, path, request, callback?) {
     if (typeof context === 'string') {
         callback = request
         request = path
@@ -89,6 +113,7 @@ resolve.loader = function resolveLoader(context, path, request, callback) {
     }
     asyncLoaderResolver.resolve(context, path, request, callback)
 }
+resolve.loader = resolveLoader
 
 const syncLoaderResolver = ResolverFactory.createResolver({
     extensions: ['.js', '.json', '.node'],
@@ -96,7 +121,11 @@ const syncLoaderResolver = ResolverFactory.createResolver({
     mainFields: ['loader', 'main'],
     fileSystem: syncFileSystem
 });
-resolve.loader.sync = function resolveLoaderSync(context, path, request) {
+
+function resolveLoaderSync(path: string, request: string): ResolveResult
+function resolveLoaderSync(context: Context, path: string, request: string): ResolveResult
+
+function resolveLoaderSync(context, path, request?) {
     if (typeof context === 'string') {
         request = path
         path = context
@@ -104,8 +133,12 @@ resolve.loader.sync = function resolveLoaderSync(context, path, request) {
     }
     return syncLoaderResolver.resolveSync(context, path, request)
 }
+resolve.loader.sync = resolveLoaderSync
 
-resolve.create = function create(options) {
+function create(options): (path: string, request: string, callback: LoggingCallbackWrapper) => void
+function create(options): (context: Context, path: string, request: string, callback: LoggingCallbackWrapper) => void
+
+function create(options) {
     options = Object.assign({
         fileSystem: asyncFileSystem
     }, options)
@@ -121,7 +154,12 @@ resolve.create = function create(options) {
     }
 }
 
-resolve.create.sync = function createSync(options) {
+resolve.create = create
+
+function createSync(options): (path: string, request: string) => ResolveResult
+function createSync(options): (context: Context, path: string, request: string) => ResolveResult
+
+function createSync(options) {
     options = Object.assign({
         fileSystem: syncFileSystem
     }, options)
@@ -135,6 +173,8 @@ resolve.create.sync = function createSync(options) {
         return resolver.resolveSync(context, path, request)
     }
 }
+
+resolve.create.sync = createSync
 
 resolve.ResolverFactory = ResolverFactory
 resolve.NodeJsInputFileSystem = NodeJsInputFileSystem

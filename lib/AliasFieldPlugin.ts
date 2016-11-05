@@ -6,19 +6,7 @@ import DescriptionFileUtils = require('./DescriptionFileUtils')
 import createInnerCallback = require('./createInnerCallback')
 import getInnerRequest = require('./getInnerRequest')
 import Resolver = require('./Resolver')
-
-interface ResolverRequest {
-    request: string
-    relativePath: string
-    descriptionFileData: any
-    descriptionFileRoot: string
-    descriptionFilePath: string
-    context: string
-    path: string
-    query?: string
-    directory?: boolean
-    module?: boolean
-}
+import { ResolverRequest, LoggingCallbackWrapper } from './common-types'
 
 class AliasFieldPlugin {
     constructor(public source: string, public field: string, public target: string) {
@@ -27,7 +15,7 @@ class AliasFieldPlugin {
     apply(resolver: Resolver) {
         const target = this.target
         const field = this.field
-        resolver.plugin(this.source, function (request: ResolverRequest, callback) {
+        resolver.plugin(this.source, function (request: ResolverRequest, callback: LoggingCallbackWrapper) {
             if (!request.descriptionFileData) {
                 return callback()
             }

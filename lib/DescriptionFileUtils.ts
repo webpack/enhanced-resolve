@@ -6,69 +6,73 @@ import forEachBail = require('./forEachBail')
 import Resolver = require('./Resolver')
 
 function loadDescriptionFile(resolver: Resolver, directory: string, filenames: string[], callback: (...args) => any) {
-    (function findDescriptionFile() {
-        forEachBail(filenames, (filename, callback) => {
-            const descriptionFilePath = resolver.join(directory, filename)
-            if (resolver.fileSystem.readJson) {
-                resolver.fileSystem.readJson(descriptionFilePath, (err, content) => {
-                    if (err) {
-                        if (typeof err.code !== 'undefined') {
-                            return callback()
+    (function findDescriptionFile(directory: string) {
+        forEachBail(
+            filenames,
+            function (filename, callback) {
+                const descriptionFilePath = resolver.join(directory, filename)
+                if (resolver.fileSystem.readJson) {
+                    resolver.fileSystem.readJson(descriptionFilePath, (err, content) => {
+                        if (err) {
+                            if (typeof err.code !== 'undefined') {
+                                return callback()
+                            }
+                            return onJson(err)
                         }
-                        return onJson(err)
-                    }
-                    onJson(null, content)
-                })
-            }
-            else {
-                resolver.fileSystem.readFile(descriptionFilePath, (err, content) => {
-                    if (err) {
-                        return callback()
-                    }
-                    let json
-                    try {
-                        json = JSON.parse(content)
-                    } catch (e) {
-                        onJson(e)
-                    }
-                    onJson(null, json)
-                })
-            }
-
-            function onJson(err, content?) {
-                if (err) {
-                    if (callback.log) {
-                        callback.log(`${descriptionFilePath} (directory description file): ${err}`)
-                    }
-                    else {
-                        err.message = `${descriptionFilePath} (directory description file): ${err}`
-                    }
-                    return callback(err)
-                }
-                callback(null, {
-                    content,
-                    directory,
-                    path: descriptionFilePath
-                })
-            }
-        }, (err, result) => {
-            if (err) {
-                return callback(err)
-            }
-            if (result) {
-                return callback(null, result)
-            }
-            else {
-                directory = cdUp(directory)
-                if (!directory) {
-                    return callback()
+                        onJson(null, content)
+                    })
                 }
                 else {
-                    return findDescriptionFile()
+                    resolver.fileSystem.readFile(descriptionFilePath, (err, content) => {
+                        if (err) {
+                            return callback()
+                        }
+                        let json
+                        try {
+                            json = JSON.parse(content)
+                        } catch (e) {
+                            onJson(e)
+                        }
+                        onJson(null, json)
+                    })
+                }
+
+                function onJson(err: Error | null, content?: string) {
+                    if (err) {
+                        if (callback.log) {
+                            callback.log(`${descriptionFilePath} (directory description file): ${err}`)
+                        }
+                        else {
+                            err.message = `${descriptionFilePath} (directory description file): ${err}`
+                        }
+                        return callback(err)
+                    }
+                    callback(null, {
+                        content,
+                        directory,
+                        path: descriptionFilePath
+                    })
+                }
+            },
+            function (err, result) {
+                if (err) {
+                    return callback(err)
+                }
+                if (result) {
+                    return callback(null, result)
+                }
+                else {
+                    const upDir = cdUp(directory)
+                    if (!upDir) {
+                        return callback()
+                    }
+                    else {
+                        return findDescriptionFile(upDir)
+                    }
                 }
             }
-        })
-    })()
+        )
+    })(directory)
 }
 
 function getField(content, field: string) {

@@ -3,12 +3,10 @@
  Author Tobias Koppers @sokra
  */
 import Resolver = require('./Resolver')
+import { ResolverRequest } from './common-types'
 
 export = function getInnerRequest(
-    resolver: Resolver, request: {
-        request: string
-        relativePath: string
-    }
+    resolver: Resolver, request: ResolverRequest
 ) {
     let innerRequest
     if (request.request) {

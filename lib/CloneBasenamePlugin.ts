@@ -4,6 +4,7 @@
  */
 import { basename } from './getPaths'
 import Resolver = require('./Resolver')
+import { LoggingCallbackWrapper, ResolverRequest } from './common-types'
 
 class CloneBasenamePlugin {
     constructor(public source: string, public target: string) {
@@ -11,7 +12,7 @@ class CloneBasenamePlugin {
 
     apply(resolver: Resolver) {
         const target = this.target
-        resolver.plugin(this.source, function (request, callback) {
+        resolver.plugin(this.source, function (request: ResolverRequest, callback: LoggingCallbackWrapper) {
             const filename = basename(request.path)
             const filePath = resolver.join(request.path, filename as string)
             const obj = Object.assign({}, request, {

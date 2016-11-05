@@ -7,6 +7,7 @@ import DescriptionFileUtils = require('./DescriptionFileUtils')
 import forEachBail = require('./forEachBail')
 import createInnerCallback = require('./createInnerCallback')
 import Resolver = require('./Resolver')
+import { LoggingCallbackWrapper, ResolverRequest } from './common-types'
 
 class ConcordExtensionsPlugin {
     constructor(public source: string, public options: {}, public target: string) {
@@ -14,7 +15,7 @@ class ConcordExtensionsPlugin {
 
     apply(resolver: Resolver) {
         const target = this.target
-        resolver.plugin(this.source, function (request, callback) {
+        resolver.plugin(this.source, function (request: ResolverRequest, callback: LoggingCallbackWrapper) {
             const concordField = DescriptionFileUtils.getField(request.descriptionFileData, 'concord')
             if (!concordField) {
                 return callback()

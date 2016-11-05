@@ -3,7 +3,7 @@
  Author Tobias Koppers @sokra
  */
 import Resolver = require('./Resolver')
-import { ResolveParseResult } from './common-types'
+import { ResolveParseResult, LoggingCallbackWrapper, ResolverRequest } from './common-types'
 
 class ParsePlugin {
     constructor(public source: string, public target: string) {
@@ -11,7 +11,7 @@ class ParsePlugin {
 
     apply(resolver: Resolver) {
         const target = this.target
-        resolver.plugin(this.source, function (request, callback) {
+        resolver.plugin(this.source, function (request: ResolverRequest, callback: LoggingCallbackWrapper) {
             const parsed = resolver.parse(request.request) as ResolveParseResult
             const obj = Object.assign({}, request, parsed)
             if (request.query && !parsed.query) {

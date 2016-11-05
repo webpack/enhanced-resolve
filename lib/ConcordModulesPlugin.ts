@@ -7,6 +7,7 @@ import DescriptionFileUtils = require('./DescriptionFileUtils')
 import createInnerCallback = require('./createInnerCallback')
 import getInnerRequest = require('./getInnerRequest')
 import Resolver = require('./Resolver')
+import { LoggingCallbackWrapper, ResolverRequest } from './common-types'
 
 class ConcordModulesPlugin {
     constructor(public source: string, public options: {}, public target: string) {
@@ -14,7 +15,7 @@ class ConcordModulesPlugin {
 
     apply(resolver: Resolver) {
         const target = this.target
-        resolver.plugin(this.source, function (request, callback) {
+        resolver.plugin(this.source, function (request: ResolverRequest, callback: LoggingCallbackWrapper) {
             const innerRequest = getInnerRequest(resolver, request)
             if (!innerRequest) {
                 return callback()
