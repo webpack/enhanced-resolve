@@ -2,7 +2,8 @@
  MIT License http://www.opensource.org/licenses/mit-license.php
  Author Tobias Koppers @sokra
  */
-import Storage, { IFSMethod } from './Storage'
+import Storage from './Storage'
+import { ErrorCallback, CommonFileSystemMethod, BaseFileSystem } from './common-types'
 
 class CachedInputFileSystem {
     _statStorage: Storage
@@ -10,22 +11,13 @@ class CachedInputFileSystem {
     _readFileStorage: Storage
     _readJsonStorage: Storage
     _readlinkStorage: Storage
-    _stat: IFSMethod
-    _readdir: IFSMethod
-    _readFile: IFSMethod
-    _readJson: IFSMethod
-    _readlink: IFSMethod
+    _stat: CommonFileSystemMethod
+    _readdir: CommonFileSystemMethod
+    _readFile: CommonFileSystemMethod
+    _readJson: CommonFileSystemMethod
+    _readlink: CommonFileSystemMethod
 
-    constructor(
-        public fileSystem: {
-            stat: IFSMethod
-            readdir?: IFSMethod
-            readFile?: (path: string, encoding?: string, callback?) => void
-            readJson?: IFSMethod
-            readlink?: IFSMethod
-            isSync: () => boolean
-        }, duration: number
-    ) {
+    constructor(public fileSystem: BaseFileSystem, duration: number) {
         this._statStorage = new Storage(duration)
         this._readdirStorage = new Storage(duration)
         this._readFileStorage = new Storage(duration)
@@ -38,7 +30,7 @@ class CachedInputFileSystem {
             this._readJson = this.fileSystem.readJson.bind(this.fileSystem)
         }
         else {
-            this._readJson = (name, callback) => {
+            this._readJson = (name, callback: ErrorCallback) => {
                 this.readFile(name, (err, buffer) => {
                     if (err) {
                         return callback(err)
@@ -60,23 +52,23 @@ class CachedInputFileSystem {
         return this.fileSystem.isSync()
     }
 
-    stat(path: string, callback) {
+    stat(path: string, callback: ErrorCallback) {
         this._statStorage.provide(path, this._stat, callback)
     }
 
-    readdir(path: string, callback) {
+    readdir(path: string, callback: ErrorCallback) {
         this._readdirStorage.provide(path, this._readdir, callback)
     }
 
-    readFile(path: string, callback) {
+    readFile(path: string, callback: ErrorCallback) {
         this._readFileStorage.provide(path, this._readFile, callback)
     }
 
-    readJson(path: string, callback) {
+    readJson(path: string, callback: ErrorCallback) {
         this._readJsonStorage.provide(path, this._readJson, callback)
     }
 
-    readlink(path: string, callback) {
+    readlink(path: string, callback: ErrorCallback) {
         this._readlinkStorage.provide(path, this._readlink, callback)
     }
 

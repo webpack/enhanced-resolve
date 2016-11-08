@@ -26,6 +26,7 @@ import AppendPlugin = require('./AppendPlugin')
 import ResultPlugin = require('./ResultPlugin')
 import ModuleAppendPlugin = require('./ModuleAppendPlugin')
 import UnsafeCachePlugin = require('./UnsafeCachePlugin')
+import { ResolverRequest } from './common-types'
 
 export interface ResolverOption {
     modules?: string[]
@@ -34,7 +35,7 @@ export interface ResolverOption {
     mainFields?: string[]
     aliasFields?: string[]
     mainFiles?: string[]
-    extensions?: string[]
+    extensions: string[]
     enforceExtension?: boolean
     moduleExtensions?: string[]
     enforceModuleExtension?: boolean
@@ -42,8 +43,8 @@ export interface ResolverOption {
     symlinks?: string[]|boolean
     resolveToContext?: boolean
     unsafeCache?: boolean | {}
-    cachePredicate?: (val) => boolean
-    fileSystem?
+    cachePredicate?: (val: ResolverRequest) => boolean
+    fileSystem
     resolver?: Resolver
 }
 

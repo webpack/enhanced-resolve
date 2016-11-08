@@ -1,8 +1,9 @@
 import { Context } from './concord'
+
 /**
  * Created by cloud on 16-11-4.
  */
-export interface ReSolveError extends Error {
+export interface ResolveError extends Error {
     details: string
     missing: string[]
     recursion: boolean
@@ -43,5 +44,23 @@ export interface LoggingCallbackTools {
 }
 
 export interface LoggingCallbackWrapper extends LoggingCallbackTools {
-    (...args: any[]): any
+    (err?: Error | null, ...args: any[]): any
+}
+
+export interface ErrorCallback {
+    (err: Error | null, ...args: any[]): any
+}
+
+export interface BaseFileSystem {
+    stat: CommonFileSystemMethod
+    readdir?: CommonFileSystemMethod
+    readFile?(path: string, encoding: string, callback: ErrorCallback): void
+    readFile?(path: string, callback: ErrorCallback): void
+    readJson?: CommonFileSystemMethod
+    readlink?: CommonFileSystemMethod
+    isSync: () => boolean
+}
+
+export interface CommonFileSystemMethod {
+    (name: string, callback: (err: NodeJS.ErrnoException | null, ...args) => void): void
 }

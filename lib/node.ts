@@ -53,6 +53,7 @@ function resolveSync(context, path, request?) {
     }
     return syncResolver.resolveSync(context, path, request)
 }
+
 resolve.sync = resolveSync
 
 const asyncContextResolver = ResolverFactory.createResolver({
@@ -73,6 +74,7 @@ function resolveContext(context, path, request, callback?) {
     }
     asyncContextResolver.resolve(context, path, request, callback)
 }
+
 resolve.context = resolveContext
 
 const syncContextResolver = ResolverFactory.createResolver({
@@ -92,6 +94,7 @@ function resolveContextSync(context, path, request?) {
     }
     return syncContextResolver.resolveSync(context, path, request)
 }
+
 resolve.context.sync = resolveContextSync
 
 const asyncLoaderResolver = ResolverFactory.createResolver({
@@ -113,6 +116,7 @@ function resolveLoader(context, path, request, callback?) {
     }
     asyncLoaderResolver.resolve(context, path, request, callback)
 }
+
 resolve.loader = resolveLoader
 
 const syncLoaderResolver = ResolverFactory.createResolver({
@@ -133,6 +137,7 @@ function resolveLoaderSync(context, path, request?) {
     }
     return syncLoaderResolver.resolveSync(context, path, request)
 }
+
 resolve.loader.sync = resolveLoaderSync
 
 function create(options): (path: string, request: string, callback: LoggingCallbackWrapper) => void
@@ -155,9 +160,6 @@ function create(options) {
 }
 
 resolve.create = create
-
-function createSync(options): (path: string, request: string) => ResolveResult
-function createSync(options): (context: Context, path: string, request: string) => ResolveResult
 
 function createSync(options) {
     options = Object.assign({

@@ -3,15 +3,19 @@
  Author Tobias Koppers @sokra
  */
 import fs = require('graceful-fs')
-import { IFSMethod } from './Storage'
+import { CommonFileSystemMethod } from './common-types'
 
 class SyncNodeJsInputFileSystem {
     isSync() { return true }
 
-    stat: IFSMethod
-    readdir: IFSMethod
-    readFile: (path: string, encoding?: string, callback?: (err, result: Buffer) => void) => void
-    readlink: IFSMethod
+    stat: CommonFileSystemMethod
+    readdir: CommonFileSystemMethod
+    readlink: CommonFileSystemMethod
+}
+
+interface SyncNodeJsInputFileSystem {
+    readFile(path: string, encoding?: string, callback?: (err, result: Buffer) => void): void
+    readFile(path: string, callback?: (err, result: Buffer) => void): void
 }
 
 export = SyncNodeJsInputFileSystem

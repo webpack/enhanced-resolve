@@ -19,6 +19,7 @@ class NodeJsInputFileSystem {
 interface NodeJsInputFileSystem {
     stat(path: string, callback?: (err: NodeJS.ErrnoException, stats: fs.Stats) => any): void;
     readFile(filename: string, encoding: string, callback: (err: NodeJS.ErrnoException, data: string) => void): void
+    readFile(filename: string, callback: (err: NodeJS.ErrnoException, data: string) => void): void
     readlink(path: string, callback?: (err: NodeJS.ErrnoException, linkString: string) => any): void
 }
 

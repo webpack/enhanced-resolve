@@ -7,8 +7,8 @@ import memoryFsJoin = require('memory-fs/lib/join')
 
 import createInnerCallback = require('./createInnerCallback')
 import {
-    ReSolveError, ResolveParseResult, ResolveResult, ResolverRequest,
-    LoggingCallbackWrapper
+    ResolveError, ResolveParseResult, ResolveResult, ResolverRequest,
+    LoggingCallbackWrapper, BaseFileSystem
 } from './common-types'
 import { Context } from './concord'
 
@@ -17,11 +17,8 @@ const directoryRegExp = /[\/\\]$/i
 const memoizedJoin = {}
 
 class Resolver extends Tapable {
-    fileSystem
-
-    constructor(fileSystem) {
+    constructor(public fileSystem: BaseFileSystem) {
         super()
-        this.fileSystem = fileSystem
     }
 
     resolveSync(context: Context, path: string, request: string) {
@@ -42,7 +39,7 @@ class Resolver extends Tapable {
         return result
     }
 
-    resolve(context: Context, path: string, request: string, callback) {
+    resolve(context: Context, path: string, request: string, callback: LoggingCallbackWrapper) {
         if (arguments.length === 3) {
             throw new Error('Signature changed: context parameter added')
         }
@@ -54,9 +51,10 @@ class Resolver extends Tapable {
         }
 
         const localMissing = []
-        const missing = callback.missing ? {
+        const callbackMissing = callback.missing
+        const missing = callbackMissing ? {
             push(item) {
-                callback.missing.push(item)
+                callbackMissing.push(item)
                 localMissing.push(item)
             }
         } : localMissing
@@ -79,7 +77,7 @@ class Resolver extends Tapable {
                 return callback(err)
             }
             if (!result) {
-                const error = <ReSolveError>new Error(`Can't ${message}`)
+                const error = <ResolveError>new Error(`Can't ${message}`)
                 error.details = logAsString()
                 error.missing = localMissing
                 resolver.applyPlugins('no-resolve', obj, error)
@@ -109,7 +107,7 @@ class Resolver extends Tapable {
             newStack = callback.stack.concat(newStack)
             if (callback.stack.includes(stackLine)) {
                 // Prevent recursion
-                const recursionError = <ReSolveError>new Error(`Recursion in resolving\nStack:\n  ${newStack.join('\n  ')}`)
+                const recursionError = <ResolveError>new Error(`Recursion in resolving\nStack:\n  ${newStack.join('\n  ')}`)
                 recursionError.recursion = true
                 if (callback.log) {
                     callback.log('abort resolving because of recursion')
@@ -212,7 +210,7 @@ class Resolver extends Tapable {
         return directoryRegExp.test(path)
     }
 
-    join(path: string, request: string) {
+    join(path: string, request: string): string {
         const memoizeKey = `${path}|$${request}`
         if (!memoizedJoin[memoizeKey]) {
             memoizedJoin[memoizeKey] = memoryFsJoin(path, request)

@@ -10,7 +10,7 @@ import Resolver = require('./Resolver')
 import { LoggingCallbackWrapper, ResolverRequest } from './common-types'
 
 class ConcordModulesPlugin {
-    constructor(public source: string, public options: {}, public target: string) {
+    constructor(public source: string, public options: Object, public target: string) {
     }
 
     apply(resolver: Resolver) {

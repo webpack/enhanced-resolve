@@ -9,8 +9,8 @@ import { ResolverRequest, LoggingCallbackWrapper } from './common-types'
 class UnsafeCachePlugin {
     constructor(
         public source: string,
-        public filterPredicate: (str: ResolverRequest) => boolean,
-        public cache: {} = {},
+        public filterPredicate: (request: ResolverRequest) => boolean,
+        public cache: Object = {},
         public target: string
     ) {
     }

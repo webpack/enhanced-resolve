@@ -1,6 +1,7 @@
+import { CommonFileSystemMethod } from './common-types'
 class Storage {
-    running: {}
-    data: {}
+    running: Object
+    data: Object
     levels: string[][]
     count: number
     interval: NodeJS.Timer | null
@@ -45,7 +46,7 @@ class Storage {
         }
     }
 
-    provide(name: string, provider: IFSMethod, callback: (...args: any[]) => any) {
+    provide(name: string, provider: CommonFileSystemMethod, callback: (...args: any[]) => any) {
         let running = this.running[name]
         if (running) {
             running.push(callback)
@@ -125,10 +126,6 @@ class Storage {
             }
         }
     }
-}
-
-export interface IFSMethod {
-    (name: string, callback: (name: Error | null, ...args) => void): void
 }
 
 export default Storage
