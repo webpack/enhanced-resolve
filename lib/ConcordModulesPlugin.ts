@@ -8,9 +8,10 @@ import createInnerCallback = require('./createInnerCallback')
 import getInnerRequest = require('./getInnerRequest')
 import Resolver = require('./Resolver')
 import { LoggingCallbackWrapper, ResolverRequest } from './common-types'
+import { Dictionary } from './concord'
 
 class ConcordModulesPlugin {
-    constructor(public source: string, public options: Object, public target: string) {
+    constructor(public source: string, public options: Dictionary<any>, public target: string) {
     }
 
     apply(resolver: Resolver) {
@@ -45,7 +46,7 @@ class ConcordModulesPlugin {
                 target,
                 obj,
                 `aliased from description file ${request.descriptionFilePath} with mapping '${innerRequest}' to '${data}'`,
-                createInnerCallback(function (err, result) {
+                createInnerCallback(function (err: Error, result) {
                     if (arguments.length > 0) {
                         return callback(err, result)
                     }

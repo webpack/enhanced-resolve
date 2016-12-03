@@ -2,6 +2,7 @@
  MIT License http://www.opensource.org/licenses/mit-license.php
  Author Tobias Koppers @sokra
  */
+import { Dictionary } from './concord'
 function globToRegExp(glob: string) {
     // * [^\\\/]*
     // /**/ /.+/
@@ -25,7 +26,7 @@ function globToRegExp(glob: string) {
     return new RegExp(`^${regExpStr}$`)
 }
 
-const SIMPLE_TOKENS = {
+const SIMPLE_TOKENS: Dictionary<string> = {
     '@(': 'one',
     '?(': 'zero-one',
     '+(': 'one-many',
@@ -40,6 +41,11 @@ const SIMPLE_TOKENS = {
     ',': 'comma',
     ')': 'closing-seqment',
     '}': 'closing-or'
+}
+
+interface Token {
+    type: string
+    value?: string
 }
 
 function tokenize(glob: string) {
@@ -76,14 +82,14 @@ function tokenize(glob: string) {
         .filter(Boolean)
         .concat({
             type: 'end'
-        })
+        }) as Token[]
 }
 
 function createRoot() {
     const inOr = [] as boolean[]
     const process = createSeqment()
     let initial = true
-    return token => {
+    return (token: Token) => {
         switch (token.type) {
             case 'or':
                 inOr.push(initial)
@@ -121,7 +127,7 @@ function createRoot() {
 function createSeqment() {
     const inSeqment = [] as string[]
     const process = createSimple()
-    return (token, initial) => {
+    return (token: Token, initial: boolean) => {
         switch (token.type) {
             case 'one':
             case 'one-many':
@@ -163,7 +169,7 @@ function createSeqment() {
 }
 
 function createSimple() {
-    return (token, initial) => {
+    return (token: Token, initial: boolean) => {
         switch (token.type) {
             case 'path-sep':
                 return '[\\\\/]+'

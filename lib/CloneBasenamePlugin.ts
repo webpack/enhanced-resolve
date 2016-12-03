@@ -3,8 +3,8 @@
  Author Tobias Koppers @sokra
  */
 import { basename } from './getPaths'
-import Resolver = require('./Resolver')
 import { LoggingCallbackWrapper, ResolverRequest } from './common-types'
+import Resolver = require('./Resolver')
 
 class CloneBasenamePlugin {
     constructor(public source: string, public target: string) {

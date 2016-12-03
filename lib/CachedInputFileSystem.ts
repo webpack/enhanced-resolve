@@ -3,21 +3,22 @@
  Author Tobias Koppers @sokra
  */
 import Storage from './Storage'
-import { ErrorCallback, CommonFileSystemMethod, BaseFileSystem } from './common-types'
+import { ErrorCallback, CommonFileSystemMethod, AbstractInputFileSystem } from './common-types'
+import fs = require('graceful-fs')
 
 class CachedInputFileSystem {
-    _statStorage: Storage
-    _readdirStorage: Storage
-    _readFileStorage: Storage
-    _readJsonStorage: Storage
-    _readlinkStorage: Storage
-    _stat: CommonFileSystemMethod
-    _readdir: CommonFileSystemMethod
-    _readFile: CommonFileSystemMethod
-    _readJson: CommonFileSystemMethod
-    _readlink: CommonFileSystemMethod
+    private _readdir: CommonFileSystemMethod
+    private _readdirStorage: Storage
+    private _readFile: CommonFileSystemMethod
+    private _readFileStorage: Storage
+    private _readJson: CommonFileSystemMethod
+    private _readJsonStorage: Storage
+    private _readlink: CommonFileSystemMethod
+    private _readlinkStorage: Storage
+    private _stat: CommonFileSystemMethod
+    private _statStorage: Storage
 
-    constructor(public fileSystem: BaseFileSystem, duration: number) {
+    constructor(public fileSystem: AbstractInputFileSystem, duration: number) {
         this._statStorage = new Storage(duration)
         this._readdirStorage = new Storage(duration)
         this._readFileStorage = new Storage(duration)
@@ -30,7 +31,7 @@ class CachedInputFileSystem {
             this._readJson = this.fileSystem.readJson.bind(this.fileSystem)
         }
         else {
-            this._readJson = (name, callback: ErrorCallback) => {
+            this._readJson = (name, callback: ErrorCallback<NodeJS.ErrnoException>) => {
                 this.readFile(name, (err, buffer) => {
                     if (err) {
                         return callback(err)
@@ -52,23 +53,23 @@ class CachedInputFileSystem {
         return this.fileSystem.isSync()
     }
 
-    stat(path: string, callback: ErrorCallback) {
+    stat(path: string, callback: (err: NodeJS.ErrnoException, stats: fs.Stats) => void) {
         this._statStorage.provide(path, this._stat, callback)
     }
 
-    readdir(path: string, callback: ErrorCallback) {
+    readdir(path: string, callback: (err: NodeJS.ErrnoException, files: string[]) => void) {
         this._readdirStorage.provide(path, this._readdir, callback)
     }
 
-    readFile(path: string, callback: ErrorCallback) {
+    readFile(path: string, callback: (err: NodeJS.ErrnoException, data: Buffer) => void) {
         this._readFileStorage.provide(path, this._readFile, callback)
     }
 
-    readJson(path: string, callback: ErrorCallback) {
+    readJson(path: string, callback: (err: NodeJS.ErrnoException, data: any) => void) {
         this._readJsonStorage.provide(path, this._readJson, callback)
     }
 
-    readlink(path: string, callback: ErrorCallback) {
+    readlink(path: string, callback: (err: NodeJS.ErrnoException, linkString: string) => void) {
         this._readlinkStorage.provide(path, this._readlink, callback)
     }
 

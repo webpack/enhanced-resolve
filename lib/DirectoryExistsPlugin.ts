@@ -11,7 +11,10 @@ class DirectoryExistsPlugin {
 
     apply(resolver: Resolver) {
         const target = this.target
-        resolver.plugin(this.source, function (this: Resolver, request: ResolverRequest, callback: LoggingCallbackWrapper) {
+        resolver.plugin(this.source, function (
+            this: Resolver, request: ResolverRequest,
+            callback: LoggingCallbackWrapper
+        ) {
             const fs = this.fileSystem
             const directory = request.path
             fs.stat(directory, (err, stat) => {

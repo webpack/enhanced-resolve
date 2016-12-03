@@ -4,14 +4,8 @@
  */
 import { LoggingCallbackWrapper, LoggingCallbackTools } from './common-types'
 
-interface CallbackWrapper {
-    (): any
-    stack?: string[]
-    missing?: string[] | {}
-}
-
 export = function createInnerCallback(
-    callback,
+    callback: LoggingCallbackWrapper,
     options: LoggingCallbackTools,
     message?: string | null,
     messageOptional?: boolean
@@ -20,7 +14,7 @@ export = function createInnerCallback(
 
     if (!log) {
         if (options.stack !== callback.stack) {
-            const callbackWrapper: CallbackWrapper = function callbackWrapper() {
+            const callbackWrapper: LoggingCallbackWrapper = function callbackWrapper() {
                 return callback.apply(this, arguments)
             }
             callbackWrapper.stack = options.stack

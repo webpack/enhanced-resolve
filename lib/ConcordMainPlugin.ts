@@ -8,9 +8,10 @@ import concord = require('./concord')
 import DescriptionFileUtils = require('./DescriptionFileUtils')
 import Resolver = require('./Resolver')
 import { LoggingCallbackWrapper, ResolverRequest } from './common-types'
+import { Dictionary } from './concord'
 
 class ConcordMainPlugin {
-    constructor(public source: string, public options: Object, public target: string) {
+    constructor(public source: string, public options: Dictionary<any>, public target: string) {
     }
 
     apply(resolver: Resolver) {

@@ -53,7 +53,7 @@ class AliasFieldPlugin {
                 target,
                 obj,
                 `aliased from description file ${request.descriptionFilePath} with mapping '${innerRequest}' to '${data}'`,
-                createInnerCallback(function (err, result) {
+                createInnerCallback(function (err: Error, result) {
                     if (arguments.length > 0) {
                         return callback(err, result)
                     }

@@ -6,22 +6,30 @@ import fs = require('graceful-fs')
 import { CommonFileSystemMethod } from './common-types'
 
 class SyncNodeJsInputFileSystem {
-    isSync() { return true }
-
     stat: CommonFileSystemMethod
     readdir: CommonFileSystemMethod
     readlink: CommonFileSystemMethod
+
+    isSync() { return true }
 }
 
 interface SyncNodeJsInputFileSystem {
-    readFile(path: string, encoding?: string, callback?: (err, result: Buffer) => void): void
-    readFile(path: string, callback?: (err, result: Buffer) => void): void
+    readFile(filename: string, encoding: string, callback: (err: NodeJS.ErrnoException, data: string) => void): void;
+    readFile(
+        filename: string, options: { encoding: string; flag?: string; },
+        callback: (err: NodeJS.ErrnoException, data: string) => void
+    ): void;
+    readFile(
+        filename: string, options: { flag?: string; },
+        callback: (err: NodeJS.ErrnoException, data: Buffer) => void
+    ): void;
+    readFile(filename: string, callback: (err: NodeJS.ErrnoException, data: Buffer) => void): void;
 }
 
 export = SyncNodeJsInputFileSystem
 
-function asAsync(fn, context) {
-    return function (...args) {
+function asAsync(fn: Function, context: any) {
+    return function (...args: any[]) {
         const callback = args.pop()
         try {
             callback(null, fn.apply(context, args))
@@ -32,7 +40,7 @@ function asAsync(fn, context) {
 }
 
 SyncNodeJsInputFileSystem.prototype.stat = asAsync(fs.statSync, fs);
-SyncNodeJsInputFileSystem.prototype.readdir = asAsync(function readdirSync(path) {
+SyncNodeJsInputFileSystem.prototype.readdir = asAsync(function readdirSync(path: string) {
     const files = fs.readdirSync(path)
     return files && files.map(file => file.normalize ? file.normalize('NFC') : file)
 }, fs);

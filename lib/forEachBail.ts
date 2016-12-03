@@ -6,14 +6,14 @@ import { LoggingCallbackWrapper } from './common-types'
 
 export = function forEachBail(
     array: any[],
-    iterator: (val, cb: LoggingCallbackWrapper) => void,
-    callback: (...args) => any
+    iterator: (val: any, cb: LoggingCallbackWrapper) => void,
+    callback: (...args: any[]) => any
 ) {
     if (array.length === 0) {
         return callback()
     }
     let currentPos = array.length
-    let currentResult
+    let currentResult: any[]
     let done = [] as number[]
     for (let i = 0; i < array.length; i++) {
         const itCb = createIteratorCallback(i)
@@ -24,7 +24,7 @@ export = function forEachBail(
     }
 
     function createIteratorCallback(i: number) {
-        return function (...args) {
+        return function (...args: any[]) {
             if (i >= currentPos) {
                 return // ignore
             }

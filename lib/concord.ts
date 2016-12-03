@@ -4,15 +4,28 @@
  */
 import { globToRegExp } from './globToRegExp'
 
+export interface Dictionary<T> {
+    [key: string]: T
+}
+
+// see https://github.com/webpack/concord
+export interface Concord {
+    '[server] main': string
+    extensions: string[]
+    main: string
+    modules: Dictionary<string>
+    types: Dictionary<string>
+}
+
 export interface Type {
     type: string | null | undefined
     features: string[]
 }
 
-export interface Context {
-    supportedResourceTypes?: string[]
+export interface ConcordContext {
     environments?: string[]
-    referrer: string
+    referrer?: string
+    supportedResourceTypes?: string[]
 }
 
 function parseType(type: string): Type {
@@ -51,16 +64,16 @@ function isResourceTypeMatched(rawBaseType: string, rawTestedType: string) {
     return true
 }
 
-function isResourceTypeSupported(context: Context, type: string) {
-    return context.supportedResourceTypes
+function isResourceTypeSupported(context: ConcordContext, type: string): boolean {
+    return !!context.supportedResourceTypes
         && context.supportedResourceTypes.some(supportedType => isResourceTypeMatched(supportedType, type))
 }
 
-function isEnvironment(context: Context, env: string | Type) {
-    return context.environments && context.environments.every(environment => isTypeMatched(environment, env))
+function isEnvironment(context: ConcordContext, env: string | Type): boolean {
+    return !!context.environments && context.environments.every(environment => isTypeMatched(environment, env))
 }
 
-const globCache = {}
+const globCache: Dictionary<RegExp> = {}
 
 function getGlobRegExp(glob: string) {
     return globCache[glob] || (globCache[glob] = globToRegExp(glob))
@@ -75,9 +88,9 @@ function isGlobMatched(glob: string, relativePath: string) {
     return !!matchGlob(glob, relativePath)
 }
 
-function isConditionMatched(context: Context, condition: string) {
+function isConditionMatched(context: ConcordContext, condition: string) {
     const items = condition.split('|')
-    return items.some(function testFn(item) {
+    return items.some(function testFn(item): boolean {
         item = item.trim()
         const inverted = /^!/.test(item)
         if (inverted) {
@@ -106,7 +119,7 @@ function isConditionMatched(context: Context, condition: string) {
     })
 }
 
-function isKeyMatched(context: Context, key: string): string | boolean {
+function isKeyMatched(context: ConcordContext, key: string): string | boolean {
     while (true) {
         const match = /^\[([^\]]+)\]\s*/.exec(key)
         if (!match) {
@@ -120,7 +133,7 @@ function isKeyMatched(context: Context, key: string): string | boolean {
     }
 }
 
-function getField(context: Context, configuration, field: string) {
+function getField(context: ConcordContext, configuration: Concord, field: string): any {
     let value
     Object.keys(configuration)
         .forEach(key => {
@@ -132,15 +145,15 @@ function getField(context: Context, configuration, field: string) {
     return value
 }
 
-function getMain(context: Context, configuration) {
+function getMain(context: ConcordContext, configuration: Concord) {
     return getField(context, configuration, 'main')
 }
 
-function getExtensions(context: Context, configuration) {
+function getExtensions(context: ConcordContext, configuration: Concord) {
     return getField(context, configuration, 'extensions')
 }
 
-function matchModule(context: Context, configuration, request: string) {
+function matchModule(context: ConcordContext, configuration: Concord, request: string) {
     const modulesField = getField(context, configuration, 'modules')
     if (!modulesField) {
         return request
@@ -148,12 +161,12 @@ function matchModule(context: Context, configuration, request: string) {
     let newRequest = request
     const keys = Object.keys(modulesField)
     let iteration = 0
-    let index
-    let match
+    let index: number
+    let match: RegExpExecArray
     for (let i = 0; i < keys.length; i++) {
         const key = keys[i]
         const pureKey = <string>isKeyMatched(context, key)
-        match = matchGlob(pureKey, newRequest)
+        match = matchGlob(pureKey, newRequest) as RegExpExecArray
         if (match) {
             const value = modulesField[key]
             if (typeof value !== 'string') {
@@ -183,16 +196,18 @@ function matchModule(context: Context, configuration, request: string) {
             case '*':
                 return match[index++]
         }
+
+        // todo: throw error or return empty string
     }
 }
 
-function matchType(context: Context, configuration, relativePath: string) {
+function matchType(context: ConcordContext, configuration: Concord, relativePath: string) {
     const typesField = getField(context, configuration, 'types')
     if (!typesField) {
         return undefined
     }
 
-    let type
+    let type: string | undefined
     Object.keys(typesField).forEach(key => {
         const pureKey = <string>isKeyMatched(context, key)
         if (isGlobMatched(pureKey, relativePath)) {

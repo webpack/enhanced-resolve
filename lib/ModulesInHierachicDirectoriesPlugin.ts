@@ -3,10 +3,10 @@
  Author Tobias Koppers @sokra
  */
 import getPaths from './getPaths'
+import { LoggingCallbackWrapper, ResolverRequest } from './common-types'
 import createInnerCallback = require('./createInnerCallback')
 import forEachBail = require('./forEachBail')
 import Resolver = require('./Resolver')
-import { LoggingCallbackWrapper, ResolverRequest } from './common-types'
 
 class ModulesInHierachicDirectoriesPlugin {
     directories: string[]

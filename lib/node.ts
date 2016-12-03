@@ -7,8 +7,8 @@ import ResolverFactory = require('./ResolverFactory')
 import NodeJsInputFileSystem = require('./NodeJsInputFileSystem')
 import SyncNodeJsInputFileSystem = require('./SyncNodeJsInputFileSystem')
 import CachedInputFileSystem = require('./CachedInputFileSystem')
-import { Context } from './concord'
-import { LoggingCallbackWrapper, ResolveResult } from './common-types'
+import { LoggingCallbackWrapper, ResolveResult, ResolveContext } from './common-types'
+import { ResolverOption } from './ResolverFactory'
 
 const asyncFileSystem = new CachedInputFileSystem(new NodeJsInputFileSystem(), 4000)
 const syncFileSystem = new CachedInputFileSystem(new SyncNodeJsInputFileSystem(), 4000)
@@ -23,9 +23,9 @@ const asyncResolver = ResolverFactory.createResolver({
 })
 
 function resolve(path: string, request: string, callback: LoggingCallbackWrapper): void
-function resolve(context: Context, path: string, request: string, callback: LoggingCallbackWrapper): void
+function resolve(context: ResolveContext, path: string, request: string, callback: LoggingCallbackWrapper): void
 
-function resolve(context, path, request, callback?) {
+function resolve(context: any, path: any, request: any, callback?: any) {
     if (typeof context === 'string') {
         callback = request
         request = path
@@ -43,9 +43,9 @@ const syncResolver = ResolverFactory.createResolver({
 });
 
 function resolveSync(path: string, request: string): ResolveResult
-function resolveSync(context: Context, path: string, request: string): ResolveResult
+function resolveSync(context: ResolveContext, path: string, request: string): ResolveResult
 
-function resolveSync(context, path, request?) {
+function resolveSync(context: any, path: any, request?: any): ResolveResult {
     if (typeof context === 'string') {
         request = path
         path = context
@@ -63,9 +63,9 @@ const asyncContextResolver = ResolverFactory.createResolver({
 });
 
 function resolveContext(path: string, request: string, callback: LoggingCallbackWrapper): void
-function resolveContext(context: Context, path: string, request: string, callback: LoggingCallbackWrapper): void
+function resolveContext(context: ResolveContext, path: string, request: string, callback: LoggingCallbackWrapper): void
 
-function resolveContext(context, path, request, callback?) {
+function resolveContext(context: any, path: any, request: any, callback?: any) {
     if (typeof context === 'string') {
         callback = request
         request = path
@@ -83,10 +83,10 @@ const syncContextResolver = ResolverFactory.createResolver({
     fileSystem: syncFileSystem
 });
 
+function resolveContextSync(context: ResolveContext, path: string, request: string): ResolveResult
 function resolveContextSync(path: string, request: string): ResolveResult
-function resolveContextSync(context: Context, path: string, request: string): ResolveResult
 
-function resolveContextSync(context, path, request?) {
+function resolveContextSync(context: any, path: any, request?: any): ResolveResult {
     if (typeof context === 'string') {
         request = path
         path = context
@@ -105,9 +105,9 @@ const asyncLoaderResolver = ResolverFactory.createResolver({
 });
 
 function resolveLoader(path: string, request: string, callback: LoggingCallbackWrapper): void
-function resolveLoader(context: Context, path: string, request: string, callback: LoggingCallbackWrapper): void
+function resolveLoader(context: ResolveContext, path: string, request: string, callback: LoggingCallbackWrapper): void
 
-function resolveLoader(context, path, request, callback?) {
+function resolveLoader(context: any, path: any, request: any, callback?: any) {
     if (typeof context === 'string') {
         callback = request
         request = path
@@ -127,9 +127,9 @@ const syncLoaderResolver = ResolverFactory.createResolver({
 });
 
 function resolveLoaderSync(path: string, request: string): ResolveResult
-function resolveLoaderSync(context: Context, path: string, request: string): ResolveResult
+function resolveLoaderSync(context: ResolveContext, path: string, request: string): ResolveResult
 
-function resolveLoaderSync(context, path, request?) {
+function resolveLoaderSync(context: any, path: any, request?: any) {
     if (typeof context === 'string') {
         request = path
         path = context
@@ -140,15 +140,13 @@ function resolveLoaderSync(context, path, request?) {
 
 resolve.loader.sync = resolveLoaderSync
 
-function create(options): (path: string, request: string, callback: LoggingCallbackWrapper) => void
-function create(options): (context: Context, path: string, request: string, callback: LoggingCallbackWrapper) => void
-
-function create(options) {
+function create(options: ResolverOption) {
     options = Object.assign({
         fileSystem: asyncFileSystem
     }, options)
     const resolver = ResolverFactory.createResolver(options)
-    return (context, path, request, callback) => {
+
+    return (context: any, path: any, request: any, callback: any) => {
         if (typeof context === 'string') {
             callback = request
             request = path
@@ -161,12 +159,12 @@ function create(options) {
 
 resolve.create = create
 
-function createSync(options) {
+function createSync(options: ResolverOption) {
     options = Object.assign({
         fileSystem: syncFileSystem
     }, options)
     const resolver = ResolverFactory.createResolver(options)
-    return (context, path, request) => {
+    return (context: any, path: any, request: any) => {
         if (typeof context === 'string') {
             request = path
             path = context

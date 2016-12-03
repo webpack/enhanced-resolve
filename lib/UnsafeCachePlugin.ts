@@ -5,12 +5,13 @@
 import createInnerCallback = require('./createInnerCallback')
 import Resolver = require('./Resolver')
 import { ResolverRequest, LoggingCallbackWrapper } from './common-types'
+import { Dictionary } from './concord'
 
 class UnsafeCachePlugin {
     constructor(
         public source: string,
         public filterPredicate: (request: ResolverRequest) => boolean,
-        public cache: Object = {},
+        public cache: Dictionary<any> = {},
         public target: string
     ) {
     }
@@ -43,7 +44,7 @@ class UnsafeCachePlugin {
 
 export = UnsafeCachePlugin
 
-function getCacheId(request) {
+function getCacheId(request: ResolverRequest) {
     return JSON.stringify({
         context: request.context,
         path: request.path,

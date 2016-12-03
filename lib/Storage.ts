@@ -1,13 +1,15 @@
 import { CommonFileSystemMethod } from './common-types'
+import { Dictionary } from './concord'
+
 class Storage {
-    running: Object
-    data: Object
-    levels: string[][]
     count: number
+    data: Dictionary<any>
     interval: NodeJS.Timer | null
+    levels: string[][]
     needTickCheck: boolean
     nextTick: number | null
     passive: boolean
+    running: Dictionary<Function[]>
 
     constructor(public duration: number) {
         this.running = {}

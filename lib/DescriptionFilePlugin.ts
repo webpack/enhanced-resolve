@@ -46,7 +46,7 @@ class DescriptionFilePlugin {
                     target,
                     obj,
                     `using description file: ${result.path} (relative path: ${relativePath})`,
-                    createInnerCallback((err, result) => {
+                    createInnerCallback((err: Error, result) => {
                         if (err) {
                             return callback(err)
                         }

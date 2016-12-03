@@ -8,9 +8,10 @@ import forEachBail = require('./forEachBail')
 import createInnerCallback = require('./createInnerCallback')
 import Resolver = require('./Resolver')
 import { LoggingCallbackWrapper, ResolverRequest } from './common-types'
+import { Dictionary } from './concord'
 
 class ConcordExtensionsPlugin {
-    constructor(public source: string, public options: Object, public target: string) {
+    constructor(public source: string, public options: Dictionary<any>, public target: string) {
     }
 
     apply(resolver: Resolver) {

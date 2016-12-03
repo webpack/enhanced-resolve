@@ -7,23 +7,28 @@ import memoryFsJoin = require('memory-fs/lib/join')
 
 import createInnerCallback = require('./createInnerCallback')
 import {
-    ResolveError, ResolveParseResult, ResolveResult, ResolverRequest,
-    LoggingCallbackWrapper, BaseFileSystem
+    ResolveError,
+    ResolveParseResult,
+    ResolveResult,
+    ResolverRequest,
+    LoggingCallbackWrapper,
+    ResolveContext
 } from './common-types'
-import { Context } from './concord'
+import { Dictionary } from './concord'
+import CachedInputFileSystem = require('./CachedInputFileSystem')
 
 const notModuleRegExp = /^\.$|^\.[\\\/]|^\.\.$|^\.\.[\/\\]|^\/|^[A-Z]:[\\\/]/i
 const directoryRegExp = /[\/\\]$/i
-const memoizedJoin = {}
+const memoizedJoin: Dictionary<string> = {}
 
 class Resolver extends Tapable {
-    constructor(public fileSystem: BaseFileSystem) {
+    constructor(public fileSystem: CachedInputFileSystem) {
         super()
     }
 
-    resolveSync(context: Context, path: string, request: string) {
+    resolveSync(context: ResolveContext, path: string, request: string): ResolveResult {
         let err
-        let result: ResolveResult | null = null
+        let result: ResolveResult = null as any
         let sync = false
         this.resolve(context, path, request, (e, r) => {
             err = e
@@ -39,7 +44,7 @@ class Resolver extends Tapable {
         return result
     }
 
-    resolve(context: Context, path: string, request: string, callback: LoggingCallbackWrapper) {
+    resolve(context: ResolveContext, path: string, request: string, callback: LoggingCallbackWrapper) {
         if (arguments.length === 3) {
             throw new Error('Signature changed: context parameter added')
         }
@@ -50,15 +55,15 @@ class Resolver extends Tapable {
             request
         }
 
-        const localMissing = []
+        const localMissing: string[] = []
         const callbackMissing = callback.missing
         const missing = callbackMissing ? {
-            push(item) {
+            push(item: string) {
                 callbackMissing.push(item)
                 localMissing.push(item)
             }
         } : localMissing
-        const log = []
+        const log: string[] = []
         const message = `resolve '${request}' in '${path}'`
 
         function writeLog(msg: string) {
@@ -69,7 +74,7 @@ class Resolver extends Tapable {
             return log.join('\n')
         }
 
-        function onResolved(err, result: ResolveResult) {
+        function onResolved(err: Error, result: ResolveResult) {
             if (callback.log) {
                 for (let i = 0; i < log.length; i++) callback.log(log[i])
             }
@@ -123,7 +128,7 @@ class Resolver extends Tapable {
             stack: newStack
         }, message && `before ${message}`, true))
 
-        function beforeInnerCallback(err, result) {
+        function beforeInnerCallback(err: Error, result: ResolverRequest | undefined) {
             if (arguments.length > 0) {
                 if (err) {
                     return callback(err)
@@ -140,7 +145,7 @@ class Resolver extends Tapable {
             }, message))
         }
 
-        function innerCallback(err, result) {
+        function innerCallback(err: Error, result: ResolverRequest | undefined) {
             if (arguments.length > 0) {
                 if (err) {
                     return callback(err)
@@ -157,7 +162,7 @@ class Resolver extends Tapable {
             }, message && `after ${message}`, true))
         }
 
-        function afterInnerCallback(err, result) {
+        function afterInnerCallback(err: Error, result: ResolverRequest | undefined) {
             if (arguments.length > 0) {
                 if (err) {
                     return callback(err)

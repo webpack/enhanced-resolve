@@ -3,3 +3,4 @@
 .vscode
 .idea
 yarn.lock
+*.map

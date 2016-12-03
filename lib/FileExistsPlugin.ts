@@ -11,7 +11,10 @@ class FileExistsPlugin {
 
     apply(resolver: Resolver) {
         const target = this.target
-        resolver.plugin(this.source, function (this: Resolver, request: ResolverRequest, callback: LoggingCallbackWrapper) {
+        resolver.plugin(this.source, function (
+            this: Resolver, request: ResolverRequest,
+            callback: LoggingCallbackWrapper
+        ) {
             const fs = this.fileSystem
             const file = request.path
             fs.stat(file, (err, stat) => {

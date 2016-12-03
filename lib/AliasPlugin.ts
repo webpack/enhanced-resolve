@@ -9,8 +9,8 @@ import { AliasItem } from './ResolverFactory'
 import { LoggingCallbackWrapper, ResolverRequest } from './common-types'
 
 class AliasPlugin {
-    name: string
     alias: string
+    name: string
     onlyModule: boolean
 
     constructor(
@@ -43,7 +43,7 @@ class AliasPlugin {
                         target,
                         obj,
                         `aliased with mapping '${name}': '${alias}' to '${newRequestStr}'`,
-                        createInnerCallback(function (err, result) {
+                        createInnerCallback(function (err: Error, result) {
                             if (arguments.length > 0) {
                                 return callback(err, result)
                             }

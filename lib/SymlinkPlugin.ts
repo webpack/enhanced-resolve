@@ -3,9 +3,9 @@
  Author Tobias Koppers @sokra
  */
 import getPaths from './getPaths'
+import { LoggingCallbackWrapper, ResolverRequest } from './common-types'
 import forEachBail = require('./forEachBail')
 import Resolver = require('./Resolver')
-import { LoggingCallbackWrapper, ResolverRequest } from './common-types'
 
 class SymlinkPlugin {
     constructor(public source: string, public target: string) {
@@ -14,8 +14,7 @@ class SymlinkPlugin {
     apply(resolver: Resolver) {
         const target = this.target
         resolver.plugin(this.source, function (request: ResolverRequest, callback: LoggingCallbackWrapper) {
-            const _this = this
-            const fs = _this.fileSystem
+            const fs = this.fileSystem
             const pathsResult = getPaths(request.path)
             const pathSeqments = pathsResult.seqments
             const paths = pathsResult.paths
@@ -38,7 +37,7 @@ class SymlinkPlugin {
                     return callback()
                 }
                 const resultSeqments = typeof idx === 'number' ? pathSeqments.slice(0, idx + 1) : pathSeqments.slice()
-                const result = resultSeqments.reverse().reduce((a, b) => _this.join(a, b))
+                const result = resultSeqments.reverse().reduce((a, b) => this.join(a, b))
                 const obj = Object.assign({}, request, {
                     path: result
                 })

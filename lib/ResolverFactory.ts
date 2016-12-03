@@ -27,25 +27,28 @@ import ResultPlugin = require('./ResultPlugin')
 import ModuleAppendPlugin = require('./ModuleAppendPlugin')
 import UnsafeCachePlugin = require('./UnsafeCachePlugin')
 import { ResolverRequest } from './common-types'
+import { Dictionary } from './concord'
+import Tapable = require('tapable')
+import CachedInputFileSystem = require('./CachedInputFileSystem')
 
 export interface ResolverOption {
-    modules?: string[]
-    descriptionFiles?: string[]
-    plugins?: any[]
-    mainFields?: string[]
+    alias?: AliasItem[] | Dictionary<string>
     aliasFields?: string[]
-    mainFiles?: string[]
-    extensions: string[]
-    enforceExtension?: boolean
-    moduleExtensions?: string[]
-    enforceModuleExtension?: boolean
-    alias?: AliasItem[] | {}
-    symlinks?: string[]|boolean
-    resolveToContext?: boolean
-    unsafeCache?: boolean | {}
     cachePredicate?: (val: ResolverRequest) => boolean
-    fileSystem
+    descriptionFiles?: string[]
+    enforceExtension?: boolean
+    enforceModuleExtension?: boolean
+    extensions: string[]
+    fileSystem: CachedInputFileSystem
+    mainFields?: string[]
+    mainFiles?: string[]
+    moduleExtensions?: string[]
+    modules?: string[]
+    plugins?: Tapable.Plugin[]
     resolver?: Resolver
+    resolveToContext?: boolean
+    symlinks?: string[] | boolean
+    unsafeCache?: boolean | Dictionary<any>
 }
 
 export interface AliasItem {
@@ -89,7 +92,7 @@ export function createResolver(options: ResolverOption) {
     const enforceModuleExtension = options.enforceModuleExtension || false
 
     // A list of module alias configurations or an object which maps key to value
-    let alias = options.alias || []
+    let alias: any = options.alias || []
 
     // Resolve symlinks to their symlinked location
     const symlinks = typeof options.symlinks !== 'undefined' ? options.symlinks : true
@@ -275,7 +278,7 @@ export function createResolver(options: ResolverOption) {
     return resolver
 }
 
-function mergeFilteredToArray(array, filter) {
+function mergeFilteredToArray(array: any[], filter: (item: any) => boolean) {
     return array.reduce((array, item) => {
         if (filter(item)) {
             const lastElement = array[array.length - 1]
@@ -294,7 +297,7 @@ function mergeFilteredToArray(array, filter) {
     }, [])
 }
 
-function isAbsolutePath(path) {
+function isAbsolutePath(path: string) {
     return (/^[A-Z]:|^\//.test(path)
     )
 }

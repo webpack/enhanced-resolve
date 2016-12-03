@@ -18,7 +18,7 @@ class ModuleKindPlugin {
             }
             const obj = Object.assign({}, request)
             delete obj.module
-            resolver.doResolve(target, obj, 'resolve as module', createInnerCallback(function (err, result) {
+            resolver.doResolve(target, obj, 'resolve as module', createInnerCallback(function (err: Error, result) {
                 if (arguments.length > 0) {
                     return callback(err, result)
                 }
