@@ -7,7 +7,7 @@
     "lib"
   ],
   "dependencies": {
-    "tapable": "^0.2.3",
+    "tapable": "^0.2.5",
     "memory-fs": "^0.3.0",
     "graceful-fs": "^4.1.2",
     "object-assign": "^4.0.1"
