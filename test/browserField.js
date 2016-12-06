@@ -2,7 +2,7 @@ var path = require("path");
 var should = require("should");
 
 var ResolverFactory = require("../lib/ResolverFactory");
-var SyncNodeJsInputFileSystem = require("../lib/SyncNodeJsInputFileSystem");
+var NodeJsInputFileSystem = require("../lib/NodeJsInputFileSystem");
 
 var browserModule = path.join(__dirname, "fixtures", "browser-module");
 
@@ -16,7 +16,8 @@ describe("browserField", function() {
 	beforeEach(function() {
 		resolver = ResolverFactory.createResolver({
 			aliasFields: ["browser"],
-			fileSystem: new SyncNodeJsInputFileSystem()
+			useSyncFileSystemCalls: true,
+			fileSystem: new NodeJsInputFileSystem()
 		});
 	});
 
