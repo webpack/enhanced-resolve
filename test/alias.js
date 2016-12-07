@@ -50,6 +50,7 @@ describe("alias", function() {
 				"recursive": "recursive/dir"
 			},
 			modules: "/",
+			useSyncFileSystemCalls: true,
 			fileSystem: fileSystem
 		})
 	});
