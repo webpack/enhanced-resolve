@@ -5,13 +5,11 @@
 // Export Resolver, FileSystems and Plugins
 import ResolverFactory = require('./ResolverFactory')
 import NodeJsInputFileSystem = require('./NodeJsInputFileSystem')
-import SyncNodeJsInputFileSystem = require('./SyncNodeJsInputFileSystem')
 import CachedInputFileSystem = require('./CachedInputFileSystem')
 import { LoggingCallbackWrapper, ResolveResult, ResolveContext } from './common-types'
 import { ResolverOption } from './ResolverFactory'
 
-const asyncFileSystem = new CachedInputFileSystem(new NodeJsInputFileSystem(), 4000)
-const syncFileSystem = new CachedInputFileSystem(new SyncNodeJsInputFileSystem(), 4000)
+const nodeFileSystem = new CachedInputFileSystem(new NodeJsInputFileSystem(), 4000)
 
 const nodeContext = {
     environments: ['node+es3+es5+process+native']
@@ -19,7 +17,7 @@ const nodeContext = {
 
 const asyncResolver = ResolverFactory.createResolver({
     extensions: ['.js', '.json', '.node'],
-    fileSystem: asyncFileSystem
+    fileSystem: nodeFileSystem
 })
 
 function resolve(path: string, request: string, callback: LoggingCallbackWrapper): void
@@ -39,7 +37,8 @@ export = resolve
 
 const syncResolver = ResolverFactory.createResolver({
     extensions: ['.js', '.json', '.node'],
-    fileSystem: syncFileSystem
+    useSyncFileSystemCalls: true,
+    fileSystem: nodeFileSystem
 });
 
 function resolveSync(path: string, request: string): ResolveResult
@@ -59,7 +58,7 @@ resolve.sync = resolveSync
 const asyncContextResolver = ResolverFactory.createResolver({
     extensions: ['.js', '.json', '.node'],
     resolveToContext: true,
-    fileSystem: asyncFileSystem
+    fileSystem: nodeFileSystem
 });
 
 function resolveContext(path: string, request: string, callback: LoggingCallbackWrapper): void
@@ -80,7 +79,8 @@ resolve.context = resolveContext
 const syncContextResolver = ResolverFactory.createResolver({
     extensions: ['.js', '.json', '.node'],
     resolveToContext: true,
-    fileSystem: syncFileSystem
+    useSyncFileSystemCalls: true,
+    fileSystem: nodeFileSystem
 });
 
 function resolveContextSync(context: ResolveContext, path: string, request: string): ResolveResult
@@ -101,7 +101,7 @@ const asyncLoaderResolver = ResolverFactory.createResolver({
     extensions: ['.js', '.json', '.node'],
     moduleExtensions: ['-loader'],
     mainFields: ['loader', 'main'],
-    fileSystem: asyncFileSystem
+    fileSystem: nodeFileSystem
 });
 
 function resolveLoader(path: string, request: string, callback: LoggingCallbackWrapper): void
@@ -123,7 +123,8 @@ const syncLoaderResolver = ResolverFactory.createResolver({
     extensions: ['.js', '.json', '.node'],
     moduleExtensions: ['-loader'],
     mainFields: ['loader', 'main'],
-    fileSystem: syncFileSystem
+    useSyncFileSystemCalls: true,
+    fileSystem: nodeFileSystem
 });
 
 function resolveLoaderSync(path: string, request: string): ResolveResult
@@ -142,7 +143,7 @@ resolve.loader.sync = resolveLoaderSync
 
 function create(options: ResolverOption) {
     options = Object.assign({
-        fileSystem: asyncFileSystem
+        fileSystem: nodeFileSystem
     }, options)
     const resolver = ResolverFactory.createResolver(options)
 
@@ -161,7 +162,8 @@ resolve.create = create
 
 function createSync(options: ResolverOption) {
     options = Object.assign({
-        fileSystem: syncFileSystem
+        useSyncFileSystemCalls: true,
+        fileSystem: nodeFileSystem
     }, options)
     const resolver = ResolverFactory.createResolver(options)
     return (context: any, path: any, request: any) => {
@@ -178,5 +180,4 @@ resolve.create.sync = createSync
 
 resolve.ResolverFactory = ResolverFactory
 resolve.NodeJsInputFileSystem = NodeJsInputFileSystem
-resolve.SyncNodeJsInputFileSystem = SyncNodeJsInputFileSystem
 resolve.CachedInputFileSystem = CachedInputFileSystem

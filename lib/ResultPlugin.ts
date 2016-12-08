@@ -12,7 +12,7 @@ class ResultPlugin {
     apply(resolver: Resolver) {
         resolver.plugin(this.source, function (request: ResolverRequest, callback: LoggingCallbackWrapper) {
             const obj = Object.assign({}, request)
-            resolver.applyPluginsAsync('result', obj, (err: Error) => {
+            resolver.applyPluginsAsyncSeries1('result', obj, function(err: Error) {
                 if (err) {
                     return callback(err)
                 }

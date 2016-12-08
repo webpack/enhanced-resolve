@@ -30,6 +30,7 @@ import { ResolverRequest } from './common-types'
 import { Dictionary } from './concord'
 import Tapable = require('tapable')
 import CachedInputFileSystem = require('./CachedInputFileSystem')
+import SyncAsyncFileSystemDecorator = require('./SyncAsyncFileSystemDecorator')
 
 export interface ResolverOption {
     alias?: AliasItem[] | Dictionary<string>
@@ -49,6 +50,7 @@ export interface ResolverOption {
     resolveToContext?: boolean
     symlinks?: string[] | boolean
     unsafeCache?: boolean | Dictionary<any>
+    useSyncFileSystemCalls?: boolean
 }
 
 export interface AliasItem {
@@ -68,7 +70,9 @@ export function createResolver(options: ResolverOption) {
     const descriptionFiles = options.descriptionFiles || ['package.json']
 
     // A list of additional resolve plugins which should be applied
-    const plugins = options.plugins || []
+    // The slice is there to create a copy, because otherwise pushing into plugins
+    // changes the original options.plugins array, causing duplicate plugins
+    const plugins = (options.plugins && options.plugins.slice()) || [];
 
     // A list of main fields in description files
     let mainFields = options.mainFields || ['main']
@@ -85,7 +89,7 @@ export function createResolver(options: ResolverOption) {
     // Enforce that a extension from extensions must be used
     const enforceExtension = options.enforceExtension || false
 
-    // A list of module extsions which should be tried for modules
+    // A list of module extensions which should be tried for modules
     let moduleExtensions = options.moduleExtensions || []
 
     // Enforce that a extension from moduleExtensions must be used
@@ -103,17 +107,24 @@ export function createResolver(options: ResolverOption) {
     // Use this cache object to unsafely cache the successful requests
     let unsafeCache = options.unsafeCache || false
 
-    // A function which decides wheter a request should be cached or not.
+    // A function which decides whether a request should be cached or not.
     // an object is passed with `path` and `request` properties.
     const cachePredicate = options.cachePredicate || (() => true)
 
     // The file system which should be used
     const fileSystem = options.fileSystem
 
+    // Use only the sync variants of the file system calls
+    const useSyncFileSystemCalls = options.useSyncFileSystemCalls;
+
     // A prepared Resolver to which the plugins are attached
-    const resolver = options.resolver || new Resolver(fileSystem)
+    let resolver: Resolver = options.resolver;
 
     //// options processing ////
+
+    if (!resolver) {
+        resolver = new Resolver(useSyncFileSystemCalls ? new SyncAsyncFileSystemDecorator(fileSystem) : fileSystem)
+    }
 
     extensions = ([] as string[]).concat(extensions)
     moduleExtensions = ([] as string[]).concat(moduleExtensions)
@@ -171,9 +182,7 @@ export function createResolver(options: ResolverOption) {
     }
 
     // parsed-resolve
-    descriptionFiles.forEach(item => {
-        plugins.push(new DescriptionFilePlugin('parsed-resolve', item, 'described-resolve'))
-    })
+    plugins.push(new DescriptionFilePlugin('parsed-resolve', descriptionFiles, 'described-resolve'));
     plugins.push(new NextPlugin('after-parsed-resolve', 'described-resolve'))
 
     // described-resolve
@@ -206,9 +215,7 @@ export function createResolver(options: ResolverOption) {
     })
 
     // relative
-    descriptionFiles.forEach(item => {
-        plugins.push(new DescriptionFilePlugin('relative', item, 'described-relative'))
-    })
+    plugins.push(new DescriptionFilePlugin('relative', descriptionFiles, 'described-relative'));
     plugins.push(new NextPlugin('after-relative', 'described-relative'))
 
     // described-relative
@@ -235,9 +242,7 @@ export function createResolver(options: ResolverOption) {
         })
 
         // undescribed-raw-file
-        descriptionFiles.forEach(item => {
-            plugins.push(new DescriptionFilePlugin('undescribed-raw-file', item, 'raw-file'))
-        })
+        plugins.push(new DescriptionFilePlugin('undescribed-raw-file', descriptionFiles, 'raw-file'));
         plugins.push(new NextPlugin('after-undescribed-raw-file', 'raw-file'))
 
         // raw-file

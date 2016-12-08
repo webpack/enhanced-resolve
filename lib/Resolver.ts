@@ -12,7 +12,8 @@ import {
     ResolveResult,
     ResolverRequest,
     LoggingCallbackWrapper,
-    ResolveContext
+    ResolveContext,
+    AbstractInputFileSystem
 } from './common-types'
 import { Dictionary } from './concord'
 import CachedInputFileSystem = require('./CachedInputFileSystem')
@@ -22,7 +23,7 @@ const directoryRegExp = /[\/\\]$/i
 const memoizedJoin: Dictionary<string> = {}
 
 class Resolver extends Tapable {
-    constructor(public fileSystem: CachedInputFileSystem) {
+    constructor(public fileSystem: AbstractInputFileSystem) {
         super()
     }
 
@@ -58,11 +59,11 @@ class Resolver extends Tapable {
         const localMissing: string[] = []
         const callbackMissing = callback.missing
         const missing = callbackMissing ? {
-            push(item: string) {
-                callbackMissing.push(item)
-                localMissing.push(item)
-            }
-        } : localMissing
+                push(item: string) {
+                    callbackMissing.push(item)
+                    localMissing.push(item)
+                }
+            } : localMissing
         const log: string[] = []
         const message = `resolve '${request}' in '${path}'`
 

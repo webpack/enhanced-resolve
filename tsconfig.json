@@ -6,11 +6,12 @@
     "lib": [
       "es2016"
     ],
-    "noEmit": true,
     "declaration": true,
+    "declarationDir": "typings",
+    "importHelpers": true,
+    "noEmit": false,
     "noImplicitAny": true,
     "pretty": true,
-    "declarationDir": "typings",
     "sourceMap": true
   },
   "exclude": [

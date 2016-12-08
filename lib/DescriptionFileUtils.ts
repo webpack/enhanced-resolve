@@ -38,7 +38,7 @@ function loadDescriptionFile(
                     })
                 }
                 else {
-                    resolver.fileSystem.readFile(descriptionFilePath, (err, content: string) => {
+                    resolver.fileSystem.readFile(descriptionFilePath, (err, content: Buffer) => {
                         if (err) {
                             return callback()
                         }
@@ -90,7 +90,7 @@ function loadDescriptionFile(
     })(directory)
 }
 
-function getField(content: Dictionary<any> | null, field: string) {
+function getField(content: Dictionary<any> | null | undefined, field: string) {
     if (!content) {
         return undefined
     }

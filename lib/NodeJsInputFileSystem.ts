@@ -10,10 +10,6 @@ class NodeJsInputFileSystem {
             callback(err, files && files.map(file => file.normalize ? file.normalize('NFC') : file))
         })
     }
-
-    isSync() {
-        return false
-    }
 }
 
 interface NodeJsInputFileSystem {
@@ -31,10 +27,25 @@ interface NodeJsInputFileSystem {
     readFile(filename: string, callback: (err: NodeJS.ErrnoException, data: Buffer) => void): void;
 
     readlink(path: string, callback?: (err: NodeJS.ErrnoException, linkString: string) => any): void;
+    statSync(path: string | Buffer): fs.Stats
+    readdirSync(path: string): string[]
+    readFileSync(filename: string, encoding: string): string;
+    readFileSync(filename: string, options: { encoding: string; flag?: string; }): string;
+    readFileSync(filename: string, options?: { flag?: string; }): Buffer;
+    readlinkSync(path: string | Buffer): string
 }
 
 export = NodeJsInputFileSystem
 
 NodeJsInputFileSystem.prototype.stat = fs.stat.bind(fs);
 NodeJsInputFileSystem.prototype.readFile = fs.readFile.bind(fs);
-NodeJsInputFileSystem.prototype.readlink = fs.readlink.bind(fs)
+NodeJsInputFileSystem.prototype.readlink = fs.readlink.bind(fs);
+NodeJsInputFileSystem.prototype.statSync = fs.statSync.bind(fs);
+NodeJsInputFileSystem.prototype.readdirSync = function readdirSync(path: string) {
+    const files = fs.readdirSync(path);
+    return files && files.map(function(file) {
+            return file.normalize ? file.normalize('NFC') : file;
+        });
+};
+NodeJsInputFileSystem.prototype.readFileSync = fs.readFileSync.bind(fs);
+NodeJsInputFileSystem.prototype.readlinkSync = fs.readlinkSync.bind(fs);

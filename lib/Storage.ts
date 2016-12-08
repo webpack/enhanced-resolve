@@ -33,36 +33,68 @@ class Storage {
         }
     }
 
-    finished(name: string) {
-        const args = Array.prototype.slice.call(arguments, 1)
-        const callbacks = this.running[name]
-        delete this.running[name]
+    finished(name: string, err: NodeJS.ErrnoException | null, result: any) {
+        const callbacks = this.running[name];
+        delete this.running[name];
         if (this.duration > 0) {
-            this.count++
-            this.data[name] = args
-            this.levels[0].push(name)
-            this.ensureTick()
+            this.count++;
+            this.data[name] = [err, result];
+            this.levels[0].push(name);
+            this.ensureTick();
         }
         for (let i = 0; i < callbacks.length; i++) {
-            callbacks[i].apply(null, args)
+            callbacks[i](err, result);
+        }
+    }
+
+    finishedSync(name: string, err: NodeJS.ErrnoException | null, result?: any) {
+        if (this.duration > 0) {
+            this.count++;
+            this.data[name] = [err, result];
+            this.levels[0].push(name);
+            this.ensureTick();
         }
     }
 
     provide(name: string, provider: CommonFileSystemMethod, callback: (...args: any[]) => any) {
-        let running = this.running[name]
+        let running = this.running[name];
         if (running) {
-            running.push(callback)
-            return
+            running.push(callback);
+            return;
         }
         if (this.duration > 0) {
-            this.checkTicks()
-            const data = this.data[name]
+            this.checkTicks();
+            const data = this.data[name];
             if (data) {
-                return callback(...data)
+                return callback(...data);
             }
         }
-        this.running[name] = running = [callback]
-        provider(name, this.finished.bind(this, name))
+        this.running[name] = running = [callback];
+        provider(name, (err, result) => {
+            this.finished(name, err, result);
+        });
+    }
+
+    provideSync(name: string, provider: (name: string) => any) {
+        if (this.duration > 0) {
+            this.checkTicks();
+            const data = this.data[name];
+            if (data) {
+                if (data[0]) {
+                    throw data[0];
+                }
+                return data[1];
+            }
+        }
+        let result
+        try {
+            result = provider(name);
+        } catch (e) {
+            this.finishedSync(null, e);
+            throw e;
+        }
+        this.finishedSync(name, null, result);
+        return result;
     }
 
     tick() {

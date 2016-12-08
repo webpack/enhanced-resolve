@@ -103,7 +103,7 @@ function isConditionMatched(context: ConcordContext, condition: string) {
             const name = match[1]
             switch (name) {
                 case 'referrer':
-                    return isGlobMatched(value, context.referrer)
+                    return isGlobMatched(value, context.referrer as string)
                 default:
                     return false
             }

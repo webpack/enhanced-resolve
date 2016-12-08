@@ -12,7 +12,8 @@ class DirectoryExistsPlugin {
     apply(resolver: Resolver) {
         const target = this.target
         resolver.plugin(this.source, function (
-            this: Resolver, request: ResolverRequest,
+            this: Resolver,
+            request: ResolverRequest,
             callback: LoggingCallbackWrapper
         ) {
             const fs = this.fileSystem
