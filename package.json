@@ -1,6 +1,6 @@
 {
   "name": "enhanced-resolve",
-  "version": "2.3.0",
+  "version": "3.0.0",
   "author": "Tobias Koppers @sokra",
   "description": "Offers a async require.resolve function. It's highly configurable.",
   "files": [
@@ -13,7 +13,7 @@
     "graceful-fs": "^4.1.2",
     "memory-fs": "^0.3.0",
     "object-assign": "^4.0.1",
-    "tapable": "^0.2.3"
+    "tapable": "^0.2.5",
   },
   "licenses": [
     {
