@@ -39,17 +39,22 @@ describe("CachedInputFileSystem", function() {
 					fs.stat("a", function(err, result) {
 						should.not.exist(result.a);
 						result.b = true;
-						sync = true;
+						var sync2 = true;
 						fs.stat("a", function(err, result) {
 							should.not.exist(result.a);
 							should.exist(result.b);
+							sync2.should.be.eql(true);
 							done();
 						});
-						sync = false;
+						setTimeout(function() {
+							sync2 = false;
+						}, 50);
 					});
 				}, 1100);
 			});
-			sync = false;
+			setTimeout(function() {
+				sync = false;
+			}, 50);
 		});
 	});
 
