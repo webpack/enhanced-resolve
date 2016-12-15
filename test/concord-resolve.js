@@ -28,6 +28,21 @@ function testResolve(name, context, moduleName, result) {
 			done();
 		}
 	});
+	it(name + " (sync)", function() {
+		/*var logData = [];
+		callback.log = function(line) {
+			logData.push(line);
+		}*/
+		var filename = resolve.sync({
+			environments: [
+				"web+es5+dom+xhr"
+			],
+			referrer: "test"
+		}, context, moduleName);
+
+		should.exist(filename);
+		filename.should.equal(result);
+	});
 }
 describe("concord-resolve", function() {
 	testResolve("should prefer concord main field over normal main field (outside)",
