@@ -40,6 +40,14 @@ describe("alias", function() {
 					"": true,
 					index: buf
 				}
+			},
+			d: {
+				"": true,
+				index: buf,
+				dir: {
+					"": true,
+					index: buf
+				}
 			}
 		});
 		resolver = ResolverFactory.createResolver({
@@ -47,7 +55,8 @@ describe("alias", function() {
 				aliasA: "a",
 				"b$": "a/index",
 				"c$": "/a/index",
-				"recursive": "recursive/dir"
+				"recursive": "recursive/dir",
+				"d": "d?someQuery"
 			},
 			modules: "/",
 			useSyncFileSystemCalls: true,
@@ -80,6 +89,10 @@ describe("alias", function() {
 	it("should resolve a file aliased module with a query", function() {
 		resolver.resolveSync({}, "/", "b?query").should.be.eql("/a/index?query");
 		resolver.resolveSync({}, "/", "c?query").should.be.eql("/a/index?query");
+	});
+	it("should resolve an module with an alias query", function() {
+		resolver.resolveSync({}, "/", "d").should.be.eql("/d/index?someQuery");
+		resolver.resolveSync({}, "/", "d?overrideQuery").should.be.eql("/d/index?overrideQuery");
 	});
 	it("should resolve a path in a file aliased module", function() {
 		resolver.resolveSync({}, "/", "b/index").should.be.eql("/b/index");
