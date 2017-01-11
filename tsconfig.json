@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es5",
+    "strictNullChecks": true,
+    "lib": [
+      "es2016"
+    ],
+    "declaration": true,
+    "declarationDir": "typings",
+    "importHelpers": true,
+    "noEmit": false,
+    "noImplicitAny": true,
+    "pretty": true,
+    "sourceMap": true
+  },
+  "exclude": [
+    "node_modules",
+    "typings"
+  ]
+}
