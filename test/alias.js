@@ -45,6 +45,7 @@ describe("alias", function() {
 		resolver = ResolverFactory.createResolver({
 			alias: {
 				aliasA: "a",
+				paramsA: "a?x=1",
 				"b$": "a/index",
 				"c$": "/a/index",
 				"recursive": "recursive/dir"
@@ -66,6 +67,11 @@ describe("alias", function() {
 		resolver.resolveSync({}, "/", "aliasA/index").should.be.eql("/a/index");
 		resolver.resolveSync({}, "/", "aliasA/dir").should.be.eql("/a/dir/index");
 		resolver.resolveSync({}, "/", "aliasA/dir/index").should.be.eql("/a/dir/index");
+	});
+	it("should resolve an aliased module with a query", function() {
+		resolver.resolveSync({}, "/", "paramsA").should.be.eql("/a/index?x=1");
+		resolver.resolveSync({}, "/", "paramsA?x=2").should.be.eql("/a/index?x=2");
+		resolver.resolveSync({}, "/", "paramsA?y=1").should.be.eql("/a/index?x=1&y=1");
 	});
 	it("should resolve a recursive aliased module", function() {
 		resolver.resolveSync({}, "/", "recursive").should.be.eql("/recursive/dir/index");
