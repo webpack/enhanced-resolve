@@ -23,6 +23,10 @@
 		"consistent-return": 0,
 		"no-inner-declarations": 1,
 		"no-loop-func": 1,
-		"space-before-function-paren": [2, "never"] 
+		"space-before-function-paren": [2, "never"],
+    "keyword-spacing": 0,
+    "one-var-declaration-per-line": 0,
+    "brace-style": 0,
+    "quotes": 0
 	}
 }
