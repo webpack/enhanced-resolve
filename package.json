@@ -27,7 +27,8 @@
     "istanbul": "^0.4.1",
     "js-beautify": "^1.5.10",
     "mocha": "^2.3.4",
-    "should": "^8.0.2"
+    "should": "^8.0.2",
+    "standard-version": "^4.0.0"
   },
   "engines": {
     "node": ">=0.6"
@@ -42,7 +43,9 @@
     "test": "mocha --full-trace --check-leaks",
     "precover": "npm run lint && npm run beautify-lint",
     "cover": "istanbul cover node_modules/mocha/bin/_mocha",
-    "travis": "npm run cover -- --report lcovonly"
+    "travis": "npm run cover -- --report lcovonly",
+    "release:create": "standard-version -i CHANGELOG.md -m \"Creating release %s\"",
+    "release:publish": "git push --follow-tags origin master; npm publish"
   },
   "repository": {
     "type": "git",
