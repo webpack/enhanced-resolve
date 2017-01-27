@@ -1,10 +1,11 @@
 {
 	"env": {
 		"node": true,
-    "es6": true
+    "es6":true
 	},
 	"plugins": [
-		"nodeca"
+    "eslint-plugin-node",
+    "nodeca"
 	],
 	"rules": {
 		"strict": 0,
