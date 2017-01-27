@@ -19,14 +19,11 @@
     }
   ],
   "devDependencies": {
-    "beautify-lint": "^1.0.3",
-    "codecov.io": "^0.1.6",
-    "coveralls": "^2.11.6",
+    "codecov": "^1.0.1",
     "eslint": "^3.14.1",
     "eslint-plugin-node": "^3.0.5",
     "eslint-plugin-nodeca": "^1.0.3",
     "istanbul": "^0.4.1",
-    "js-beautify": "^1.5.10",
     "mocha": "^2.3.4",
     "should": "^8.0.2"
   },
@@ -36,14 +33,13 @@
   "main": "lib/node.js",
   "homepage": "http://github.com/webpack/enhanced-resolve",
   "scripts": {
-    "beautify-lint": "beautify-lint lib/**.js test/*.js",
-    "beautify": "beautify-rewrite lib/**.js test/*.js",
     "lint": "eslint lib",
-    "pretest": "npm run lint && npm run beautify-lint",
+    "pretest": "npm run lint",
     "test": "mocha --full-trace --check-leaks",
-    "precover": "npm run lint && npm run beautify-lint",
+    "precover": "npm run lint",
     "cover": "istanbul cover node_modules/mocha/bin/_mocha",
-    "travis": "npm run cover -- --report lcovonly"
+    "travis:test": "npm run cover -- --report lcovonly",
+    "travis:lint": "npm run lint"
   },
   "repository": {
     "type": "git",
