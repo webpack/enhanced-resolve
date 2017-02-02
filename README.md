@@ -41,7 +41,7 @@ Take a look at `lib/ResolveFactory.js` to understand how everything fits togethe
 | fileSystem               |                             | The file system which should be used |
 | resolver                 | undefined                   | A prepared Resolver to which the plugins are attached |
 
-The options are passed from the `revolve` key of your webpack configuration e.g.:
+The options are passed from the `resolve` key of your webpack configuration e.g.:
 
 ```
 resolve: {
