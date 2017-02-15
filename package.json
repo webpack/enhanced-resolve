@@ -44,8 +44,7 @@
     "precover": "npm run lint && npm run beautify-lint",
     "cover": "istanbul cover node_modules/mocha/bin/_mocha",
     "travis": "npm run cover -- --report lcovonly",
-    "release:create": "standard-version -i CHANGELOG.md -m \"Creating release %s\"",
-    "release:publish": "git push --follow-tags origin master; npm publish"
+    "release": "standard-version"
   },
   "repository": {
     "type": "git",
