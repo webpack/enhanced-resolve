@@ -7,10 +7,10 @@
     "lib"
   ],
   "dependencies": {
-    "tapable": "^0.2.5",
-    "memory-fs": "^0.4.0",
     "graceful-fs": "^4.1.2",
-    "object-assign": "^4.0.1"
+    "memory-fs": "^0.4.0",
+    "object-assign": "^4.0.1",
+    "tapable": "^0.2.5"
   },
   "licenses": [
     {
@@ -31,14 +31,14 @@
     "should": "^8.0.2"
   },
   "engines": {
-    "node": ">=0.6"
+    "node": ">=4.3.0 <5.0.0 || >=5.10"
   },
   "main": "lib/node.js",
   "homepage": "http://github.com/webpack/enhanced-resolve",
   "scripts": {
     "beautify-lint": "beautify-lint lib/**.js test/*.js",
     "beautify": "beautify-rewrite lib/**.js test/*.js",
-    "lint": "eslint lib test",
+    "lint": "eslint lib",
     "pretest": "npm run lint && npm run beautify-lint",
     "test": "mocha --full-trace --check-leaks",
     "precover": "npm run lint && npm run beautify-lint",
