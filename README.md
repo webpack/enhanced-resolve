@@ -32,7 +32,7 @@ Take a look at `lib/ResolveFactory.js` to understand how everything fits togethe
 | mainFiles                | ["index"]                   | A list of main files in directories |
 | extensions               | [".js", ".json", ".node"]   | A list of extensions which should be tried for files |
 | enforceExtension         | false                       | Enforce that a extension from extensions must be used |
-| moduleExtensions         | []                          | A list of module extsions which should be tried for modules |
+| moduleExtensions         | []                          | A list of module extensions which should be tried for modules |
 | enforceModuleExtension   | false                       | Enforce that a extension from moduleExtensions must be used |
 | alias                    | []                          | A list of module alias configurations or an object which maps key to value |
 | resolveToContext         | false                       | Resolve to a context instead of a file |
