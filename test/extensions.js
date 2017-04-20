@@ -21,8 +21,14 @@ describe("extensions", function() {
 		});
 	});
 	it("should resolve according to order of provided extensions (dir index)", function(done) {
+		resolver.resolve({}, fixture, "./dir", function(err, result) {
+			result.should.equal(path.resolve(fixture, "dir", "index.ts"));
+			done();
+		});
+	});
+	it("should resolve according to main field in module root", function(done) {
 		resolver.resolve({}, fixture, ".", function(err, result) {
-			result.should.equal(path.resolve(fixture, "index.ts"));
+			result.should.equal(path.resolve(fixture, "index.js"));
 			done();
 		});
 	});
