@@ -58,6 +58,10 @@ describe("concord-resolve", function() {
 		path.join(fixtures, "extensions"), "./", path.join(fixtures, "extensions", "file.css"));
 	testResolve("should use specified extensions (inside)",
 		path.join(fixtures, "extensions"), "./file", path.join(fixtures, "extensions", "file.css"));
+	testResolve("should use specified extensions (outside) (dir index)",
+		fixtures, "./extensions/dir", path.join(fixtures, "extensions", "dir", "index.ts"));
+	testResolve("should use specified extensions (inside) (dir index)",
+		path.join(fixtures, "extensions"), "./dir", path.join(fixtures, "extensions", "dir", "index.ts"));
 
 	testResolve("should use modules configuration, module (over main)",
 		fixtures, "./modules", path.join(fixtures, "modules", "correct.js"));
