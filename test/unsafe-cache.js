@@ -1,5 +1,4 @@
 var resolve = require("../");
-var should = require("should");
 var path = require("path");
 
 describe("unsafe-cache", function() {
@@ -20,7 +19,7 @@ describe("unsafe-cache", function() {
 			});
 			cachedResolve(path.join(__dirname, "fixtures"), "m2/b", function(err, result) {
 				if(err) return done(err);
-				result.should.be.eql("yep")
+				result.should.be.eql("yep");
 				done();
 			});
 		});
@@ -41,7 +40,7 @@ describe("unsafe-cache", function() {
 			});
 			cachedResolve(path.join(__dirname, "fixtures"), "m2/b?query2", function(err, result) {
 				if(err) return done(err);
-				result.should.not.be.eql("yep")
+				result.should.not.be.eql("yep");
 				done();
 			});
 		});

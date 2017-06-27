@@ -1,5 +1,4 @@
 var path = require("path");
-var should = require("should");
 
 var ResolverFactory = require("../lib/ResolverFactory");
 var NodeJsInputFileSystem = require("../lib/NodeJsInputFileSystem");
@@ -8,7 +7,7 @@ var browserModule = path.join(__dirname, "fixtures", "browser-module");
 
 function p() {
 	return path.join.apply(path, [browserModule].concat(Array.prototype.slice.call(arguments)));
-};
+}
 
 describe("browserField", function() {
 	var resolver;
@@ -26,7 +25,7 @@ describe("browserField", function() {
 			if(err) throw err;
 			result.should.be.eql(false);
 			done();
-		})
+		});
 	});
 	it("should ignore", function() {
 		resolver.resolveSync({}, p(), "./lib/ignore").should.be.eql(false);
