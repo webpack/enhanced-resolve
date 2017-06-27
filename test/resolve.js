@@ -49,14 +49,14 @@ function testResolveContext(name, context, moduleName, result) {
 		it("should resolve async correctly", function(done) {
 			resolve.context(context, moduleName, function(err, filename) {
 				if(err) done(err);
-				should.exist(filename)
+				should.exist(filename);
 				filename.should.equal(result);
 				done();
 			});
 		});
 		it("should resolve sync correctly", function() {
 			var filename = resolve.context.sync(context, moduleName);
-			should.exist(filename)
+			should.exist(filename);
 			filename.should.equal(result);
 		});
 	});

@@ -1,4 +1,3 @@
-var should = require("should");
 var concord = require("../lib/concord");
 
 describe("concord", function() {
@@ -33,7 +32,7 @@ describe("concord", function() {
 			it("should parse " + key, function() {
 				concord.parseType(key).should.be.eql(TESTS[key]);
 			});
-		})
+		});
 	});
 
 	describe("isTypeMatched", function() {
@@ -144,7 +143,7 @@ describe("concord", function() {
 			supportedResourceTypes: ["promise+lazy/*", "stylesheet/sass+mixins", "stylesheet/sass+functions/incorrect"],
 			environments: ["web+es5+dom+xhr", "web+es5+xhr"],
 			referrer: "./main.css"
-		}
+		};
 		var TESTS = {
 			"web": true,
 			"web+es5": true,
@@ -258,7 +257,7 @@ describe("concord", function() {
 				"./*.match": "./success-*.matched-css",
 				"(regexp-([^\-]*))": "regexp/$1"
 			}
-		}
+		};
 		var TESTS = [
 			[{}, "./no-field.js", "./no-field.js"],
 			[config1, "./normal.js", "./normal.js"],
@@ -301,10 +300,10 @@ describe("concord", function() {
 						"b": "c",
 						"c": "a"
 					}
-				}, "b")
+				}, "b");
 			}).should.throw("Request 'b' matches recursively");
-		})
-	})
+		});
+	});
 
 	describe("matchType", function() {
 		var context = {
@@ -367,7 +366,7 @@ describe("concord", function() {
 					result.should.be.eql(testCase[2]);
 				else
 					(typeof result).should.be.eql(typeof testCase[2]);
-			})
+			});
 		});
 		it("should throw an exception on incomplete star match", function() {
 			(function() {
@@ -378,5 +377,5 @@ describe("concord", function() {
 				}, "./abc.test");
 			}).should.throw("value ('super/*') of key '*.test' contains '*', but there is no previous value defined");
 		});
-	})
+	});
 });

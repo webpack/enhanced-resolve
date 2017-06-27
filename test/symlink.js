@@ -95,7 +95,7 @@ describe("symlink", function() {
 					resolveWithoutSymlinks(pathToIt[0], pathToIt[1], function(err, filename) {
 						if(err) return done(err);
 						filename.should.have.type("string");
-						filename.should.be.eql(path.resolve(pathToIt[0], pathToIt[1]))
+						filename.should.be.eql(path.resolve(pathToIt[0], pathToIt[1]));
 						done();
 					});
 				});
@@ -107,7 +107,7 @@ describe("symlink", function() {
 				filename.should.be.eql(path.join(__dirname, "..", "lib", "node.js"));
 				filename = resolveSyncWithoutSymlinks(pathToIt[0], pathToIt[1]);
 				filename.should.have.type("string");
-				filename.should.be.eql(path.resolve(pathToIt[0], pathToIt[1]))
+				filename.should.be.eql(path.resolve(pathToIt[0], pathToIt[1]));
 			});
 		});
 	} else {

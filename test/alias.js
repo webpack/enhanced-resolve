@@ -1,12 +1,11 @@
 var ResolverFactory = require("../lib/ResolverFactory");
 var MemoryFileSystem = require("memory-fs");
-var should = require("should");
 
 describe("alias", function() {
 	var resolver;
 
 	beforeEach(function() {
-		var buf = new Buffer("");
+		var buf = new Buffer(""); // eslint-disable-line node/no-deprecated-api
 		var fileSystem = new MemoryFileSystem({
 			"": true,
 			a: {
@@ -52,7 +51,7 @@ describe("alias", function() {
 			modules: "/",
 			useSyncFileSystemCalls: true,
 			fileSystem: fileSystem
-		})
+		});
 	});
 
 	it("should resolve a not aliased module", function() {

@@ -1,6 +1,5 @@
 var ResolverFactory = require("../").ResolverFactory;
 var CloneBasenamePlugin = require("../lib/CloneBasenamePlugin");
-var should = require("should");
 var path = require("path");
 
 describe("plugins", function() {

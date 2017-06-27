@@ -1,4 +1,3 @@
-var should = require("should");
 var CachedInputFileSystem = require("../lib/CachedInputFileSystem");
 
 describe("pr-53", function() {
