@@ -37,7 +37,8 @@ Take a look at `lib/ResolveFactory.js` to understand how everything fits togethe
 | alias                    | []                          | A list of module alias configurations or an object which maps key to value |
 | resolveToContext         | false                       | Resolve to a context instead of a file |
 | unsafeCache              | false                       | Use this cache object to unsafely cache the successful requests |
-| cachePredicate           | function() { return true }; | A function which decides wheter a request should be cached or not. An object is passed to the function with `path` and `request` properties. |
+| cacheWithContext         | true                        | If unsafe cache is enabled, includes `request.context` in the cache key  |
+| cachePredicate           | function() { return true }; | A function which decides whether a request should be cached or not. An object is passed to the function with `path` and `request` properties. |
 | fileSystem               |                             | The file system which should be used |
 | resolver                 | undefined                   | A prepared Resolver to which the plugins are attached |
 
