@@ -44,7 +44,7 @@ myResolver.resolve({}, lookupStartPath, request, (err/*Error*/, filepath/*string
 });
 ```
 
-For more examples creating different types resolvers (sync/async, context, etc) see `/lib/node.js`.
+For more examples creating different types resolvers (sync/async, context, etc) see `lib/node.js`.
 #### Resolver Options
 | Field                    | Default                     | Description                                                                        |
 | ------------------------ | --------------------------- | ---------------------------------------------------------------------------------- |
@@ -65,6 +65,30 @@ For more examples creating different types resolvers (sync/async, context, etc) 
 | cachePredicate           | function() { return true }; | A function which decides whether a request should be cached or not. An object is passed to the function with `path` and `request` properties. |
 | fileSystem               |                             | The file system which should be used |
 | resolver                 | undefined                   | A prepared Resolver to which the plugins are attached |
+
+## Plugins
+Similar to `webpack`, the core of `enhanced-resolve` functionality is implemented as individual plugins that are executed using [`Tapable`](https://github.com/webpack/tapable). These plugins can extend the functionality of the library, adding other ways for files/contexts to be resolved.
+
+A plugin should be a `class` (or its ES5 equivalent) with an `apply` method. The `apply` method will receive a `resolver` instance, that can be used to hook in to the event system.
+
+### Plugin Boilerplate
+```js
+class MyResolverPlugin {
+  constructor(source, target) {
+    this.source = source;
+    this.target = target;
+  }
+
+  apply(resolver) {
+    resolver.plugin(this.source, (request, callback) => {
+      // Any logic you need to create a new `request` can go here
+      resolver.doResolve(this.target, request, null, callback);
+    });
+  }
+}
+```
+
+Plugins are executed in a pipeline, and register which event they should be executed before/after. In the example above, `source` is the name of the event that starts the pipeline, and `target` is what event this plugin should fire, which is what continues the execution of the pipeline. For an example of how these different plugin events create a chain, see `lib/ResolverFactory.js`, in the `//// pipeline ////` section.
 
 ## Tests
 
