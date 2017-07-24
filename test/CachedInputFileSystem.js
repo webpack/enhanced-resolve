@@ -101,4 +101,12 @@ describe("CachedInputFileSystem", function() {
 		});
 	});
 
+	it("should cache undefined value", function(done) {
+		fs.stat(undefined, function(err, result) {
+			fs.purge("a");
+			fs.purge();
+			done();
+		});
+	});
+
 });
