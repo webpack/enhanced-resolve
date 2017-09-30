@@ -1,6 +1,11 @@
 var should = require("should");
 var path = require("path");
-var resolve = require("../");
+var resolve = require("../").create({
+	concord: true
+});
+var resolveSync = require("../").create.sync({
+	concord: true
+});
 
 var fixtures = path.join(__dirname, "concord");
 
@@ -33,7 +38,7 @@ function testResolve(name, context, moduleName, result) {
 		callback.log = function(line) {
 			logData.push(line);
 		}*/
-		var filename = resolve.sync({
+		var filename = resolveSync({
 			environments: [
 				"web+es5+dom+xhr"
 			],
