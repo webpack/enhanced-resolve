@@ -1614,9 +1614,9 @@ table@^3.7.8:
     slice-ansi "0.0.4"
     string-width "^2.0.0"
 
-tapable@1.0.0-beta.0:
-  version "1.0.0-beta.0"
-  resolved "https://registry.yarnpkg.com/tapable/-/tapable-1.0.0-beta.0.tgz#214faaa5c38faf34089da57206ff04d39a43302d"
+tapable@^1.0.0-beta.1:
+  version "1.0.0-beta.1"
+  resolved "https://registry.yarnpkg.com/tapable/-/tapable-1.0.0-beta.1.tgz#393ba614d35909b6ad486102a2f0d437f5f855bc"
 
 tape@2.3.0:
   version "2.3.0"

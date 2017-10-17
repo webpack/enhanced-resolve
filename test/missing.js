@@ -48,7 +48,7 @@ describe("missing", function() {
 				Array.from(callback.missing).sort().should.containDeep(testCase[2].sort());
 				done();
 			};
-			callback.missing = [];
+			callback.missing = new Set();
 			resolve(testCase[0], testCase[1], callback);
 		});
 		it("should tell about missing file in the callback's error object when trying to resolve " + testCase[1], function(done) {

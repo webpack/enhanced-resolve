@@ -21,7 +21,7 @@ describe("browserField", function() {
 	});
 
 	it("should ignore", function(done) {
-		resolver.resolve({}, p(), "./lib/ignore", function(err, result) {
+		resolver.resolve({}, p(), "./lib/ignore", {}, function(err, result) {
 			if(err) throw err;
 			result.should.be.eql(false);
 			done();
