@@ -38,17 +38,17 @@ describe("missing", function() {
 			var callback = function(err, filename) {
 				if(err) {
 					err.missing.sort().should.containDeep(testCase[2].sort());
-					callback.missing.sort().should.containDeep(testCase[2].sort());
+					Array.from(callback.missing).sort().should.containDeep(testCase[2].sort());
 					resolve(testCase[0], testCase[1], function(err) {
 						err.missing.sort().should.containDeep(testCase[2].sort());
 						done();
 					});
 					return;
 				}
-				callback.missing.sort().should.containDeep(testCase[2].sort());
+				Array.from(callback.missing).sort().should.containDeep(testCase[2].sort());
 				done();
 			};
-			callback.missing = [];
+			callback.missing = new Set();
 			resolve(testCase[0], testCase[1], callback);
 		});
 		it("should tell about missing file in the callback's error object when trying to resolve " + testCase[1], function(done) {
