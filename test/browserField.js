@@ -1,9 +1,9 @@
-var path = require("path");
+var path = require("path"),
 
-var ResolverFactory = require("../lib/ResolverFactory");
-var NodeJsInputFileSystem = require("../lib/NodeJsInputFileSystem");
+ ResolverFactory = require("../lib/ResolverFactory"),
+ NodeJsInputFileSystem = require("../lib/NodeJsInputFileSystem"),
 
-var browserModule = path.join(__dirname, "fixtures", "browser-module");
+ browserModule = path.join(__dirname, "fixtures", "browser-module");
 
 function p() {
 	return path.join.apply(path, [browserModule].concat(Array.prototype.slice.call(arguments)));
