@@ -2,6 +2,7 @@ var resolve = require("../");
 var should = require("should");
 var path = require("path");
 var fs = require("fs");
+var os = require("os");
 
 var tempPath = path.join(__dirname, "temp");
 
@@ -31,6 +32,10 @@ describe("symlink", function() {
 	}
 
 	if(isAdmin) {
+		// PR #150
+		var isWindows = (os.type() === "Windows_NT");
+		var oldCWD = isWindows && process.cwd();
+
 		before(function() {
 			// Create some cool symlinks
 			try {
@@ -41,10 +46,18 @@ describe("symlink", function() {
 				fs.symlinkSync(path.join(tempPath, "this"), path.join(tempPath, "that"), "dir");
 				fs.symlinkSync(path.join("..", "..", "lib", "node.js"), path.join(tempPath, "node.relative.js"), "file");
 				fs.symlinkSync(path.join(".", "node.relative.js"), path.join(tempPath, "node.relative.sym.js"), "file");
+				// PR #150
+				if(isWindows) {
+					process.chdir(path.join(tempPath, "that"));
+				}
 			} catch(e) {}
 		});
 
 		after(function() {
+			// PR #150
+			if(isWindows) {
+				process.chdir(oldCWD);
+			}
 			fs.unlinkSync(path.join(tempPath, "node.js"));
 			fs.unlinkSync(path.join(tempPath, "node.relative.js"));
 			fs.unlinkSync(path.join(tempPath, "node.relative.sym.js"));
@@ -84,7 +97,7 @@ describe("symlink", function() {
 			[path.join(tempPath, "that"), "./test/temp/lib/node.js", "with symlinked directory as context and in path (chained)"],
 			[path.join(tempPath, "that", "lib"), "./node.js", "with symlinked directory in context path (chained)"],
 			[path.join(tempPath, "that", "test"), "./temp/node.js", "with symlinked directory in context path and symlinked file (chained)"],
-			[path.join(tempPath, "that", "test"), "./temp/lib/node.js", "with symlinked directory in context path and symlinked directory (chained)"],
+			[path.join(tempPath, "that", "test"), "./temp/lib/node.js", "with symlinked directory in context path and symlinked directory (chained)"]
 		].forEach(function(pathToIt) {
 			it("should resolve symlink to itself " + pathToIt[2], function(done) {
 				resolve(pathToIt[0], pathToIt[1], function(err, filename) {
