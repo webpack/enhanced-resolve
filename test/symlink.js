@@ -2,7 +2,9 @@ var resolve = require("../");
 var should = require("should");
 var path = require("path");
 var fs = require("fs");
-const{ platform } = require("os");
+const {
+	platform
+} = require("os");
 
 var tempPath = path.join(__dirname, "temp");
 
