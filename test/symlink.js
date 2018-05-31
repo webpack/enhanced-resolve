@@ -2,7 +2,8 @@ var resolve = require("../");
 var should = require("should");
 var path = require("path");
 var fs = require("fs");
-const{
+
+const { // eslint-disable-line keyword-spacing
 	platform
 } = require("os");
 
