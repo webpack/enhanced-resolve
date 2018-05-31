@@ -2,7 +2,7 @@ var resolve = require("../");
 var should = require("should");
 var path = require("path");
 var fs = require("fs");
-var os = require("os");
+const{ platform } = require("os");
 
 var tempPath = path.join(__dirname, "temp");
 
@@ -32,8 +32,8 @@ describe("symlink", function() {
 	}
 
 	if(isAdmin) {
-		// PR #150
-		var isWindows = (os.type() === "Windows_NT");
+		// PR #150: Detect Windows and preserve current working directory.
+		var isWindows = (platform() === "win32");
 		var oldCWD = isWindows && process.cwd();
 
 		before(function() {
@@ -46,7 +46,7 @@ describe("symlink", function() {
 				fs.symlinkSync(path.join(tempPath, "this"), path.join(tempPath, "that"), "dir");
 				fs.symlinkSync(path.join("..", "..", "lib", "node.js"), path.join(tempPath, "node.relative.js"), "file");
 				fs.symlinkSync(path.join(".", "node.relative.js"), path.join(tempPath, "node.relative.sym.js"), "file");
-				// PR #150
+				// PR #150: Set the current working directory so that tests will fail if changes get reverted.
 				if(isWindows) {
 					process.chdir(path.join(tempPath, "that"));
 				}
@@ -54,7 +54,7 @@ describe("symlink", function() {
 		});
 
 		after(function() {
-			// PR #150
+			// PR #150: Restore the original working directory.
 			if(isWindows) {
 				process.chdir(oldCWD);
 			}
@@ -97,7 +97,7 @@ describe("symlink", function() {
 			[path.join(tempPath, "that"), "./test/temp/lib/node.js", "with symlinked directory as context and in path (chained)"],
 			[path.join(tempPath, "that", "lib"), "./node.js", "with symlinked directory in context path (chained)"],
 			[path.join(tempPath, "that", "test"), "./temp/node.js", "with symlinked directory in context path and symlinked file (chained)"],
-			[path.join(tempPath, "that", "test"), "./temp/lib/node.js", "with symlinked directory in context path and symlinked directory (chained)"]
+			[path.join(tempPath, "that", "test"), "./temp/lib/node.js", "with symlinked directory in context path and symlinked directory (chained)"],
 		].forEach(function(pathToIt) {
 			it("should resolve symlink to itself " + pathToIt[2], function(done) {
 				resolve(pathToIt[0], pathToIt[1], function(err, filename) {
