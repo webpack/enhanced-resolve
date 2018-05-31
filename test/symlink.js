@@ -2,7 +2,7 @@ var resolve = require("../");
 var should = require("should");
 var path = require("path");
 var fs = require("fs");
-const {
+const{
 	platform
 } = require("os");
 
