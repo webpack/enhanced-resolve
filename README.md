@@ -82,9 +82,10 @@ class MyResolverPlugin {
   }
 
   apply(resolver) {
-    resolver.plugin(this.source, (request, callback) => {
+    const target = resolver.ensureHook(this.target);
+    resolver.getHook(this.source).tapAsync("MyResolverPlugin", (request, resolveContext, callback) => {
       // Any logic you need to create a new `request` can go here
-      resolver.doResolve(this.target, request, null, callback);
+      resolver.doResolve(target, request, null, resolveContext, callback);
     });
   }
 }
