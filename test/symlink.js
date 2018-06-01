@@ -3,6 +3,10 @@ var should = require("should");
 var path = require("path");
 var fs = require("fs");
 
+const { // eslint-disable-line keyword-spacing
+	platform
+} = require("os");
+
 var tempPath = path.join(__dirname, "temp");
 
 describe("symlink", function() {
@@ -31,6 +35,10 @@ describe("symlink", function() {
 	}
 
 	if(isAdmin) {
+		// PR #150: Detect Windows and preserve current working directory.
+		const isWindows = (platform() === "win32");
+		const oldCWD = isWindows && process.cwd();
+
 		before(function() {
 			// Create some cool symlinks
 			try {
@@ -41,10 +49,18 @@ describe("symlink", function() {
 				fs.symlinkSync(path.join(tempPath, "this"), path.join(tempPath, "that"), "dir");
 				fs.symlinkSync(path.join("..", "..", "lib", "node.js"), path.join(tempPath, "node.relative.js"), "file");
 				fs.symlinkSync(path.join(".", "node.relative.js"), path.join(tempPath, "node.relative.sym.js"), "file");
+				// PR #150: Set the current working directory so that tests will fail if changes get reverted.
+				if(isWindows) {
+					process.chdir(path.join(tempPath, "that"));
+				}
 			} catch(e) {}
 		});
 
 		after(function() {
+			// PR #150: Restore the original working directory.
+			if(isWindows) {
+				process.chdir(oldCWD);
+			}
 			fs.unlinkSync(path.join(tempPath, "node.js"));
 			fs.unlinkSync(path.join(tempPath, "node.relative.js"));
 			fs.unlinkSync(path.join(tempPath, "node.relative.sym.js"));
