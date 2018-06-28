@@ -115,4 +115,7 @@ describe("resolve", function() {
 
 	testResolve("find node_modules outside of node_modules",
 		path.join(fixtures, "browser-module", "node_modules"), "m1/a", path.join(fixtures, "node_modules", "m1", "a.js"));
+
+	testResolve("don't crash on main field pointing to self",
+		fixtures, "./main-field-self", path.join(fixtures, "main-field-self", "index.js"));
 });
