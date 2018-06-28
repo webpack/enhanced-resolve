@@ -1,3 +1,4 @@
+require("should");
 var ResolverFactory = require("../lib/ResolverFactory");
 var MemoryFileSystem = require("memory-fs");
 
@@ -39,6 +40,13 @@ describe("alias", function() {
 					"": true,
 					index: buf
 				}
+			},
+			d: {
+				"": true,
+				"index.js": buf,
+				dir: {
+					"": true
+				}
 			}
 		});
 		resolver = ResolverFactory.createResolver({
@@ -46,7 +54,9 @@ describe("alias", function() {
 				aliasA: "a",
 				"b$": "a/index",
 				"c$": "/a/index",
-				"recursive": "recursive/dir"
+				"recursive": "recursive/dir",
+				"/d/dir": "/c/dir",
+				"/d/index.js": "/c/index",
 			},
 			modules: "/",
 			useSyncFileSystemCalls: true,
@@ -87,6 +97,10 @@ describe("alias", function() {
 		resolver.resolveSync({}, "/", "c/index").should.be.eql("/c/index");
 		resolver.resolveSync({}, "/", "c/dir").should.be.eql("/c/dir/index");
 		resolver.resolveSync({}, "/", "c/dir/index").should.be.eql("/c/dir/index");
+	});
+	it("should resolve a file aliased file", function() {
+		resolver.resolveSync({}, "/", "d").should.be.eql("/c/index");
+		resolver.resolveSync({}, "/", "d/dir/index").should.be.eql("/c/dir/index");
 	});
 
 });
