@@ -1,6 +1,6 @@
 {
-	"main": "wrong.js",
-	"concord": {
-		"main": "./correct.js"
-	}
+  "main": "wrong.js",
+  "concord": {
+    "main": "./correct.js"
+  }
 }

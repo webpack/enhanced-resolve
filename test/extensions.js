@@ -4,7 +4,10 @@ var ResolverFactory = require("../lib/ResolverFactory");
 var NodeJsInputFileSystem = require("../lib/NodeJsInputFileSystem");
 var CachedInputFileSystem = require("../lib/CachedInputFileSystem");
 
-var nodeFileSystem = new CachedInputFileSystem(new NodeJsInputFileSystem(), 4000);
+var nodeFileSystem = new CachedInputFileSystem(
+	new NodeJsInputFileSystem(),
+	4000
+);
 
 var resolver = ResolverFactory.createResolver({
 	extensions: [".ts", ".js"],

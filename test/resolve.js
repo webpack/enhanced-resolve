@@ -17,7 +17,7 @@ function testResolve(name, context, moduleName, result) {
 		});
 		it("should resolve async correctly", function(done) {
 			resolve(context, moduleName, function(err, filename) {
-				if(err) return done(err);
+				if (err) return done(err);
 				should.exist(filename);
 				filename.should.equal(result);
 				done();
@@ -35,7 +35,7 @@ function testResolveLoader(name, context, moduleName, result) {
 		});
 		it("should resolve async correctly", function(done) {
 			resolve.loader(context, moduleName, function(err, filename) {
-				if(err) return done(err);
+				if (err) return done(err);
 				should.exist(filename);
 				filename.should.equal(result);
 				done();
@@ -48,7 +48,7 @@ function testResolveContext(name, context, moduleName, result) {
 	describe(name, function() {
 		it("should resolve async correctly", function(done) {
 			resolve.context(context, moduleName, function(err, filename) {
-				if(err) done(err);
+				if (err) done(err);
 				should.exist(filename);
 				filename.should.equal(result);
 				done();
@@ -62,60 +62,151 @@ function testResolveContext(name, context, moduleName, result) {
 	});
 }
 describe("resolve", function() {
-	testResolve("absolute path",
-		fixtures, path.join(fixtures, "main1.js"), path.join(fixtures, "main1.js"));
+	testResolve(
+		"absolute path",
+		fixtures,
+		path.join(fixtures, "main1.js"),
+		path.join(fixtures, "main1.js")
+	);
 
-	testResolve("file with .js",
-		fixtures, "./main1.js", path.join(fixtures, "main1.js"));
-	testResolve("file without extension",
-		fixtures, "./main1", path.join(fixtures, "main1.js"));
-	testResolve("another file with .js",
-		fixtures, "./a.js", path.join(fixtures, "a.js"));
-	testResolve("another file without extension",
-		fixtures, "./a", path.join(fixtures, "a.js"));
-	testResolve("file in module with .js",
-		fixtures, "m1/a.js", path.join(fixtures, "node_modules", "m1", "a.js"));
-	testResolve("file in module without extension",
-		fixtures, "m1/a", path.join(fixtures, "node_modules", "m1", "a.js"));
-	testResolve("another file in module without extension",
-		fixtures, "complexm/step1", path.join(fixtures, "node_modules", "complexm", "step1.js"));
-	testResolve("from submodule to file in sibling module",
-		path.join(fixtures, "node_modules", "complexm"), "m2/b.js", path.join(fixtures, "node_modules", "m2", "b.js"));
-	testResolve("from submodule to file in sibling of parent module",
-		path.join(fixtures, "node_modules", "complexm", "web_modules", "m1"), "m2/b.js", path.join(fixtures, "node_modules", "m2", "b.js"));
-	testResolve("from nested directory to overwritten file in module",
-		path.join(fixtures, "multiple_modules"), "m1/a.js", path.join(fixtures, "multiple_modules", "node_modules", "m1", "a.js"));
-	testResolve("from nested directory to not overwritten file in module",
-		path.join(fixtures, "multiple_modules"), "m1/b.js", path.join(fixtures, "node_modules", "m1", "b.js"));
+	testResolve(
+		"file with .js",
+		fixtures,
+		"./main1.js",
+		path.join(fixtures, "main1.js")
+	);
+	testResolve(
+		"file without extension",
+		fixtures,
+		"./main1",
+		path.join(fixtures, "main1.js")
+	);
+	testResolve(
+		"another file with .js",
+		fixtures,
+		"./a.js",
+		path.join(fixtures, "a.js")
+	);
+	testResolve(
+		"another file without extension",
+		fixtures,
+		"./a",
+		path.join(fixtures, "a.js")
+	);
+	testResolve(
+		"file in module with .js",
+		fixtures,
+		"m1/a.js",
+		path.join(fixtures, "node_modules", "m1", "a.js")
+	);
+	testResolve(
+		"file in module without extension",
+		fixtures,
+		"m1/a",
+		path.join(fixtures, "node_modules", "m1", "a.js")
+	);
+	testResolve(
+		"another file in module without extension",
+		fixtures,
+		"complexm/step1",
+		path.join(fixtures, "node_modules", "complexm", "step1.js")
+	);
+	testResolve(
+		"from submodule to file in sibling module",
+		path.join(fixtures, "node_modules", "complexm"),
+		"m2/b.js",
+		path.join(fixtures, "node_modules", "m2", "b.js")
+	);
+	testResolve(
+		"from submodule to file in sibling of parent module",
+		path.join(fixtures, "node_modules", "complexm", "web_modules", "m1"),
+		"m2/b.js",
+		path.join(fixtures, "node_modules", "m2", "b.js")
+	);
+	testResolve(
+		"from nested directory to overwritten file in module",
+		path.join(fixtures, "multiple_modules"),
+		"m1/a.js",
+		path.join(fixtures, "multiple_modules", "node_modules", "m1", "a.js")
+	);
+	testResolve(
+		"from nested directory to not overwritten file in module",
+		path.join(fixtures, "multiple_modules"),
+		"m1/b.js",
+		path.join(fixtures, "node_modules", "m1", "b.js")
+	);
 
-	testResolve("file with query",
-		fixtures, "./main1.js?query", path.join(fixtures, "main1.js") + "?query");
-	testResolve("file in module with query",
-		fixtures, "m1/a?query", path.join(fixtures, "node_modules", "m1", "a.js") + "?query");
+	testResolve(
+		"file with query",
+		fixtures,
+		"./main1.js?query",
+		path.join(fixtures, "main1.js") + "?query"
+	);
+	testResolve(
+		"file in module with query",
+		fixtures,
+		"m1/a?query",
+		path.join(fixtures, "node_modules", "m1", "a.js") + "?query"
+	);
 
-	testResolveContext("context for fixtures",
-		fixtures, "./", fixtures);
-	testResolveContext("context for fixtures/lib",
-		fixtures, "./lib", path.join(fixtures, "lib"));
-	testResolveContext("context for fixtures with ..",
-		fixtures, "./lib/../../fixtures/./lib/..", fixtures);
+	testResolveContext("context for fixtures", fixtures, "./", fixtures);
+	testResolveContext(
+		"context for fixtures/lib",
+		fixtures,
+		"./lib",
+		path.join(fixtures, "lib")
+	);
+	testResolveContext(
+		"context for fixtures with ..",
+		fixtures,
+		"./lib/../../fixtures/./lib/..",
+		fixtures
+	);
 
-	testResolveContext("context for fixtures with query",
-		fixtures, "./?query", fixtures + "?query");
+	testResolveContext(
+		"context for fixtures with query",
+		fixtures,
+		"./?query",
+		fixtures + "?query"
+	);
 
-	testResolve("differ between directory and file, resolve file",
-		fixtures, "./dirOrFile", path.join(fixtures, "dirOrFile.js"));
-	testResolve("differ between directory and file, resolve directory",
-		fixtures, "./dirOrFile/", path.join(fixtures, "dirOrFile", "index.js"));
+	testResolve(
+		"differ between directory and file, resolve file",
+		fixtures,
+		"./dirOrFile",
+		path.join(fixtures, "dirOrFile.js")
+	);
+	testResolve(
+		"differ between directory and file, resolve directory",
+		fixtures,
+		"./dirOrFile/",
+		path.join(fixtures, "dirOrFile", "index.js")
+	);
 
-	testResolveLoader("loader with template without extension",
-		fixtures, "m2/b", path.join(fixtures, "node_modules", "m2-loader", "b.js"));
-	testResolveLoader("loader with template as file",
-		fixtures, "l", path.join(fixtures, "node_modules", "l-loader.js"));
+	testResolveLoader(
+		"loader with template without extension",
+		fixtures,
+		"m2/b",
+		path.join(fixtures, "node_modules", "m2-loader", "b.js")
+	);
+	testResolveLoader(
+		"loader with template as file",
+		fixtures,
+		"l",
+		path.join(fixtures, "node_modules", "l-loader.js")
+	);
 
-	testResolve("find node_modules outside of node_modules",
-		path.join(fixtures, "browser-module", "node_modules"), "m1/a", path.join(fixtures, "node_modules", "m1", "a.js"));
+	testResolve(
+		"find node_modules outside of node_modules",
+		path.join(fixtures, "browser-module", "node_modules"),
+		"m1/a",
+		path.join(fixtures, "node_modules", "m1", "a.js")
+	);
 
-	testResolve("don't crash on main field pointing to self",
-		fixtures, "./main-field-self", path.join(fixtures, "main-field-self", "index.js"));
+	testResolve(
+		"don't crash on main field pointing to self",
+		fixtures,
+		"./main-field-self",
+		path.join(fixtures, "main-field-self", "index.js")
+	);
 });
