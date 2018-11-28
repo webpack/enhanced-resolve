@@ -6,13 +6,19 @@ describe("CachedInputFileSystem", function() {
 	var fs;
 
 	beforeEach(function() {
-		fs = new CachedInputFileSystem({
-			stat: function(path, callback) {
-				setTimeout(callback.bind(null, null, {
-					path: path
-				}), 100);
-			}
-		}, 1000);
+		fs = new CachedInputFileSystem(
+			{
+				stat: function(path, callback) {
+					setTimeout(
+						callback.bind(null, null, {
+							path: path
+						}),
+						100
+					);
+				}
+			},
+			1000
+		);
 	});
 	afterEach(function() {
 		fs.purge();
@@ -108,5 +114,4 @@ describe("CachedInputFileSystem", function() {
 			done();
 		});
 	});
-
 });

@@ -7,12 +7,19 @@ describe("simple", function() {
 		[__dirname, "../lib/node", "direct"],
 		[__dirname, "../", "as directory"],
 		[path.join(__dirname, "..", ".."), "./enhanced-resolve", "as module"],
-		[path.join(__dirname, "..", ".."), "./enhanced-resolve/lib/node", "in module"]
+		[
+			path.join(__dirname, "..", ".."),
+			"./enhanced-resolve/lib/node",
+			"in module"
+		]
 	];
 	pathsToIt.forEach(function(pathToIt) {
 		it("should resolve itself " + pathToIt[2], function(done) {
 			resolve(pathToIt[0], pathToIt[1], function(err, filename) {
-				if(err) return done(new Error([err.message, err.stack, err.details].join("\n")));
+				if (err)
+					return done(
+						new Error([err.message, err.stack, err.details].join("\n"))
+					);
 				should.exist(filename);
 				filename.should.have.type("string");
 				filename.should.be.eql(path.join(__dirname, "..", "lib", "node.js"));
@@ -26,5 +33,4 @@ describe("simple", function() {
 			filename.should.be.eql(path.join(__dirname, "..", "lib", "node.js"));
 		});
 	});
-
 });

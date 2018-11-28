@@ -50,26 +50,49 @@ describe("concord", function() {
 			["node+es5+es6", "*+es6", true],
 			["node+es5+es6", "*+es7", false],
 			["node+es5+es6", "*", true],
-			[{
-				type: "node",
-				features: ["es5", "es6"]
-			}, {
-				type: "node",
-				features: ["es5"]
-			}, true],
-			["node+es5+es6", {
-				type: "node",
-				features: ["es5"]
-			}, true],
-			[{
-				type: "node",
-				features: ["es5", "es6"]
-			}, "*+es5", true]
+			[
+				{
+					type: "node",
+					features: ["es5", "es6"]
+				},
+				{
+					type: "node",
+					features: ["es5"]
+				},
+				true
+			],
+			[
+				"node+es5+es6",
+				{
+					type: "node",
+					features: ["es5"]
+				},
+				true
+			],
+			[
+				{
+					type: "node",
+					features: ["es5", "es6"]
+				},
+				"*+es5",
+				true
+			]
 		];
 		TESTS.forEach(function(testCase) {
-			it("should say '" + testCase[1] + "' is " + (testCase[2] ? "matched" : "not matched") + " in '" + testCase[0] + "'", function() {
-				concord.isTypeMatched(testCase[0], testCase[1]).should.be.eql(testCase[2]);
-			});
+			it(
+				"should say '" +
+					testCase[1] +
+					"' is " +
+					(testCase[2] ? "matched" : "not matched") +
+					" in '" +
+					testCase[0] +
+					"'",
+				function() {
+					concord
+						.isTypeMatched(testCase[0], testCase[1])
+						.should.be.eql(testCase[2]);
+				}
+			);
 		});
 	});
 
@@ -129,23 +152,38 @@ describe("concord", function() {
 			["./a|b.js", "./a.js", false],
 			["./a|b.js", "./a|b.js", true],
 			["(\\.js$)", "./dir/abc.js", true],
-			["(\\.js$)", "./dir/abc.js.css", false],
+			["(\\.js$)", "./dir/abc.js.css", false]
 		];
 		TESTS.forEach(function(testCase) {
-			it("should say '" + testCase[1] + "' is " + (testCase[2] ? "matched" : "not matched") + " in '" + testCase[0] + "'", function() {
-				concord.isGlobMatched(testCase[0], testCase[1]).should.be.eql(testCase[2]);
-			});
+			it(
+				"should say '" +
+					testCase[1] +
+					"' is " +
+					(testCase[2] ? "matched" : "not matched") +
+					" in '" +
+					testCase[0] +
+					"'",
+				function() {
+					concord
+						.isGlobMatched(testCase[0], testCase[1])
+						.should.be.eql(testCase[2]);
+				}
+			);
 		});
 	});
 
 	describe("isConditionMatched", function() {
 		var context = {
-			supportedResourceTypes: ["promise+lazy/*", "stylesheet/sass+mixins", "stylesheet/sass+functions/incorrect"],
+			supportedResourceTypes: [
+				"promise+lazy/*",
+				"stylesheet/sass+mixins",
+				"stylesheet/sass+functions/incorrect"
+			],
 			environments: ["web+es5+dom+xhr", "web+es5+xhr"],
 			referrer: "./main.css"
 		};
 		var TESTS = {
-			"web": true,
+			web: true,
 			"web+es5": true,
 			"*+es6": false,
 			"*+es5": true,
@@ -169,13 +207,16 @@ describe("concord", function() {
 			"referrer:./**/*": true,
 			"referrer:./**": true,
 			"referrer:!./**": false,
-			"unknown:any": false,
+			"unknown:any": false
 		};
 		Object.keys(TESTS).forEach(function(key) {
 			var expected = TESTS[key];
-			it("should say '" + key + "' is " + (expected ? "matched" : "not matched"), function() {
-				concord.isConditionMatched(context, key).should.be.eql(expected);
-			});
+			it(
+				"should say '" + key + "' is " + (expected ? "matched" : "not matched"),
+				function() {
+					concord.isConditionMatched(context, key).should.be.eql(expected);
+				}
+			);
 		});
 	});
 
@@ -185,31 +226,40 @@ describe("concord", function() {
 			environments: ["web+es5+dom+xhr"],
 			referrer: "module"
 		};
-		var TESTS = [{
-			"main": "yes"
-		}, {
-			"main": "no",
-			"[web]main": "yes"
-		}, {
-			"main": "no",
-			"[   web  ]   [\t*+es5]\t\tmain": "yes"
-		}, {
-			"[web] main": "yes"
-		}, {
-			"main": "yes",
-			"[ node ] main": "no"
-		}, {
-			"main": "no",
-			"[ web ] main": "yes",
-			"[ node ] main": "no"
-		}, {
-			"main": "no",
-			"[ referrer: module ] main": "yes"
-		}, {
-			"main": "no",
-			"[ web] main": "no",
-			"[*+es5 ] main": "yes"
-		}];
+		var TESTS = [
+			{
+				main: "yes"
+			},
+			{
+				main: "no",
+				"[web]main": "yes"
+			},
+			{
+				main: "no",
+				"[   web  ]   [\t*+es5]\t\tmain": "yes"
+			},
+			{
+				"[web] main": "yes"
+			},
+			{
+				main: "yes",
+				"[ node ] main": "no"
+			},
+			{
+				main: "no",
+				"[ web ] main": "yes",
+				"[ node ] main": "no"
+			},
+			{
+				main: "no",
+				"[ referrer: module ] main": "yes"
+			},
+			{
+				main: "no",
+				"[ web] main": "no",
+				"[*+es5 ] main": "yes"
+			}
+		];
 		TESTS.forEach(function(testCase) {
 			it("should get the main from " + JSON.stringify(testCase), function() {
 				concord.getMain(context, testCase).should.be.eql("yes");
@@ -219,9 +269,14 @@ describe("concord", function() {
 
 	describe("getExtensions", function() {
 		it("should allow to access the extensions field", function() {
-			concord.getExtensions({}, {
-				extensions: [".js"]
-			}).should.be.eql([".js"]);
+			concord
+				.getExtensions(
+					{},
+					{
+						extensions: [".js"]
+					}
+				)
+				.should.be.eql([".js"]);
 		});
 	});
 
@@ -238,10 +293,10 @@ describe("concord", function() {
 				"./ddd/d.js": "./ddd/dd.js",
 				"./dir/**": "./new/**",
 				"./empty.js": false,
-				"module": "./replacement-module.js",
+				module: "./replacement-module.js",
 				"templates/**": "./templates/**",
-				"fs": "fake-fs",
-				"abc": "./abc",
+				fs: "fake-fs",
+				abc: "./abc",
 				"abc/**": "./dir-abc/**",
 				"jquery**": "./jquery**",
 				"xyz/*.js": "./not-used.js",
@@ -255,7 +310,7 @@ describe("concord", function() {
 				"./overwrite.js": "./wrong",
 				"./*.css": "./*.match",
 				"./*.match": "./success-*.matched-css",
-				"(regexp-([^\-]*))": "regexp/$1"
+				"(regexp-([^-]*))": "regexp/$1"
 			}
 		};
 		var TESTS = [
@@ -284,24 +339,35 @@ describe("concord", function() {
 			[config2, "./overwrite.js", "./overwritten.js"],
 			[config2, "./matched-again.css", "./success-matched-again.matched-css"],
 			[config2, "./some/regexp-match.js", "./some/regexp/match.js"],
-			[config2, "./overwrite.regexp-test.css", "./success-overwritten.regexp/test.matched-css"],
+			[
+				config2,
+				"./overwrite.regexp-test.css",
+				"./success-overwritten.regexp/test.matched-css"
+			]
 		];
 		TESTS.forEach(function(testCase) {
-			it("should map '" + testCase[1] + "' to '" + testCase[2] + "'", function() {
-				var actual = concord.matchModule(context, testCase[0], testCase[1]);
-				actual.should.be.eql(testCase[2]);
-			});
+			it(
+				"should map '" + testCase[1] + "' to '" + testCase[2] + "'",
+				function() {
+					var actual = concord.matchModule(context, testCase[0], testCase[1]);
+					actual.should.be.eql(testCase[2]);
+				}
+			);
 		});
 		it("should throw an exception on recursive configuration", function() {
 			(function() {
-				concord.matchModule({}, {
-					modules: {
-						"a": "b",
-						"b": "c",
-						"c": "a"
-					}
-				}, "b");
-			}).should.throw("Request 'b' matches recursively");
+				concord.matchModule(
+					{},
+					{
+						modules: {
+							a: "b",
+							b: "c",
+							c: "a"
+						}
+					},
+					"b"
+				);
+			}.should.throw("Request 'b' matches recursively"));
 		});
 	});
 
@@ -311,71 +377,103 @@ describe("concord", function() {
 			environments: ["web+es5+dom+xhr"]
 		};
 		var TESTS = [
-			["should get a type", {
-				"types": {
-					"*.test": "hello/world"
-				}
-			}, "hello/world"],
-			["should get a type from list", {
-				"types": {
-					"*.js": "any/javascript+commonjs",
-					"*.test": "hello/world",
-					"*.css": "stylesheet/css"
-				}
-			}, "hello/world"],
-			["should get a type with conditions", {
-				"types": {
-					"*.test": "hello/world",
-					"[*+es5] *.test": "hello/es5",
-					"[web] *.test": "hello/web",
-				}
-			}, "hello/web"],
-			["should get a type with complete override", {
-				"types": {
-					"*.test": "hello/world",
-					"[web] *.test": "hello/wrong"
+			[
+				"should get a type",
+				{
+					types: {
+						"*.test": "hello/world"
+					}
 				},
-				"[web] types": {
-					"*.js": "hello/web"
-				}
-			}, undefined],
-			["should get a type with multiple matches", {
-				"types": {
-					"*.test": "hello/world",
-					"./abc.test": "hello/abs"
-				}
-			}, "hello/abs"],
-			["should get a type with multiple matches 2", {
-				"types": {
-					"./abc.test": "hello/abs",
-					"*.test": "hello/world"
-				}
-			}, "hello/world"],
-			["should get a type with star match", {
-				"types": {
-					"./abc.test": "hello/world",
-					"*.test": "super/*"
-				}
-			}, "super/hello/world"],
-			["should get a type without types field", {}, undefined],
+				"hello/world"
+			],
+			[
+				"should get a type from list",
+				{
+					types: {
+						"*.js": "any/javascript+commonjs",
+						"*.test": "hello/world",
+						"*.css": "stylesheet/css"
+					}
+				},
+				"hello/world"
+			],
+			[
+				"should get a type with conditions",
+				{
+					types: {
+						"*.test": "hello/world",
+						"[*+es5] *.test": "hello/es5",
+						"[web] *.test": "hello/web"
+					}
+				},
+				"hello/web"
+			],
+			[
+				"should get a type with complete override",
+				{
+					types: {
+						"*.test": "hello/world",
+						"[web] *.test": "hello/wrong"
+					},
+					"[web] types": {
+						"*.js": "hello/web"
+					}
+				},
+				undefined
+			],
+			[
+				"should get a type with multiple matches",
+				{
+					types: {
+						"*.test": "hello/world",
+						"./abc.test": "hello/abs"
+					}
+				},
+				"hello/abs"
+			],
+			[
+				"should get a type with multiple matches 2",
+				{
+					types: {
+						"./abc.test": "hello/abs",
+						"*.test": "hello/world"
+					}
+				},
+				"hello/world"
+			],
+			[
+				"should get a type with star match",
+				{
+					types: {
+						"./abc.test": "hello/world",
+						"*.test": "super/*"
+					}
+				},
+				"super/hello/world"
+			],
+			["should get a type without types field", {}, undefined]
 		];
 		TESTS.forEach(function(testCase) {
 			it(testCase[0], function() {
 				var result = concord.matchType(context, testCase[1], "./abc.test");
-				if(testCase[2])
-					result.should.be.eql(testCase[2]);
-				else
-					(typeof result).should.be.eql(typeof testCase[2]);
+				if (testCase[2]) result.should.be.eql(testCase[2]);
+				else (typeof result).should.be.eql(typeof testCase[2]);
 			});
 		});
 		it("should throw an exception on incomplete star match", function() {
 			(function() {
-				concord.matchType({}, {
-					types: {
-						"*.test": "super/*"
-					}
-				}, "./abc.test");
-			}).should.throw("value ('super/*') of key '*.test' contains '*', but there is no previous value defined");
+				concord.matchType(
+					{},
+					{
+						types: {
+							"*.test": "super/*"
+						}
+					},
+					"./abc.test"
+				);
+			}.should.throw(
+				"value ('super/*') of key '*.test' contains '*', but there is no previous value defined"
+			));
 		});
 	});
 });

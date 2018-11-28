@@ -6,7 +6,7 @@ describe("alias", function() {
 	var resolver;
 
 	beforeEach(function() {
-		var buf = new Buffer(""); // eslint-disable-line node/no-deprecated-api
+		var buf = Buffer.from("");
 		var fileSystem = new MemoryFileSystem({
 			"": true,
 			a: {
@@ -52,11 +52,11 @@ describe("alias", function() {
 		resolver = ResolverFactory.createResolver({
 			alias: {
 				aliasA: "a",
-				"b$": "a/index",
-				"c$": "/a/index",
-				"recursive": "recursive/dir",
+				b$: "a/index",
+				c$: "/a/index",
+				recursive: "recursive/dir",
 				"/d/dir": "/c/dir",
-				"/d/index.js": "/c/index",
+				"/d/index.js": "/c/index"
 			},
 			modules: "/",
 			useSyncFileSystemCalls: true,
@@ -74,13 +74,23 @@ describe("alias", function() {
 		resolver.resolveSync({}, "/", "aliasA").should.be.eql("/a/index");
 		resolver.resolveSync({}, "/", "aliasA/index").should.be.eql("/a/index");
 		resolver.resolveSync({}, "/", "aliasA/dir").should.be.eql("/a/dir/index");
-		resolver.resolveSync({}, "/", "aliasA/dir/index").should.be.eql("/a/dir/index");
+		resolver
+			.resolveSync({}, "/", "aliasA/dir/index")
+			.should.be.eql("/a/dir/index");
 	});
 	it("should resolve a recursive aliased module", function() {
-		resolver.resolveSync({}, "/", "recursive").should.be.eql("/recursive/dir/index");
-		resolver.resolveSync({}, "/", "recursive/index").should.be.eql("/recursive/dir/index");
-		resolver.resolveSync({}, "/", "recursive/dir").should.be.eql("/recursive/dir/index");
-		resolver.resolveSync({}, "/", "recursive/dir/index").should.be.eql("/recursive/dir/index");
+		resolver
+			.resolveSync({}, "/", "recursive")
+			.should.be.eql("/recursive/dir/index");
+		resolver
+			.resolveSync({}, "/", "recursive/index")
+			.should.be.eql("/recursive/dir/index");
+		resolver
+			.resolveSync({}, "/", "recursive/dir")
+			.should.be.eql("/recursive/dir/index");
+		resolver
+			.resolveSync({}, "/", "recursive/dir/index")
+			.should.be.eql("/recursive/dir/index");
 	});
 	it("should resolve a file aliased module", function() {
 		resolver.resolveSync({}, "/", "b").should.be.eql("/a/index");
@@ -102,5 +112,4 @@ describe("alias", function() {
 		resolver.resolveSync({}, "/", "d").should.be.eql("/c/index");
 		resolver.resolveSync({}, "/", "d/dir/index").should.be.eql("/c/dir/index");
 	});
-
 });
