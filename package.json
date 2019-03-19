@@ -30,7 +30,8 @@
     "lint-staged": "^8.1.0",
     "mocha": "^2.3.4",
     "prettier": "^1.15.2",
-    "should": "^8.0.2"
+    "should": "^8.0.2",
+    "memfs": "^2.14.1"
   },
   "engines": {
     "node": ">=6.9.0"

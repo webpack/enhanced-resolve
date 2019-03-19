@@ -95,6 +95,10 @@ Plugins are executed in a pipeline, and register which event they should be exec
 
 ## Tests
 
+```
+npm install yarn -g
+```
+
 ``` javascript
 npm test
 ```
