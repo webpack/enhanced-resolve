@@ -3,11 +3,6 @@ var should = require("should");
 
 describe("NodeJsInputFileSystem", function() {
 	this.timeout(3000);
-	beforeEach(function() {});
-	afterEach(function() {
-		//fs.purge();
-	});
-
 	it("shoud not require fs argument in constructor", function(done) {
 		var nodeFs = new nodeJsInputFileSystem();
 		should.exist(nodeFs);
