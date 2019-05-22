@@ -40,6 +40,7 @@
   "scripts": {
     "lint": "eslint lib test",
     "pretty": "prettier --loglevel warn --write \"{lib,test}/**/*.{js,json}\"",
+    "pretest": "yarn lint",
     "test": "mocha --full-trace --check-leaks",
     "precover": "yarn lint",
     "cover": "istanbul cover node_modules/mocha/bin/_mocha",
