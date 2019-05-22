@@ -38,65 +38,64 @@ describe("jail", function() {
 								},
 							}
 						},
+						b: {
+							"": true,
+							"index.js": buf,
+						},
 					}
 				}
 			},
+			other: {
+				"": true,
+				node_modules: {
+					a: {
+						"": true,
+						"index.js": buf,
+					},
+					d: {
+						"": true,
+						"index.js": buf,
+					},
+				}
+			}
 		});
 		resolver = ResolverFactory.createResolver({
-			modules: [["node_modules"]],
+			modules: ["/other/node_modules", "node_modules"],
 			useSyncFileSystemCalls: true,
 			fileSystem: fileSystem,
 			jail: "/someDir/myJail",
 		});
 	});
 
-	it("should resolve a not aliased module", function() {
-		// resolver.resolveSync({}, "/someDir/myJail/node_modules/a/node_modules", "a").should.be.eql("/someDir/myJail/node_modules/a/index.js");
-		resolver.resolveSync({}, "/someDir/myJail/node_modules/a/node_modules", "c").should.be.eql("/someDir/node_modules/c/index.js");
-		// resolver.resolveSync({}, "/", "a/index").should.be.eql("/a/index");
-		// resolver.resolveSync({}, "/", "a/dir").should.be.eql("/a/dir/index");
-		// resolver.resolveSync({}, "/", "a/dir/index").should.be.eql("/a/dir/index");
+	it("should resolve modules in jail", function() {
+		resolver.resolveSync({}, "/someDir/myJail/node_modules/a/node_modules", "a").should.be.eql("/someDir/myJail/node_modules/a/index.js");
+		resolver.resolveSync({}, "/someDir/myJail/node_modules/a/node_modules", "b").should.be.eql("/someDir/myJail/node_modules/a/node_modules/b/index.js");
+		resolver.resolveSync({}, "/someDir/myJail/", "b").should.be.eql("/someDir/myJail/node_modules/b/index.js");
 	});
-	// it("should resolve an aliased module", function() {
-	// 	resolver.resolveSync({}, "/", "aliasA").should.be.eql("/a/index");
-	// 	resolver.resolveSync({}, "/", "aliasA/index").should.be.eql("/a/index");
-	// 	resolver.resolveSync({}, "/", "aliasA/dir").should.be.eql("/a/dir/index");
-	// 	resolver
-	// 		.resolveSync({}, "/", "aliasA/dir/index")
-	// 		.should.be.eql("/a/dir/index");
-	// });
-	// it("should resolve a recursive aliased module", function() {
-	// 	resolver
-	// 		.resolveSync({}, "/", "recursive")
-	// 		.should.be.eql("/recursive/dir/index");
-	// 	resolver
-	// 		.resolveSync({}, "/", "recursive/index")
-	// 		.should.be.eql("/recursive/dir/index");
-	// 	resolver
-	// 		.resolveSync({}, "/", "recursive/dir")
-	// 		.should.be.eql("/recursive/dir/index");
-	// 	resolver
-	// 		.resolveSync({}, "/", "recursive/dir/index")
-	// 		.should.be.eql("/recursive/dir/index");
-	// });
-	// it("should resolve a file aliased module", function() {
-	// 	resolver.resolveSync({}, "/", "b").should.be.eql("/a/index");
-	// 	resolver.resolveSync({}, "/", "c").should.be.eql("/a/index");
-	// });
-	// it("should resolve a file aliased module with a query", function() {
-	// 	resolver.resolveSync({}, "/", "b?query").should.be.eql("/a/index?query");
-	// 	resolver.resolveSync({}, "/", "c?query").should.be.eql("/a/index?query");
-	// });
-	// it("should resolve a path in a file aliased module", function() {
-	// 	resolver.resolveSync({}, "/", "b/index").should.be.eql("/b/index");
-	// 	resolver.resolveSync({}, "/", "b/dir").should.be.eql("/b/dir/index");
-	// 	resolver.resolveSync({}, "/", "b/dir/index").should.be.eql("/b/dir/index");
-	// 	resolver.resolveSync({}, "/", "c/index").should.be.eql("/c/index");
-	// 	resolver.resolveSync({}, "/", "c/dir").should.be.eql("/c/dir/index");
-	// 	resolver.resolveSync({}, "/", "c/dir/index").should.be.eql("/c/dir/index");
-	// });
-	// it("should resolve a file aliased file", function() {
-	// 	resolver.resolveSync({}, "/", "d").should.be.eql("/c/index");
-	// 	resolver.resolveSync({}, "/", "d/dir/index").should.be.eql("/c/dir/index");
-	// });
+
+	it("should not resolve modules outside of jail", function() {
+		try {
+			resolver.resolveSync({}, "/someDir/myJail/node_modules/a/node_modules", "c").should.be.eql("");
+		} catch (e) {
+			e.toString().should.be.eql("Error: Can\'t resolve \'c\' in \'/someDir/myJail/node_modules/a/node_modules\'")
+		}
+		try {
+			resolver.resolveSync({}, "/someDir/myJail/node_modules/a/node_modules", "d").should.be.eql("");
+		} catch (e) {
+			e.toString().should.be.eql("Error: Can\'t resolve \'d\' in \'/someDir/myJail/node_modules/a/node_modules\'")
+		}
+	});
+
+	it("should not resolve modules from path outside jail", function() {
+		try {
+			resolver.resolveSync({}, "/someDir", "a").should.be.eql("");
+		} catch (e) {
+			e.toString().should.be.eql("Error: Can\'t resolve \'a\' in \'/someDir\'")
+		}
+		try {
+			resolver.resolveSync({}, "/someDir", "b").should.be.eql("");
+		} catch (e) {
+			e.toString().should.be.eql("Error: Can\'t resolve \'b\' in \'/someDir\'")
+		}
+	});
 });
