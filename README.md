@@ -59,6 +59,7 @@ For more examples creating different types resolvers (sync/async, context, etc) 
 | mainFields               | ["main"]                    | A list of main fields in description files |
 | mainFiles                | ["index"]                   | A list of main files in directories |
 | modules                  | ["node_modules"]            | A list of directories to resolve modules from, can be absolute path or folder name |
+| jail                     | ""                          | An absolute path to which the module search is being limited to (like a chroot). Any modules outside this path will be ignored, even if specified in "modules" |
 | unsafeCache              | false                       | Use this cache object to unsafely cache the successful requests |
 | plugins                  | []                          | A list of additional resolve plugins which should be applied |
 | symlinks                 | true                        | Whether to resolve symlinks to their symlinked location |
