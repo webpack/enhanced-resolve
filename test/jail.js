@@ -60,7 +60,7 @@ describe("jail", function() {
 			}
 		});
 		resolver = ResolverFactory.createResolver({
-			modules: ["node_modules"],
+			modules: ["node_modules", "/someDir/myJail"],
 			useSyncFileSystemCalls: true,
 			fileSystem: fileSystem,
 			jail: "/someDir/myJail"
@@ -128,7 +128,19 @@ describe("incorrect jail config", function() {
 			}).should.be.eql("");
 		} catch (e) {
 			e.toString().should.be.eql(
-				"Error: The provided module path '/other/node_modules' is not within the provided jail path '/someDir/myJail'. Please remove it."
+				"Error: The provided module path '/other/node_modules' is not within the provided jail path '/someDir/myJail/'. Please remove it."
+			);
+		}
+		try {
+			ResolverFactory.createResolver({
+				modules: ["/someDir/myJailother"],
+				useSyncFileSystemCalls: true,
+				fileSystem: fileSystem,
+				jail: "/someDir/myJail"
+			}).should.be.eql("");
+		} catch (e) {
+			e.toString().should.be.eql(
+				"Error: The provided module path '/someDir/myJailother' is not within the provided jail path '/someDir/myJail/'. Please remove it."
 			);
 		}
 	});
