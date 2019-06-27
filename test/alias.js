@@ -1,6 +1,7 @@
 require("should");
 var ResolverFactory = require("../lib/ResolverFactory");
 var MemoryFileSystem = require("memory-fs");
+var { normalizeOptions } = require("../lib/AliasPlugin");
 
 describe("alias", function() {
 	var resolver;
@@ -47,6 +48,18 @@ describe("alias", function() {
 				dir: {
 					"": true
 				}
+			},
+			e: {
+				"": true,
+				index: buf,
+				anotherDir: {
+					"": true,
+					index: buf
+				},
+				dir: {
+					"": true,
+					file: buf
+				}
 			}
 		});
 		resolver = ResolverFactory.createResolver({
@@ -54,6 +67,7 @@ describe("alias", function() {
 				aliasA: "a",
 				b$: "a/index",
 				c$: "/a/index",
+				multiAlias: ["b", "c", "d", "e", "a"],
 				recursive: "recursive/dir",
 				"/d/dir": "/c/dir",
 				"/d/index.js": "/c/index"
@@ -111,5 +125,56 @@ describe("alias", function() {
 	it("should resolve a file aliased file", function() {
 		resolver.resolveSync({}, "/", "d").should.be.eql("/c/index");
 		resolver.resolveSync({}, "/", "d/dir/index").should.be.eql("/c/dir/index");
+	});
+	it("should resolve a file in multiple aliased dirs", function() {
+		resolver
+			.resolveSync({}, "/", "multiAlias/dir/file")
+			.should.be.eql("/e/dir/file");
+		resolver
+			.resolveSync({}, "/", "multiAlias/anotherDir")
+			.should.be.eql("/e/anotherDir/index");
+	});
+});
+
+describe("alias normalizeOptions", function() {
+	it("should convert shorthanded type option with single alias", function() {
+		normalizeOptions({ a: "./src/a" }).should.be.eql([
+			{ name: "a", alias: "./src/a", onlyModule: false }
+		]);
+		normalizeOptions({ a: "./src/a", b: "./src/b" }).should.be.eql([
+			{ name: "a", alias: "./src/a", onlyModule: false },
+			{ name: "b", alias: "./src/b", onlyModule: false }
+		]);
+	});
+	it("should convert shorthanded type option with multiple aliases", function() {
+		normalizeOptions({ a: ["./src/a", "./lib/a"] }).should.be.eql([
+			{ name: "a", alias: "./src/a", onlyModule: false },
+			{ name: "a", alias: "./lib/a", onlyModule: false }
+		]);
+		normalizeOptions({
+			a: ["./src/a", "./lib/a"],
+			b: "./src/b"
+		}).should.be.eql([
+			{ name: "a", alias: "./src/a", onlyModule: false },
+			{ name: "a", alias: "./lib/a", onlyModule: false },
+			{ name: "b", alias: "./src/b", onlyModule: false }
+		]);
+		normalizeOptions({
+			a: ["./src/a", "./lib/a"],
+			b: ["./src/b", "./lib/b"]
+		}).should.be.eql([
+			{ name: "a", alias: "./src/a", onlyModule: false },
+			{ name: "a", alias: "./lib/a", onlyModule: false },
+			{ name: "b", alias: "./src/b", onlyModule: false },
+			{ name: "b", alias: "./lib/b", onlyModule: false }
+		]);
+	});
+	it("should pass through raw type options", function() {
+		const options = [
+			{ name: "a", alias: "./src/a", onlyModule: false },
+			{ name: "b", alias: "./src/b", onlyModule: true },
+			{ name: "c", alias: "./src/c", onlyModule: false }
+		];
+		normalizeOptions(options).should.be.eql(options);
 	});
 });
