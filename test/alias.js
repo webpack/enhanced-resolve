@@ -1,54 +1,26 @@
 require("should");
 var ResolverFactory = require("../lib/ResolverFactory");
-var MemoryFileSystem = require("memory-fs");
+var { Volume } = require("memfs");
 
 describe("alias", function() {
 	var resolver;
 
 	beforeEach(function() {
-		var buf = Buffer.from("");
-		var fileSystem = new MemoryFileSystem({
-			"": true,
-			a: {
-				"": true,
-				index: buf,
-				dir: {
-					"": true,
-					index: buf
-				}
+		var fileSystem = Volume.fromJSON(
+			{
+				"/a/index": "",
+				"/a/dir/index": "",
+				"/recursive/index": "",
+				"/recursive/dir/index": "",
+				"/b/index": "",
+				"/b/dir/index": "",
+				"/c/index": "",
+				"/c/dir/index": "",
+				"/d/index.js": "",
+				"/d/dir/.empty": ""
 			},
-			recursive: {
-				"": true,
-				index: buf,
-				dir: {
-					"": true,
-					index: buf
-				}
-			},
-			b: {
-				"": true,
-				index: buf,
-				dir: {
-					"": true,
-					index: buf
-				}
-			},
-			c: {
-				"": true,
-				index: buf,
-				dir: {
-					"": true,
-					index: buf
-				}
-			},
-			d: {
-				"": true,
-				"index.js": buf,
-				dir: {
-					"": true
-				}
-			}
-		});
+			"/"
+		);
 		resolver = ResolverFactory.createResolver({
 			alias: {
 				aliasA: "a",
