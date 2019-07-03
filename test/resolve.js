@@ -8,6 +8,28 @@ var resolve = require("../");
 
 var fixtures = path.join(__dirname, "fixtures");
 
+const asyncContextResolve = resolve.create({
+	extensions: [".js", ".json", ".node"],
+	resolveToContext: true
+});
+
+const syncContextResolve = resolve.create.sync({
+	extensions: [".js", ".json", ".node"],
+	resolveToContext: true
+});
+
+const asyncLoaderResolve = resolve.create({
+	extensions: [".js", ".json", ".node"],
+	moduleExtensions: ["-loader"],
+	mainFields: ["loader", "main"]
+});
+
+const syncLoaderResolve = resolve.create.sync({
+	extensions: [".js", ".json", ".node"],
+	moduleExtensions: ["-loader"],
+	mainFields: ["loader", "main"]
+});
+
 function testResolve(name, context, moduleName, result) {
 	describe(name, function() {
 		it("should resolve sync correctly", function() {
@@ -29,12 +51,12 @@ function testResolve(name, context, moduleName, result) {
 function testResolveLoader(name, context, moduleName, result) {
 	describe(name, function() {
 		it("should resolve sync correctly", function() {
-			var filename = resolve.loader.sync(context, moduleName);
+			var filename = syncLoaderResolve(context, moduleName);
 			should.exist(filename);
 			filename.should.equal(result);
 		});
 		it("should resolve async correctly", function(done) {
-			resolve.loader(context, moduleName, function(err, filename) {
+			asyncLoaderResolve(context, moduleName, function(err, filename) {
 				if (err) return done(err);
 				should.exist(filename);
 				filename.should.equal(result);
@@ -47,7 +69,7 @@ function testResolveLoader(name, context, moduleName, result) {
 function testResolveContext(name, context, moduleName, result) {
 	describe(name, function() {
 		it("should resolve async correctly", function(done) {
-			resolve.context(context, moduleName, function(err, filename) {
+			asyncContextResolve(context, moduleName, function(err, filename) {
 				if (err) done(err);
 				should.exist(filename);
 				filename.should.equal(result);
@@ -55,7 +77,7 @@ function testResolveContext(name, context, moduleName, result) {
 			});
 		});
 		it("should resolve sync correctly", function() {
-			var filename = resolve.context.sync(context, moduleName);
+			var filename = syncContextResolve(context, moduleName);
 			should.exist(filename);
 			filename.should.equal(result);
 		});
