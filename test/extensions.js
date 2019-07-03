@@ -1,20 +1,17 @@
-var path = require("path");
+const path = require("path");
+const fs = require("fs");
 require("should");
-var ResolverFactory = require("../lib/ResolverFactory");
-var NodeJsInputFileSystem = require("../lib/NodeJsInputFileSystem");
-var CachedInputFileSystem = require("../lib/CachedInputFileSystem");
+const ResolverFactory = require("../lib/ResolverFactory");
+const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
 
-var nodeFileSystem = new CachedInputFileSystem(
-	new NodeJsInputFileSystem(),
-	4000
-);
+const nodeFileSystem = new CachedInputFileSystem(fs, 4000);
 
-var resolver = ResolverFactory.createResolver({
+const resolver = ResolverFactory.createResolver({
 	extensions: [".ts", ".js"],
 	fileSystem: nodeFileSystem
 });
 
-var fixture = path.resolve(__dirname, "fixtures", "extensions");
+const fixture = path.resolve(__dirname, "fixtures", "extensions");
 
 describe("extensions", function() {
 	it("should resolve according to order of provided extensions", function(done) {
