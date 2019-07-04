@@ -29,7 +29,7 @@ describe("unsafe-cache", function() {
 				result
 			) {
 				if (err) return done(err);
-				Object.keys(cache).should.have.length(2);
+				Object.keys(cache).should.have.length(1);
 				Object.keys(cache).forEach(function(key) {
 					cache[key] = {
 						path: "yep"
@@ -51,7 +51,7 @@ describe("unsafe-cache", function() {
 				result
 			) {
 				if (err) return done(err);
-				Object.keys(cache).should.have.length(2);
+				Object.keys(cache).should.have.length(1);
 				Object.keys(cache).forEach(function(key) {
 					cache[key] = {
 						path: "yep"
@@ -75,7 +75,7 @@ describe("unsafe-cache", function() {
 				result
 			) {
 				if (err) return done(err);
-				Object.keys(cache).should.have.length(2);
+				Object.keys(cache).should.have.length(1);
 				Object.keys(cache).forEach(function(key) {
 					cache[key] = {
 						path: "yep"
@@ -107,7 +107,7 @@ describe("unsafe-cache", function() {
 				result
 			) {
 				if (err) return done(err);
-				Object.keys(cache).should.have.length(2);
+				Object.keys(cache).should.have.length(1);
 				Object.keys(cache).forEach(function(key) {
 					cache[key] = {
 						path: "yep"
@@ -131,7 +131,7 @@ describe("unsafe-cache", function() {
 				result
 			) {
 				if (err) return done(err);
-				Object.keys(cache).should.have.length(2);
+				Object.keys(cache).should.have.length(1);
 				Object.keys(cache).forEach(function(key) {
 					cache[key] = {
 						path: "yep"

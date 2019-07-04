@@ -1,37 +1,44 @@
-var path = require("path");
+const path = require("path");
+const fs = require("fs");
 require("should");
-var ResolverFactory = require("../lib/ResolverFactory");
-var NodeJsInputFileSystem = require("../lib/NodeJsInputFileSystem");
-var CachedInputFileSystem = require("../lib/CachedInputFileSystem");
+const ResolverFactory = require("../lib/ResolverFactory");
+const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
 
-var nodeFileSystem = new CachedInputFileSystem(
-	new NodeJsInputFileSystem(),
-	4000
-);
+const nodeFileSystem = new CachedInputFileSystem(fs, 4000);
 
-var resolver = ResolverFactory.createResolver({
+const resolver = ResolverFactory.createResolver({
 	extensions: [".ts", ".js"],
 	fileSystem: nodeFileSystem
 });
 
-var fixture = path.resolve(__dirname, "fixtures", "extensions");
+const fixture = path.resolve(__dirname, "fixtures", "extensions");
 
 describe("extensions", function() {
 	it("should resolve according to order of provided extensions", function(done) {
-		resolver.resolve({}, fixture, "./foo", {}, function(err, result) {
+		resolver.resolve({}, fixture, "./foo", {}, (err, result) => {
+			if (err) return done(err);
 			result.should.equal(path.resolve(fixture, "foo.ts"));
 			done();
 		});
 	});
 	it("should resolve according to order of provided extensions (dir index)", function(done) {
-		resolver.resolve({}, fixture, "./dir", {}, function(err, result) {
+		resolver.resolve({}, fixture, "./dir", {}, (err, result) => {
+			if (err) return done(err);
 			result.should.equal(path.resolve(fixture, "dir", "index.ts"));
 			done();
 		});
 	});
 	it("should resolve according to main field in module root", function(done) {
-		resolver.resolve({}, fixture, ".", {}, function(err, result) {
+		resolver.resolve({}, fixture, ".", {}, (err, result) => {
+			if (err) return done(err);
 			result.should.equal(path.resolve(fixture, "index.js"));
+			done();
+		});
+	});
+	it("should resolve single file module before directory", function(done) {
+		resolver.resolve({}, fixture, "module", {}, (err, result) => {
+			if (err) return done(err);
+			result.should.equal(path.resolve(fixture, "node_modules/module.js"));
 			done();
 		});
 	});

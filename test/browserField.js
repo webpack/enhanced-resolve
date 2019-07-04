@@ -1,7 +1,7 @@
 var path = require("path");
+var fs = require("fs");
 
 var ResolverFactory = require("../lib/ResolverFactory");
-var NodeJsInputFileSystem = require("../lib/NodeJsInputFileSystem");
 
 var browserModule = path.join(__dirname, "fixtures", "browser-module");
 
@@ -19,7 +19,7 @@ describe("browserField", function() {
 		resolver = ResolverFactory.createResolver({
 			aliasFields: ["browser"],
 			useSyncFileSystemCalls: true,
-			fileSystem: new NodeJsInputFileSystem()
+			fileSystem: fs
 		});
 	});
 

@@ -1,59 +1,35 @@
 require("should");
 var ResolverFactory = require("../lib/ResolverFactory");
-var MemoryFileSystem = require("memory-fs");
+var { Volume } = require("memfs");
 
 describe("alias", function() {
 	var resolver;
 
 	beforeEach(function() {
-		var buf = Buffer.from("");
-		var fileSystem = new MemoryFileSystem({
-			"": true,
-			a: {
-				"": true,
-				index: buf,
-				dir: {
-					"": true,
-					index: buf
-				}
+		var fileSystem = Volume.fromJSON(
+			{
+				"/a/index": "",
+				"/a/dir/index": "",
+				"/recursive/index": "",
+				"/recursive/dir/index": "",
+				"/b/index": "",
+				"/b/dir/index": "",
+				"/c/index": "",
+				"/c/dir/index": "",
+				"/d/index.js": "",
+				"/d/dir/.empty": "",
+				"/e/index": "",
+				"/e/anotherDir/index": "",
+				"/e/dir/file": ""
 			},
-			recursive: {
-				"": true,
-				index: buf,
-				dir: {
-					"": true,
-					index: buf
-				}
-			},
-			b: {
-				"": true,
-				index: buf,
-				dir: {
-					"": true,
-					index: buf
-				}
-			},
-			c: {
-				"": true,
-				index: buf,
-				dir: {
-					"": true,
-					index: buf
-				}
-			},
-			d: {
-				"": true,
-				"index.js": buf,
-				dir: {
-					"": true
-				}
-			}
-		});
+			"/"
+		);
 		resolver = ResolverFactory.createResolver({
 			alias: {
 				aliasA: "a",
 				b$: "a/index",
 				c$: "/a/index",
+				multiAlias: ["b", "c", "d", "e", "a"],
 				recursive: "recursive/dir",
 				"/d/dir": "/c/dir",
 				"/d/index.js": "/c/index"
@@ -111,5 +87,65 @@ describe("alias", function() {
 	it("should resolve a file aliased file", function() {
 		resolver.resolveSync({}, "/", "d").should.be.eql("/c/index");
 		resolver.resolveSync({}, "/", "d/dir/index").should.be.eql("/c/dir/index");
+	});
+	it("should resolve a file in multiple aliased dirs", function() {
+		resolver
+			.resolveSync({}, "/", "multiAlias/dir/file")
+			.should.be.eql("/e/dir/file");
+		resolver
+			.resolveSync({}, "/", "multiAlias/anotherDir")
+			.should.be.eql("/e/anotherDir/index");
+	});
+	it("should log the correct info", done => {
+		const log = [];
+		resolver.resolve(
+			{},
+			"/",
+			"aliasA/dir",
+			{ log: v => log.push(v) },
+			(err, result) => {
+				if (err) return done(err);
+				result.should.be.eql("/a/dir/index");
+				log.should.be.eql([
+					"resolve 'aliasA/dir' in '/'",
+					"  Parsed request is a module",
+					"  No description file found in / or above",
+					"  aliased with mapping 'aliasA': 'a' to 'a/dir'",
+					"    Parsed request is a module",
+					"    No description file found in / or above",
+					"    resolve as module",
+					"      looking for modules in /",
+					"        single file module",
+					"          No description file found in / or above",
+					"          no extension",
+					"            /a is not a file",
+					"          .js",
+					"            /a.js doesn't exist",
+					"          .json",
+					"            /a.json doesn't exist",
+					"          .node",
+					"            /a.node doesn't exist",
+					"        existing directory /a",
+					"          No description file found in /a or above",
+					"          no extension",
+					"            /a/dir is not a file",
+					"          .js",
+					"            /a/dir.js doesn't exist",
+					"          .json",
+					"            /a/dir.json doesn't exist",
+					"          .node",
+					"            /a/dir.node doesn't exist",
+					"          as directory",
+					"            existing directory /a/dir",
+					"              No description file found in /a/dir or above",
+					"              using path: /a/dir/index",
+					"                No description file found in /a/dir or above",
+					"                no extension",
+					"                  existing file: /a/dir/index",
+					"                    reporting result /a/dir/index"
+				]);
+				done();
+			}
+		);
 	});
 });
