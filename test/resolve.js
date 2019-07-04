@@ -18,18 +18,6 @@ const syncContextResolve = resolve.create.sync({
 	resolveToContext: true
 });
 
-const asyncLoaderResolve = resolve.create({
-	extensions: [".js", ".json", ".node"],
-	moduleExtensions: ["-loader"],
-	mainFields: ["loader", "main"]
-});
-
-const syncLoaderResolve = resolve.create.sync({
-	extensions: [".js", ".json", ".node"],
-	moduleExtensions: ["-loader"],
-	mainFields: ["loader", "main"]
-});
-
 function testResolve(name, context, moduleName, result) {
 	describe(name, function() {
 		it("should resolve sync correctly", function() {
@@ -39,24 +27,6 @@ function testResolve(name, context, moduleName, result) {
 		});
 		it("should resolve async correctly", function(done) {
 			resolve(context, moduleName, function(err, filename) {
-				if (err) return done(err);
-				should.exist(filename);
-				filename.should.equal(result);
-				done();
-			});
-		});
-	});
-}
-
-function testResolveLoader(name, context, moduleName, result) {
-	describe(name, function() {
-		it("should resolve sync correctly", function() {
-			var filename = syncLoaderResolve(context, moduleName);
-			should.exist(filename);
-			filename.should.equal(result);
-		});
-		it("should resolve async correctly", function(done) {
-			asyncLoaderResolve(context, moduleName, function(err, filename) {
 				if (err) return done(err);
 				should.exist(filename);
 				filename.should.equal(result);
@@ -203,19 +173,6 @@ describe("resolve", function() {
 		fixtures,
 		"./dirOrFile/",
 		path.join(fixtures, "dirOrFile", "index.js")
-	);
-
-	testResolveLoader(
-		"loader with template without extension",
-		fixtures,
-		"m2/b",
-		path.join(fixtures, "node_modules", "m2-loader", "b.js")
-	);
-	testResolveLoader(
-		"loader with template as file",
-		fixtures,
-		"l",
-		path.join(fixtures, "node_modules", "l-loader.js")
 	);
 
 	testResolve(
