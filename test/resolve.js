@@ -188,4 +188,11 @@ describe("resolve", function() {
 		"./main-field-self",
 		path.join(fixtures, "main-field-self", "index.js")
 	);
+
+	testResolve(
+		"don't crash on main field pointing to self",
+		fixtures,
+		"./main-field-self2",
+		path.join(fixtures, "main-field-self2", "index.js")
+	);
 });
