@@ -17,7 +17,10 @@ describe("alias", function() {
 				"/c/index": "",
 				"/c/dir/index": "",
 				"/d/index.js": "",
-				"/d/dir/.empty": ""
+				"/d/dir/.empty": "",
+				"/e/index": "",
+				"/e/anotherDir/index": "",
+				"/e/dir/file": ""
 			},
 			"/"
 		);
@@ -26,6 +29,7 @@ describe("alias", function() {
 				aliasA: "a",
 				b$: "a/index",
 				c$: "/a/index",
+				multiAlias: ["b", "c", "d", "e", "a"],
 				recursive: "recursive/dir",
 				"/d/dir": "/c/dir",
 				"/d/index.js": "/c/index"
@@ -83,5 +87,13 @@ describe("alias", function() {
 	it("should resolve a file aliased file", function() {
 		resolver.resolveSync({}, "/", "d").should.be.eql("/c/index");
 		resolver.resolveSync({}, "/", "d/dir/index").should.be.eql("/c/dir/index");
+	});
+	it("should resolve a file in multiple aliased dirs", function() {
+		resolver
+			.resolveSync({}, "/", "multiAlias/dir/file")
+			.should.be.eql("/e/dir/file");
+		resolver
+			.resolveSync({}, "/", "multiAlias/anotherDir")
+			.should.be.eql("/e/anotherDir/index");
 	});
 });
