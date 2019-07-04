@@ -96,4 +96,46 @@ describe("alias", function() {
 			.resolveSync({}, "/", "multiAlias/anotherDir")
 			.should.be.eql("/e/anotherDir/index");
 	});
+	it("should log the correct info", done => {
+		const log = [];
+		resolver.resolve(
+			{},
+			"/",
+			"aliasA/dir",
+			{ log: v => log.push(v) },
+			(err, result) => {
+				if (err) return done(err);
+				result.should.be.eql("/a/dir/index");
+				log.should.be.eql([
+					"resolve 'aliasA/dir' in '/'",
+					"  Parsed request is a module",
+					"  No description file found in / or above",
+					"  aliased with mapping 'aliasA': 'a' to 'a/dir'",
+					"    Parsed request is a module",
+					"    No description file found in / or above",
+					"    resolve as module",
+					"      looking for modules in /",
+					"        existing directory /a",
+					"          No description file found in /a or above",
+					"          no extension",
+					"            /a/dir is not a file",
+					"          .js",
+					"            /a/dir.js doesn't exist",
+					"          .json",
+					"            /a/dir.json doesn't exist",
+					"          .node",
+					"            /a/dir.node doesn't exist",
+					"          as directory",
+					"            existing directory /a/dir",
+					"              No description file found in /a/dir or above",
+					"              using path: /a/dir/index",
+					"                No description file found in /a/dir or above",
+					"                no extension",
+					"                  existing file: /a/dir/index",
+					"                    reporting result /a/dir/index"
+				]);
+				done();
+			}
+		);
+	});
 });
