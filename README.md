@@ -19,6 +19,32 @@ npm install enhanced-resolve
 yarn add enhanced-resolve
 ```
 
+### Resolve
+
+There is a Node.js API which allows to resolve requests according to the Node.js resolving rules.
+Sync and async APIs are offered. A `create` method allows to create a custom resolve function.
+
+```js
+const resolve = require("enhanced-resolve");
+
+resolve("/some/path/to/folder", "module/dir", (err, result) => {
+	result; // === "/some/path/node_modules/module/dir/index.js"
+});
+
+resolve.sync("/some/path/to/folder", "../../dir");
+// === "/some/path/dir/index.js"
+
+const myResolve = resolve.create({
+	// or resolve.create.sync
+	extensions: [".ts", ".js"]
+	// see more options below
+});
+
+myResolve("/some/path/to/folder", "ts-module", (err, result) => {
+	result; // === "/some/node_modules/ts-module/index.ts"
+});
+```
+
 ### Creating a Resolver
 
 The easiest way to create a resolver is to use the `createResolver` function on `ResolveFactory`, along with one of the supplied File System implementations.
@@ -48,8 +74,6 @@ myResolver.resolve({}, lookupStartPath, request, resolveContext, (
 });
 ```
 
-For more examples creating different types resolvers (sync/async, context, etc) see `lib/node.js`.
-
 #### Resolver Options
 
 | Field            | Default                     | Description                                                                                                                                   |
@@ -73,7 +97,8 @@ For more examples creating different types resolvers (sync/async, context, etc) 
 
 ## Plugins
 
-Similar to `webpack`, the core of `enhanced-resolve` functionality is implemented as individual plugins that are executed using [`Tapable`](https://github.com/webpack/tapable). These plugins can extend the functionality of the library, adding other ways for files/contexts to be resolved.
+Similar to `webpack`, the core of `enhanced-resolve` functionality is implemented as individual plugins that are executed using [`tapable`](https://github.com/webpack/tapable).
+These plugins can extend the functionality of the library, adding other ways for files/contexts to be resolved.
 
 A plugin should be a `class` (or its ES5 equivalent) with an `apply` method. The `apply` method will receive a `resolver` instance, that can be used to hook in to the event system.
 
@@ -114,8 +139,8 @@ If you are using `webpack`, and you want to pass custom options to `enhanced-res
 
 ```
 resolve: {
-  extensions: ['', '.js', '.jsx'],
-  modules: ['src', 'node_modules'],
+  extensions: ['.js', '.jsx'],
+  modules: [path.resolve(__dirname, 'src'), 'node_modules'],
   plugins: [new DirectoryNamedWebpackPlugin()]
   ...
 },
@@ -123,6 +148,6 @@ resolve: {
 
 ## License
 
-Copyright (c) 2012-2016 Tobias Koppers
+Copyright (c) 2012-2019 JS Foundation and other contributors
 
 MIT (http://www.opensource.org/licenses/mit-license.php)
