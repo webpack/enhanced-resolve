@@ -18,17 +18,15 @@
     }
   ],
   "devDependencies": {
-    "codecov.io": "^0.1.6",
-    "coveralls": "^2.11.6",
     "eslint": "^5.9.0",
     "eslint-config-prettier": "^3.3.0",
     "eslint-plugin-node": "^8.0.0",
     "eslint-plugin-prettier": "^3.0.0",
     "husky": "^1.2.0",
-    "istanbul": "^0.4.1",
     "lint-staged": "^8.1.0",
     "memfs": "^2.15.4",
-    "mocha": "^2.3.4",
+    "mocha": "^6.1.4",
+    "nyc": "^14.1.1",
     "prettier": "^1.15.2",
     "should": "^8.0.2"
   },
@@ -43,8 +41,9 @@
     "pretest": "yarn lint",
     "test": "mocha --full-trace --check-leaks",
     "precover": "yarn lint",
-    "cover": "istanbul cover node_modules/mocha/bin/_mocha",
-    "travis": "yarn cover --report lcovonly"
+    "cover": "nyc --reporter=html node node_modules/mocha/bin/_mocha",
+    "pretravis": "yarn lint",
+    "travis": "nyc --reporter=lcovonly node node_modules/mocha/bin/_mocha"
   },
   "husky": {
     "hooks": {
