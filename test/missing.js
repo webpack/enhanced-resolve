@@ -74,7 +74,9 @@ describe("missing", function() {
 				var callback = function(err, filename) {
 					Array.from(missingDependencies)
 						.sort()
-						.should.containDeep(testCase[2].sort());
+						.should.containDeep(
+							/** @type {Array<string>} */ (testCase[2]).sort()
+						);
 					done();
 				};
 				const missingDependencies = new Set();
