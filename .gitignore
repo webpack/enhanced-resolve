@@ -3,3 +3,6 @@
 /.nyc_output
 *.log
 .eslintcache
+.idea
+.vscode
+.DS_Store
