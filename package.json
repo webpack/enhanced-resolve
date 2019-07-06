@@ -18,6 +18,7 @@
     }
   ],
   "devDependencies": {
+    "@types/node": "^10.12.21",
     "eslint": "^5.9.0",
     "eslint-config-prettier": "^3.3.0",
     "eslint-plugin-node": "^8.0.0",
@@ -28,7 +29,8 @@
     "mocha": "^6.1.4",
     "nyc": "^14.1.1",
     "prettier": "^1.15.2",
-    "should": "^8.0.2"
+    "should": "^8.0.2",
+    "typescript": "^3.5.2"
   },
   "engines": {
     "node": ">=8.9.0"
@@ -37,12 +39,13 @@
   "homepage": "http://github.com/webpack/enhanced-resolve",
   "scripts": {
     "lint": "eslint lib test",
+    "types": "tsc",
     "pretty": "prettier --loglevel warn --write \"{lib,test}/**/*.{js,json}\"",
     "pretest": "yarn lint",
     "test": "mocha --full-trace --check-leaks",
     "precover": "yarn lint",
     "cover": "nyc --reporter=html node node_modules/mocha/bin/_mocha",
-    "pretravis": "yarn lint",
+    "pretravis": "yarn lint && yarn types",
     "travis": "nyc --reporter=lcovonly node node_modules/mocha/bin/_mocha"
   },
   "husky": {
