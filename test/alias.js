@@ -32,7 +32,8 @@ describe("alias", function() {
 				multiAlias: ["b", "c", "d", "e", "a"],
 				recursive: "recursive/dir",
 				"/d/dir": "/c/dir",
-				"/d/index.js": "/c/index"
+				"/d/index.js": "/c/index",
+				ignored: false
 			},
 			modules: "/",
 			useSyncFileSystemCalls: true,
@@ -53,6 +54,9 @@ describe("alias", function() {
 		resolver
 			.resolveSync({}, "/", "aliasA/dir/index")
 			.should.be.eql("/a/dir/index");
+	});
+	it("should resolve an ignore module", () => {
+		resolver.resolveSync({}, "/", "ignored").should.be.eql(false);
 	});
 	it("should resolve a recursive aliased module", function() {
 		resolver
