@@ -3,6 +3,9 @@ var path = require("path");
 var should = require("should");
 
 describe("missing", function() {
+	/**
+	 * @type {Array<[string, string, Array<string>]>}
+	 */
 	var testCases = [
 		[
 			path.join(__dirname, "fixtures"),
@@ -74,9 +77,7 @@ describe("missing", function() {
 				var callback = function(err, filename) {
 					Array.from(missingDependencies)
 						.sort()
-						.should.containDeep(
-							/** @type {Array<string>} */ (testCase[2]).sort()
-						);
+						.should.containDeep(testCase[2].sort());
 					done();
 				};
 				const missingDependencies = new Set();

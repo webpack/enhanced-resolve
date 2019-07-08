@@ -24,7 +24,7 @@ describe("forEachBail", () => {
 		forEachBail(
 			[],
 			() => {
-				done("fail");
+				done(new Error("Should not be called"));
 			},
 			(err, result) => {
 				[err, result].should.be.eql([undefined, undefined]);
