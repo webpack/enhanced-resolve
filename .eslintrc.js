@@ -1,6 +1,6 @@
 module.exports = {
 	root: true,
-	plugins: ["prettier", "node"],
+	plugins: ["prettier", "node", "jsdoc"],
 	extends: [
 		"eslint:recommended",
 		"plugin:node/recommended",
@@ -56,7 +56,8 @@ module.exports = {
 		"node/no-missing-import": "error",
 		"node/no-unpublished-bin": "error",
 		"node/no-unpublished-require": "error",
-		"node/process-exit-as-throw": "error"
+		"node/process-exit-as-throw": "error",
+		"jsdoc/require-hyphen-before-param-description": ["error", "never"]
 	},
 	overrides: [
 		{

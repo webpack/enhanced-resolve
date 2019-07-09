@@ -22,6 +22,7 @@
     "@types/node": "^10.12.21",
     "eslint": "^5.9.0",
     "eslint-config-prettier": "^3.3.0",
+    "eslint-plugin-jsdoc": "^15.2.0",
     "eslint-plugin-node": "^8.0.0",
     "eslint-plugin-prettier": "^3.0.0",
     "husky": "^1.2.0",
