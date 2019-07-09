@@ -3,6 +3,9 @@ var path = require("path");
 var should = require("should");
 
 describe("missing", function() {
+	/**
+	 * @type {Array<[string, string, Array<string>]>}
+	 */
 	var testCases = [
 		[
 			path.join(__dirname, "fixtures"),
