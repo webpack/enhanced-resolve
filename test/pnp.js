@@ -4,6 +4,8 @@ require("should");
 const ResolverFactory = require("../lib/ResolverFactory");
 const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
 
+/** @typedef {import("../lib/PnpPlugin").PnpApiImpl} PnpApi */
+
 const nodeFileSystem = new CachedInputFileSystem(fs, 4000);
 
 const fixture = path.resolve(__dirname, "fixtures", "pnp");
@@ -34,7 +36,7 @@ describe("pnp", () => {
 		});
 	}
 	beforeEach(() => {
-		pnpApi = {
+		pnpApi = /** @type {PnpApi} */ ({
 			mocks: new Map(),
 			resolveToUnqualified(request, issuer) {
 				if (pnpApi.mocks.has(request)) {
@@ -43,7 +45,7 @@ describe("pnp", () => {
 					throw new Error(`No way`);
 				}
 			}
-		};
+		});
 		resolver = ResolverFactory.createResolver({
 			extensions: [".ts", ".js"],
 			aliasFields: ["browser"],
