@@ -62,6 +62,28 @@ describe("pnp", () => {
 			done();
 		});
 	});
+	it("should track dependency to the pnp api", done => {
+		pnpApi.mocks.set(
+			"pkg/dir/index.js",
+			path.resolve(fixture, "pkg/dir/index.js")
+		);
+		pnpApi.mocks.set("pnpapi", path.resolve(fixture, ".pnp.js"));
+		const fileDependencies = new Set();
+		resolver.resolve(
+			{},
+			__dirname,
+			"pkg/dir/index.js",
+			{ fileDependencies },
+			(err, result) => {
+				if (err) return done(err);
+				result.should.equal(path.resolve(fixture, "pkg/dir/index.js"));
+				Array.from(fileDependencies).should.containEql(
+					path.resolve(fixture, ".pnp.js")
+				);
+				done();
+			}
+		);
+	});
 	it("should resolve module names with package.json", done => {
 		pnpApi.mocks.set("pkg", path.resolve(fixture, "pkg"));
 		resolver.resolve({}, __dirname, "pkg", {}, (err, result) => {
