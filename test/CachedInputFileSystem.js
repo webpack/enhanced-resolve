@@ -6,6 +6,7 @@ describe("CachedInputFileSystem", function() {
 	var fs;
 
 	beforeEach(function() {
+		let counter = 0;
 		fs = new CachedInputFileSystem(
 			{
 				stat: function(path, callback) {
@@ -15,6 +16,9 @@ describe("CachedInputFileSystem", function() {
 						}),
 						100
 					);
+				},
+				readdir: function(path, callback) {
+					callback(null, [`${counter++}`]);
 				}
 			},
 			1000
@@ -112,6 +116,25 @@ describe("CachedInputFileSystem", function() {
 			fs.purge("a");
 			fs.purge();
 			done();
+		});
+	});
+
+	it("should purge readdir correctly", function(done) {
+		fs.readdir("/test/path", (err, r) => {
+			r[0].should.be.eql("0");
+			fs.purge(["/test/path/sub/path"]);
+			fs.readdir("/test/path", (err, r) => {
+				r[0].should.be.eql("0");
+				fs.purge(["/test/path/sub"]);
+				fs.readdir("/test/path", (err, r) => {
+					r[0].should.be.eql("1");
+					fs.purge(["/test/path"]);
+					fs.readdir("/test/path", (err, r) => {
+						r[0].should.be.eql("2");
+						done();
+					});
+				});
+			});
 		});
 	});
 });
