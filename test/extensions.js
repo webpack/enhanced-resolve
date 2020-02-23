@@ -42,4 +42,13 @@ describe("extensions", function() {
 			done();
 		});
 	});
+	it("should resolve trailing slash directory before single file  ", function(done) {
+		resolver.resolve({}, fixture, "module/", {}, (err, result) => {
+			if (err) return done(err);
+			result.should.equal(
+				path.resolve(fixture, "node_modules/module/index.ts")
+			);
+			done();
+		});
+	});
 });
