@@ -43,7 +43,7 @@ describe("symlink", function() {
 	if (isAdmin) {
 		// PR #150: Detect Windows and preserve current working directory.
 		const isWindows = platform() === "win32";
-		const oldCWD = isWindows && process.cwd();
+		const oldCWD = (isWindows && process.cwd()) || "";
 
 		before(function() {
 			// Create some cool symlinks
