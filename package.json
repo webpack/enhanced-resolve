@@ -9,7 +9,7 @@
   ],
   "dependencies": {
     "graceful-fs": "^4.2.0",
-    "tapable": "^2.0.0-beta.8"
+    "tapable": "^2.0.0-beta.10"
   },
   "license": "MIT",
   "devDependencies": {
