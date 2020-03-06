@@ -23,6 +23,7 @@ describe("plugins", function() {
 			{},
 			function(err, result) {
 				if (err) return done(err);
+				if (!result) throw new Error("No result");
 				result.should.be.eql(
 					path.resolve(
 						__dirname,
