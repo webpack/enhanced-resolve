@@ -11,12 +11,7 @@
     "graceful-fs": "^4.2.0",
     "tapable": "^2.0.0-beta.8"
   },
-  "licenses": [
-    {
-      "type": "MIT",
-      "url": "http://www.opensource.org/licenses/mit-license.php"
-    }
-  ],
+  "license": "MIT",
   "devDependencies": {
     "@types/mocha": "^5.2.7",
     "@types/node": "^10.12.21",
