@@ -9,30 +9,25 @@
   ],
   "dependencies": {
     "graceful-fs": "^4.2.0",
-    "tapable": "^2.0.0-beta.8"
+    "tapable": "^2.0.0-beta.10"
   },
-  "licenses": [
-    {
-      "type": "MIT",
-      "url": "http://www.opensource.org/licenses/mit-license.php"
-    }
-  ],
+  "license": "MIT",
   "devDependencies": {
-    "@types/mocha": "^5.2.7",
-    "@types/node": "^10.12.21",
-    "eslint": "^5.9.0",
-    "eslint-config-prettier": "^3.3.0",
-    "eslint-plugin-jsdoc": "^15.2.0",
-    "eslint-plugin-node": "^8.0.0",
-    "eslint-plugin-prettier": "^3.0.0",
+    "@types/mocha": "^7.0.2",
+    "@types/node": "^13.7.7",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.10.0",
+    "eslint-plugin-jsdoc": "^22.0.0",
+    "eslint-plugin-node": "^11.0.0",
+    "eslint-plugin-prettier": "^3.1.2",
     "husky": "^1.2.0",
     "lint-staged": "^8.1.0",
     "memfs": "^2.15.4",
-    "mocha": "^6.1.4",
+    "mocha": "^7.1.0",
     "nyc": "^14.1.1",
     "prettier": "^1.15.2",
     "should": "^13.2.3",
-    "typescript": "^3.5.2"
+    "typescript": "^3.8.3"
   },
   "engines": {
     "node": ">=8.9.0"
@@ -40,7 +35,13 @@
   "main": "lib/node.js",
   "homepage": "http://github.com/webpack/enhanced-resolve",
   "scripts": {
-    "lint": "eslint lib test && tsc",
+    "lint": "yarn run code-lint && yarn run type-lint && yarn run special-lint",
+    "fix": "yarn run code-lint-fix && yarn run special-lint-fix",
+    "code-lint": "eslint --cache lib test",
+    "code-lint-fix": "eslint --cache lib test --fix",
+    "type-lint": "tsc",
+    "special-lint": "node tooling/format-file-header.js",
+    "special-lint-fix": "node tooling/format-file-header.js --write",
     "pretty": "prettier --loglevel warn --write \"{lib,test}/**/*.{js,json}\"",
     "pretest": "yarn lint",
     "test": "mocha --full-trace --check-leaks",
