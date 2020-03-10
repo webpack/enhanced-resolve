@@ -4,9 +4,11 @@
   "author": "Tobias Koppers @sokra",
   "description": "Offers a async require.resolve function. It's highly configurable.",
   "files": [
+    "types",
     "lib",
     "LICENSE"
   ],
+  "types": "types",
   "dependencies": {
     "graceful-fs": "^4.2.0",
     "tapable": "^2.0.0-beta.10"
@@ -43,6 +45,7 @@
     "special-lint": "node tooling/format-file-header.js",
     "special-lint-fix": "node tooling/format-file-header.js --write",
     "pretty": "prettier --loglevel warn --write \"{lib,test}/**/*.{js,json}\"",
+    "types": "tsc --build tsconfig.emit.json",
     "pretest": "yarn lint",
     "test": "mocha --full-trace --check-leaks",
     "precover": "yarn lint",
