@@ -2,6 +2,20 @@
 
 Offers an async require.resolve function. It's highly configurable.
 
+## Table of Contents
+
+- [Features](#features)
+- [Getting Started](#getting-started)
+	-	[Install](#install)
+	-	[Resolve](#resolve)
+	-	[Creating a Resolver](#creating-a-resolver)
+		-	[Resolver Options](#resolver-options)
+-	[Plugins](#plugins)
+	-	[Plugin Boilerplate](#plugin-boilerplate)
+-	[Tests](#tests)
+- [Passing options from webpack](#passing-options-from-webpack)
+- [License](#license)
+
 ## Features
 
 - plugin system
