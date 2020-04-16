@@ -730,9 +730,7 @@ describe("Exports field", function exportsField() {
 			if (testCase.expect instanceof Error) {
 				should.throws(() => processExportsField(...testCase.suite));
 			} else {
-				processExportsField(...testCase.suite).should.containDeepOrdered(
-					testCase.expect
-				);
+				processExportsField(...testCase.suite).should.eql(testCase.expect);
 			}
 		});
 	});
