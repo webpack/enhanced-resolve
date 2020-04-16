@@ -175,13 +175,13 @@ describe("Exports field", function exportsField() {
 			suite: [
 				{
 					".": {
+						default: "./src/index.js",
 						browser: "./index.js",
-						node: "./src/node/index.js",
-						default: "./src/index.js"
+						node: "./src/node/index.js"
 					}
 				},
 				".",
-				["default", "browser"]
+				["browser"]
 			]
 		},
 		{
@@ -372,7 +372,7 @@ describe("Exports field", function exportsField() {
 			suite: [
 				{
 					"./utils/": {
-						browser: ["lodash", "./utils/"],
+						browser: ["lodash/", "./utils/"],
 						node: ["./utils-node/"]
 					}
 				},
@@ -387,7 +387,7 @@ describe("Exports field", function exportsField() {
 				{
 					"./utils/": {
 						webpack: "./wpk/",
-						browser: ["lodash", "./utils/"],
+						browser: ["lodash/", "./utils/"],
 						node: ["./node/"]
 					}
 				},
@@ -397,12 +397,12 @@ describe("Exports field", function exportsField() {
 		},
 		{
 			name: "conditional mapping folder #3",
-			expect: ["lodash/index.mjs", "./utils/index.mjs", "./wpk/index.mjs"],
+			expect: ["./wpk/index.mjs", "lodash/index.mjs", "./utils/index.mjs"],
 			suite: [
 				{
 					"./utils/": {
 						webpack: "./wpk/",
-						browser: ["lodash", "./utils/"],
+						browser: ["lodash/", "./utils/"],
 						node: ["./utils/"]
 					}
 				},
@@ -538,6 +538,51 @@ describe("Exports field", function exportsField() {
 				["browser"]
 			]
 		},
+		{
+			name: "incorrect exports field #11",
+			expect: new Error(),
+			suite: [
+				{
+					"./utils/index.mjs": {
+						// `/` percent encoded
+						browser: "./a%2f../../index.js",
+						default: "./b/index.js"
+					}
+				},
+				"./utils/index.mjs",
+				["browser"]
+			]
+		},
+		{
+			name: "incorrect exports field #12",
+			expect: new Error(),
+			suite: [
+				{
+					"./utils/index.mjs": {
+						// `/` percent encoded
+						browser: "./a%2findex.js",
+						default: "./b/index.js"
+					}
+				},
+				"./utils/index.mjs",
+				["browser"]
+			]
+		},
+		{
+			name: "incorrect exports field #13",
+			expect: new Error(),
+			suite: [
+				{
+					"./utils/index.mjs": {
+						// `\` percent encoded
+						browser: "./a%5Cindex.js",
+						default: "./b/index.js"
+					}
+				},
+				"./utils/index.mjs",
+				["browser"]
+			]
+		},
 		//#endregion
 
 		//#region Directory exports targets may not backtrack above the package base
@@ -637,6 +682,18 @@ describe("Exports field", function exportsField() {
 				["browser"]
 			]
 		},
+		{
+			name: "backtracking package base #9",
+			expect: ["./dist/index"],
+			suite: [
+				{
+					"./": "./src/../../",
+					"./dist/": "./dist/"
+				},
+				"./dist/index",
+				["browser"]
+			]
+		},
 		//#endregion
 
 		//#region Directory exports subpaths may not backtrack above the target folder
@@ -721,6 +778,18 @@ describe("Exports field", function exportsField() {
 				"./utils/index",
 				[]
 			]
+		},
+		{
+			name: "nested node_modules path #5",
+			expect: new Error(),
+			suite: [
+				{
+					// percent encoded
+					"./utils/index": "./%6e%6f%64%65%5f%6d%6f%64%75%6c%65%73/index"
+				},
+				"./utils/index",
+				[]
+			]
 		}
 		//#endregion
 	];
@@ -728,9 +797,19 @@ describe("Exports field", function exportsField() {
 	testCases.forEach(testCase => {
 		it(testCase.name, () => {
 			if (testCase.expect instanceof Error) {
-				should.throws(() => processExportsField(...testCase.suite));
+				should.throws(() =>
+					processExportsField(
+						testCase.suite[0],
+						testCase.suite[1],
+						new Set(testCase.suite[2])
+					)
+				);
 			} else {
-				processExportsField(...testCase.suite).should.eql(testCase.expect);
+				processExportsField(
+					testCase.suite[0],
+					testCase.suite[1],
+					new Set(testCase.suite[2])
+				).should.eql(testCase.expect);
 			}
 		});
 	});
