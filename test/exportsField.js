@@ -88,6 +88,28 @@ describe("Exports field", function exportsField() {
 			expect: [],
 			suite: ["./main.js", "./lib.js", []]
 		},
+		{
+			name: "sample #8",
+			expect: [],
+			suite: [
+				{
+					"./dist/a": "./dist/index.js"
+				},
+				"./dist/aaa",
+				[]
+			]
+		},
+		{
+			name: "sample #9",
+			expect: [],
+			suite: [
+				{
+					"./dist/a/a/": "./dist/index.js"
+				},
+				"./dist/a/a",
+				[]
+			]
+		},
 		//#endregion
 
 		//#region Direct mapping
@@ -162,7 +184,7 @@ describe("Exports field", function exportsField() {
 		},
 		{
 			name: "Direct mapping #6",
-			expect: ["./index.js", "./src/index.js"],
+			expect: ["./index.js"],
 			suite: [
 				{
 					".": {
@@ -243,7 +265,7 @@ describe("Exports field", function exportsField() {
 		},
 		{
 			name: "mapping to a folder root #2",
-			expect: [],
+			expect: new Error(), // incorrect export field
 			suite: [
 				{
 					"./timezones/": "./data/timezones"
@@ -298,7 +320,7 @@ describe("Exports field", function exportsField() {
 		},
 		{
 			name: "mapping to a folder root #7",
-			expect: [],
+			expect: new Error(), // incorrect export field
 			suite: [
 				{
 					".": "./"
@@ -421,7 +443,7 @@ describe("Exports field", function exportsField() {
 		//#region Incorrect exports field definition
 		{
 			name: "incorrect exports field #1",
-			expect: [],
+			expect: new Error(),
 			suite: [
 				{
 					"/utils/": "./a/"
@@ -443,7 +465,7 @@ describe("Exports field", function exportsField() {
 		},
 		{
 			name: "incorrect exports field #3",
-			expect: [],
+			expect: new Error(),
 			suite: [
 				{
 					"/utils/": {
@@ -519,51 +541,6 @@ describe("Exports field", function exportsField() {
 				["browser"]
 			]
 		},
-		{
-			name: "incorrect exports field #9",
-			expect: new Error(),
-			suite: [
-				{
-					"./utils/index.mjs": {
-						// `/` percent encoded
-						browser: "./a%2f../../index.js",
-						default: "./b/index.js"
-					}
-				},
-				"./utils/index.mjs",
-				["browser"]
-			]
-		},
-		{
-			name: "incorrect exports field #10",
-			expect: new Error(),
-			suite: [
-				{
-					"./utils/index.mjs": {
-						// `/` percent encoded
-						browser: "./a%2findex.js",
-						default: "./b/index.js"
-					}
-				},
-				"./utils/index.mjs",
-				["browser"]
-			]
-		},
-		{
-			name: "incorrect exports field #11",
-			expect: new Error(),
-			suite: [
-				{
-					"./utils/index.mjs": {
-						// `\` percent encoded
-						browser: "./a%5Cindex.js",
-						default: "./b/index.js"
-					}
-				},
-				"./utils/index.mjs",
-				["browser"]
-			]
-		},
 		//#endregion
 
 		//#region Incorrect request
@@ -599,7 +576,7 @@ describe("Exports field", function exportsField() {
 		//#region Directory exports targets may not backtrack above the package base
 		{
 			name: "backtracking package base #1",
-			expect: new Error(),
+			expect: ["./dist/index"], // we don't handle backtracking here
 			suite: [
 				{
 					"./../../utils/": "./dist/"
@@ -632,7 +609,7 @@ describe("Exports field", function exportsField() {
 		},
 		{
 			name: "backtracking package base #4",
-			expect: new Error(),
+			expect: ["./../src/index"], // we don't handle backtracking here
 			suite: [
 				{
 					"./utils/": "./../src/"
@@ -710,7 +687,7 @@ describe("Exports field", function exportsField() {
 		//#region Directory exports subpaths may not backtrack above the target folder
 		{
 			name: "backtracking target folder #1",
-			expect: new Error(),
+			expect: ["./dist/timezone/../../index"],
 			suite: [
 				{
 					"./utils/": "./dist/"
@@ -732,7 +709,7 @@ describe("Exports field", function exportsField() {
 		},
 		{
 			name: "backtracking target folder #3",
-			expect: new Error(),
+			expect: ["./dist/target/../../index"],
 			suite: [
 				{
 					"./utils/": "./dist/target/"
@@ -746,7 +723,7 @@ describe("Exports field", function exportsField() {
 		//#region Exports targets cannot map into a nested node_modules path
 		{
 			name: "nested node_modules path #1",
-			expect: new Error(),
+			expect: ["./node_modules/lodash/dist/index.js"], // we don't handle node_modules here
 			suite: [
 				{
 					"./utils/": {
@@ -759,7 +736,7 @@ describe("Exports field", function exportsField() {
 		},
 		{
 			name: "nested node_modules path #2",
-			expect: new Error(),
+			expect: ["./utils/../node_modules/lodash/dist/index.js"],
 			suite: [
 				{
 					"./utils/": "./utils/../node_modules/"
@@ -768,38 +745,120 @@ describe("Exports field", function exportsField() {
 				[]
 			]
 		},
+		//#endregion
+
+		//#region nested mapping
+
 		{
-			name: "nested node_modules path #3",
-			expect: new Error(),
+			name: "nested mapping #1",
+			expect: [],
 			suite: [
 				{
-					"./utils/index": "./utils/../node_modules/index"
+					"./utils/": {
+						browser: {
+							webpack: "./",
+							default: {
+								node: "./node/"
+							}
+						}
+					}
 				},
-				"./utils/index",
-				[]
+				"./utils/index.js",
+				["browser"]
 			]
 		},
 		{
-			name: "nested node_modules path #4",
-			expect: new Error(),
+			name: "nested mapping #2",
+			expect: ["./index.js", "./node/index.js"],
 			suite: [
 				{
-					"./utils/index": "./node_modules/index"
+					"./utils/": {
+						browser: {
+							webpack: ["./", "./node/"],
+							default: {
+								node: "./node/"
+							}
+						}
+					}
 				},
-				"./utils/index",
-				[]
+				"./utils/index.js",
+				["browser", "webpack"]
 			]
 		},
 		{
-			name: "nested node_modules path #5",
-			expect: new Error(),
+			name: "nested mapping #3",
+			expect: [], // no browser condition name
 			suite: [
 				{
-					// percent encoded
-					"./utils/index": "./%6e%6f%64%65%5f%6d%6f%64%75%6c%65%73/index"
+					"./utils/": {
+						browser: {
+							webpack: ["./", "./node/"],
+							default: {
+								node: "./node/"
+							}
+						}
+					}
 				},
-				"./utils/index",
-				[]
+				"./utils/index.js",
+				["webpack"]
+			]
+		},
+		{
+			name: "nested mapping #4",
+			expect: ["./node/index.js"],
+			suite: [
+				{
+					"./utils/": {
+						browser: {
+							webpack: ["./", "./node/"],
+							default: {
+								node: "./node/"
+							}
+						}
+					}
+				},
+				"./utils/index.js",
+				["node", "browser"]
+			]
+		},
+		{
+			name: "nested mapping #5",
+			expect: [],
+			suite: [
+				{
+					"./utils/": {
+						browser: {
+							webpack: ["./", "./node/"],
+							default: {
+								node: {
+									webpack: ["./wpck/"]
+								}
+							}
+						}
+					}
+				},
+				"./utils/index.js",
+				["browser", "node"]
+			]
+		},
+		{
+			name: "nested mapping #6",
+			expect: ["./index.js", "./node/index.js"],
+			suite: [
+				{
+					"./utils/": {
+						browser: {
+							webpack: ["./", "./node/"],
+							default: {
+								node: {
+									webpack: ["./wpck/"]
+								}
+							}
+						}
+					}
+				},
+				"./utils/index.js",
+				["browser", "node", "webpack"]
 			]
 		}
 		//#endregion
