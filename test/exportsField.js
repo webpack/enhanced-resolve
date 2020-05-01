@@ -9,11 +9,7 @@ describe("Exports field", function exportsField() {
 		//#region Samples
 		{
 			name: "sample #1",
-			expect: [
-				"./dist/test/file.js",
-				"./src/test/file.js",
-				"./wp/test/file.js"
-			],
+			expect: ["./dist/test/file.js", "./src/test/file.js"],
 			suite: [
 				{
 					"./foo/": {
@@ -171,7 +167,7 @@ describe("Exports field", function exportsField() {
 		},
 		{
 			name: "Direct mapping #7",
-			expect: ["./src/index.js", "./index.js"],
+			expect: new Error(), // Default is first one
 			suite: [
 				{
 					".": {
@@ -397,7 +393,7 @@ describe("Exports field", function exportsField() {
 		},
 		{
 			name: "conditional mapping folder #3",
-			expect: ["./wpk/index.mjs", "lodash/index.mjs", "./utils/index.mjs"],
+			expect: ["./wpk/index.mjs"],
 			suite: [
 				{
 					"./utils/": {
@@ -437,17 +433,6 @@ describe("Exports field", function exportsField() {
 		},
 		{
 			name: "incorrect exports field #3",
-			expect: new Error(),
-			suite: [
-				{
-					"./utils/": "./a/"
-				},
-				"/utils/index.mjs",
-				[]
-			]
-		},
-		{
-			name: "incorrect exports field #4",
 			expect: [],
 			suite: [
 				{
@@ -461,7 +446,7 @@ describe("Exports field", function exportsField() {
 			]
 		},
 		{
-			name: "incorrect exports field #5",
+			name: "incorrect exports field #4",
 			expect: new Error(),
 			suite: [
 				{
@@ -475,21 +460,7 @@ describe("Exports field", function exportsField() {
 			]
 		},
 		{
-			name: "incorrect exports field #6",
-			expect: new Error(),
-			suite: [
-				{
-					"./utils/": {
-						browser: "./a/",
-						default: "./b/"
-					}
-				},
-				"/utils/index.mjs",
-				["browser"]
-			]
-		},
-		{
-			name: "incorrect exports field #7",
+			name: "incorrect exports field #5",
 			expect: [],
 			suite: [
 				{
@@ -500,7 +471,7 @@ describe("Exports field", function exportsField() {
 			]
 		},
 		{
-			name: "incorrect exports field #8",
+			name: "incorrect exports field #6",
 			expect: [],
 			suite: [
 				{
@@ -511,7 +482,7 @@ describe("Exports field", function exportsField() {
 			]
 		},
 		{
-			name: "incorrect exports field #9",
+			name: "incorrect exports field #7",
 			expect: [],
 			suite: [
 				{
@@ -525,7 +496,7 @@ describe("Exports field", function exportsField() {
 			]
 		},
 		{
-			name: "incorrect exports field #10",
+			name: "incorrect exports field #8",
 			expect: [],
 			suite: [
 				{
@@ -539,7 +510,7 @@ describe("Exports field", function exportsField() {
 			]
 		},
 		{
-			name: "incorrect exports field #11",
+			name: "incorrect exports field #9",
 			expect: new Error(),
 			suite: [
 				{
@@ -554,7 +525,7 @@ describe("Exports field", function exportsField() {
 			]
 		},
 		{
-			name: "incorrect exports field #12",
+			name: "incorrect exports field #10",
 			expect: new Error(),
 			suite: [
 				{
@@ -569,7 +540,7 @@ describe("Exports field", function exportsField() {
 			]
 		},
 		{
-			name: "incorrect exports field #13",
+			name: "incorrect exports field #11",
 			expect: new Error(),
 			suite: [
 				{
@@ -583,6 +554,36 @@ describe("Exports field", function exportsField() {
 				["browser"]
 			]
 		},
+		//#endregion
+
+		//#region Incorrect request
+
+		{
+			name: "incorrect request #1",
+			expect: new Error(),
+			suite: [
+				{
+					"./utils/": "./a/"
+				},
+				"/utils/index.mjs",
+				[]
+			]
+		},
+		{
+			name: "incorrect request #2",
+			expect: new Error(),
+			suite: [
+				{
+					"./utils/": {
+						browser: "./a/",
+						default: "./b/"
+					}
+				},
+				"/utils/index.mjs",
+				["browser"]
+			]
+		},
+
 		//#endregion
 
 		//#region Directory exports targets may not backtrack above the package base
