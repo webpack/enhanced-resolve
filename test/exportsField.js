@@ -78,6 +78,16 @@ describe("Exports field", function exportsField() {
 				["browser"]
 			]
 		},
+		{
+			name: "sample #6",
+			expect: ["./main.js"],
+			suite: ["./main.js", ".", []]
+		},
+		{
+			name: "sample #7",
+			expect: [],
+			suite: ["./main.js", "./lib.js", []]
+		},
 		//#endregion
 
 		//#region Direct mapping
