@@ -860,6 +860,34 @@ describe("Exports field", function exportsField() {
 				"./utils/index.js",
 				["browser", "node", "webpack"]
 			]
+		},
+		{
+			name: "nested mapping #7",
+			expect: ["./y.js"],
+			suite: [
+				{
+					"./a.js": {
+						abc: { def: "./x.js" },
+						ghi: "./y.js"
+					}
+				},
+				"./a.js",
+				["abc", "ghi"]
+			]
+		},
+		{
+			name: "nested mapping #8",
+			expect: [],
+			suite: [
+				{
+					"./a.js": {
+						abc: { def: "./x.js", default: [] },
+						ghi: "./y.js"
+					}
+				},
+				"./a.js",
+				["abc", "ghi"]
+			]
 		}
 		//#endregion
 	];
