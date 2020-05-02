@@ -110,6 +110,17 @@ describe("Exports field", function exportsField() {
 				[]
 			]
 		},
+		{
+			name: "sample #10",
+			expect: [],
+			suite: [
+				{
+					".": "./index.js"
+				},
+				"./timezones/pdt.mjs",
+				[]
+			]
+		},
 		//#endregion
 
 		//#region Direct mapping
@@ -320,7 +331,7 @@ describe("Exports field", function exportsField() {
 		},
 		{
 			name: "mapping to a folder root #7",
-			expect: new Error(), // incorrect export field
+			expect: [], // incorrect export field, but value did not processed
 			suite: [
 				{
 					".": "./"
