@@ -80,16 +80,6 @@ describe("Exports field", function exportsField() {
 		},
 		{
 			name: "sample #6",
-			expect: ["./main.js"],
-			suite: ["./main.js", ".", []]
-		},
-		{
-			name: "sample #7",
-			expect: [],
-			suite: ["./main.js", "./lib.js", []]
-		},
-		{
-			name: "sample #8",
 			expect: [],
 			suite: [
 				{
@@ -100,7 +90,7 @@ describe("Exports field", function exportsField() {
 			]
 		},
 		{
-			name: "sample #9",
+			name: "sample #7",
 			expect: [],
 			suite: [
 				{
@@ -111,7 +101,7 @@ describe("Exports field", function exportsField() {
 			]
 		},
 		{
-			name: "sample #10",
+			name: "sample #8",
 			expect: [],
 			suite: [
 				{
@@ -759,7 +749,6 @@ describe("Exports field", function exportsField() {
 		//#endregion
 
 		//#region nested mapping
-
 		{
 			name: "nested mapping #1",
 			expect: [],
@@ -898,6 +887,83 @@ describe("Exports field", function exportsField() {
 				},
 				"./a.js",
 				["abc", "ghi"]
+			]
+		},
+		//#endregion
+
+		//#region Syntax sugar
+		{
+			name: "syntax sugar #1",
+			expect: ["./main.js"],
+			suite: ["./main.js", ".", []]
+		},
+		{
+			name: "syntax sugar #2",
+			expect: [],
+			suite: ["./main.js", "./lib.js", []]
+		},
+		{
+			name: "syntax sugar #3",
+			expect: ["./a.js", "./b.js"],
+			suite: [["./a.js", "./b.js"], ".", []]
+		},
+		{
+			name: "syntax sugar #4",
+			expect: [],
+			suite: [["./a.js", "./b.js"], "./lib.js", []]
+		},
+		{
+			name: "syntax sugar #5",
+			expect: ["./index.js"],
+			suite: [
+				{
+					browser: {
+						default: "./index.js"
+					}
+				},
+				".",
+				["browser"]
+			]
+		},
+		{
+			name: "syntax sugar #6",
+			expect: [],
+			suite: [
+				{
+					browser: {
+						default: "./index.js"
+					}
+				},
+				"./lib.js",
+				["browser"]
+			]
+		},
+		{
+			name: "syntax sugar #7",
+			expect: new Error(),
+			suite: [
+				{
+					"./node": "./node.js",
+					browser: {
+						default: "./index.js"
+					}
+				},
+				".",
+				["browser"]
+			]
+		},
+		{
+			name: "syntax sugar #8",
+			expect: new Error(),
+			suite: [
+				{
+					browser: {
+						default: "./index.js"
+					},
+					"./node": "./node.js"
+				},
+				".",
+				["browser"]
 			]
 		}
 		//#endregion
