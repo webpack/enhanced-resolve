@@ -1,9 +1,20 @@
+const path = require("path");
+const fs = require("fs");
 const should = require("should");
 const processExportsField = require("../lib/processExportsField");
+const ResolverFactory = require("../lib/ResolverFactory");
+const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
 
 /** @typedef {import("../lib/processExportsField").ExportField} ExportField */
 
-describe("Exports field", function exportsField() {
+const fixture = path.resolve(__dirname, "fixtures", "exports-field");
+const fixtureNpmPackage = path.resolve(
+	__dirname,
+	"fixtures",
+	"exports-field/node_modules/exports-field"
+);
+
+describe("Process exports field", function exportsField() {
 	/** @type {Array<{name: string, expect: string[]|Error, suite: [ExportField, string, string[]]}>} */
 	const testCases = [
 		//#region Samples
@@ -987,5 +998,197 @@ describe("Exports field", function exportsField() {
 				).should.eql(testCase.expect);
 			}
 		});
+	});
+});
+
+describe("ExportsFieldPlugin", () => {
+	const nodeFileSystem = new CachedInputFileSystem(fs, 4000);
+
+	const resolver = ResolverFactory.createResolver({
+		extensions: [".js"],
+		fileSystem: nodeFileSystem,
+		conditionNames: ["webpack"]
+	});
+
+	it("resolve root using exports field, not a main field", done => {
+		resolver.resolve({}, fixture, "exports-field", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) throw new Error("No result");
+			result.should.equal(path.resolve(fixtureNpmPackage, "index.js"));
+			done();
+		});
+	});
+
+	it("resolve using exports field, not a browser field #1", done => {
+		const resolver = ResolverFactory.createResolver({
+			aliasFields: ["browser"],
+			extensions: [".js"],
+			fileSystem: nodeFileSystem
+		});
+
+		resolver.resolve(
+			{},
+			fixture,
+			"exports-field/dist/main.js",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) throw new Error("No result");
+				result.should.equal(
+					path.resolve(fixtureNpmPackage, "./lib/lib2/main.js")
+				);
+				done();
+			}
+		);
+	});
+
+	it("resolve using exports field, not a browser field #2", done => {
+		const resolver = ResolverFactory.createResolver({
+			aliasFields: ["browser"],
+			extensions: [".js"],
+			fileSystem: nodeFileSystem,
+			conditionNames: ["node"]
+		});
+
+		resolver.resolve(
+			{},
+			fixture,
+			"exports-field/dist/main.js",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) throw new Error("No result");
+				result.should.equal(path.resolve(fixtureNpmPackage, "./lib/main.js"));
+				done();
+			}
+		);
+	});
+
+	it("throw error if extension not provided", done => {
+		resolver.resolve(
+			{},
+			fixture,
+			"exports-field/dist/main",
+			{},
+			(err, result) => {
+				if (!err) throw new Error(`expect error, got ${result}`);
+				err.should.be.instanceof(Error);
+				done();
+			}
+		);
+	});
+
+	it("resolver should respect condition names", done => {
+		resolver.resolve(
+			{},
+			fixture,
+			"exports-field/dist/main.js",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) throw new Error("No result");
+				result.should.equal(
+					path.resolve(fixtureNpmPackage, "./lib/lib2/main.js")
+				);
+				done();
+			}
+		);
+	});
+
+	it("resolver should respect fallback", done => {
+		resolver.resolve(
+			{},
+			fixture,
+			"exports-field/dist/browser.js",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) throw new Error("No result");
+				result.should.equal(
+					path.resolve(fixtureNpmPackage, "./lib/browser.js")
+				);
+				done();
+			}
+		);
+	});
+
+	it("relative path should work, if relative path as request is used", done => {
+		resolver.resolve(
+			{},
+			fixture,
+			"./node_modules/exports-field/lib/main.js",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) throw new Error("No result");
+				result.should.equal(path.resolve(fixtureNpmPackage, "./lib/main.js"));
+				done();
+			}
+		);
+	});
+
+	it("relative path should not work with exports field", done => {
+		resolver.resolve(
+			{},
+			fixture,
+			"./node_modules/exports-field/dist/main.js",
+			{},
+			(err, result) => {
+				if (!err) throw new Error(`expect error, got ${result}`);
+				err.should.be.instanceof(Error);
+				done();
+			}
+		);
+	});
+
+	it("backtracking should not work", done => {
+		resolver.resolve(
+			{},
+			fixture,
+			"exports-field/dist/../../../a.js",
+			{},
+			(err, result) => {
+				if (!err) throw new Error(`expect error, got ${result}`);
+				err.should.be.instanceof(Error);
+				done();
+			}
+		);
+	});
+
+	it("accessing to node_modules should not work", done => {
+		resolver.resolve(
+			{},
+			fixture,
+			"exports-field/dist/a.js",
+			{},
+			(err, result) => {
+				if (!err) throw new Error(`expect error, got ${result}`);
+				err.should.be.instanceof(Error);
+				done();
+			}
+		);
+	});
+
+	it("self-resolving root", done => {
+		resolver.resolve({}, fixture, "@exports-field/core", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) throw new Error("No result");
+			result.should.equal(path.resolve(fixture, "./a.js"));
+			done();
+		});
+	});
+
+	it("incorrect request", done => {
+		resolver.resolve(
+			{},
+			fixtureNpmPackage,
+			"exports-field/",
+			{},
+			(err, result) => {
+				if (!err) throw new Error(`expect error, got ${result}`);
+				err.should.be.instanceof(Error);
+				done();
+			}
+		);
 	});
 });
