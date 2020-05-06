@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES2017",
     "module": "commonjs",
-    "lib": ["es2017", "dom"],
+    "lib": ["es2017"],
     "allowJs": true,
     "checkJs": true,
     "noEmit": true,
@@ -10,8 +10,8 @@
     "noImplicitThis": true,
     "alwaysStrict": true,
     "strictNullChecks": true,
-    "types": ["node", "mocha"],
+    "types": ["node"],
     "esModuleInterop": true
   },
-  "include": ["lib/**/*.js", "test/*.js"]
+  "include": ["lib/**/*.js"]
 }

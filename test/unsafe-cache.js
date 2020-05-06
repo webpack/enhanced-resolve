@@ -1,5 +1,7 @@
-var resolve = require("../");
+require("should");
+
 var path = require("path");
+var resolve = require("../");
 
 describe("unsafe-cache", function() {
 	var cache;

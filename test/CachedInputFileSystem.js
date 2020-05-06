@@ -1,5 +1,6 @@
-var CachedInputFileSystem = require("../lib/CachedInputFileSystem");
 var should = require("should");
+
+var { CachedInputFileSystem } = require("../");
 
 describe("CachedInputFileSystem", function() {
 	this.timeout(3000);
