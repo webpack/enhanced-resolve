@@ -1,8 +1,8 @@
+require("should");
+
 const path = require("path");
 const fs = require("fs");
-require("should");
-const ResolverFactory = require("../lib/ResolverFactory");
-const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
+const { ResolverFactory, CachedInputFileSystem } = require("../");
 
 const nodeFileSystem = new CachedInputFileSystem(fs, 4000);
 

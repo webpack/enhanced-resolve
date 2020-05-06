@@ -1,9 +1,9 @@
-var resolve = require("../");
 var should = require("should");
+
 var path = require("path");
 var fs = require("fs");
-
 const { platform } = require("os");
+var resolve = require("../");
 
 var tempPath = path.join(__dirname, "temp");
 
@@ -12,7 +12,7 @@ describe("symlink", function() {
 	try {
 		fs.mkdirSync(tempPath);
 		fs.symlinkSync(
-			path.join(__dirname, "..", "lib", "node.js"),
+			path.join(__dirname, "..", "lib", "index.js"),
 			path.join(tempPath, "test"),
 			"file"
 		);
@@ -50,8 +50,8 @@ describe("symlink", function() {
 			try {
 				fs.mkdirSync(tempPath);
 				fs.symlinkSync(
-					path.join(__dirname, "..", "lib", "node.js"),
-					path.join(tempPath, "node.js"),
+					path.join(__dirname, "..", "lib", "index.js"),
+					path.join(tempPath, "index.js"),
 					"file"
 				);
 				fs.symlinkSync(
@@ -70,7 +70,7 @@ describe("symlink", function() {
 					"dir"
 				);
 				fs.symlinkSync(
-					path.join("..", "..", "lib", "node.js"),
+					path.join("..", "..", "lib", "index.js"),
 					path.join(tempPath, "node.relative.js"),
 					"file"
 				);
@@ -93,7 +93,7 @@ describe("symlink", function() {
 			if (isWindows) {
 				process.chdir(oldCWD);
 			}
-			fs.unlinkSync(path.join(tempPath, "node.js"));
+			fs.unlinkSync(path.join(tempPath, "index.js"));
 			fs.unlinkSync(path.join(tempPath, "node.relative.js"));
 			fs.unlinkSync(path.join(tempPath, "node.relative.sym.js"));
 			fs.unlinkSync(path.join(tempPath, "lib"));
@@ -110,103 +110,103 @@ describe("symlink", function() {
 		});
 
 		[
-			[tempPath, "./node.js", "with a symlink to a file"],
+			[tempPath, "./index.js", "with a symlink to a file"],
 			[tempPath, "./node.relative.js", "with a relative symlink to a file"],
 			[
 				tempPath,
 				"./node.relative.sym.js",
 				"with a relative symlink to a symlink to a file"
 			],
-			[tempPath, "./lib/node.js", "with a symlink to a directory 1"],
-			[tempPath, "./this/lib/node.js", "with a symlink to a directory 2"],
+			[tempPath, "./lib/index.js", "with a symlink to a directory 1"],
+			[tempPath, "./this/lib/index.js", "with a symlink to a directory 2"],
 			[
 				tempPath,
-				"./this/test/temp/node.js",
+				"./this/test/temp/index.js",
 				"with multiple symlinks in the path 1"
 			],
 			[
 				tempPath,
-				"./this/test/temp/lib/node.js",
+				"./this/test/temp/lib/index.js",
 				"with multiple symlinks in the path 2"
 			],
 			[
 				tempPath,
-				"./this/test/temp/this/lib/node.js",
+				"./this/test/temp/this/lib/index.js",
 				"with multiple symlinks in the path 3"
 			],
 			[
 				tempPath,
-				"./that/lib/node.js",
+				"./that/lib/index.js",
 				"with a symlink to a directory 2 (chained)"
 			],
 			[
 				tempPath,
-				"./that/test/temp/node.js",
+				"./that/test/temp/index.js",
 				"with multiple symlinks in the path 1 (chained)"
 			],
 			[
 				tempPath,
-				"./that/test/temp/lib/node.js",
+				"./that/test/temp/lib/index.js",
 				"with multiple symlinks in the path 2 (chained)"
 			],
 			[
 				tempPath,
-				"./that/test/temp/that/lib/node.js",
+				"./that/test/temp/that/lib/index.js",
 				"with multiple symlinks in the path 3 (chained)"
 			],
 			[
 				path.join(tempPath, "lib"),
-				"./node.js",
+				"./index.js",
 				"with symlinked directory as context 1"
 			],
 			[
 				path.join(tempPath, "this"),
-				"./lib/node.js",
+				"./lib/index.js",
 				"with symlinked directory as context 2"
 			],
 			[
 				path.join(tempPath, "this"),
-				"./test/temp/lib/node.js",
+				"./test/temp/lib/index.js",
 				"with symlinked directory as context and in path"
 			],
 			[
 				path.join(tempPath, "this", "lib"),
-				"./node.js",
+				"./index.js",
 				"with symlinked directory in context path"
 			],
 			[
 				path.join(tempPath, "this", "test"),
-				"./temp/node.js",
+				"./temp/index.js",
 				"with symlinked directory in context path and symlinked file"
 			],
 			[
 				path.join(tempPath, "this", "test"),
-				"./temp/lib/node.js",
+				"./temp/lib/index.js",
 				"with symlinked directory in context path and symlinked directory"
 			],
 			[
 				path.join(tempPath, "that"),
-				"./lib/node.js",
+				"./lib/index.js",
 				"with symlinked directory as context 2 (chained)"
 			],
 			[
 				path.join(tempPath, "that"),
-				"./test/temp/lib/node.js",
+				"./test/temp/lib/index.js",
 				"with symlinked directory as context and in path (chained)"
 			],
 			[
 				path.join(tempPath, "that", "lib"),
-				"./node.js",
+				"./index.js",
 				"with symlinked directory in context path (chained)"
 			],
 			[
 				path.join(tempPath, "that", "test"),
-				"./temp/node.js",
+				"./temp/index.js",
 				"with symlinked directory in context path and symlinked file (chained)"
 			],
 			[
 				path.join(tempPath, "that", "test"),
-				"./temp/lib/node.js",
+				"./temp/lib/index.js",
 				"with symlinked directory in context path and symlinked directory (chained)"
 			]
 		].forEach(function(pathToIt) {
@@ -215,7 +215,7 @@ describe("symlink", function() {
 					if (err) return done(err);
 					should.exist(filename);
 					filename.should.have.type("string");
-					filename.should.be.eql(path.join(__dirname, "..", "lib", "node.js"));
+					filename.should.be.eql(path.join(__dirname, "..", "lib", "index.js"));
 					resolveWithoutSymlinks(pathToIt[0], pathToIt[1], function(
 						err,
 						filename
@@ -231,7 +231,7 @@ describe("symlink", function() {
 				var filename = resolve.sync(pathToIt[0], pathToIt[1]);
 				should.exist(filename);
 				filename.should.have.type("string");
-				filename.should.be.eql(path.join(__dirname, "..", "lib", "node.js"));
+				filename.should.be.eql(path.join(__dirname, "..", "lib", "index.js"));
 				filename = resolveSyncWithoutSymlinks(pathToIt[0], pathToIt[1]);
 				filename.should.have.type("string");
 				filename.should.be.eql(path.resolve(pathToIt[0], pathToIt[1]));

@@ -1,6 +1,7 @@
 require("should");
-var ResolverFactory = require("../lib/ResolverFactory");
+
 var { Volume } = require("memfs");
+var { ResolverFactory } = require("../");
 
 describe("alias", function() {
 	var resolver;
