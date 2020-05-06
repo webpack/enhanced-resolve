@@ -1,15 +1,16 @@
-var resolve = require("../");
 var should = require("should");
+
 var path = require("path");
+var resolve = require("../");
 
 describe("simple", function() {
 	var pathsToIt = [
-		[__dirname, "../lib/node", "direct"],
-		[__dirname, "../", "as directory"],
+		[__dirname, "../lib/index", "direct"],
+		[__dirname, "..", "as directory"],
 		[path.join(__dirname, "..", ".."), "./enhanced-resolve", "as module"],
 		[
 			path.join(__dirname, "..", ".."),
-			"./enhanced-resolve/lib/node",
+			"./enhanced-resolve/lib/index",
 			"in module"
 		]
 	];
@@ -22,7 +23,7 @@ describe("simple", function() {
 					);
 				should.exist(filename);
 				filename.should.have.type("string");
-				filename.should.be.eql(path.join(__dirname, "..", "lib", "node.js"));
+				filename.should.be.eql(path.join(__dirname, "..", "lib", "index.js"));
 				done();
 			});
 		});
@@ -30,7 +31,7 @@ describe("simple", function() {
 			var filename = resolve.sync(pathToIt[0], pathToIt[1]);
 			should.exist(filename);
 			filename.should.have.type("string");
-			filename.should.be.eql(path.join(__dirname, "..", "lib", "node.js"));
+			filename.should.be.eql(path.join(__dirname, "..", "lib", "index.js"));
 		});
 	});
 });

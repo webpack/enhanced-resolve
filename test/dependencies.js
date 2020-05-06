@@ -1,4 +1,5 @@
 require("should");
+
 var { Volume } = require("memfs");
 var resolve = require("../");
 

@@ -1,8 +1,9 @@
 "use strict";
 
-const ResolverFactory = require("../").ResolverFactory;
-const CloneBasenamePlugin = require("../lib/CloneBasenamePlugin");
+require("should");
+
 const path = require("path");
+const { ResolverFactory, CloneBasenamePlugin } = require("../");
 
 describe("plugins", function() {
 	it("should resolve with the CloneBasenamePlugin", function(done) {

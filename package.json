@@ -5,6 +5,7 @@
   "description": "Offers a async require.resolve function. It's highly configurable.",
   "files": [
     "lib",
+    "types.d.ts",
     "LICENSE"
   ],
   "dependencies": {
@@ -27,12 +28,14 @@
     "nyc": "^14.1.1",
     "prettier": "^1.15.2",
     "should": "^13.2.3",
+    "tooling": "webpack/tooling#v1.6.0",
     "typescript": "^3.8.3"
   },
   "engines": {
-    "node": ">=8.9.0"
+    "node": ">=10.13.0"
   },
-  "main": "lib/node.js",
+  "main": "lib/index.js",
+  "types": "types.d.ts",
   "homepage": "http://github.com/webpack/enhanced-resolve",
   "scripts": {
     "lint": "yarn run code-lint && yarn run type-lint && yarn run special-lint",
@@ -40,8 +43,8 @@
     "code-lint": "eslint --cache lib test",
     "code-lint-fix": "eslint --cache lib test --fix",
     "type-lint": "tsc",
-    "special-lint": "node tooling/format-file-header.js",
-    "special-lint-fix": "node tooling/format-file-header.js --write",
+    "special-lint": "node node_modules/tooling/lockfile-lint && node node_modules/tooling/inherit-types && node node_modules/tooling/format-file-header && node node_modules/tooling/generate-types",
+    "special-lint-fix": "node node_modules/tooling/inherit-types --write && node node_modules/tooling/format-file-header --write && node node_modules/tooling/generate-types --write",
     "pretty": "prettier --loglevel warn --write \"{lib,test}/**/*.{js,json}\"",
     "pretest": "yarn lint",
     "test": "mocha --full-trace --check-leaks",
