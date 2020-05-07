@@ -1205,38 +1205,4 @@ describe("ExportsFieldPlugin", () => {
 			}
 		);
 	});
-
-	it("deep import specifier in exports field target should work", done => {
-		resolver.resolve(
-			{},
-			fixtureNpmPackage,
-			"exports-field/some/index",
-			{},
-			(err, result) => {
-				if (err) return done(err);
-				if (!result) throw new Error("No result");
-				result.should.equal(
-					path.resolve(fixtureNpmPackage, "./node_modules/next-pack/lib/index")
-				);
-				done();
-			}
-		);
-	});
-
-	it("bare specifier in exports field target should work", done => {
-		resolver.resolve(
-			{},
-			fixtureNpmPackage,
-			"exports-field/dist/b.js",
-			{},
-			(err, result) => {
-				if (err) return done(err);
-				if (!result) throw new Error("No result");
-				result.should.equal(
-					path.resolve(fixture, "./node_modules/other-pack/main.js")
-				);
-				done();
-			}
-		);
-	});
 });
