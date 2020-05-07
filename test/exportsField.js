@@ -1,11 +1,14 @@
 const path = require("path");
 const fs = require("fs");
 const should = require("should");
-const processExportsField = require("../lib/processExportsField");
+const {
+	processExportsField,
+	buildPathTree
+} = require("../lib/processExportsField");
 const ResolverFactory = require("../lib/ResolverFactory");
 const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
 
-/** @typedef {import("../lib/processExportsField").ExportField} ExportField */
+/** @typedef {import("../lib/processExportsField").ExportsField} ExportsField */
 
 const fixture = path.resolve(__dirname, "fixtures", "exports-field");
 const fixtureNpmPackage = path.resolve(
@@ -15,7 +18,7 @@ const fixtureNpmPackage = path.resolve(
 );
 
 describe("Process exports field", function exportsField() {
-	/** @type {Array<{name: string, expect: string[]|Error, suite: [ExportField, string, string[]]}>} */
+	/** @type {Array<{name: string, expect: string[]|Error, suite: [ExportsField, string, string[]]}>} */
 	const testCases = [
 		//#region Samples
 		{
@@ -119,6 +122,17 @@ describe("Process exports field", function exportsField() {
 					".": "./index.js"
 				},
 				"./timezones/pdt.mjs",
+				[]
+			]
+		},
+		{
+			name: "sample #9",
+			expect: ["./main.js"],
+			suite: [
+				{
+					"./index.js": "./main.js"
+				},
+				"./index.js",
 				[]
 			]
 		},
@@ -985,14 +999,14 @@ describe("Process exports field", function exportsField() {
 			if (testCase.expect instanceof Error) {
 				should.throws(() =>
 					processExportsField(
-						testCase.suite[0],
+						buildPathTree(testCase.suite[0]),
 						testCase.suite[1],
 						new Set(testCase.suite[2])
 					)
 				);
 			} else {
 				processExportsField(
-					testCase.suite[0],
+					buildPathTree(testCase.suite[0]),
 					testCase.suite[1],
 					new Set(testCase.suite[2])
 				).should.eql(testCase.expect);
