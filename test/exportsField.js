@@ -1,15 +1,13 @@
 const path = require("path");
 const fs = require("fs");
 const should = require("should");
-const {
-	processExportsField,
-	buildPathTree
-} = require("../lib/processExportsField");
+const createProcessor = require("../lib/processExportsField");
 const ResolverFactory = require("../lib/ResolverFactory");
 const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
 
 /** @typedef {import("../lib/processExportsField").ExportsField} ExportsField */
 
+const processExportsField = createProcessor();
 const fixture = path.resolve(__dirname, "fixtures", "exports-field");
 const fixtureNpmPackage = path.resolve(
 	__dirname,
@@ -999,14 +997,14 @@ describe("Process exports field", function exportsField() {
 			if (testCase.expect instanceof Error) {
 				should.throws(() =>
 					processExportsField(
-						buildPathTree(testCase.suite[0]),
+						testCase.suite[0],
 						testCase.suite[1],
 						new Set(testCase.suite[2])
 					)
 				);
 			} else {
 				processExportsField(
-					buildPathTree(testCase.suite[0]),
+					testCase.suite[0],
 					testCase.suite[1],
 					new Set(testCase.suite[2])
 				).should.eql(testCase.expect);
