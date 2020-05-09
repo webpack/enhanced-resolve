@@ -1036,6 +1036,7 @@ describe("ExportsFieldPlugin", () => {
 	it("resolve using exports field, not a browser field #1", done => {
 		const resolver = ResolverFactory.createResolver({
 			aliasFields: ["browser"],
+			conditionNames: ["webpack"],
 			extensions: [".js"],
 			fileSystem: nodeFileSystem
 		});
@@ -1160,20 +1161,6 @@ describe("ExportsFieldPlugin", () => {
 			{},
 			fixture,
 			"exports-field/dist/../../../a.js",
-			{},
-			(err, result) => {
-				if (!err) throw new Error(`expect error, got ${result}`);
-				err.should.be.instanceof(Error);
-				done();
-			}
-		);
-	});
-
-	it("accessing to node_modules should not work", done => {
-		resolver.resolve(
-			{},
-			fixture,
-			"exports-field/dist/a.js",
 			{},
 			(err, result) => {
 				if (!err) throw new Error(`expect error, got ${result}`);
