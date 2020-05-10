@@ -9,11 +9,7 @@ const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
 
 const processExportsField = createProcessor();
 const fixture = path.resolve(__dirname, "fixtures", "exports-field");
-const fixtureNpmPackage = path.resolve(
-	__dirname,
-	"fixtures",
-	"exports-field/node_modules/exports-field"
-);
+const fixture2 = path.resolve(__dirname, "fixtures", "exports-field");
 
 describe("Process exports field", function exportsField() {
 	/** @type {Array<{name: string, expect: string[]|Error, suite: [ExportsField, string, string[]]}>} */
@@ -1026,7 +1022,9 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve({}, fixture, "exports-field", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) throw new Error("No result");
-			result.should.equal(path.resolve(fixtureNpmPackage, "index.js"));
+			result.should.equal(
+				path.resolve(fixture, "node_modules/exports-field/index.js")
+			);
 			done();
 		});
 	});
@@ -1048,7 +1046,7 @@ describe("ExportsFieldPlugin", () => {
 				if (err) return done(err);
 				if (!result) throw new Error("No result");
 				result.should.equal(
-					path.resolve(fixtureNpmPackage, "./lib/lib2/main.js")
+					path.resolve(fixture, "node_modules/exports-field/lib/lib2/main.js")
 				);
 				done();
 			}
@@ -1065,13 +1063,15 @@ describe("ExportsFieldPlugin", () => {
 
 		resolver.resolve(
 			{},
-			fixture,
+			fixture2,
 			"exports-field/dist/main.js",
 			{},
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) throw new Error("No result");
-				result.should.equal(path.resolve(fixtureNpmPackage, "./lib/main.js"));
+				result.should.equal(
+					path.resolve(fixture2, "node_modules/exports-field/lib/main.js")
+				);
 				done();
 			}
 		);
@@ -1080,7 +1080,7 @@ describe("ExportsFieldPlugin", () => {
 	it("throw error if extension not provided", done => {
 		resolver.resolve(
 			{},
-			fixture,
+			fixture2,
 			"exports-field/dist/main",
 			{},
 			(err, result) => {
@@ -1101,7 +1101,7 @@ describe("ExportsFieldPlugin", () => {
 				if (err) return done(err);
 				if (!result) throw new Error("No result");
 				result.should.equal(
-					path.resolve(fixtureNpmPackage, "./lib/lib2/main.js")
+					path.resolve(fixture, "node_modules/exports-field/lib/lib2/main.js")
 				);
 				done();
 			}
@@ -1111,14 +1111,14 @@ describe("ExportsFieldPlugin", () => {
 	it("resolver should respect fallback", done => {
 		resolver.resolve(
 			{},
-			fixture,
+			fixture2,
 			"exports-field/dist/browser.js",
 			{},
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) throw new Error("No result");
 				result.should.equal(
-					path.resolve(fixtureNpmPackage, "./lib/browser.js")
+					path.resolve(fixture2, "node_modules/exports-field/lib/browser.js")
 				);
 				done();
 			}
@@ -1134,7 +1134,9 @@ describe("ExportsFieldPlugin", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) throw new Error("No result");
-				result.should.equal(path.resolve(fixtureNpmPackage, "./lib/main.js"));
+				result.should.equal(
+					path.resolve(fixture, "node_modules/exports-field/lib/main.js")
+				);
 				done();
 			}
 		);
@@ -1154,11 +1156,26 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("backtracking should not work", done => {
+	it("backtracking should work for request", done => {
 		resolver.resolve(
 			{},
 			fixture,
 			"exports-field/dist/../../../a.js",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) throw new Error("No result");
+				result.should.equal(path.resolve(fixture, "./a.js"));
+				done();
+			}
+		);
+	});
+
+	it("backtracking should not work for exports field target", done => {
+		resolver.resolve(
+			{},
+			fixture,
+			"exports-field/dist/a.js",
 			{},
 			(err, result) => {
 				if (!err) throw new Error(`expect error, got ${result}`);
@@ -1180,7 +1197,7 @@ describe("ExportsFieldPlugin", () => {
 	it("incorrect request", done => {
 		resolver.resolve(
 			{},
-			fixtureNpmPackage,
+			path.resolve(fixture2, "exports-field/node_modules/exports-field"),
 			"exports-field/",
 			{},
 			(err, result) => {
