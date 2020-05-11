@@ -1,13 +1,12 @@
 const path = require("path");
 const fs = require("fs");
 const should = require("should");
-const createProcessor = require("../lib/processExportsField");
+const processExportsField = require("../lib/processExportsField");
 const ResolverFactory = require("../lib/ResolverFactory");
 const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
 
 /** @typedef {import("../lib/processExportsField").ExportsField} ExportsField */
 
-const processExportsField = createProcessor();
 const fixture = path.resolve(__dirname, "fixtures", "exports-field");
 const fixture2 = path.resolve(__dirname, "fixtures", "exports-field");
 
@@ -992,15 +991,13 @@ describe("Process exports field", function exportsField() {
 		it(testCase.name, () => {
 			if (testCase.expect instanceof Error) {
 				should.throws(() =>
-					processExportsField(
-						testCase.suite[0],
+					processExportsField(testCase.suite[0])(
 						testCase.suite[1],
 						new Set(testCase.suite[2])
 					)
 				);
 			} else {
-				processExportsField(
-					testCase.suite[0],
+				processExportsField(testCase.suite[0])(
 					testCase.suite[1],
 					new Set(testCase.suite[2])
 				).should.eql(testCase.expect);
