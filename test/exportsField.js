@@ -1221,6 +1221,22 @@ describe("ExportsFieldPlugin", () => {
 		});
 	});
 
+	it("throw error if exports field is invalid", done => {
+		resolver.resolve(
+			{},
+			fixture,
+			"invalid-exports-field",
+			{},
+			(err, result) => {
+				if (!err) throw new Error(`expect error, got ${result}`);
+				err.should.be.instanceof(Error);
+				err.message.should.match(/should be relative path/);
+				err.message.should.match(/umd/);
+				done();
+			}
+		);
+	});
+
 	it("should log the correct info", done => {
 		const log = [];
 		resolver.resolve(
