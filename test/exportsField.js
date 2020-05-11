@@ -1194,6 +1194,21 @@ describe("ExportsFieldPlugin", () => {
 		});
 	});
 
+	it("not exported error", done => {
+		resolver.resolve(
+			{},
+			fixture,
+			"exports-field/anything/else",
+			{},
+			(err, result) => {
+				if (!err) throw new Error(`expect error, got ${result}`);
+				err.should.be.instanceof(Error);
+				err.message.should.match(/not exported from package/);
+				done();
+			}
+		);
+	});
+
 	it("request ending with slash #1", done => {
 		resolver.resolve({}, fixture, "exports-field/", {}, (err, result) => {
 			if (!err) throw new Error(`expect error, got ${result}`);
