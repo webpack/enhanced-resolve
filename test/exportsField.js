@@ -983,8 +983,33 @@ describe("Process exports field", function exportsField() {
 				".",
 				["browser"]
 			]
-		}
+		},
 		//#endregion
+
+		{
+			name: "path tree edge case #1",
+			expect: ["./A/b/d.js"],
+			suite: [
+				{
+					"./a/": "./A/",
+					"./a/b/c": "./c.js"
+				},
+				"./a/b/d.js",
+				[]
+			]
+		},
+		{
+			name: "path tree edge case #2",
+			expect: ["./A/c.js"],
+			suite: [
+				{
+					"./a/": "./A/",
+					"./a/b": "./b.js"
+				},
+				"./a/c.js",
+				[]
+			]
+		}
 	];
 
 	testCases.forEach(testCase => {
