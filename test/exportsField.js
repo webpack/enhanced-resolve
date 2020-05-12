@@ -9,6 +9,7 @@ const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
 
 const fixture = path.resolve(__dirname, "fixtures", "exports-field");
 const fixture2 = path.resolve(__dirname, "fixtures", "exports-field2");
+const fixture3 = path.resolve(__dirname, "fixtures", "exports-field3");
 
 describe("Process exports field", function exportsField() {
 	/** @type {Array<{name: string, expect: string[]|Error, suite: [ExportsField, string, string[]]}>} */
@@ -1232,6 +1233,96 @@ describe("ExportsFieldPlugin", () => {
 				done();
 			}
 		);
+	});
+
+	it("field name path #1", done => {
+		const resolver = ResolverFactory.createResolver({
+			aliasFields: ["browser"],
+			exportsFields: [["exportsField", "exports"]],
+			extensions: [".js"],
+			fileSystem: nodeFileSystem
+		});
+
+		resolver.resolve({}, fixture3, "exports-field", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) throw new Error("No result");
+			result.should.equal(
+				path.resolve(fixture3, "node_modules/exports-field/main.js")
+			);
+			done();
+		});
+	});
+
+	it("field name path #2", done => {
+		const resolver = ResolverFactory.createResolver({
+			aliasFields: ["browser"],
+			exportsFields: [["exportsField", "exports"], "exports"],
+			extensions: [".js"],
+			fileSystem: nodeFileSystem
+		});
+
+		resolver.resolve({}, fixture3, "exports-field", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) throw new Error("No result");
+			result.should.equal(
+				path.resolve(fixture3, "node_modules/exports-field/main.js")
+			);
+			done();
+		});
+	});
+
+	it("field name path #3", done => {
+		const resolver = ResolverFactory.createResolver({
+			aliasFields: ["browser"],
+			exportsFields: ["exports", ["exportsField", "exports"]],
+			extensions: [".js"],
+			fileSystem: nodeFileSystem
+		});
+
+		resolver.resolve({}, fixture3, "exports-field", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) throw new Error("No result");
+			result.should.equal(
+				path.resolve(fixture3, "node_modules/exports-field/main.js")
+			);
+			done();
+		});
+	});
+
+	it("field name path #4", done => {
+		const resolver = ResolverFactory.createResolver({
+			aliasFields: ["browser"],
+			exportsFields: [["exports"]],
+			extensions: [".js"],
+			fileSystem: nodeFileSystem
+		});
+
+		resolver.resolve({}, fixture2, "exports-field", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) throw new Error("No result");
+			result.should.equal(
+				path.resolve(fixture2, "node_modules/exports-field/index.js")
+			);
+			done();
+		});
+	});
+
+	it("field name path #5", done => {
+		const resolver = ResolverFactory.createResolver({
+			aliasFields: ["browser"],
+			exportsFields: ["ex", ["exportsField", "exports"]],
+			extensions: [".js"],
+			fileSystem: nodeFileSystem
+		});
+
+		resolver.resolve({}, fixture3, "exports-field", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) throw new Error("No result");
+			result.should.equal(
+				path.resolve(fixture3, "node_modules/exports-field/index")
+			);
+			done();
+		});
 	});
 
 	it("request ending with slash #1", done => {

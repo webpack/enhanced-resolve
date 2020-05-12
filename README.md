@@ -81,9 +81,11 @@ myResolver.resolve({}, lookupStartPath, request, resolveContext, (
 | alias            | []                          | A list of module alias configurations or an object which maps key to value                                                                    |
 | aliasFields      | []                          | A list of alias fields in description files                                                                                                   |
 | cacheWithContext | true                        | If unsafe cache is enabled, includes `request.context` in the cache key                                                                       |
+| conditionNames   | []                          | A list of exports field condition names                                                                                                       |
 | descriptionFiles | ["package.json"]            | A list of description files to read from                                                                                                      |
 | enforceExtension | false                       | Enforce that a extension from extensions must be used                                                                                         |
 | extensions       | [".js", ".json", ".node"]   | A list of extensions which should be tried for files                                                                                          |
+| exportsFields    | ["exports"]                 | A list of exports fields in description files                                                                                                 |
 | mainFields       | ["main"]                    | A list of main fields in description files                                                                                                    |
 | mainFiles        | ["index"]                   | A list of main files in directories                                                                                                           |
 | modules          | ["node_modules"]            | A list of directories to resolve modules from, can be absolute path or folder name                                                            |
