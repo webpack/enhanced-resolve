@@ -1,10 +1,17 @@
+const path = require("path");
+const fs = require("fs");
 const should = require("should");
 const processExportsField = require("../lib/processExportsField");
+const ResolverFactory = require("../lib/ResolverFactory");
+const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
 
-/** @typedef {import("../lib/processExportsField").ExportField} ExportField */
+/** @typedef {import("../lib/processExportsField").ExportsField} ExportsField */
 
-describe("Exports field", function exportsField() {
-	/** @type {Array<{name: string, expect: string[]|Error, suite: [ExportField, string, string[]]}>} */
+const fixture = path.resolve(__dirname, "fixtures", "exports-field");
+const fixture2 = path.resolve(__dirname, "fixtures", "exports-field2");
+
+describe("Process exports field", function exportsField() {
+	/** @type {Array<{name: string, expect: string[]|Error, suite: [ExportsField, string, string[]]}>} */
 	const testCases = [
 		//#region Samples
 		{
@@ -108,6 +115,17 @@ describe("Exports field", function exportsField() {
 					".": "./index.js"
 				},
 				"./timezones/pdt.mjs",
+				[]
+			]
+		},
+		{
+			name: "sample #9",
+			expect: ["./main.js"],
+			suite: [
+				{
+					"./index.js": "./main.js"
+				},
+				"./index.js",
 				[]
 			]
 		},
@@ -965,27 +983,337 @@ describe("Exports field", function exportsField() {
 				".",
 				["browser"]
 			]
-		}
+		},
 		//#endregion
+
+		{
+			name: "path tree edge case #1",
+			expect: ["./A/b/d.js"],
+			suite: [
+				{
+					"./a/": "./A/",
+					"./a/b/c": "./c.js"
+				},
+				"./a/b/d.js",
+				[]
+			]
+		},
+		{
+			name: "path tree edge case #2",
+			expect: ["./A/c.js"],
+			suite: [
+				{
+					"./a/": "./A/",
+					"./a/b": "./b.js"
+				},
+				"./a/c.js",
+				[]
+			]
+		}
 	];
 
 	testCases.forEach(testCase => {
 		it(testCase.name, () => {
 			if (testCase.expect instanceof Error) {
 				should.throws(() =>
-					processExportsField(
-						testCase.suite[0],
+					processExportsField(testCase.suite[0])(
 						testCase.suite[1],
 						new Set(testCase.suite[2])
 					)
 				);
 			} else {
-				processExportsField(
-					testCase.suite[0],
+				processExportsField(testCase.suite[0])(
 					testCase.suite[1],
 					new Set(testCase.suite[2])
 				).should.eql(testCase.expect);
 			}
 		});
+	});
+});
+
+describe("ExportsFieldPlugin", () => {
+	const nodeFileSystem = new CachedInputFileSystem(fs, 4000);
+
+	const resolver = ResolverFactory.createResolver({
+		extensions: [".js"],
+		fileSystem: nodeFileSystem,
+		conditionNames: ["webpack"]
+	});
+
+	it("resolve root using exports field, not a main field", done => {
+		resolver.resolve({}, fixture, "exports-field", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) throw new Error("No result");
+			result.should.equal(
+				path.resolve(fixture, "node_modules/exports-field/x.js")
+			);
+			done();
+		});
+	});
+
+	it("resolve using exports field, not a browser field #1", done => {
+		const resolver = ResolverFactory.createResolver({
+			aliasFields: ["browser"],
+			conditionNames: ["webpack"],
+			extensions: [".js"],
+			fileSystem: nodeFileSystem
+		});
+
+		resolver.resolve(
+			{},
+			fixture,
+			"exports-field/dist/main.js",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) throw new Error("No result");
+				result.should.equal(
+					path.resolve(fixture, "node_modules/exports-field/lib/lib2/main.js")
+				);
+				done();
+			}
+		);
+	});
+
+	it("resolve using exports field, not a browser field #2", done => {
+		const resolver = ResolverFactory.createResolver({
+			aliasFields: ["browser"],
+			extensions: [".js"],
+			fileSystem: nodeFileSystem,
+			conditionNames: ["node"]
+		});
+
+		resolver.resolve(
+			{},
+			fixture2,
+			"exports-field/dist/main.js",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) throw new Error("No result");
+				result.should.equal(
+					path.resolve(fixture2, "node_modules/exports-field/lib/main.js")
+				);
+				done();
+			}
+		);
+	});
+
+	it("throw error if extension not provided", done => {
+		resolver.resolve(
+			{},
+			fixture2,
+			"exports-field/dist/main",
+			{},
+			(err, result) => {
+				if (!err) throw new Error(`expect error, got ${result}`);
+				err.should.be.instanceof(Error);
+				err.message.should.match(/Can't resolve/);
+				done();
+			}
+		);
+	});
+
+	it("resolver should respect condition names", done => {
+		resolver.resolve(
+			{},
+			fixture,
+			"exports-field/dist/main.js",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) throw new Error("No result");
+				result.should.equal(
+					path.resolve(fixture, "node_modules/exports-field/lib/lib2/main.js")
+				);
+				done();
+			}
+		);
+	});
+
+	it("resolver should respect fallback", done => {
+		resolver.resolve(
+			{},
+			fixture2,
+			"exports-field/dist/browser.js",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) throw new Error("No result");
+				result.should.equal(
+					path.resolve(fixture2, "node_modules/exports-field/lib/browser.js")
+				);
+				done();
+			}
+		);
+	});
+
+	it("relative path should work, if relative path as request is used", done => {
+		resolver.resolve(
+			{},
+			fixture,
+			"./node_modules/exports-field/lib/main.js",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) throw new Error("No result");
+				result.should.equal(
+					path.resolve(fixture, "node_modules/exports-field/lib/main.js")
+				);
+				done();
+			}
+		);
+	});
+
+	it("relative path should not work with exports field", done => {
+		resolver.resolve(
+			{},
+			fixture,
+			"./node_modules/exports-field/dist/main.js",
+			{},
+			(err, result) => {
+				if (!err) throw new Error(`expect error, got ${result}`);
+				err.should.be.instanceof(Error);
+				err.message.should.match(/Can't resolve/);
+				done();
+			}
+		);
+	});
+
+	it("backtracking should not work for request", done => {
+		resolver.resolve(
+			{},
+			fixture,
+			"exports-field/dist/../../../a.js",
+			{},
+			(err, result) => {
+				if (!err) throw new Error(`expect error, got ${result}`);
+				err.should.be.instanceof(Error);
+				err.message.should.match(/out of package scope/);
+				done();
+			}
+		);
+	});
+
+	it("backtracking should not work for exports field target", done => {
+		resolver.resolve(
+			{},
+			fixture,
+			"exports-field/dist/a.js",
+			{},
+			(err, result) => {
+				if (!err) throw new Error(`expect error, got ${result}`);
+				err.should.be.instanceof(Error);
+				err.message.should.match(/out of package scope/);
+				done();
+			}
+		);
+	});
+
+	it("self-resolving root", done => {
+		resolver.resolve({}, fixture, "@exports-field/core", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) throw new Error("No result");
+			result.should.equal(path.resolve(fixture, "./a.js"));
+			done();
+		});
+	});
+
+	it("not exported error", done => {
+		resolver.resolve(
+			{},
+			fixture,
+			"exports-field/anything/else",
+			{},
+			(err, result) => {
+				if (!err) throw new Error(`expect error, got ${result}`);
+				err.should.be.instanceof(Error);
+				err.message.should.match(/not exported from package/);
+				done();
+			}
+		);
+	});
+
+	it("request ending with slash #1", done => {
+		resolver.resolve({}, fixture, "exports-field/", {}, (err, result) => {
+			if (!err) throw new Error(`expect error, got ${result}`);
+			err.should.be.instanceof(Error);
+			err.message.should.match(/Resolving to directories is not possible/);
+			done();
+		});
+	});
+
+	it("request ending with slash #2", done => {
+		resolver.resolve({}, fixture, "exports-field/dist/", {}, (err, result) => {
+			if (!err) throw new Error(`expect error, got ${result}`);
+			err.should.be.instanceof(Error);
+			err.message.should.match(/Resolving to directories is not possible/);
+			done();
+		});
+	});
+
+	it("request ending with slash #3", done => {
+		resolver.resolve({}, fixture, "exports-field/lib/", {}, (err, result) => {
+			if (!err) throw new Error(`expect error, got ${result}`);
+			err.should.be.instanceof(Error);
+			err.message.should.match(/Resolving to directories is not possible/);
+			done();
+		});
+	});
+
+	it("throw error if exports field is invalid", done => {
+		resolver.resolve(
+			{},
+			fixture,
+			"invalid-exports-field",
+			{},
+			(err, result) => {
+				if (!err) throw new Error(`expect error, got ${result}`);
+				err.should.be.instanceof(Error);
+				err.message.should.match(/should be relative path/);
+				err.message.should.match(/umd/);
+				done();
+			}
+		);
+	});
+
+	it("should log the correct info", done => {
+		const log = [];
+		resolver.resolve(
+			{},
+			fixture,
+			"exports-field/dist/browser.js",
+			{ log: v => log.push(v) },
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) throw new Error("No result");
+				result.should.be.eql(
+					path.join(fixture, "node_modules/exports-field/lib/browser.js")
+				);
+				log
+					.map(line => line.replace(fixture, "...").replace(/\\/g, "/"))
+					.should.be.eql([
+						"resolve 'exports-field/dist/browser.js' in '...'",
+						"  Parsed request is a module",
+						"  using description file: .../package.json (relative path: .)",
+						"    resolve as module",
+						"      looking for modules in .../node_modules",
+						"        single file module",
+						"          using description file: .../package.json (relative path: ./node_modules/exports-field)",
+						"            no extension",
+						"              .../node_modules/exports-field is not a file",
+						"            .js",
+						"              .../node_modules/exports-field.js doesn't exist",
+						"        existing directory .../node_modules/exports-field",
+						"          using description file: .../node_modules/exports-field/package.json (relative path: .)",
+						"            using exports field: ./lib/lib2/browser.js",
+						"              .../node_modules/exports-field/lib/lib2/browser.js doesn't exist",
+						"            using exports field: ./lib/browser.js",
+						"              existing file: .../node_modules/exports-field/lib/browser.js",
+						"                reporting result .../node_modules/exports-field/lib/browser.js"
+					]);
+				done();
+			}
+		);
 	});
 });
