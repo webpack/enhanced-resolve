@@ -98,9 +98,9 @@ declare interface ResolveOptions {
 	aliasFields: ((string)[])[];
 	cachePredicate: (arg0: ResolveRequest) => boolean;
 	cacheWithContext: boolean;
-	descriptionFiles: (string)[];
+	descriptionFiles: Set<string>;
 	enforceExtension: boolean;
-	extensions: (string)[];
+	extensions: Set<string>;
 	fileSystem: FileSystem;
 	unsafeCache: any;
 	symlinks: boolean;
