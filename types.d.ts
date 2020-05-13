@@ -31,24 +31,39 @@ declare interface FileSystem {
 	readFile: (
 		arg0: string,
 		arg1: (
-			arg0: undefined | null | Error,
+			arg0: undefined | null | (FileSystemError & Error),
 			arg1: undefined | string | Buffer
 		) => void
 	) => void;
+	readJson?:
+		| undefined
+		| ((
+				arg0: string,
+				arg1: (
+					arg0: undefined | null | (FileSystemError & Error),
+					arg1?: any
+				) => void
+		  ) => void);
 	readlink: (
 		arg0: string,
 		arg1: (
-			arg0: undefined | null | Error,
+			arg0: undefined | null | (FileSystemError & Error),
 			arg1: undefined | string | Buffer
 		) => void
 	) => void;
 	stat: (
 		arg0: string,
 		arg1: (
-			arg0: undefined | null | Error,
+			arg0: undefined | null | (FileSystemError & Error),
 			arg1: undefined | FileSystemStats
 		) => void
 	) => void;
+}
+declare interface FileSystemError {
+	code?: undefined | string;
+	errno?: undefined | number;
+	path?: undefined | string;
+	syscall?: undefined | string;
 }
 declare interface FileSystemStats {
 	isDirectory: () => boolean;
