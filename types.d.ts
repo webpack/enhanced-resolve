@@ -95,7 +95,7 @@ declare interface ResolveOptions {
 		name: string;
 		onlyModule?: undefined | boolean;
 	})[];
-	aliasFields: ((string)[])[];
+	aliasFields: Set<string | (string)[]>;
 	cachePredicate: (arg0: ResolveRequest) => boolean;
 	cacheWithContext: boolean;
 	descriptionFiles: Set<string>;
@@ -105,9 +105,9 @@ declare interface ResolveOptions {
 	unsafeCache: any;
 	symlinks: boolean;
 	resolver?: undefined | Resolver;
-	modules: (string | (string)[])[];
+	modules: Set<string | (string)[]>;
 	mainFields: ({ name: (string)[]; forceRelative: boolean })[];
-	mainFiles: (string)[];
+	mainFiles: Set<string>;
 	plugins: (
 		| { apply: (arg0: Resolver) => void }
 		| ((this: Resolver, arg1: Resolver) => void))[];
