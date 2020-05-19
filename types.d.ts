@@ -113,7 +113,7 @@ declare interface ResolveOptions {
 	aliasFields: Set<string | (string)[]>;
 	cachePredicate: (arg0: ResolveRequest) => boolean;
 	cacheWithContext: boolean;
-	descriptionFiles: Set<string>;
+	descriptionFiles: (string)[];
 	enforceExtension: boolean;
 	extensions: Set<string>;
 	fileSystem: FileSystem;
