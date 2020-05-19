@@ -31,7 +31,7 @@ declare interface FileSystem {
 	readFile: (
 		arg0: string,
 		arg1: (
-			arg0: undefined | null | (FileSystemError & Error),
+			arg0: undefined | null | (PossibleFileSystemError & Error),
 			arg1: undefined | string | Buffer
 		) => void
 	) => void;
@@ -40,30 +40,24 @@ declare interface FileSystem {
 		| ((
 				arg0: string,
 				arg1: (
-					arg0: undefined | null | (FileSystemError & Error),
+					arg0: undefined | null | (PossibleFileSystemError & Error),
 					arg1?: any
 				) => void
 		  ) => void);
 	readlink: (
 		arg0: string,
 		arg1: (
-			arg0: undefined | null | (FileSystemError & Error),
+			arg0: undefined | null | (PossibleFileSystemError & Error),
 			arg1: undefined | string | Buffer
 		) => void
 	) => void;
 	stat: (
 		arg0: string,
 		arg1: (
-			arg0: undefined | null | (FileSystemError & Error),
+			arg0: undefined | null | (PossibleFileSystemError & Error),
 			arg1: undefined | FileSystemStats
 		) => void
 	) => void;
-}
-declare interface FileSystemError {
-	code?: undefined | string;
-	errno?: undefined | number;
-	path?: undefined | string;
-	syscall?: undefined | string;
 }
 declare interface FileSystemStats {
 	isDirectory: () => boolean;
@@ -76,6 +70,12 @@ declare class LogInfoPlugin {
 }
 declare interface PnpApiImpl {
 	resolveToUnqualified: (arg0: string, arg1: string, arg2?: any) => string;
+}
+declare interface PossibleFileSystemError {
+	code?: undefined | string;
+	errno?: undefined | number;
+	path?: undefined | string;
+	syscall?: undefined | string;
 }
 
 /**
@@ -120,7 +120,7 @@ declare interface ResolveOptions {
 	unsafeCache: any;
 	symlinks: boolean;
 	resolver?: undefined | Resolver;
-	modules: Set<string | (string)[]>;
+	modules: (string | (string)[])[];
 	mainFields: ({ name: (string)[]; forceRelative: boolean })[];
 	mainFiles: Set<string>;
 	plugins: (
