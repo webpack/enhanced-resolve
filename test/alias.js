@@ -132,6 +132,7 @@ describe("alias", function() {
 					"            /a.node doesn't exist",
 					"        existing directory /a",
 					"          No description file found in /a or above",
+					"          No description file found in /a or above",
 					"          no extension",
 					"            /a/dir is not a file",
 					"          .js",

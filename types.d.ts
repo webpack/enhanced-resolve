@@ -113,8 +113,14 @@ declare interface ResolveOptions {
 	aliasFields: Set<string | (string)[]>;
 	cachePredicate: (arg0: ResolveRequest) => boolean;
 	cacheWithContext: boolean;
+
+	/**
+	 * A list of exports field condition names.
+	 */
+	conditionNames: Set<string>;
 	descriptionFiles: (string)[];
 	enforceExtension: boolean;
+	exportsFields: Set<string | (string)[]>;
 	extensions: Set<string>;
 	fileSystem: FileSystem;
 	unsafeCache: any;
@@ -251,9 +257,19 @@ declare interface UserResolveOptions {
 	descriptionFiles?: undefined | (string)[];
 
 	/**
+	 * A list of exports field condition names.
+	 */
+	conditionNames?: undefined | (string)[];
+
+	/**
 	 * Enforce that a extension from extensions must be used
 	 */
 	enforceExtension?: undefined | boolean;
+
+	/**
+	 * A list of exports fields in description files
+	 */
+	exportsFields?: undefined | (string | (string)[])[];
 
 	/**
 	 * A list of extensions which should be tried for files
