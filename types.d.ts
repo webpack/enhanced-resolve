@@ -31,21 +31,30 @@ declare interface FileSystem {
 	readFile: (
 		arg0: string,
 		arg1: (
-			arg0: undefined | null | Error,
+			arg0: undefined | null | (PossibleFileSystemError & Error),
 			arg1: undefined | string | Buffer
 		) => void
 	) => void;
+	readJson?:
+		| undefined
+		| ((
+				arg0: string,
+				arg1: (
+					arg0: undefined | null | (PossibleFileSystemError & Error),
+					arg1?: any
+				) => void
+		  ) => void);
 	readlink: (
 		arg0: string,
 		arg1: (
-			arg0: undefined | null | Error,
+			arg0: undefined | null | (PossibleFileSystemError & Error),
 			arg1: undefined | string | Buffer
 		) => void
 	) => void;
 	stat: (
 		arg0: string,
 		arg1: (
-			arg0: undefined | null | Error,
+			arg0: undefined | null | (PossibleFileSystemError & Error),
 			arg1: undefined | FileSystemStats
 		) => void
 	) => void;
@@ -61,6 +70,12 @@ declare class LogInfoPlugin {
 }
 declare interface PnpApiImpl {
 	resolveToUnqualified: (arg0: string, arg1: string, arg2?: any) => string;
+}
+declare interface PossibleFileSystemError {
+	code?: undefined | string;
+	errno?: undefined | number;
+	path?: undefined | string;
+	syscall?: undefined | string;
 }
 
 /**
@@ -95,19 +110,19 @@ declare interface ResolveOptions {
 		name: string;
 		onlyModule?: undefined | boolean;
 	})[];
-	aliasFields: ((string)[])[];
+	aliasFields: Set<string | (string)[]>;
 	cachePredicate: (arg0: ResolveRequest) => boolean;
 	cacheWithContext: boolean;
 	descriptionFiles: (string)[];
 	enforceExtension: boolean;
-	extensions: (string)[];
+	extensions: Set<string>;
 	fileSystem: FileSystem;
 	unsafeCache: any;
 	symlinks: boolean;
 	resolver?: undefined | Resolver;
 	modules: (string | (string)[])[];
 	mainFields: ({ name: (string)[]; forceRelative: boolean })[];
-	mainFiles: (string)[];
+	mainFiles: Set<string>;
 	plugins: (
 		| { apply: (arg0: Resolver) => void }
 		| ((this: Resolver, arg1: Resolver) => void))[];
