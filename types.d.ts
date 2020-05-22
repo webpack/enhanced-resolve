@@ -105,6 +105,7 @@ declare interface ResolveOptions {
 	conditionNames: Set<string>;
 	descriptionFiles: (string)[];
 	enforceExtension: boolean;
+	exportsFields: (string | (string)[])[];
 	extensions: (string)[];
 	fileSystem: FileSystem;
 	unsafeCache: any;
@@ -249,6 +250,11 @@ declare interface UserResolveOptions {
 	 * Enforce that a extension from extensions must be used
 	 */
 	enforceExtension?: undefined | boolean;
+
+	/**
+	 * A list of exports fields in description files
+	 */
+	exportsFields?: undefined | (string | (string)[])[];
 
 	/**
 	 * A list of extensions which should be tried for files
