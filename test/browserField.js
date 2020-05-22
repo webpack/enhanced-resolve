@@ -18,7 +18,12 @@ describe("browserField", function() {
 
 	beforeEach(function() {
 		resolver = ResolverFactory.createResolver({
-			aliasFields: ["browser"],
+			aliasFields: [
+				"browser",
+				["innerBrowser1", "field2", "browser"], // not presented
+				["innerBrowser1", "field", "browser"],
+				["innerBrowser2", "browser"]
+			],
 			useSyncFileSystemCalls: true,
 			fileSystem: fs
 		});
@@ -69,5 +74,14 @@ describe("browserField", function() {
 		resolver
 			.resolveSync({}, p("lib"), "module-b")
 			.should.be.eql(p("node_modules", "module-c.js"));
+	});
+
+	it("should resolve in nested property", function() {
+		resolver
+			.resolveSync({}, p(), "./lib/main1.js")
+			.should.be.eql(p("lib", "main.js"));
+		resolver
+			.resolveSync({}, p(), "./lib/main2.js")
+			.should.be.eql(p("lib", "browser.js"));
 	});
 });
