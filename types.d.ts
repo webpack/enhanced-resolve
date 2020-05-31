@@ -134,6 +134,7 @@ declare interface ResolveOptions {
 		| ((this: Resolver, arg1: Resolver) => void))[];
 	pnpApi: null | PnpApiImpl;
 	resolveToContext: boolean;
+	restrictions: Set<string | RegExp>;
 }
 declare interface ResolveRequest {
 	path: string | false;
@@ -334,6 +335,11 @@ declare interface UserResolveOptions {
 	 * Resolve to a context instead of a file
 	 */
 	resolveToContext?: undefined | boolean;
+
+	/**
+	 * A list of resolve restrictions
+	 */
+	restrictions?: undefined | (string | RegExp)[];
 
 	/**
 	 * Use only the sync constiants of the file system calls
