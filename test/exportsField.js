@@ -271,6 +271,39 @@ describe("Process exports field", function exportsField() {
 		},
 		//#endregion
 
+		//#region Direct and conditional mapping
+		{
+			name: "Direct and conditional mapping #1",
+			expect: [],
+			suite: [
+				{
+					".": [
+						{ browser: "./browser.js" },
+						{ require: "./require.js" },
+						{ import: "./import.mjs" }
+					]
+				},
+				".",
+				[]
+			]
+		},
+		{
+			name: "Direct and conditional mapping #2",
+			expect: ["./import.mjs"],
+			suite: [
+				{
+					".": [
+						{ browser: "./browser.js" },
+						{ require: "./require.js" },
+						{ import: "./import.mjs" }
+					]
+				},
+				".",
+				["import"]
+			]
+		},
+		//#endregion
+
 		//#region When mapping to a folder root, both the left and right sides must end in slashes
 		{
 			name: "mapping to a folder root #1",
