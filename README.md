@@ -94,6 +94,7 @@ myResolver.resolve({}, lookupStartPath, request, resolveContext, (
 | symlinks         | true                        | Whether to resolve symlinks to their symlinked location                                                                                       |
 | cachePredicate   | function() { return true }; | A function which decides whether a request should be cached or not. An object is passed to the function with `path` and `request` properties. |
 | resolveToContext | false                       | Resolve to a context instead of a file                                                                                                        |
+| restrictions     | []                          | A list of resolve restrictions                                                                                                                |
 | fileSystem       |                             | The file system which should be used                                                                                                          |
 | resolver         | undefined                   | A prepared Resolver to which the plugins are attached                                                                                         |
 
