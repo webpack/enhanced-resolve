@@ -97,6 +97,7 @@ myResolver.resolve({}, lookupStartPath, request, resolveContext, (
 | restrictions     | []                          | A list of resolve restrictions                                                                                                                |
 | fileSystem       |                             | The file system which should be used                                                                                                          |
 | resolver         | undefined                   | A prepared Resolver to which the plugins are attached                                                                                         |
+| enforceCase      | false                       | Enforce that the file path has the correct casing, even on case insensitive file systems                                                    |
 
 ## Plugins
 

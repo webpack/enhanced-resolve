@@ -19,6 +19,8 @@ declare class CachedInputFileSystem {
 	readJsonSync(path?: any): any;
 	readlink(path?: any, callback?: any): void;
 	readlinkSync(path?: any): any;
+	realpath(path?: any, callback?: any): void;
+	realpathSync(path?: any): any;
 	purge(what?: any): void;
 }
 declare class CloneBasenamePlugin {
@@ -56,6 +58,13 @@ declare interface FileSystem {
 		arg1: (
 			arg0: undefined | null | (PossibleFileSystemError & Error),
 			arg1: undefined | FileSystemStats
+		) => void
+	) => void;
+	realpath: (
+		arg0: string,
+		arg1: (
+			arg0: undefined | null | (PossibleFileSystemError & Error),
+			arg1: undefined | string | Buffer
 		) => void
 	) => void;
 }
@@ -135,6 +144,7 @@ declare interface ResolveOptions {
 	pnpApi: null | PnpApiImpl;
 	resolveToContext: boolean;
 	restrictions: Set<string | RegExp>;
+	enforceCase: boolean;
 }
 declare interface ResolveRequest {
 	path: string | false;
@@ -345,6 +355,11 @@ declare interface UserResolveOptions {
 	 * Use only the sync constiants of the file system calls
 	 */
 	useSyncFileSystemCalls?: undefined | boolean;
+
+	/**
+	 * Enforce that the file path has the correct casing, even on case insensitive file systems
+	 */
+	enforceCase?: undefined | boolean;
 }
 declare function exports(
 	context?: any,
