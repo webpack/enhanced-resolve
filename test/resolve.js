@@ -132,10 +132,47 @@ describe("resolve", function() {
 		path.join(fixtures, "main1.js") + "?query"
 	);
 	testResolve(
+		"file with fragment",
+		fixtures,
+		"./main1.js#fragment",
+		path.join(fixtures, "main1.js") + "#fragment"
+	);
+	testResolve(
+		"file with fragment and query",
+		fixtures,
+		"./main1.js#fragment?query",
+		path.join(fixtures, "main1.js") + "#fragment?query"
+	);
+	testResolve(
+		"file with query and fragment",
+		fixtures,
+		"./main1.js?#fragment",
+		path.join(fixtures, "main1.js") + "?#fragment"
+	);
+
+	testResolve(
 		"file in module with query",
 		fixtures,
 		"m1/a?query",
 		path.join(fixtures, "node_modules", "m1", "a.js") + "?query"
+	);
+	testResolve(
+		"file in module with fragment",
+		fixtures,
+		"m1/a#fragment",
+		path.join(fixtures, "node_modules", "m1", "a.js") + "#fragment"
+	);
+	testResolve(
+		"file in module with fragment and query",
+		fixtures,
+		"m1/a#fragment?query",
+		path.join(fixtures, "node_modules", "m1", "a.js") + "#fragment?query"
+	);
+	testResolve(
+		"file in module with query and fragment",
+		fixtures,
+		"m1/a?#fragment",
+		path.join(fixtures, "node_modules", "m1", "a.js") + "?#fragment"
 	);
 
 	testResolveContext("context for fixtures", fixtures, "./", fixtures);
