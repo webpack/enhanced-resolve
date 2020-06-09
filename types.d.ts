@@ -230,12 +230,12 @@ declare interface UserResolveOptions {
 	 */
 	alias?:
 		| undefined
+		| { [index: string]: string | false | (string)[] }
 		| ({
 				alias: string | false | (string)[];
 				name: string;
 				onlyModule?: undefined | boolean;
-		  })[]
-		| { [index: string]: string | false | (string)[] };
+		  })[];
 
 	/**
 	 * A list of alias fields in description files
@@ -389,8 +389,10 @@ declare namespace exports {
 		CloneBasenamePlugin,
 		LogInfoPlugin,
 		PnpApiImpl as PnpApi,
+		Resolver,
 		FileSystem,
-		ResolveRequest
+		ResolveRequest,
+		UserResolveOptions as ResolveOptions
 	};
 }
 

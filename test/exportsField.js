@@ -130,6 +130,183 @@ describe("Process exports field", function exportsField() {
 				[]
 			]
 		},
+		{
+			name: "sample #10",
+			expect: ["./ok.js"],
+			suite: [
+				{
+					"./#foo": "./ok.js",
+					"./module": "./ok.js",
+					"./🎉": "./ok.js",
+					"./%F0%9F%8E%89": "./other.js",
+					"./bar#foo": "./ok.js",
+					"./#zapp/": "./"
+				},
+				"./#foo",
+				[]
+			]
+		},
+		{
+			name: "sample #11",
+			expect: ["./ok.js"],
+			suite: [
+				{
+					"./#foo": "./ok.js",
+					"./module": "./ok.js",
+					"./🎉": "./ok.js",
+					"./%F0%9F%8E%89": "./other.js",
+					"./bar#foo": "./ok.js",
+					"./#zapp/": "./"
+				},
+				"./bar#foo",
+				[]
+			]
+		},
+		{
+			name: "sample #12",
+			expect: ["./ok.js#abc"],
+			suite: [
+				{
+					"./#foo": "./ok.js",
+					"./module": "./ok.js",
+					"./🎉": "./ok.js",
+					"./%F0%9F%8E%89": "./other.js",
+					"./bar#foo": "./ok.js",
+					"./#zapp/": "./"
+				},
+				"./#zapp/ok.js#abc",
+				[]
+			]
+		},
+		{
+			name: "sample #13",
+			expect: ["./ok.js?abc"],
+			suite: [
+				{
+					"./#foo": "./ok.js",
+					"./module": "./ok.js",
+					"./🎉": "./ok.js",
+					"./%F0%9F%8E%89": "./other.js",
+					"./bar#foo": "./ok.js",
+					"./#zapp/": "./"
+				},
+				"./#zapp/ok.js?abc",
+				[]
+			]
+		},
+		{
+			name: "sample #14",
+			expect: ["./🎉.js"],
+			suite: [
+				{
+					"./#foo": "./ok.js",
+					"./module": "./ok.js",
+					"./🎉": "./ok.js",
+					"./%F0%9F%8E%89": "./other.js",
+					"./bar#foo": "./ok.js",
+					"./#zapp/": "./"
+				},
+				"./#zapp/🎉.js",
+				[]
+			]
+		},
+		{
+			name: "sample #15",
+			expect: ["./%F0%9F%8E%89.js"],
+			suite: [
+				{
+					"./#foo": "./ok.js",
+					"./module": "./ok.js",
+					"./🎉": "./ok.js",
+					"./%F0%9F%8E%89": "./other.js",
+					"./bar#foo": "./ok.js",
+					"./#zapp/": "./"
+				},
+				// "🎉" percent encoded
+				"./#zapp/%F0%9F%8E%89.js",
+				[]
+			]
+		},
+		{
+			name: "sample #16",
+			expect: ["./ok.js"],
+			suite: [
+				{
+					"./#foo": "./ok.js",
+					"./module": "./ok.js",
+					"./🎉": "./ok.js",
+					"./%F0%9F%8E%89": "./other.js",
+					"./bar#foo": "./ok.js",
+					"./#zapp/": "./"
+				},
+				"./🎉",
+				[]
+			]
+		},
+		{
+			name: "sample #17",
+			expect: ["./other.js"],
+			suite: [
+				{
+					"./#foo": "./ok.js",
+					"./module": "./ok.js",
+					"./🎉": "./ok.js",
+					"./%F0%9F%8E%89": "./other.js",
+					"./bar#foo": "./ok.js",
+					"./#zapp/": "./"
+				},
+				"./%F0%9F%8E%89",
+				[]
+			]
+		},
+		{
+			name: "sample #18",
+			expect: ["./ok.js"],
+			suite: [
+				{
+					"./#foo": "./ok.js",
+					"./module": "./ok.js",
+					"./🎉": "./ok.js",
+					"./%F0%9F%8E%89": "./other.js",
+					"./bar#foo": "./ok.js",
+					"./#zapp/": "./"
+				},
+				"./module",
+				[]
+			]
+		},
+		{
+			name: "sample #19",
+			expect: [],
+			suite: [
+				{
+					"./#foo": "./ok.js",
+					"./module": "./ok.js",
+					"./🎉": "./ok.js",
+					"./%F0%9F%8E%89": "./other.js",
+					"./bar#foo": "./ok.js",
+					"./#zapp/": "./"
+				},
+				"./module#foo",
+				[]
+			]
+		},
+		{
+			name: "sample #20",
+			expect: [],
+			suite: [
+				{
+					"./#foo": "./ok.js",
+					"./module": "./ok.js",
+					"./🎉": "./ok.js",
+					"./%F0%9F%8E%89": "./other.js",
+					"./bar#foo": "./ok.js",
+					"./#zapp/": "./"
+				},
+				"./module?foo",
+				[]
+			]
+		},
 		//#endregion
 
 		//#region Direct mapping
@@ -1210,6 +1387,35 @@ describe("ExportsFieldPlugin", () => {
 				done();
 			}
 		);
+	});
+
+	it("resolver should respect query parameters #1", done => {
+		resolver.resolve(
+			{},
+			fixture2,
+			"exports-field/dist/browser.js?foo",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) throw new Error("No result");
+				result.should.equal(
+					path.resolve(
+						fixture2,
+						"node_modules/exports-field/lib/browser.js?foo"
+					)
+				);
+				done();
+			}
+		);
+	});
+
+	it("resolver should respect query parameters #2. Direct matching", done => {
+		resolver.resolve({}, fixture2, "exports-field?foo", {}, (err, result) => {
+			if (!err) throw new Error(`expect error, got ${result}`);
+			err.should.be.instanceof(Error);
+			err.message.should.match(/Package path \.\/\?foo is not exported/);
+			done();
+		});
 	});
 
 	it("relative path should work, if relative path as request is used", done => {
