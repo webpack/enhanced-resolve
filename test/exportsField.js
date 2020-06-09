@@ -307,6 +307,17 @@ describe("Process exports field", function exportsField() {
 				[]
 			]
 		},
+		{
+			name: "sample #21",
+			expect: ["./d?e?f"],
+			suite: [
+				{
+					"./a?b?c/": "./"
+				},
+				"./a?b?c/d?e?f",
+				[]
+			]
+		},
 		//#endregion
 
 		//#region Direct mapping
