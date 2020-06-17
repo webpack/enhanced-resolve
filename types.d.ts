@@ -68,6 +68,14 @@ declare class LogInfoPlugin {
 	source: any;
 	apply(resolver: Resolver): void;
 }
+declare interface ParsedIdentifier {
+	request: string;
+	query: string;
+	fragment: string;
+	directory: boolean;
+	module: boolean;
+	file: boolean;
+}
 declare interface PnpApiImpl {
 	resolveToUnqualified: (arg0: string, arg1: string, arg2?: any) => string;
 }
@@ -140,6 +148,7 @@ declare interface ResolveRequest {
 	path: string | false;
 	request?: undefined | string;
 	query?: undefined | string;
+	fragment?: undefined | string;
 	directory?: undefined | boolean;
 	module?: undefined | boolean;
 	descriptionFilePath?: undefined | string;
@@ -199,7 +208,7 @@ declare abstract class Resolver {
 		resolveContext: ResolveContext,
 		callback: (
 			arg0: null | Error,
-			arg1: undefined | string,
+			arg1: undefined | string | false,
 			arg2: undefined | ResolveRequest
 		) => void
 	): void;
@@ -210,15 +219,7 @@ declare abstract class Resolver {
 		resolveContext?: any,
 		callback?: any
 	): any;
-	parse(
-		identifier?: any
-	): {
-		request: string;
-		query: string;
-		module: boolean;
-		directory: boolean;
-		file: boolean;
-	};
+	parse(identifier: string): ParsedIdentifier;
 	isModule(path?: any): boolean;
 	isDirectory(path: string): boolean;
 	join(path?: any, request?: any): string;

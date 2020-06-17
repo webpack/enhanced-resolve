@@ -1429,6 +1429,35 @@ describe("ExportsFieldPlugin", () => {
 		});
 	});
 
+	it("resolver should respect fragment parameters #1", done => {
+		resolver.resolve(
+			{},
+			fixture2,
+			"exports-field/dist/browser.js#foo",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) throw new Error("No result");
+				result.should.equal(
+					path.resolve(
+						fixture2,
+						"node_modules/exports-field/lib/browser.js#foo"
+					)
+				);
+				done();
+			}
+		);
+	});
+
+	it("resolver should respect fragment parameters #2. Direct matching", done => {
+		resolver.resolve({}, fixture2, "exports-field#foo", {}, (err, result) => {
+			if (!err) throw new Error(`expect error, got ${result}`);
+			err.should.be.instanceof(Error);
+			err.message.should.match(/Package path \.\/#foo is not exported/);
+			done();
+		});
+	});
+
 	it("relative path should work, if relative path as request is used", done => {
 		resolver.resolve(
 			{},
