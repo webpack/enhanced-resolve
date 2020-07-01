@@ -93,6 +93,7 @@ myResolver.resolve({}, lookupStartPath, request, resolveContext, (
 | plugins          | []                          | A list of additional resolve plugins which should be applied                                                                                  |
 | symlinks         | true                        | Whether to resolve symlinks to their symlinked location                                                                                       |
 | cachePredicate   | function() { return true }; | A function which decides whether a request should be cached or not. An object is passed to the function with `path` and `request` properties. |
+| roots            | []                          | A list of root paths                                                                                                                          |
 | resolveToContext | false                       | Resolve to a context instead of a file                                                                                                        |
 | restrictions     | []                          | A list of resolve restrictions                                                                                                                |
 | fileSystem       |                             | The file system which should be used                                                                                                          |
