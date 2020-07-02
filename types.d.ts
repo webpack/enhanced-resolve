@@ -398,6 +398,7 @@ declare namespace exports {
 		PnpApiImpl as PnpApi,
 		Resolver,
 		FileSystem,
+		ResolveContext,
 		ResolveRequest,
 		UserResolveOptions as ResolveOptions
 	};
