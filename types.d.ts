@@ -141,6 +141,7 @@ declare interface ResolveOptions {
 		| { apply: (arg0: Resolver) => void }
 		| ((this: Resolver, arg1: Resolver) => void))[];
 	pnpApi: null | PnpApiImpl;
+	roots: Set<string>;
 	resolveToContext: boolean;
 	restrictions: Set<string | RegExp>;
 }
@@ -333,6 +334,11 @@ declare interface UserResolveOptions {
 	pnpApi?: undefined | null | PnpApiImpl;
 
 	/**
+	 * A list of root paths
+	 */
+	roots?: undefined | (string)[];
+
+	/**
 	 * Resolve to a context instead of a file
 	 */
 	resolveToContext?: undefined | boolean;
@@ -392,6 +398,7 @@ declare namespace exports {
 		PnpApiImpl as PnpApi,
 		Resolver,
 		FileSystem,
+		ResolveContext,
 		ResolveRequest,
 		UserResolveOptions as ResolveOptions
 	};
