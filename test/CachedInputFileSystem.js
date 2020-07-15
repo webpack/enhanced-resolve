@@ -2,7 +2,88 @@ var should = require("should");
 
 var { CachedInputFileSystem } = require("../");
 
-describe("CachedInputFileSystem", function() {
+describe("CachedInputFileSystem OperationMergerBackend", function() {
+	this.timeout(3000);
+	var fs;
+
+	beforeEach(function() {
+		fs = new CachedInputFileSystem(
+			{
+				stat: function(path, options, callback) {
+					if (!callback) {
+						callback = options;
+						options = undefined;
+					}
+					setTimeout(
+						() =>
+							callback(null, {
+								path,
+								options
+							}),
+						100
+					);
+				},
+				statSync: function(path, options) {
+					return {
+						path,
+						options
+					};
+				}
+			},
+			0
+		);
+	});
+	afterEach(function() {
+		fs.purge();
+	});
+
+	it("should join accesses", function(done) {
+		fs.stat("a", function(err, result) {
+			should.exist(result);
+			result.a = true;
+		});
+		fs.stat("a", function(err, result) {
+			should.exist(result);
+			should.exist(result.a);
+			done();
+		});
+	});
+
+	it("should not join accesses with options", function(done) {
+		fs.stat("a", function(err, result) {
+			should.exist(result);
+			result.a = true;
+			result.path.should.be.eql("a");
+			should.not.exist(result.options);
+		});
+		fs.stat("a", { options: true }, function(err, result) {
+			should.exist(result);
+			should.not.exist(result.a);
+			result.path.should.be.eql("a");
+			result.options.should.eql({ options: true });
+			done();
+		});
+	});
+
+	it("should not cache accesses", function(done) {
+		fs.stat("a", function(err, result) {
+			result.a = true;
+			fs.stat("a", function(err, result) {
+				should.not.exist(result.a);
+				done();
+			});
+		});
+	});
+
+	it("should not cache sync accesses", function() {
+		const result = fs.statSync("a");
+		result.a = true;
+		const result2 = fs.statSync("a");
+		should.not.exist(result2.a);
+	});
+});
+
+describe("CachedInputFileSystem CacheBackend", function() {
 	this.timeout(3000);
 	var fs;
 
@@ -10,13 +91,24 @@ describe("CachedInputFileSystem", function() {
 		let counter = 0;
 		fs = new CachedInputFileSystem(
 			{
-				stat: function(path, callback) {
+				stat: function(path, options, callback) {
+					if (!callback) {
+						callback = options;
+						options = undefined;
+					}
 					setTimeout(
 						callback.bind(null, null, {
-							path: path
+							path,
+							options
 						}),
 						100
 					);
+				},
+				statSync: function(path, options) {
+					return {
+						path,
+						options
+					};
 				},
 				readdir: function(path, callback) {
 					callback(null, [`${counter++}`]);
@@ -35,6 +127,20 @@ describe("CachedInputFileSystem", function() {
 		});
 		fs.stat("a", function(err, result) {
 			should.exist(result.a);
+			done();
+		});
+	});
+
+	it("should not join accesses with options", function(done) {
+		fs.stat("a", function(err, result) {
+			result.a = true;
+			result.path.should.be.eql("a");
+			should.not.exist(result.options);
+		});
+		fs.stat("a", { options: true }, function(err, result) {
+			should.not.exist(result.a);
+			result.path.should.be.eql("a");
+			result.options.should.eql({ options: true });
 			done();
 		});
 	});
@@ -67,6 +173,16 @@ describe("CachedInputFileSystem", function() {
 				sync = false;
 			}, 50);
 		});
+	});
+
+	it("should cache sync accesses", function() {
+		const result = fs.statSync("a");
+		result.a = true;
+		const result2 = fs.statSync("a");
+		should.exist(result2.a);
+		const result3 = fs.statSync("a", { options: true });
+		should.not.exist(result3.a);
+		result3.options.should.be.eql({ options: true });
 	});
 
 	it("should recover after passive periods", function(done) {
