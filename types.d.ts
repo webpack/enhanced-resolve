@@ -9,16 +9,41 @@ import { AsyncSeriesBailHook, AsyncSeriesHook, SyncHook } from "tapable";
 declare class CachedInputFileSystem {
 	constructor(fileSystem?: any, duration?: any);
 	fileSystem: any;
-	stat(path?: any, callback?: any): void;
-	statSync(path?: any): any;
-	readdir(path?: any, callback?: any): void;
-	readdirSync(path?: any): any;
-	readFile(path?: any, callback?: any): void;
-	readFileSync(path?: any): any;
-	readJson(path?: any, callback?: any): void;
-	readJsonSync(path?: any): any;
-	readlink(path?: any, callback?: any): void;
-	readlinkSync(path?: any): any;
+	stat: {
+		(arg0: string, arg1: FileSystemCallback<FileSystemStats>): void;
+		(arg0: string, arg1: any, arg2: FileSystemCallback<string | Buffer>): void;
+	};
+	statSync: (arg0: string, arg1?: any) => FileSystemStats;
+	readdir: {
+		(
+			arg0: string,
+			arg1: FileSystemCallback<(string | Buffer)[] | (FileSystemDirent)[]>
+		): void;
+		(
+			arg0: string,
+			arg1: any,
+			arg2: FileSystemCallback<(string | Buffer)[] | (FileSystemDirent)[]>
+		): void;
+	};
+	readdirSync: (
+		arg0: string,
+		arg1?: any
+	) => (string | Buffer)[] | (FileSystemDirent)[];
+	readFile: {
+		(arg0: string, arg1: FileSystemCallback<string | Buffer>): void;
+		(arg0: string, arg1: any, arg2: FileSystemCallback<string | Buffer>): void;
+	};
+	readFileSync: (arg0: string, arg1?: any) => string | Buffer;
+	readJson?: {
+		(arg0: string, arg1: FileSystemCallback<any>): void;
+		(arg0: string, arg1: any, arg2: FileSystemCallback<any>): void;
+	};
+	readJsonSync?: (arg0: string, arg1?: any) => any;
+	readlink: {
+		(arg0: string, arg1: FileSystemCallback<string | Buffer>): void;
+		(arg0: string, arg1: any, arg2: FileSystemCallback<string | Buffer>): void;
+	};
+	readlinkSync: (arg0: string, arg1?: any) => string | Buffer;
 	purge(what?: any): void;
 }
 declare class CloneBasenamePlugin {
@@ -28,36 +53,46 @@ declare class CloneBasenamePlugin {
 	apply(resolver: Resolver): void;
 }
 declare interface FileSystem {
-	readFile: (
-		arg0: string,
-		arg1: (
-			arg0: undefined | null | (PossibleFileSystemError & Error),
-			arg1: undefined | string | Buffer
-		) => void
-	) => void;
+	readFile: {
+		(arg0: string, arg1: FileSystemCallback<string | Buffer>): void;
+		(arg0: string, arg1: any, arg2: FileSystemCallback<string | Buffer>): void;
+	};
+	readdir: {
+		(
+			arg0: string,
+			arg1: FileSystemCallback<(string | Buffer)[] | (FileSystemDirent)[]>
+		): void;
+		(
+			arg0: string,
+			arg1: any,
+			arg2: FileSystemCallback<(string | Buffer)[] | (FileSystemDirent)[]>
+		): void;
+	};
 	readJson?:
 		| undefined
-		| ((
-				arg0: string,
-				arg1: (
-					arg0: undefined | null | (PossibleFileSystemError & Error),
-					arg1?: any
-				) => void
-		  ) => void);
-	readlink: (
-		arg0: string,
-		arg1: (
-			arg0: undefined | null | (PossibleFileSystemError & Error),
-			arg1: undefined | string | Buffer
-		) => void
-	) => void;
-	stat: (
-		arg0: string,
-		arg1: (
-			arg0: undefined | null | (PossibleFileSystemError & Error),
-			arg1: undefined | FileSystemStats
-		) => void
-	) => void;
+		| {
+				(arg0: string, arg1: FileSystemCallback<any>): void;
+				(arg0: string, arg1: any, arg2: FileSystemCallback<any>): void;
+		  };
+	readlink: {
+		(arg0: string, arg1: FileSystemCallback<string | Buffer>): void;
+		(arg0: string, arg1: any, arg2: FileSystemCallback<string | Buffer>): void;
+	};
+	stat: {
+		(arg0: string, arg1: FileSystemCallback<FileSystemStats>): void;
+		(arg0: string, arg1: any, arg2: FileSystemCallback<string | Buffer>): void;
+	};
+}
+declare interface FileSystemCallback<T> {
+	(
+		err: undefined | null | (PossibleFileSystemError & Error),
+		result?: undefined | T
+	): any;
+}
+declare interface FileSystemDirent {
+	name: string | Buffer;
+	isDirectory: () => boolean;
+	isFile: () => boolean;
 }
 declare interface FileSystemStats {
 	isDirectory: () => boolean;
