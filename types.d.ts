@@ -177,6 +177,7 @@ declare interface ResolveOptions {
 		| ((this: Resolver, arg1: Resolver) => void))[];
 	pnpApi: null | PnpApiImpl;
 	roots: Set<string>;
+	fullySpecified: boolean;
 	resolveToContext: boolean;
 	restrictions: Set<string | RegExp>;
 }
@@ -192,6 +193,7 @@ declare interface ResolveRequest {
 	descriptionFileData?: any;
 	relativePath?: undefined | string;
 	ignoreSymlinks?: undefined | boolean;
+	fullySpecified?: undefined | boolean;
 }
 declare abstract class Resolver {
 	fileSystem: FileSystem;
@@ -372,6 +374,11 @@ declare interface UserResolveOptions {
 	 * A list of root paths
 	 */
 	roots?: undefined | (string)[];
+
+	/**
+	 * The request is already fully specified and no extensions or directories are resolved for it
+	 */
+	fullySpecified?: undefined | boolean;
 
 	/**
 	 * Resolve to a context instead of a file
