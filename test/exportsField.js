@@ -1,11 +1,11 @@
 const path = require("path");
 const fs = require("fs");
 const should = require("should");
-const processExportsField = require("../lib/processExportsField");
+const { processExportsField } = require("../lib/util/entrypoints");
 const ResolverFactory = require("../lib/ResolverFactory");
 const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
 
-/** @typedef {import("../lib/processExportsField").ExportsField} ExportsField */
+/** @typedef {import("../lib/util/entrypoints").ExportsField} ExportsField */
 
 const fixture = path.resolve(__dirname, "fixtures", "exports-field");
 const fixture2 = path.resolve(__dirname, "fixtures", "exports-field2");
