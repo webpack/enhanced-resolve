@@ -1018,7 +1018,7 @@ describe("Process exports field", function exportsField() {
 		},
 		//#endregion
 
-		//#region nested mapping
+		//#region Nested mapping
 		{
 			name: "nested mapping #1",
 			expect: [],
