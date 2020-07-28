@@ -7,7 +7,7 @@ const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
 
 /** @typedef {import("../lib/util/entrypoints").ImportsField} ImportsField */
 
-const fixture = path.resolve(__dirname, "fixtures", "#imports-field");
+const fixture = path.resolve(__dirname, "fixtures", "imports-field");
 
 describe("Process imports field", function exportsField() {
 	/** @type {Array<{name: string, expect: string[]|Error, suite: [ImportsField, string, string[]]}>} */
@@ -1187,7 +1187,7 @@ describe("ImportsFieldPlugin", () => {
 		conditionNames: ["webpack"]
 	});
 
-	it("resolve imports field instead of self-referencing", done => {
+	it("should resolve using imports field instead of self-referencing", done => {
 		resolver.resolve({}, fixture, "#imports-field", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) throw new Error("No result");
@@ -1196,7 +1196,7 @@ describe("ImportsFieldPlugin", () => {
 		});
 	});
 
-	it("resolve out of package scope", done => {
+	it("should resolve out of package scope", done => {
 		resolver.resolve({}, fixture, "#b", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) throw new Error("No result");
@@ -1239,7 +1239,7 @@ describe("ImportsFieldPlugin", () => {
 		});
 	});
 
-	it("resolve package #1", done => {
+	it("should resolve package #1", done => {
 		resolver.resolve({}, fixture, "#a/dist/main.js", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) throw new Error("No result");
@@ -1250,7 +1250,7 @@ describe("ImportsFieldPlugin", () => {
 		});
 	});
 
-	it("resolve package #2", done => {
+	it("should resolve package #2", done => {
 		resolver.resolve({}, fixture, "#a", {}, (err, result) => {
 			if (!err) throw new Error(`expect error, got ${result}`);
 			err.should.be.instanceof(Error);
@@ -1259,7 +1259,7 @@ describe("ImportsFieldPlugin", () => {
 		});
 	});
 
-	it("resolve package #3", done => {
+	it("should resolve package #3", done => {
 		resolver.resolve({}, fixture, "#ccc/index.js", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) throw new Error("No result");
@@ -1268,12 +1268,35 @@ describe("ImportsFieldPlugin", () => {
 		});
 	});
 
-	it("resolve package #4", done => {
+	it("should resolve package #4", done => {
 		resolver.resolve({}, fixture, "#c", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) throw new Error("No result");
 			result.should.equal(path.resolve(fixture, "node_modules/c/index.js"));
 			done();
+		});
+	});
+
+	it("should resolve absolute path as an imports field target", done => {
+		const tmpdirPrefix = path.join(fixture, "node_modules/absolute-tmp-");
+		fs.mkdtemp(tmpdirPrefix, (err, dir) => {
+			if (err) done(err);
+
+			const pjson = path.resolve(dir, "./package.json");
+			const file = path.resolve(dir, "./index");
+			fs.writeFileSync(file, "");
+			fs.writeFileSync(pjson, JSON.stringify({ imports: { "#a": file } }));
+
+			resolver.resolve({}, dir, "#a", {}, (err, result) => {
+				fs.unlinkSync(file);
+				fs.unlinkSync(pjson);
+				fs.rmdirSync(dir);
+				if (err) return done(err);
+				if (!result) throw new Error("No result");
+				console.log(result);
+				result.should.equal(file);
+				done();
+			});
 		});
 	});
 

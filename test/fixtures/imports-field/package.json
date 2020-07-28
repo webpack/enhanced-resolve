@@ -1,5 +1,5 @@
 {
-  "name": "#imports-field",
+  "name": "imports-field",
   "version": "1.0.0",
   "exports": "./a.js",
   "imports": {
