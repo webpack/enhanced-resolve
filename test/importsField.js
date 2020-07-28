@@ -1,7 +1,13 @@
+const path = require("path");
+const fs = require("fs");
 const should = require("should");
 const { processImportsField } = require("../lib/util/entrypoints");
+const ResolverFactory = require("../lib/ResolverFactory");
+const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
 
 /** @typedef {import("../lib/util/entrypoints").ImportsField} ImportsField */
+
+const fixture = path.resolve(__dirname, "fixtures", "#imports-field");
 
 describe("Process imports field", function exportsField() {
 	/** @type {Array<{name: string, expect: string[]|Error, suite: [ImportsField, string, string[]]}>} */
@@ -1168,5 +1174,141 @@ describe("Process imports field", function exportsField() {
 				).should.eql(testCase.expect);
 			}
 		});
+	});
+});
+
+describe("ImportsFieldPlugin", () => {
+	const nodeFileSystem = new CachedInputFileSystem(fs, 4000);
+
+	const resolver = ResolverFactory.createResolver({
+		extensions: [".js"],
+		fileSystem: nodeFileSystem,
+		mainFiles: ["index.js"],
+		conditionNames: ["webpack"]
+	});
+
+	it("resolve imports field instead of self-referencing", done => {
+		resolver.resolve({}, fixture, "#imports-field", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) throw new Error("No result");
+			result.should.equal(path.resolve(fixture, "b.js"));
+			done();
+		});
+	});
+
+	it("resolve out of package scope", done => {
+		resolver.resolve({}, fixture, "#b", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) throw new Error("No result");
+			result.should.equal(path.resolve(fixture, "../b.js"));
+			done();
+		});
+	});
+
+	it("field name #1", done => {
+		const resolver = ResolverFactory.createResolver({
+			extensions: [".js"],
+			fileSystem: nodeFileSystem,
+			mainFiles: ["index.js"],
+			importsFields: [["imports"]],
+			conditionNames: ["webpack"]
+		});
+
+		resolver.resolve({}, fixture, "#b", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) throw new Error("No result");
+			result.should.equal(path.resolve(fixture, "../b.js"));
+			done();
+		});
+	});
+
+	it("field name #2", done => {
+		const resolver = ResolverFactory.createResolver({
+			extensions: [".js"],
+			fileSystem: nodeFileSystem,
+			mainFiles: ["index.js"],
+			importsFields: [["other", "imports"], "imports"],
+			conditionNames: ["webpack"]
+		});
+
+		resolver.resolve({}, fixture, "#b", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) throw new Error("No result");
+			result.should.equal(path.resolve(fixture, "./a.js"));
+			done();
+		});
+	});
+
+	it("resolve package #1", done => {
+		resolver.resolve({}, fixture, "#a/dist/main.js", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) throw new Error("No result");
+			result.should.equal(
+				path.resolve(fixture, "node_modules/a/lib/lib2/main.js")
+			);
+			done();
+		});
+	});
+
+	it("resolve package #2", done => {
+		resolver.resolve({}, fixture, "#a", {}, (err, result) => {
+			if (!err) throw new Error(`expect error, got ${result}`);
+			err.should.be.instanceof(Error);
+			err.message.should.match(/is not imported from package/);
+			done();
+		});
+	});
+
+	it("resolve package #3", done => {
+		resolver.resolve({}, fixture, "#ccc/index.js", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) throw new Error("No result");
+			result.should.equal(path.resolve(fixture, "node_modules/c/index.js"));
+			done();
+		});
+	});
+
+	it("resolve package #4", done => {
+		resolver.resolve({}, fixture, "#c", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) throw new Error("No result");
+			result.should.equal(path.resolve(fixture, "node_modules/c/index.js"));
+			done();
+		});
+	});
+
+	it("should log the correct info", done => {
+		const log = [];
+		resolver.resolve(
+			{},
+			fixture,
+			"#a/dist/index.js",
+			{ log: v => log.push(v) },
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) throw new Error("No result");
+				result.should.be.eql(path.join(fixture, "node_modules/a/lib/index.js"));
+				log
+					.map(line => line.replace(fixture, "...").replace(/\\/g, "/"))
+					.should.be.eql([
+						"resolve '#a/dist/index.js' in '...'",
+						"  using description file: .../package.json (relative path: .)",
+						"    resolve as internal import",
+						"      using imports field: a/dist/index.js",
+						"        Parsed request is a module",
+						"        using description file: .../package.json (relative path: .)",
+						"          resolve as module",
+						"            looking for modules in .../node_modules",
+						"              existing directory .../node_modules/a",
+						"                using description file: .../node_modules/a/package.json (relative path: .)",
+						"                  using exports field: ./lib/lib2/index.js",
+						"                    .../node_modules/a/lib/lib2/index.js doesn't exist",
+						"                  using exports field: ./lib/index.js",
+						"                    existing file: .../node_modules/a/lib/index.js",
+						"                      reporting result .../node_modules/a/lib/index.js"
+					]);
+				done();
+			}
+		);
 	});
 });
