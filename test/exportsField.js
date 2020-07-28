@@ -841,7 +841,34 @@ describe("Process exports field", function exportsField() {
 				["browser"]
 			]
 		},
-
+		{
+			name: "incorrect request #3",
+			expect: new Error(),
+			suite: [
+				{
+					"./utils/": {
+						browser: "./a/",
+						default: "./b/"
+					}
+				},
+				"../utils/index.mjs",
+				["browser"]
+			]
+		},
+		{
+			name: "incorrect request #4",
+			expect: new Error(),
+			suite: [
+				{
+					"./utils/": {
+						browser: "./a/",
+						default: "./b/"
+					}
+				},
+				"/utils/index.mjs/",
+				["browser"]
+			]
+		},
 		//#endregion
 
 		//#region Directory exports targets may not backtrack above the package base

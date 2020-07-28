@@ -12,13 +12,13 @@ describe("Process imports field", function exportsField() {
 			expect: ["./dist/test/file.js", "./src/test/file.js"],
 			suite: [
 				{
-					"#a/": {
+					"#abc/": {
 						import: ["./dist/", "./src/"],
 						webpack: "./wp/"
 					},
-					"#a": "./main.js"
+					"#abc": "./main.js"
 				},
-				"#a/test/file.js",
+				"#abc/test/file.js",
 				["import", "webpack"]
 			]
 		},
@@ -27,9 +27,9 @@ describe("Process imports field", function exportsField() {
 			expect: ["./data/timezones/pdt.mjs"],
 			suite: [
 				{
-					"#a/timezones/": "./data/timezones/"
+					"#1/timezones/": "./data/timezones/"
 				},
-				"#a/timezones/pdt.mjs",
+				"#1/timezones/pdt.mjs",
 				[]
 			]
 		},
@@ -39,6 +39,7 @@ describe("Process imports field", function exportsField() {
 			expect: ["./data/timezones/timezones/pdt.mjs"],
 			suite: [
 				{
+					"#aaa/": "./data/timezones/",
 					"#a/": "./data/timezones/"
 				},
 				"#a/timezones/pdt.mjs",
@@ -342,6 +343,18 @@ describe("Process imports field", function exportsField() {
 					"#a/b": "./b.js"
 				},
 				"#a/c.js",
+				[]
+			]
+		},
+		{
+			name: "path tree edge case #3",
+			expect: ["./A/b/c/d.js"],
+			suite: [
+				{
+					"#a/": "./A/",
+					"#a/b/c/d": "./c.js"
+				},
+				"#a/b/c/d.js",
 				[]
 			]
 		},
@@ -875,7 +888,48 @@ describe("Process imports field", function exportsField() {
 				["browser"]
 			]
 		},
-
+		{
+			name: "incorrect request #3",
+			expect: new Error(),
+			suite: [
+				{
+					"#a/": {
+						browser: "./a/",
+						default: "./b/"
+					}
+				},
+				"#",
+				["browser"]
+			]
+		},
+		{
+			name: "incorrect request #4",
+			expect: new Error(),
+			suite: [
+				{
+					"#a/": {
+						browser: "./a/",
+						default: "./b/"
+					}
+				},
+				"#/",
+				["browser"]
+			]
+		},
+		{
+			name: "incorrect request #5",
+			expect: new Error(),
+			suite: [
+				{
+					"#a/": {
+						browser: "./a/",
+						default: "./b/"
+					}
+				},
+				"#a/",
+				["browser"]
+			]
+		},
 		//#endregion
 
 		//#region Directory imports targets may backtrack above the package base
