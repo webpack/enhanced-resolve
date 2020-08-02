@@ -59,3 +59,35 @@ describe("parse identifier. edge cases", () => {
 
 	run(tests);
 });
+
+describe("parse identifier. Windows-like paths", () => {
+	/** @type {TestSuite[]} */
+	const tests = [
+		{
+			input: "path\\#",
+			expect: ["path\\", "", "#"]
+		},
+		{
+			input: "C:path\\as\\?",
+			expect: ["C:path\\as\\", "?", ""]
+		},
+		{
+			input: "path\\#\\?",
+			expect: ["path\\", "", "#\\?"]
+		},
+		{
+			input: "path\\#repo#hash",
+			expect: ["path\\#repo", "", "#hash"]
+		},
+		{
+			input: "path\\#r#hash",
+			expect: ["path\\#r", "", "#hash"]
+		},
+		{
+			input: "path\\#/not/a/hash?not-a-query",
+			expect: ["path\\", "", "#/not/a/hash?not-a-query"]
+		}
+	];
+
+	run(tests);
+});
