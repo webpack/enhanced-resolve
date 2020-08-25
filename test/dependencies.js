@@ -47,22 +47,12 @@ describe("dependencies", function() {
 				"/a/b/package.json",
 				"/a/package.json",
 				"/package.json",
-				"/a/node_modules/package.json",
-				"/a/b/node_modules/package.json",
 				// missing modules directories
 				"/a/b/c/node_modules",
 				// not found in modules directories
-				"/modules/package.json",
 				// missing single file modules
 				"/modules/module",
-				"/modules/module.json",
-				"/modules/module.js",
 				"/a/b/node_modules/module",
-				"/a/b/node_modules/module.json",
-				"/a/b/node_modules/module.js",
-				"/a/node_modules/module",
-				"/a/node_modules/module.js",
-				"/a/node_modules/module.json",
 				// missing files with alterative extensions
 				"/a/node_modules/module/file",
 				"/a/node_modules/module/file.json"
@@ -82,9 +72,6 @@ describe("dependencies", function() {
 			],
 			missingDependencies: [
 				// missing single file modules
-				"/modules/other-module",
-				"/modules/other-module.js",
-				"/modules/other-module.json",
 				// missing package.jsons
 				"/a/b/c/package.json",
 				"/a/b/package.json",
