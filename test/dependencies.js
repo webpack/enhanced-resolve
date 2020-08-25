@@ -49,7 +49,6 @@ describe("dependencies", function() {
 				"/package.json",
 				// missing modules directories
 				"/a/b/c/node_modules",
-				// not found in modules directories
 				// missing single file modules
 				"/modules/module",
 				"/a/b/node_modules/module",
@@ -71,7 +70,6 @@ describe("dependencies", function() {
 				"/"
 			],
 			missingDependencies: [
-				// missing single file modules
 				// missing package.jsons
 				"/a/b/c/package.json",
 				"/a/b/package.json",
