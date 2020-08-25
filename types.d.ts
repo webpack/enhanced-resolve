@@ -6,6 +6,15 @@
 
 import { AsyncSeriesBailHook, AsyncSeriesHook, SyncHook } from "tapable";
 
+declare interface BaseResolveRequest {
+	path: string | false;
+	descriptionFilePath?: undefined | string;
+	descriptionFileRoot?: undefined | string;
+	descriptionFileData?: any;
+	relativePath?: undefined | string;
+	ignoreSymlinks?: undefined | boolean;
+	fullySpecified?: undefined | boolean;
+}
 declare class CachedInputFileSystem {
 	constructor(fileSystem?: any, duration?: any);
 	fileSystem: any;
@@ -154,7 +163,9 @@ declare interface ResolveOptions {
 		onlyModule?: undefined | boolean;
 	})[];
 	aliasFields: Set<string | (string)[]>;
-	cachePredicate: (arg0: ResolveRequest) => boolean;
+	cachePredicate: (
+		arg0: BaseResolveRequest & Partial<ParsedIdentifier>
+	) => boolean;
 	cacheWithContext: boolean;
 
 	/**
@@ -181,20 +192,6 @@ declare interface ResolveOptions {
 	resolveToContext: boolean;
 	restrictions: Set<string | RegExp>;
 }
-declare interface ResolveRequest {
-	path: string | false;
-	request?: undefined | string;
-	query?: undefined | string;
-	fragment?: undefined | string;
-	directory?: undefined | boolean;
-	module?: undefined | boolean;
-	descriptionFilePath?: undefined | string;
-	descriptionFileRoot?: undefined | string;
-	descriptionFileData?: any;
-	relativePath?: undefined | string;
-	ignoreSymlinks?: undefined | boolean;
-	fullySpecified?: undefined | boolean;
-}
 declare abstract class Resolver {
 	fileSystem: FileSystem;
 	options: ResolveOptions;
@@ -202,41 +199,46 @@ declare abstract class Resolver {
 		resolveStep: SyncHook<
 			[
 				AsyncSeriesBailHook<
-					[ResolveRequest, ResolveContext],
-					null | ResolveRequest
+					[(BaseResolveRequest & Partial<ParsedIdentifier>), ResolveContext],
+					null | (BaseResolveRequest & Partial<ParsedIdentifier>)
 				>,
-				ResolveRequest
+				(BaseResolveRequest & Partial<ParsedIdentifier>)
 			],
 			void
 		>;
-		noResolve: SyncHook<[ResolveRequest, Error], void>;
-		resolve: AsyncSeriesBailHook<
-			[ResolveRequest, ResolveContext],
-			null | ResolveRequest
+		noResolve: SyncHook<
+			[(BaseResolveRequest & Partial<ParsedIdentifier>), Error],
+			void
 		>;
-		result: AsyncSeriesHook<[ResolveRequest, ResolveContext]>;
+		resolve: AsyncSeriesBailHook<
+			[(BaseResolveRequest & Partial<ParsedIdentifier>), ResolveContext],
+			null | (BaseResolveRequest & Partial<ParsedIdentifier>)
+		>;
+		result: AsyncSeriesHook<
+			[(BaseResolveRequest & Partial<ParsedIdentifier>), ResolveContext]
+		>;
 	};
 	ensureHook(
 		name:
 			| string
 			| AsyncSeriesBailHook<
-					[ResolveRequest, ResolveContext],
-					null | ResolveRequest
+					[(BaseResolveRequest & Partial<ParsedIdentifier>), ResolveContext],
+					null | (BaseResolveRequest & Partial<ParsedIdentifier>)
 			  >
 	): AsyncSeriesBailHook<
-		[ResolveRequest, ResolveContext],
-		null | ResolveRequest
+		[(BaseResolveRequest & Partial<ParsedIdentifier>), ResolveContext],
+		null | (BaseResolveRequest & Partial<ParsedIdentifier>)
 	>;
 	getHook(
 		name:
 			| string
 			| AsyncSeriesBailHook<
-					[ResolveRequest, ResolveContext],
-					null | ResolveRequest
+					[(BaseResolveRequest & Partial<ParsedIdentifier>), ResolveContext],
+					null | (BaseResolveRequest & Partial<ParsedIdentifier>)
 			  >
 	): AsyncSeriesBailHook<
-		[ResolveRequest, ResolveContext],
-		null | ResolveRequest
+		[(BaseResolveRequest & Partial<ParsedIdentifier>), ResolveContext],
+		null | (BaseResolveRequest & Partial<ParsedIdentifier>)
 	>;
 	resolveSync(context: any, path: string, request: string): string | false;
 	resolve(
@@ -247,7 +249,7 @@ declare abstract class Resolver {
 		callback: (
 			arg0: null | Error,
 			arg1: undefined | string | false,
-			arg2: undefined | ResolveRequest
+			arg2: undefined | (BaseResolveRequest & Partial<ParsedIdentifier>)
 		) => void
 	): void;
 	doResolve(
@@ -284,7 +286,9 @@ declare interface UserResolveOptions {
 	/**
 	 * A function which decides whether a request should be cached or not. An object is passed with at least `path` and `request` properties.
 	 */
-	cachePredicate?: undefined | ((arg0: ResolveRequest) => boolean);
+	cachePredicate?:
+		| undefined
+		| ((arg0: BaseResolveRequest & Partial<ParsedIdentifier>) => boolean);
 
 	/**
 	 * Whether or not the unsafeCache should include request context as part of the cache key.
@@ -430,6 +434,7 @@ declare namespace exports {
 		iterator?: any,
 		callback?: any
 	) => any;
+	export type ResolveRequest = BaseResolveRequest & Partial<ParsedIdentifier>;
 	export type Plugin =
 		| { apply: (arg0: Resolver) => void }
 		| ((this: Resolver, arg1: Resolver) => void);
@@ -441,7 +446,6 @@ declare namespace exports {
 		Resolver,
 		FileSystem,
 		ResolveContext,
-		ResolveRequest,
 		UserResolveOptions as ResolveOptions
 	};
 }

@@ -15,6 +15,11 @@ const syncContextResolve = resolve.create.sync({
 	resolveToContext: true
 });
 
+const issue238Resolve = resolve.create({
+	extensions: [".js", ".jsx", ".ts", ".tsx"],
+	modules: ["src/a", "src/b", "src/common", "node_modules"]
+});
+
 function testResolve(name, context, moduleName, result) {
 	describe(name, function() {
 		it("should resolve sync correctly", function() {
@@ -229,4 +234,21 @@ describe("resolve", function() {
 		"./main-field-self2",
 		path.join(fixtures, "main-field-self2", "index.js")
 	);
+
+	it("should correctly resolve", function(done) {
+		const issue238 = path.resolve(fixtures, "issue-238");
+
+		issue238Resolve(
+			path.resolve(issue238, "./src/common"),
+			"config/myObjectFile",
+			function(err, filename) {
+				if (err) done(err);
+				should.exist(filename);
+				filename.should.equal(
+					path.resolve(issue238, "./src/common/config/myObjectFile.js")
+				);
+				done();
+			}
+		);
+	});
 });
