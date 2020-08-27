@@ -3,7 +3,7 @@ require("should");
 var { Volume } = require("memfs");
 var { ResolverFactory } = require("../");
 
-describe("alias", function() {
+describe("fallback", function() {
 	var resolver;
 
 	beforeEach(function() {
@@ -13,6 +13,7 @@ describe("alias", function() {
 				"/a/dir/index": "",
 				"/recursive/index": "",
 				"/recursive/dir/index": "",
+				"/recursive/dir/dir/index": "",
 				"/b/index": "",
 				"/b/dir/index": "",
 				"/c/index": "",
@@ -26,7 +27,7 @@ describe("alias", function() {
 			"/"
 		);
 		resolver = ResolverFactory.createResolver({
-			alias: {
+			fallback: {
 				aliasA: "a",
 				b$: "a/index",
 				c$: "/a/index",
@@ -48,7 +49,7 @@ describe("alias", function() {
 		resolver.resolveSync({}, "/", "a/dir").should.be.eql("/a/dir/index");
 		resolver.resolveSync({}, "/", "a/dir/index").should.be.eql("/a/dir/index");
 	});
-	it("should resolve an aliased module", function() {
+	it("should resolve an fallback module", function() {
 		resolver.resolveSync({}, "/", "aliasA").should.be.eql("/a/index");
 		resolver.resolveSync({}, "/", "aliasA/index").should.be.eql("/a/index");
 		resolver.resolveSync({}, "/", "aliasA/dir").should.be.eql("/a/dir/index");
@@ -68,14 +69,10 @@ describe("alias", function() {
 			.should.be.eql("/recursive/dir/index");
 		resolver
 			.resolveSync({}, "/", "recursive/dir")
-			.should.be.eql("/recursive/dir/index");
+			.should.be.eql("/recursive/dir/dir/index");
 		resolver
 			.resolveSync({}, "/", "recursive/dir/index")
-			.should.be.eql("/recursive/dir/index");
-	});
-	it("should resolve a file aliased module", function() {
-		resolver.resolveSync({}, "/", "b").should.be.eql("/a/index");
-		resolver.resolveSync({}, "/", "c").should.be.eql("/a/index");
+			.should.be.eql("/recursive/dir/dir/index");
 	});
 	it("should resolve a file aliased module with a query", function() {
 		resolver.resolveSync({}, "/", "b?query").should.be.eql("/a/index?query");
@@ -88,10 +85,6 @@ describe("alias", function() {
 		resolver.resolveSync({}, "/", "c/index").should.be.eql("/c/index");
 		resolver.resolveSync({}, "/", "c/dir").should.be.eql("/c/dir/index");
 		resolver.resolveSync({}, "/", "c/dir/index").should.be.eql("/c/dir/index");
-	});
-	it("should resolve a file aliased file", function() {
-		resolver.resolveSync({}, "/", "d").should.be.eql("/c/index");
-		resolver.resolveSync({}, "/", "d/dir/index").should.be.eql("/c/dir/index");
 	});
 	it("should resolve a file in multiple aliased dirs", function() {
 		resolver
@@ -115,30 +108,27 @@ describe("alias", function() {
 					"resolve 'aliasA/dir' in '/'",
 					"  Parsed request is a module",
 					"  No description file found in / or above",
-					"  aliased using AliasOption strategy with mapping 'aliasA': 'a' to '/'+'a/dir'",
-					"    Parsed request is a module",
-					"    No description file found in / or above",
-					"    resolve as module",
-					"      looking for modules in /",
-					"        existing directory /a",
-					"          No description file found in /a or above",
-					"          No description file found in /a or above",
-					"          no extension",
-					"            /a/dir is not a file",
-					"          .js",
-					"            /a/dir.js doesn't exist",
-					"          .json",
-					"            /a/dir.json doesn't exist",
-					"          .node",
-					"            /a/dir.node doesn't exist",
-					"          as directory",
-					"            existing directory /a/dir",
+					"  resolve as module",
+					"    looking for modules in /",
+					"      aliased using FallbackOption strategy with mapping 'aliasA': 'a' to '/a'+'./dir'",
+					"        No description file found in /a or above",
+					"        No description file found in /a or above",
+					"        no extension",
+					"          /a/dir is not a file",
+					"        .js",
+					"          /a/dir.js doesn't exist",
+					"        .json",
+					"          /a/dir.json doesn't exist",
+					"        .node",
+					"          /a/dir.node doesn't exist",
+					"        as directory",
+					"          existing directory /a/dir",
+					"            No description file found in /a/dir or above",
+					"            using path: /a/dir/index",
 					"              No description file found in /a/dir or above",
-					"              using path: /a/dir/index",
-					"                No description file found in /a/dir or above",
-					"                no extension",
-					"                  existing file: /a/dir/index",
-					"                    reporting result /a/dir/index"
+					"              no extension",
+					"                existing file: /a/dir/index",
+					"                  reporting result /a/dir/index"
 				]);
 				done();
 			}

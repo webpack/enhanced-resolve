@@ -163,6 +163,11 @@ declare interface ResolveOptions {
 		name: string;
 		onlyModule?: undefined | boolean;
 	})[];
+	fallback: ({
+		alias: string | false | (string)[];
+		name: string;
+		onlyModule?: undefined | boolean;
+	})[];
 	aliasFields: Set<string | (string)[]>;
 	cachePredicate: (
 		arg0: BaseResolveRequest & Partial<ParsedIdentifier>
@@ -273,6 +278,18 @@ declare interface UserResolveOptions {
 	 * A list of module alias configurations or an object which maps key to value
 	 */
 	alias?:
+		| undefined
+		| { [index: string]: string | false | (string)[] }
+		| ({
+				alias: string | false | (string)[];
+				name: string;
+				onlyModule?: undefined | boolean;
+		  })[];
+
+	/**
+	 * A list of module alias configurations or an object which maps key to value, applied only after modules option
+	 */
+	fallback?:
 		| undefined
 		| { [index: string]: string | false | (string)[] }
 		| ({
