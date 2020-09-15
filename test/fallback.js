@@ -13,6 +13,7 @@ describe("fallback", function() {
 				"/a/dir/index": "",
 				"/recursive/index": "",
 				"/recursive/dir/index": "",
+				"/recursive/dir/file": "",
 				"/recursive/dir/dir/index": "",
 				"/b/index": "",
 				"/b/dir/index": "",
@@ -63,20 +64,23 @@ describe("fallback", function() {
 	it("should resolve a recursive aliased module", function() {
 		resolver
 			.resolveSync({}, "/", "recursive")
-			.should.be.eql("/recursive/dir/index");
+			.should.be.eql("/recursive/index");
 		resolver
 			.resolveSync({}, "/", "recursive/index")
-			.should.be.eql("/recursive/dir/index");
+			.should.be.eql("/recursive/index");
 		resolver
 			.resolveSync({}, "/", "recursive/dir")
-			.should.be.eql("/recursive/dir/dir/index");
+			.should.be.eql("/recursive/dir/index");
 		resolver
 			.resolveSync({}, "/", "recursive/dir/index")
-			.should.be.eql("/recursive/dir/dir/index");
+			.should.be.eql("/recursive/dir/index");
+		resolver
+			.resolveSync({}, "/", "recursive/file")
+			.should.be.eql("/recursive/dir/file");
 	});
 	it("should resolve a file aliased module with a query", function() {
-		resolver.resolveSync({}, "/", "b?query").should.be.eql("/a/index?query");
-		resolver.resolveSync({}, "/", "c?query").should.be.eql("/a/index?query");
+		resolver.resolveSync({}, "/", "b?query").should.be.eql("/b/index?query");
+		resolver.resolveSync({}, "/", "c?query").should.be.eql("/c/index?query");
 	});
 	it("should resolve a path in a file aliased module", function() {
 		resolver.resolveSync({}, "/", "b/index").should.be.eql("/b/index");
@@ -110,25 +114,31 @@ describe("fallback", function() {
 					"  No description file found in / or above",
 					"  resolve as module",
 					"    looking for modules in /",
-					"      aliased using FallbackOption strategy with mapping 'aliasA': 'a' to '/a'+'./dir'",
-					"        No description file found in /a or above",
-					"        No description file found in /a or above",
-					"        no extension",
-					"          /a/dir is not a file",
-					"        .js",
-					"          /a/dir.js doesn't exist",
-					"        .json",
-					"          /a/dir.json doesn't exist",
-					"        .node",
-					"          /a/dir.node doesn't exist",
-					"        as directory",
-					"          existing directory /a/dir",
-					"            No description file found in /a/dir or above",
-					"            using path: /a/dir/index",
+					"      /aliasA doesn't exist",
+					"  aliased using AliasOption strategy with mapping 'aliasA': 'a' to '/'+'a/dir'",
+					"    Parsed request is a module",
+					"    No description file found in / or above",
+					"    resolve as module",
+					"      looking for modules in /",
+					"        existing directory /a",
+					"          No description file found in /a or above",
+					"          No description file found in /a or above",
+					"          no extension",
+					"            /a/dir is not a file",
+					"          .js",
+					"            /a/dir.js doesn't exist",
+					"          .json",
+					"            /a/dir.json doesn't exist",
+					"          .node",
+					"            /a/dir.node doesn't exist",
+					"          as directory",
+					"            existing directory /a/dir",
 					"              No description file found in /a/dir or above",
-					"              no extension",
-					"                existing file: /a/dir/index",
-					"                  reporting result /a/dir/index"
+					"              using path: /a/dir/index",
+					"                No description file found in /a/dir or above",
+					"                no extension",
+					"                  existing file: /a/dir/index",
+					"                    reporting result /a/dir/index"
 				]);
 				done();
 			}
