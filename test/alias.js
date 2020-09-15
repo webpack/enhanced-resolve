@@ -115,7 +115,7 @@ describe("alias", function() {
 					"resolve 'aliasA/dir' in '/'",
 					"  Parsed request is a module",
 					"  No description file found in / or above",
-					"  aliased using AliasOption strategy with mapping 'aliasA': 'a' to '/'+'a/dir'",
+					"  aliased with mapping 'aliasA': 'a' to 'a/dir'",
 					"    Parsed request is a module",
 					"    No description file found in / or above",
 					"    resolve as module",

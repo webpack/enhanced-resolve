@@ -115,7 +115,7 @@ describe("fallback", function() {
 					"  resolve as module",
 					"    looking for modules in /",
 					"      /aliasA doesn't exist",
-					"  aliased using AliasOption strategy with mapping 'aliasA': 'a' to '/'+'a/dir'",
+					"  aliased with mapping 'aliasA': 'a' to 'a/dir'",
 					"    Parsed request is a module",
 					"    No description file found in / or above",
 					"    resolve as module",
