@@ -1,11 +1,11 @@
 const path = require("path");
 const fs = require("fs");
 const should = require("should");
-const processExportsField = require("../lib/processExportsField");
+const { processExportsField } = require("../lib/util/entrypoints");
 const ResolverFactory = require("../lib/ResolverFactory");
 const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
 
-/** @typedef {import("../lib/processExportsField").ExportsField} ExportsField */
+/** @typedef {import("../lib/util/entrypoints").ExportsField} ExportsField */
 
 const fixture = path.resolve(__dirname, "fixtures", "exports-field");
 const fixture2 = path.resolve(__dirname, "fixtures", "exports-field2");
@@ -841,7 +841,34 @@ describe("Process exports field", function exportsField() {
 				["browser"]
 			]
 		},
-
+		{
+			name: "incorrect request #3",
+			expect: new Error(),
+			suite: [
+				{
+					"./utils/": {
+						browser: "./a/",
+						default: "./b/"
+					}
+				},
+				"../utils/index.mjs",
+				["browser"]
+			]
+		},
+		{
+			name: "incorrect request #4",
+			expect: new Error(),
+			suite: [
+				{
+					"./utils/": {
+						browser: "./a/",
+						default: "./b/"
+					}
+				},
+				"/utils/index.mjs/",
+				["browser"]
+			]
+		},
 		//#endregion
 
 		//#region Directory exports targets may not backtrack above the package base
@@ -1018,7 +1045,7 @@ describe("Process exports field", function exportsField() {
 		},
 		//#endregion
 
-		//#region nested mapping
+		//#region Nested mapping
 		{
 			name: "nested mapping #1",
 			expect: [],

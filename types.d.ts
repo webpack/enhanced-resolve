@@ -119,6 +119,7 @@ declare interface ParsedIdentifier {
 	directory: boolean;
 	module: boolean;
 	file: boolean;
+	internal: boolean;
 }
 declare interface PnpApiImpl {
 	resolveToUnqualified: (arg0: string, arg1: string, arg2?: any) => string;
@@ -175,6 +176,7 @@ declare interface ResolveOptions {
 	descriptionFiles: (string)[];
 	enforceExtension: boolean;
 	exportsFields: Set<string | (string)[]>;
+	importsFields: Set<string | (string)[]>;
 	extensions: Set<string>;
 	fileSystem: FileSystem;
 	unsafeCache: any;
@@ -261,6 +263,7 @@ declare abstract class Resolver {
 	): any;
 	parse(identifier: string): ParsedIdentifier;
 	isModule(path?: any): boolean;
+	isPrivate(path?: any): boolean;
 	isDirectory(path: string): boolean;
 	join(path?: any, request?: any): string;
 	normalize(path?: any): string;
@@ -314,6 +317,11 @@ declare interface UserResolveOptions {
 	 * A list of exports fields in description files
 	 */
 	exportsFields?: undefined | (string | (string)[])[];
+
+	/**
+	 * A list of imports fields in description files
+	 */
+	importsFields?: undefined | (string | (string)[])[];
 
 	/**
 	 * A list of extensions which should be tried for files
