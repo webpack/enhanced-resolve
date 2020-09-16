@@ -37,19 +37,19 @@ describe("parse identifier. edge cases", () => {
 		},
 		{
 			input: "path/#repo#hash",
-			expect: ["path/#repo", "", "#hash"]
+			expect: ["path/", "", "#repo#hash"]
 		},
 		{
 			input: "path/#r#hash",
-			expect: ["path/#r", "", "#hash"]
+			expect: ["path/", "", "#r#hash"]
 		},
 		{
 			input: "path/#repo/#repo2#hash",
-			expect: ["path/#repo/#repo2", "", "#hash"]
+			expect: ["path/", "", "#repo/#repo2#hash"]
 		},
 		{
 			input: "path/#r/#r#hash",
-			expect: ["path/#r/#r", "", "#hash"]
+			expect: ["path/", "", "#r/#r#hash"]
 		},
 		{
 			input: "path/#/not/a/hash?not-a-query",
@@ -77,11 +77,11 @@ describe("parse identifier. Windows-like paths", () => {
 		},
 		{
 			input: "path\\#repo#hash",
-			expect: ["path\\#repo", "", "#hash"]
+			expect: ["path\\", "", "#repo#hash"]
 		},
 		{
 			input: "path\\#r#hash",
-			expect: ["path\\#r", "", "#hash"]
+			expect: ["path\\", "", "#r#hash"]
 		},
 		{
 			input: "path\\#/not/a/hash?not-a-query",
