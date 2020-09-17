@@ -3,10 +3,10 @@ require("should");
 var { Volume } = require("memfs");
 var resolve = require("../");
 
-describe("dependencies", function() {
+describe("dependencies", function () {
 	var resolver;
 
-	beforeEach(function() {
+	beforeEach(function () {
 		var fileSystem = Volume.fromJSON(
 			{
 				"/a/b/node_modules/some-module/index.js": "",

@@ -7,7 +7,7 @@ var resolve = require("../");
 
 var tempPath = path.join(__dirname, "temp");
 
-describe("symlink", function() {
+describe("symlink", function () {
 	var isAdmin = true;
 	try {
 		fs.mkdirSync(tempPath);
@@ -45,7 +45,7 @@ describe("symlink", function() {
 		const isWindows = platform() === "win32";
 		const oldCWD = (isWindows && process.cwd()) || "";
 
-		before(function() {
+		before(function () {
 			// Create some cool symlinks
 			try {
 				fs.mkdirSync(tempPath);
@@ -88,7 +88,7 @@ describe("symlink", function() {
 			}
 		});
 
-		after(function() {
+		after(function () {
 			// PR #150: Restore the original working directory.
 			if (isWindows) {
 				process.chdir(oldCWD);
@@ -209,14 +209,14 @@ describe("symlink", function() {
 				"./temp/lib/index.js",
 				"with symlinked directory in context path and symlinked directory (chained)"
 			]
-		].forEach(function(pathToIt) {
-			it("should resolve symlink to itself " + pathToIt[2], function(done) {
-				resolve(pathToIt[0], pathToIt[1], function(err, filename) {
+		].forEach(function (pathToIt) {
+			it("should resolve symlink to itself " + pathToIt[2], function (done) {
+				resolve(pathToIt[0], pathToIt[1], function (err, filename) {
 					if (err) return done(err);
 					should.exist(filename);
 					filename.should.have.type("string");
 					filename.should.be.eql(path.join(__dirname, "..", "lib", "index.js"));
-					resolveWithoutSymlinks(pathToIt[0], pathToIt[1], function(
+					resolveWithoutSymlinks(pathToIt[0], pathToIt[1], function (
 						err,
 						filename
 					) {
@@ -227,7 +227,7 @@ describe("symlink", function() {
 					});
 				});
 			});
-			it("should resolve symlink to itself sync " + pathToIt[2], function() {
+			it("should resolve symlink to itself sync " + pathToIt[2], function () {
 				var filename = resolve.sync(pathToIt[0], pathToIt[1]);
 				should.exist(filename);
 				filename.should.have.type("string");

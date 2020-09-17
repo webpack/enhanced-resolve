@@ -13,10 +13,10 @@ function p() {
 	);
 }
 
-describe("browserField", function() {
+describe("browserField", function () {
 	var resolver;
 
-	beforeEach(function() {
+	beforeEach(function () {
 		resolver = ResolverFactory.createResolver({
 			aliasFields: [
 				"browser",
@@ -29,21 +29,21 @@ describe("browserField", function() {
 		});
 	});
 
-	it("should ignore", function(done) {
-		resolver.resolve({}, p(), "./lib/ignore", {}, function(err, result) {
+	it("should ignore", function (done) {
+		resolver.resolve({}, p(), "./lib/ignore", {}, function (err, result) {
 			if (err) throw err;
 			result.should.be.eql(false);
 			done();
 		});
 	});
-	it("should ignore", function() {
+	it("should ignore", function () {
 		resolver.resolveSync({}, p(), "./lib/ignore").should.be.eql(false);
 		resolver.resolveSync({}, p(), "./lib/ignore.js").should.be.eql(false);
 		resolver.resolveSync({}, p("lib"), "./ignore").should.be.eql(false);
 		resolver.resolveSync({}, p("lib"), "./ignore.js").should.be.eql(false);
 	});
 
-	it("should replace a file", function() {
+	it("should replace a file", function () {
 		resolver
 			.resolveSync({}, p(), "./lib/replaced")
 			.should.be.eql(p("lib", "browser.js"));
@@ -58,7 +58,7 @@ describe("browserField", function() {
 			.should.be.eql(p("lib", "browser.js"));
 	});
 
-	it("should replace a module with a file", function() {
+	it("should replace a module with a file", function () {
 		resolver
 			.resolveSync({}, p(), "module-a")
 			.should.be.eql(p("browser", "module-a.js"));
@@ -67,7 +67,7 @@ describe("browserField", function() {
 			.should.be.eql(p("browser", "module-a.js"));
 	});
 
-	it("should replace a module with a module", function() {
+	it("should replace a module with a module", function () {
 		resolver
 			.resolveSync({}, p(), "module-b")
 			.should.be.eql(p("node_modules", "module-c.js"));
@@ -76,7 +76,7 @@ describe("browserField", function() {
 			.should.be.eql(p("node_modules", "module-c.js"));
 	});
 
-	it("should resolve in nested property", function() {
+	it("should resolve in nested property", function () {
 		resolver
 			.resolveSync({}, p(), "./lib/main1.js")
 			.should.be.eql(p("lib", "main.js"));

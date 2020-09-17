@@ -2,11 +2,11 @@ require("should");
 
 var { CachedInputFileSystem } = require("../");
 
-describe("pr-53", function() {
-	it("should allow to readJsonSync in CachedInputFileSystem", function() {
+describe("pr-53", function () {
+	it("should allow to readJsonSync in CachedInputFileSystem", function () {
 		var cfs = new CachedInputFileSystem(
 			{
-				readFileSync: function(path) {
+				readFileSync: function (path) {
 					return JSON.stringify("abc" + path);
 				}
 			},

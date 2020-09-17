@@ -3,7 +3,7 @@ require("should");
 const { Volume } = require("memfs");
 const { ResolverFactory } = require("../");
 
-describe("fullSpecified", function() {
+describe("fullSpecified", function () {
 	const fileSystem = Volume.fromJSON(
 		{
 			"/a/node_modules/package1/index.js": "",
