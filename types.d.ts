@@ -8,12 +8,12 @@ import { AsyncSeriesBailHook, AsyncSeriesHook, SyncHook } from "tapable";
 
 declare interface BaseResolveRequest {
 	path: string | false;
-	descriptionFilePath?: undefined | string;
-	descriptionFileRoot?: undefined | string;
+	descriptionFilePath?: string;
+	descriptionFileRoot?: string;
 	descriptionFileData?: any;
-	relativePath?: undefined | string;
-	ignoreSymlinks?: undefined | boolean;
-	fullySpecified?: undefined | boolean;
+	relativePath?: string;
+	ignoreSymlinks?: boolean;
+	fullySpecified?: boolean;
 }
 declare class CachedInputFileSystem {
 	constructor(fileSystem?: any, duration?: any);
@@ -26,18 +26,18 @@ declare class CachedInputFileSystem {
 	readdir: {
 		(
 			arg0: string,
-			arg1: FileSystemCallback<(string | Buffer)[] | (FileSystemDirent)[]>
+			arg1: FileSystemCallback<(string | Buffer)[] | FileSystemDirent[]>
 		): void;
 		(
 			arg0: string,
 			arg1: any,
-			arg2: FileSystemCallback<(string | Buffer)[] | (FileSystemDirent)[]>
+			arg2: FileSystemCallback<(string | Buffer)[] | FileSystemDirent[]>
 		): void;
 	};
 	readdirSync: (
 		arg0: string,
 		arg1?: any
-	) => (string | Buffer)[] | (FileSystemDirent)[];
+	) => (string | Buffer)[] | FileSystemDirent[];
 	readFile: {
 		(arg0: string, arg1: FileSystemCallback<string | Buffer>): void;
 		(arg0: string, arg1: any, arg2: FileSystemCallback<string | Buffer>): void;
@@ -69,20 +69,18 @@ declare interface FileSystem {
 	readdir: {
 		(
 			arg0: string,
-			arg1: FileSystemCallback<(string | Buffer)[] | (FileSystemDirent)[]>
+			arg1: FileSystemCallback<(string | Buffer)[] | FileSystemDirent[]>
 		): void;
 		(
 			arg0: string,
 			arg1: any,
-			arg2: FileSystemCallback<(string | Buffer)[] | (FileSystemDirent)[]>
+			arg2: FileSystemCallback<(string | Buffer)[] | FileSystemDirent[]>
 		): void;
 	};
-	readJson?:
-		| undefined
-		| {
-				(arg0: string, arg1: FileSystemCallback<any>): void;
-				(arg0: string, arg1: any, arg2: FileSystemCallback<any>): void;
-		  };
+	readJson?: {
+		(arg0: string, arg1: FileSystemCallback<any>): void;
+		(arg0: string, arg1: any, arg2: FileSystemCallback<any>): void;
+	};
 	readlink: {
 		(arg0: string, arg1: FileSystemCallback<string | Buffer>): void;
 		(arg0: string, arg1: any, arg2: FileSystemCallback<string | Buffer>): void;
@@ -93,10 +91,7 @@ declare interface FileSystem {
 	};
 }
 declare interface FileSystemCallback<T> {
-	(
-		err: undefined | null | (PossibleFileSystemError & Error),
-		result?: undefined | T
-	): any;
+	(err?: null | (PossibleFileSystemError & Error), result?: T): any;
 }
 declare interface FileSystemDirent {
 	name: string | Buffer;
@@ -125,50 +120,50 @@ declare interface PnpApiImpl {
 	resolveToUnqualified: (arg0: string, arg1: string, arg2?: any) => string;
 }
 declare interface PossibleFileSystemError {
-	code?: undefined | string;
-	errno?: undefined | number;
-	path?: undefined | string;
-	syscall?: undefined | string;
+	code?: string;
+	errno?: number;
+	path?: string;
+	syscall?: string;
 }
 
 /**
  * Resolve context
  */
 declare interface ResolveContext {
-	contextDependencies?: undefined | { add: (T?: any) => void };
+	contextDependencies?: { add: (T?: any) => void };
 
 	/**
 	 * files that was found on file system
 	 */
-	fileDependencies?: undefined | { add: (T?: any) => void };
+	fileDependencies?: { add: (T?: any) => void };
 
 	/**
 	 * dependencies that was not found on file system
 	 */
-	missingDependencies?: undefined | { add: (T?: any) => void };
+	missingDependencies?: { add: (T?: any) => void };
 
 	/**
 	 * set of hooks' calls. For instance, `resolve → parsedResolve → describedResolve`,
 	 */
-	stack?: undefined | Set<string>;
+	stack?: Set<string>;
 
 	/**
 	 * log function
 	 */
-	log?: undefined | ((arg0: string) => void);
+	log?: (arg0: string) => void;
 }
 declare interface ResolveOptions {
-	alias: ({
-		alias: string | false | (string)[];
+	alias: {
+		alias: string | false | string[];
 		name: string;
-		onlyModule?: undefined | boolean;
-	})[];
-	fallback: ({
-		alias: string | false | (string)[];
+		onlyModule?: boolean;
+	}[];
+	fallback: {
+		alias: string | false | string[];
 		name: string;
-		onlyModule?: undefined | boolean;
-	})[];
-	aliasFields: Set<string | (string)[]>;
+		onlyModule?: boolean;
+	}[];
+	aliasFields: Set<string | string[]>;
 	cachePredicate: (
 		arg0: BaseResolveRequest & Partial<ParsedIdentifier>
 	) => boolean;
@@ -178,21 +173,22 @@ declare interface ResolveOptions {
 	 * A list of exports field condition names.
 	 */
 	conditionNames: Set<string>;
-	descriptionFiles: (string)[];
+	descriptionFiles: string[];
 	enforceExtension: boolean;
-	exportsFields: Set<string | (string)[]>;
-	importsFields: Set<string | (string)[]>;
+	exportsFields: Set<string | string[]>;
+	importsFields: Set<string | string[]>;
 	extensions: Set<string>;
 	fileSystem: FileSystem;
 	unsafeCache: any;
 	symlinks: boolean;
-	resolver?: undefined | Resolver;
-	modules: (string | (string)[])[];
-	mainFields: ({ name: (string)[]; forceRelative: boolean })[];
+	resolver?: Resolver;
+	modules: (string | string[])[];
+	mainFields: { name: string[]; forceRelative: boolean }[];
 	mainFiles: Set<string>;
 	plugins: (
 		| { apply: (arg0: Resolver) => void }
-		| ((this: Resolver, arg1: Resolver) => void))[];
+		| ((this: Resolver, arg1: Resolver) => void)
+	)[];
 	pnpApi: null | PnpApiImpl;
 	roots: Set<string>;
 	fullySpecified: boolean;
@@ -206,45 +202,45 @@ declare abstract class Resolver {
 		resolveStep: SyncHook<
 			[
 				AsyncSeriesBailHook<
-					[(BaseResolveRequest & Partial<ParsedIdentifier>), ResolveContext],
+					[BaseResolveRequest & Partial<ParsedIdentifier>, ResolveContext],
 					null | (BaseResolveRequest & Partial<ParsedIdentifier>)
 				>,
-				(BaseResolveRequest & Partial<ParsedIdentifier>)
+				BaseResolveRequest & Partial<ParsedIdentifier>
 			],
 			void
 		>;
 		noResolve: SyncHook<
-			[(BaseResolveRequest & Partial<ParsedIdentifier>), Error],
+			[BaseResolveRequest & Partial<ParsedIdentifier>, Error],
 			void
 		>;
 		resolve: AsyncSeriesBailHook<
-			[(BaseResolveRequest & Partial<ParsedIdentifier>), ResolveContext],
+			[BaseResolveRequest & Partial<ParsedIdentifier>, ResolveContext],
 			null | (BaseResolveRequest & Partial<ParsedIdentifier>)
 		>;
 		result: AsyncSeriesHook<
-			[(BaseResolveRequest & Partial<ParsedIdentifier>), ResolveContext]
+			[BaseResolveRequest & Partial<ParsedIdentifier>, ResolveContext]
 		>;
 	};
 	ensureHook(
 		name:
 			| string
 			| AsyncSeriesBailHook<
-					[(BaseResolveRequest & Partial<ParsedIdentifier>), ResolveContext],
+					[BaseResolveRequest & Partial<ParsedIdentifier>, ResolveContext],
 					null | (BaseResolveRequest & Partial<ParsedIdentifier>)
 			  >
 	): AsyncSeriesBailHook<
-		[(BaseResolveRequest & Partial<ParsedIdentifier>), ResolveContext],
+		[BaseResolveRequest & Partial<ParsedIdentifier>, ResolveContext],
 		null | (BaseResolveRequest & Partial<ParsedIdentifier>)
 	>;
 	getHook(
 		name:
 			| string
 			| AsyncSeriesBailHook<
-					[(BaseResolveRequest & Partial<ParsedIdentifier>), ResolveContext],
+					[BaseResolveRequest & Partial<ParsedIdentifier>, ResolveContext],
 					null | (BaseResolveRequest & Partial<ParsedIdentifier>)
 			  >
 	): AsyncSeriesBailHook<
-		[(BaseResolveRequest & Partial<ParsedIdentifier>), ResolveContext],
+		[BaseResolveRequest & Partial<ParsedIdentifier>, ResolveContext],
 		null | (BaseResolveRequest & Partial<ParsedIdentifier>)
 	>;
 	resolveSync(context: any, path: string, request: string): string | false;
@@ -255,8 +251,8 @@ declare abstract class Resolver {
 		resolveContext: ResolveContext,
 		callback: (
 			arg0: null | Error,
-			arg1: undefined | string | false,
-			arg2: undefined | (BaseResolveRequest & Partial<ParsedIdentifier>)
+			arg1?: string | false,
+			arg2?: BaseResolveRequest & Partial<ParsedIdentifier>
 		) => void
 	): void;
 	doResolve(
@@ -278,72 +274,70 @@ declare interface UserResolveOptions {
 	 * A list of module alias configurations or an object which maps key to value
 	 */
 	alias?:
-		| undefined
-		| { [index: string]: string | false | (string)[] }
-		| ({
-				alias: string | false | (string)[];
+		| { [index: string]: string | false | string[] }
+		| {
+				alias: string | false | string[];
 				name: string;
-				onlyModule?: undefined | boolean;
-		  })[];
+				onlyModule?: boolean;
+		  }[];
 
 	/**
 	 * A list of module alias configurations or an object which maps key to value, applied only after modules option
 	 */
 	fallback?:
-		| undefined
-		| { [index: string]: string | false | (string)[] }
-		| ({
-				alias: string | false | (string)[];
+		| { [index: string]: string | false | string[] }
+		| {
+				alias: string | false | string[];
 				name: string;
-				onlyModule?: undefined | boolean;
-		  })[];
+				onlyModule?: boolean;
+		  }[];
 
 	/**
 	 * A list of alias fields in description files
 	 */
-	aliasFields?: undefined | (string | (string)[])[];
+	aliasFields?: (string | string[])[];
 
 	/**
 	 * A function which decides whether a request should be cached or not. An object is passed with at least `path` and `request` properties.
 	 */
-	cachePredicate?:
-		| undefined
-		| ((arg0: BaseResolveRequest & Partial<ParsedIdentifier>) => boolean);
+	cachePredicate?: (
+		arg0: BaseResolveRequest & Partial<ParsedIdentifier>
+	) => boolean;
 
 	/**
 	 * Whether or not the unsafeCache should include request context as part of the cache key.
 	 */
-	cacheWithContext?: undefined | boolean;
+	cacheWithContext?: boolean;
 
 	/**
 	 * A list of description files to read from
 	 */
-	descriptionFiles?: undefined | (string)[];
+	descriptionFiles?: string[];
 
 	/**
 	 * A list of exports field condition names.
 	 */
-	conditionNames?: undefined | (string)[];
+	conditionNames?: string[];
 
 	/**
 	 * Enforce that a extension from extensions must be used
 	 */
-	enforceExtension?: undefined | boolean;
+	enforceExtension?: boolean;
 
 	/**
 	 * A list of exports fields in description files
 	 */
-	exportsFields?: undefined | (string | (string)[])[];
+	exportsFields?: (string | string[])[];
 
 	/**
 	 * A list of imports fields in description files
 	 */
-	importsFields?: undefined | (string | (string)[])[];
+	importsFields?: (string | string[])[];
 
 	/**
 	 * A list of extensions which should be tried for files
 	 */
-	extensions?: undefined | (string)[];
+	extensions?: string[];
 
 	/**
 	 * The file system which should be used
@@ -358,71 +352,69 @@ declare interface UserResolveOptions {
 	/**
 	 * Resolve symlinks to their symlinked location
 	 */
-	symlinks?: undefined | boolean;
+	symlinks?: boolean;
 
 	/**
 	 * A prepared Resolver to which the plugins are attached
 	 */
-	resolver?: undefined | Resolver;
+	resolver?: Resolver;
 
 	/**
 	 * A list of directories to resolve modules from, can be absolute path or folder name
 	 */
-	modules?: undefined | string | (string)[];
+	modules?: string | string[];
 
 	/**
 	 * A list of main fields in description files
 	 */
-	mainFields?:
-		| undefined
-		| (
-				| string
-				| (string)[]
-				| { name: string | (string)[]; forceRelative: boolean })[];
+	mainFields?: (
+		| string
+		| string[]
+		| { name: string | string[]; forceRelative: boolean }
+	)[];
 
 	/**
 	 * A list of main files in directories
 	 */
-	mainFiles?: undefined | (string)[];
+	mainFiles?: string[];
 
 	/**
 	 * A list of additional resolve plugins which should be applied
 	 */
-	plugins?:
-		| undefined
-		| (
-				| { apply: (arg0: Resolver) => void }
-				| ((this: Resolver, arg1: Resolver) => void))[];
+	plugins?: (
+		| { apply: (arg0: Resolver) => void }
+		| ((this: Resolver, arg1: Resolver) => void)
+	)[];
 
 	/**
 	 * A PnP API that should be used - null is "never", undefined is "auto"
 	 */
-	pnpApi?: undefined | null | PnpApiImpl;
+	pnpApi?: null | PnpApiImpl;
 
 	/**
 	 * A list of root paths
 	 */
-	roots?: undefined | (string)[];
+	roots?: string[];
 
 	/**
 	 * The request is already fully specified and no extensions or directories are resolved for it
 	 */
-	fullySpecified?: undefined | boolean;
+	fullySpecified?: boolean;
 
 	/**
 	 * Resolve to a context instead of a file
 	 */
-	resolveToContext?: undefined | boolean;
+	resolveToContext?: boolean;
 
 	/**
 	 * A list of resolve restrictions
 	 */
-	restrictions?: undefined | (string | RegExp)[];
+	restrictions?: (string | RegExp)[];
 
 	/**
 	 * Use only the sync constiants of the file system calls
 	 */
-	useSyncFileSystemCalls?: undefined | boolean;
+	useSyncFileSystemCalls?: boolean;
 }
 declare function exports(
 	context?: any,

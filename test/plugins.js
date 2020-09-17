@@ -5,8 +5,8 @@ require("should");
 const path = require("path");
 const { ResolverFactory, CloneBasenamePlugin } = require("../");
 
-describe("plugins", function() {
-	it("should resolve with the CloneBasenamePlugin", function(done) {
+describe("plugins", function () {
+	it("should resolve with the CloneBasenamePlugin", function (done) {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem: require("fs"),
 			plugins: [
@@ -22,7 +22,7 @@ describe("plugins", function() {
 			__dirname,
 			"./fixtures/directory-default",
 			{},
-			function(err, result) {
+			function (err, result) {
 				if (err) return done(err);
 				if (!result) throw new Error("No result");
 				result.should.be.eql(

@@ -3,7 +3,7 @@ var should = require("should");
 var path = require("path");
 var resolve = require("../");
 
-describe("simple", function() {
+describe("simple", function () {
 	var pathsToIt = [
 		[__dirname, "../lib/index", "direct"],
 		[__dirname, "..", "as directory"],
@@ -14,9 +14,9 @@ describe("simple", function() {
 			"in module"
 		]
 	];
-	pathsToIt.forEach(function(pathToIt) {
-		it("should resolve itself " + pathToIt[2], function(done) {
-			resolve(pathToIt[0], pathToIt[1], function(err, filename) {
+	pathsToIt.forEach(function (pathToIt) {
+		it("should resolve itself " + pathToIt[2], function (done) {
+			resolve(pathToIt[0], pathToIt[1], function (err, filename) {
 				if (err)
 					return done(
 						new Error([err.message, err.stack, err.details].join("\n"))
@@ -27,7 +27,7 @@ describe("simple", function() {
 				done();
 			});
 		});
-		it("should resolve itself sync " + pathToIt[2], function() {
+		it("should resolve itself sync " + pathToIt[2], function () {
 			var filename = resolve.sync(pathToIt[0], pathToIt[1]);
 			should.exist(filename);
 			filename.should.have.type("string");

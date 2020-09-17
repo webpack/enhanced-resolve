@@ -28,7 +28,7 @@ describe("incorrect description file", () => {
 				called = true;
 			}
 		};
-		resolver.resolve({}, p("pack1"), ".", ctx, function(err, result) {
+		resolver.resolve({}, p("pack1"), ".", ctx, function (err, result) {
 			if (!err) throw new Error("No error");
 			err.should.be.instanceof(Error);
 			ctx.fileDependencies.has(p("package.json"));
@@ -45,7 +45,7 @@ describe("incorrect description file", () => {
 				called = true;
 			}
 		};
-		resolver.resolve({}, p("pack2"), ".", ctx, function(err, result) {
+		resolver.resolve({}, p("pack2"), ".", ctx, function (err, result) {
 			if (!err) throw new Error("No error");
 			ctx.fileDependencies.has(p("package.json"));
 			called.should.be.eql(true);
@@ -54,7 +54,7 @@ describe("incorrect description file", () => {
 	});
 
 	it("should not resolve main in incorrect description file #3", done => {
-		resolver.resolve({}, p("pack2"), ".", {}, function(err, result) {
+		resolver.resolve({}, p("pack2"), ".", {}, function (err, result) {
 			if (!err) throw new Error("No error");
 			err.should.be.instanceof(Error);
 			done();
