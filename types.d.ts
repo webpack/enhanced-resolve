@@ -463,7 +463,7 @@ declare namespace exports {
 		Resolver,
 		FileSystem,
 		ResolveContext,
-		UserResolveOptions as ResolveOptions,
+		UserResolveOptions as ResolveOptions
 	};
 }
 
