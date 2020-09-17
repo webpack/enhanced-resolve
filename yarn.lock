@@ -2709,9 +2709,9 @@ to-regex-range@^5.0.1:
   dependencies:
     is-number "^7.0.0"
 
-tooling@webpack/tooling#v1.6.0:
-  version "1.6.0"
-  resolved "https://codeload.github.com/webpack/tooling/tar.gz/a42d42ad589daf63b30cfc4c035c4bed93f4027b"
+tooling@webpack/tooling#v1.8.0:
+  version "1.8.0"
+  resolved "https://codeload.github.com/webpack/tooling/tar.gz/92e13cc6cf7aae31030c736427c6ebf54f5af581"
   dependencies:
     "@yarnpkg/lockfile" "^1.1.0"
     commondir "^1.0.1"

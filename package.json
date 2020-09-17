@@ -28,7 +28,7 @@
     "nyc": "^15.1.0",
     "prettier": "^2.1.2",
     "should": "^13.2.3",
-    "tooling": "webpack/tooling#v1.6.0",
+    "tooling": "webpack/tooling#v1.8.0",
     "typescript": "3.8.3"
   },
   "engines": {
