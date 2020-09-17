@@ -42,7 +42,10 @@ describe("pnp", () => {
 				if (pnpApi.mocks.has(request)) {
 					return pnpApi.mocks.get(request);
 				} else {
-					throw new Error(`No way`);
+					const err = /** @type {any} */ (new Error(`No way`));
+					err.code = "MODULE_NOT_FOUND";
+					err.pnpCode = "UNDECLARED_DEPENDENCY";
+					throw err;
 				}
 			}
 		});
@@ -50,7 +53,11 @@ describe("pnp", () => {
 			extensions: [".ts", ".js"],
 			aliasFields: ["browser"],
 			fileSystem: nodeFileSystem,
-			pnpApi
+			alias: {
+				alias: path.resolve(fixture, "pkg")
+			},
+			pnpApi,
+			modules: ["node_modules", path.resolve(fixture, "../pnp-a")]
 		});
 	});
 	it("should resolve by going through the pnp api", done => {
@@ -145,7 +152,7 @@ describe("pnp", () => {
 			done();
 		});
 	});
-	it("should skip normal modules when pnp resolves", done => {
+	it("should prefer normal modules over pnp resolves", done => {
 		pnpApi.mocks.set("m1/a.js", path.resolve(fixture, "pkg/a.js"));
 		resolver.resolve(
 			{},
@@ -153,7 +160,52 @@ describe("pnp", () => {
 			"m1/a.js",
 			{},
 			(err, result) => {
-				if (!err) return done(new Error("Resolving should fail"));
+				if (err) return done(err);
+				result.should.equal(path.resolve(fixture, "../node_modules/m1/a.js"));
+				done();
+			}
+		);
+	});
+	it("should prefer alias over pnp resolves", done => {
+		pnpApi.mocks.set(
+			"alias/index.js",
+			path.resolve(fixture, "pkg/dir/index.js")
+		);
+		resolver.resolve(
+			{},
+			path.resolve(__dirname, "fixtures"),
+			"alias/index.js",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				result.should.equal(path.resolve(fixture, "pkg/index.js"));
+				done();
+			}
+		);
+	});
+	it("should prefer pnp over modules after node_modules", done => {
+		pnpApi.mocks.set("m2/a.js", path.resolve(fixture, "pkg/index.js"));
+		resolver.resolve(
+			{},
+			path.resolve(__dirname, "fixtures"),
+			"m2/a.js",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				result.should.equal(path.resolve(fixture, "pkg/index.js"));
+				done();
+			}
+		);
+	});
+	it("should fallback to alternatives when pnp resolving fails", done => {
+		resolver.resolve(
+			{},
+			path.resolve(__dirname, "fixtures"),
+			"m2/a.js",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				result.should.equal(path.resolve(fixture, "../pnp-a/m2/a.js"));
 				done();
 			}
 		);
