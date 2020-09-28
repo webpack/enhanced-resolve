@@ -254,4 +254,18 @@ describe("CachedInputFileSystem CacheBackend", function () {
 			});
 		});
 	});
+
+	it("should not stack overflow when resolving in an async loop", done => {
+		let i = 10000;
+		const next = () => {
+			fs.stat(__dirname, (err, result) => {
+				if (i-- > 0) {
+					next();
+				} else {
+					done();
+				}
+			});
+		};
+		next();
+	});
 });
