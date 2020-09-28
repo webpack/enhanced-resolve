@@ -25,14 +25,14 @@ const preferRelativeResolve = resolve.create({
 });
 
 function testResolve(name, context, moduleName, result) {
-	describe(name, function () {
-		it("should resolve sync correctly", function () {
+	describe(name, function() {
+		it("should resolve sync correctly", function() {
 			var filename = resolve.sync(context, moduleName);
 			should.exist(filename);
 			filename.should.equal(result);
 		});
-		it("should resolve async correctly", function (done) {
-			resolve(context, moduleName, function (err, filename) {
+		it("should resolve async correctly", function(done) {
+			resolve(context, moduleName, function(err, filename) {
 				if (err) return done(err);
 				should.exist(filename);
 				filename.should.equal(result);
@@ -43,23 +43,23 @@ function testResolve(name, context, moduleName, result) {
 }
 
 function testResolveContext(name, context, moduleName, result) {
-	describe(name, function () {
-		it("should resolve async correctly", function (done) {
-			asyncContextResolve(context, moduleName, function (err, filename) {
+	describe(name, function() {
+		it("should resolve async correctly", function(done) {
+			asyncContextResolve(context, moduleName, function(err, filename) {
 				if (err) done(err);
 				should.exist(filename);
 				filename.should.equal(result);
 				done();
 			});
 		});
-		it("should resolve sync correctly", function () {
+		it("should resolve sync correctly", function() {
 			var filename = syncContextResolve(context, moduleName);
 			should.exist(filename);
 			filename.should.equal(result);
 		});
 	});
 }
-describe("resolve", function () {
+describe("resolve", function() {
 	testResolve(
 		"absolute path",
 		fixtures,
@@ -239,13 +239,13 @@ describe("resolve", function () {
 		path.join(fixtures, "main-field-self2", "index.js")
 	);
 
-	it("should correctly resolve", function (done) {
+	it("should correctly resolve", function(done) {
 		const issue238 = path.resolve(fixtures, "issue-238");
 
 		issue238Resolve(
 			path.resolve(issue238, "./src/common"),
 			"config/myObjectFile",
-			function (err, filename) {
+			function(err, filename) {
 				if (err) done(err);
 				should.exist(filename);
 				filename.should.equal(
@@ -256,8 +256,8 @@ describe("resolve", function () {
 		);
 	});
 
-	it("should correctly resolve with preferRelative", function (done) {
-		preferRelativeResolve(fixtures, "main1.js", function (err, filename) {
+	it("should correctly resolve with preferRelative", function(done) {
+		preferRelativeResolve(fixtures, "main1.js", function(err, filename) {
 			if (err) done(err);
 			should.exist(filename);
 			filename.should.equal(path.join(fixtures, "main1.js"));
@@ -265,8 +265,8 @@ describe("resolve", function () {
 		});
 	});
 
-	it("should correctly resolve with preferRelative", function (done) {
-		preferRelativeResolve(fixtures, "m1/a.js", function (err, filename) {
+	it("should correctly resolve with preferRelative", function(done) {
+		preferRelativeResolve(fixtures, "m1/a.js", function(err, filename) {
 			if (err) done(err);
 			should.exist(filename);
 			filename.should.equal(path.join(fixtures, "node_modules", "m1", "a.js"));
