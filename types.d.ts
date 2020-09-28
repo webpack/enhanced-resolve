@@ -194,6 +194,7 @@ declare interface ResolveOptions {
 	fullySpecified: boolean;
 	resolveToContext: boolean;
 	restrictions: Set<string | RegExp>;
+	preferRelative: boolean;
 }
 declare abstract class Resolver {
 	fileSystem: FileSystem;
@@ -415,6 +416,11 @@ declare interface UserResolveOptions {
 	 * Use only the sync constiants of the file system calls
 	 */
 	useSyncFileSystemCalls?: boolean;
+
+	/**
+	 * Prefer to resolve module requests as relative requests before falling back to modules
+	 */
+	preferRelative?: boolean;
 }
 declare function exports(
 	context?: any,

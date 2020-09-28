@@ -20,6 +20,10 @@ const issue238Resolve = resolve.create({
 	modules: ["src/a", "src/b", "src/common", "node_modules"]
 });
 
+const preferRelativeResolve = resolve.create({
+	preferRelative: true
+});
+
 function testResolve(name, context, moduleName, result) {
 	describe(name, function () {
 		it("should resolve sync correctly", function () {
@@ -250,5 +254,23 @@ describe("resolve", function () {
 				done();
 			}
 		);
+	});
+
+	it("should correctly resolve with preferRelative", function (done) {
+		preferRelativeResolve(fixtures, "main1.js", function (err, filename) {
+			if (err) done(err);
+			should.exist(filename);
+			filename.should.equal(path.join(fixtures, "main1.js"));
+			done();
+		});
+	});
+
+	it("should correctly resolve with preferRelative", function (done) {
+		preferRelativeResolve(fixtures, "m1/a.js", function (err, filename) {
+			if (err) done(err);
+			should.exist(filename);
+			filename.should.equal(path.join(fixtures, "node_modules", "m1", "a.js"));
+			done();
+		});
 	});
 });
