@@ -2,7 +2,7 @@ var should = require("should");
 
 var { CachedInputFileSystem } = require("../");
 
-describe("CachedInputFileSystem OperationMergerBackend", function () {
+describe("CachedInputFileSystem OperationMergerBackend ('stat' and 'statSync')", function () {
 	this.timeout(3000);
 	var fs;
 
@@ -79,6 +79,87 @@ describe("CachedInputFileSystem OperationMergerBackend", function () {
 		const result = fs.statSync("a");
 		result.a = true;
 		const result2 = fs.statSync("a");
+		should.not.exist(result2.a);
+	});
+});
+
+describe("CachedInputFileSystem OperationMergerBackend ('lstat' and 'lstatSync')", function () {
+	this.timeout(3000);
+	var fs;
+
+	beforeEach(function () {
+		fs = new CachedInputFileSystem(
+			{
+				lstat: function (path, options, callback) {
+					if (!callback) {
+						callback = options;
+						options = undefined;
+					}
+					setTimeout(
+						() =>
+							callback(null, {
+								path,
+								options
+							}),
+						100
+					);
+				},
+				lstatSync: function (path, options) {
+					return {
+						path,
+						options
+					};
+				}
+			},
+			0
+		);
+	});
+	afterEach(function () {
+		fs.purge();
+	});
+
+	it("should join accesses", function (done) {
+		fs.lstat("a", function (err, result) {
+			should.exist(result);
+			result.a = true;
+		});
+		fs.lstat("a", function (err, result) {
+			should.exist(result);
+			should.exist(result.a);
+			done();
+		});
+	});
+
+	it("should not join accesses with options", function (done) {
+		fs.lstat("a", function (err, result) {
+			should.exist(result);
+			result.a = true;
+			result.path.should.be.eql("a");
+			should.not.exist(result.options);
+		});
+		fs.lstat("a", { options: true }, function (err, result) {
+			should.exist(result);
+			should.not.exist(result.a);
+			result.path.should.be.eql("a");
+			result.options.should.eql({ options: true });
+			done();
+		});
+	});
+
+	it("should not cache accesses", function (done) {
+		fs.lstat("a", function (err, result) {
+			result.a = true;
+			fs.lstat("a", function (err, result) {
+				should.not.exist(result.a);
+				done();
+			});
+		});
+	});
+
+	it("should not cache sync accesses", function () {
+		const result = fs.lstatSync("a");
+		result.a = true;
+		const result2 = fs.lstatSync("a");
 		should.not.exist(result2.a);
 	});
 });
