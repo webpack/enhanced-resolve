@@ -18,11 +18,11 @@ declare interface BaseResolveRequest {
 declare class CachedInputFileSystem {
 	constructor(fileSystem?: any, duration?: any);
 	fileSystem: any;
-	lstat: {
+	lstat?: {
 		(arg0: string, arg1: FileSystemCallback<FileSystemStats>): void;
 		(arg0: string, arg1: any, arg2: FileSystemCallback<string | Buffer>): void;
 	};
-	lstatSync: (arg0: string, arg1?: any) => FileSystemStats;
+	lstatSync?: (arg0: string, arg1?: any) => FileSystemStats;
 	stat: {
 		(arg0: string, arg1: FileSystemCallback<FileSystemStats>): void;
 		(arg0: string, arg1: any, arg2: FileSystemCallback<string | Buffer>): void;
@@ -90,7 +90,7 @@ declare interface FileSystem {
 		(arg0: string, arg1: FileSystemCallback<string | Buffer>): void;
 		(arg0: string, arg1: any, arg2: FileSystemCallback<string | Buffer>): void;
 	};
-	lstat: {
+	lstat?: {
 		(arg0: string, arg1: FileSystemCallback<FileSystemStats>): void;
 		(arg0: string, arg1: any, arg2: FileSystemCallback<string | Buffer>): void;
 	};
