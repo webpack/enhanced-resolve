@@ -239,6 +239,27 @@ describe("resolve", function () {
 		path.join(fixtures, "main-field-self2", "index.js")
 	);
 
+	testResolve(
+		"handle fragment edge case (no fragment)",
+		fixtures,
+		"./no#fragment/#/#",
+		path.join(fixtures, "no\0#fragment/\0#", "\0#.js")
+	);
+
+	testResolve(
+		"handle fragment edge case (fragment)",
+		fixtures,
+		"./no#fragment/#/",
+		path.join(fixtures, "no.js") + "#fragment/#/"
+	);
+
+	testResolve(
+		"handle fragment escaping",
+		fixtures,
+		"./no\0#fragment/\0#/\0##fragment",
+		path.join(fixtures, "no\0#fragment/\0#", "\0#.js") + "#fragment"
+	);
+
 	it("should correctly resolve", function (done) {
 		const issue238 = path.resolve(fixtures, "issue-238");
 

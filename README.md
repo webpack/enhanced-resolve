@@ -131,6 +131,12 @@ class MyResolverPlugin {
 
 Plugins are executed in a pipeline, and register which event they should be executed before/after. In the example above, `source` is the name of the event that starts the pipeline, and `target` is what event this plugin should fire, which is what continues the execution of the pipeline. For an example of how these different plugin events create a chain, see `lib/ResolverFactory.js`, in the `//// pipeline ////` section.
 
+## Escaping
+
+It's allowed to escape `#` as `\0#` to avoid parsing it as fragment.
+
+enhanced-resolve will try to resolve requests containing `#` as path and as fragment, so it will automatically figure out if `./some#thing` means `.../some.js#thing` or `.../some#thing.js`. When a `#` is resolved as path it will be escaped in the result. Here: `.../some\0#thing.js`.
+
 ## Tests
 
 ```javascript
