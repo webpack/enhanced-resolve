@@ -4,6 +4,7 @@ module.exports = {
 	tabWidth: 2,
 	trailingComma: "none",
 	arrowParens: "avoid",
+	endOfLine: "auto",
 	overrides: [
 		{
 			files: "*.json",
