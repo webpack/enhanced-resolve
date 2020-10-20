@@ -1767,10 +1767,12 @@ describe("ExportsFieldPlugin", () => {
 						"        existing directory .../node_modules/exports-field",
 						"          using description file: .../node_modules/exports-field/package.json (relative path: .)",
 						"            using exports field: ./lib/lib2/browser.js",
-						"              .../node_modules/exports-field/lib/lib2/browser.js doesn't exist",
+						"              using description file: .../node_modules/exports-field/package.json (relative path: ./lib/lib2/browser.js)",
+						"                .../node_modules/exports-field/lib/lib2/browser.js doesn't exist",
 						"            using exports field: ./lib/browser.js",
-						"              existing file: .../node_modules/exports-field/lib/browser.js",
-						"                reporting result .../node_modules/exports-field/lib/browser.js"
+						"              using description file: .../node_modules/exports-field/package.json (relative path: ./lib/browser.js)",
+						"                existing file: .../node_modules/exports-field/lib/browser.js",
+						"                  reporting result .../node_modules/exports-field/lib/browser.js"
 					]);
 				done();
 			}
