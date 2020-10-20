@@ -1316,6 +1316,13 @@ describe("ExportsFieldPlugin", () => {
 	const resolver = ResolverFactory.createResolver({
 		extensions: [".js"],
 		fileSystem: nodeFileSystem,
+		fullySpecified: true,
+		conditionNames: ["webpack"]
+	});
+
+	const commonjsResolver = ResolverFactory.createResolver({
+		extensions: [".js"],
+		fileSystem: nodeFileSystem,
 		conditionNames: ["webpack"]
 	});
 
@@ -1354,7 +1361,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("resolve using exports field, not a browser field #2", done => {
+	it("resolve using exports field and a browser alias field #2", done => {
 		const resolver = ResolverFactory.createResolver({
 			aliasFields: ["browser"],
 			extensions: [".js"],
@@ -1371,7 +1378,7 @@ describe("ExportsFieldPlugin", () => {
 				if (err) return done(err);
 				if (!result) throw new Error("No result");
 				result.should.equal(
-					path.resolve(fixture2, "node_modules/exports-field/lib/main.js")
+					path.resolve(fixture2, "node_modules/exports-field/lib/browser.js")
 				);
 				done();
 			}
@@ -1388,6 +1395,38 @@ describe("ExportsFieldPlugin", () => {
 				if (!err) throw new Error(`expect error, got ${result}`);
 				err.should.be.instanceof(Error);
 				err.message.should.match(/Can't resolve/);
+				done();
+			}
+		);
+	});
+
+	it("throw error if extension not provided", done => {
+		resolver.resolve(
+			{},
+			fixture2,
+			"exports-field/dist/main",
+			{},
+			(err, result) => {
+				if (!err) throw new Error(`expect error, got ${result}`);
+				err.should.be.instanceof(Error);
+				err.message.should.match(/Can't resolve/);
+				done();
+			}
+		);
+	});
+
+	it("should resolve extension without fullySpecified", done => {
+		commonjsResolver.resolve(
+			{},
+			fixture2,
+			"exports-field/dist/main",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) throw new Error("No result");
+				result.should.equal(
+					path.resolve(fixture2, "node_modules/exports-field/lib/lib2/main.js")
+				);
 				done();
 			}
 		);
@@ -1728,10 +1767,12 @@ describe("ExportsFieldPlugin", () => {
 						"        existing directory .../node_modules/exports-field",
 						"          using description file: .../node_modules/exports-field/package.json (relative path: .)",
 						"            using exports field: ./lib/lib2/browser.js",
-						"              .../node_modules/exports-field/lib/lib2/browser.js doesn't exist",
+						"              using description file: .../node_modules/exports-field/package.json (relative path: ./lib/lib2/browser.js)",
+						"                .../node_modules/exports-field/lib/lib2/browser.js doesn't exist",
 						"            using exports field: ./lib/browser.js",
-						"              existing file: .../node_modules/exports-field/lib/browser.js",
-						"                reporting result .../node_modules/exports-field/lib/browser.js"
+						"              using description file: .../node_modules/exports-field/package.json (relative path: ./lib/browser.js)",
+						"                existing file: .../node_modules/exports-field/lib/browser.js",
+						"                  reporting result .../node_modules/exports-field/lib/browser.js"
 					]);
 				done();
 			}

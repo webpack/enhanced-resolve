@@ -1325,10 +1325,18 @@ describe("ImportsFieldPlugin", () => {
 						"              existing directory .../node_modules/a",
 						"                using description file: .../node_modules/a/package.json (relative path: .)",
 						"                  using exports field: ./lib/lib2/index.js",
-						"                    .../node_modules/a/lib/lib2/index.js doesn't exist",
+						"                    using description file: .../node_modules/a/package.json (relative path: ./lib/lib2/index.js)",
+						"                      no extension",
+						"                        .../node_modules/a/lib/lib2/index.js doesn't exist",
+						"                      .js",
+						"                        .../node_modules/a/lib/lib2/index.js.js doesn't exist",
+						"                      as directory",
+						"                        .../node_modules/a/lib/lib2/index.js doesn't exist",
 						"                  using exports field: ./lib/index.js",
-						"                    existing file: .../node_modules/a/lib/index.js",
-						"                      reporting result .../node_modules/a/lib/index.js"
+						"                    using description file: .../node_modules/a/package.json (relative path: ./lib/index.js)",
+						"                      no extension",
+						"                        existing file: .../node_modules/a/lib/index.js",
+						"                          reporting result .../node_modules/a/lib/index.js"
 					]);
 				done();
 			}
