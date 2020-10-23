@@ -294,4 +294,25 @@ describe("resolve", function () {
 			done();
 		});
 	});
+
+	it("should not crash when passing undefined as path", done => {
+		resolve(fixtures, undefined, err => {
+			err.should.be.instanceof(Error);
+			done();
+		});
+	});
+
+	it("should not crash when passing undefined as context", done => {
+		resolve({}, undefined, "./test/resolve.js", err => {
+			err.should.be.instanceof(Error);
+			done();
+		});
+	});
+
+	it("should not crash when passing undefined everywere", done => {
+		resolve(undefined, undefined, undefined, undefined, err => {
+			err.should.be.instanceof(Error);
+			done();
+		});
+	});
 });
