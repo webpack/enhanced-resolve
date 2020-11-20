@@ -212,6 +212,20 @@ describe("CachedInputFileSystem CacheBackend", function () {
 		});
 	});
 
+	it("should not call callback twice when combining sync and async calls", function (done) {
+		let called = false;
+		fs.stat("a", function (err, result) {
+			if (called) return done(new Error("callback was called twice"));
+			called = true;
+			should.exist(result);
+			result.a = true;
+			done();
+		});
+		const syncResult = fs.statSync("a");
+		should.exist(syncResult);
+		should.exist(syncResult.a);
+	});
+
 	it("should not join accesses with options", function (done) {
 		fs.stat("a", function (err, result) {
 			result.a = true;
