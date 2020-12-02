@@ -26,6 +26,7 @@ try {
 
 describe("pnp", () => {
 	let pnpApi;
+	let resolverFuzzy;
 	let resolver;
 	if (isAdmin) {
 		before(() => {
@@ -49,10 +50,20 @@ describe("pnp", () => {
 				}
 			}
 		});
-		resolver = ResolverFactory.createResolver({
+		resolverFuzzy = ResolverFactory.createResolver({
 			extensions: [".ts", ".js"],
 			aliasFields: ["browser"],
 			fileSystem: nodeFileSystem,
+			alias: {
+				alias: path.resolve(fixture, "pkg")
+			},
+			pnpApi,
+			modules: ["node_modules", path.resolve(fixture, "../pnp-a")]
+		});
+		resolver = ResolverFactory.createResolver({
+			aliasFields: ["browser"],
+			fileSystem: nodeFileSystem,
+			fullySpecified: true,
 			alias: {
 				alias: path.resolve(fixture, "pkg")
 			},
@@ -68,6 +79,13 @@ describe("pnp", () => {
 		resolver.resolve({}, __dirname, "pkg/dir/index.js", {}, (err, result) => {
 			if (err) return done(err);
 			result.should.equal(path.resolve(fixture, "pkg/dir/index.js"));
+			done();
+		});
+	});
+	it("should not resolve a not fully specified request when fullySpecified is set", done => {
+		pnpApi.mocks.set("pkg/dir/index", path.resolve(fixture, "pkg/dir/index"));
+		resolver.resolve({}, __dirname, "pkg/dir/index", {}, (err, result) => {
+			err.should.be.instanceof(Error);
 			done();
 		});
 	});
@@ -114,11 +132,19 @@ describe("pnp", () => {
 		isAdmin
 			? done => {
 					pnpApi.mocks.set("pkg/symlink", path.resolve(fixture, "pkg/symlink"));
-					resolver.resolve({}, __dirname, "pkg/symlink", {}, (err, result) => {
-						if (err) return done(err);
-						result.should.equal(path.resolve(fixture, "pkg/symlink/index.js"));
-						done();
-					});
+					resolverFuzzy.resolve(
+						{},
+						__dirname,
+						"pkg/symlink",
+						{},
+						(err, result) => {
+							if (err) return done(err);
+							result.should.equal(
+								path.resolve(fixture, "pkg/symlink/index.js")
+							);
+							done();
+						}
+					);
 			  }
 			: undefined
 	);
@@ -127,7 +153,7 @@ describe("pnp", () => {
 			"@user/pkg/typescript",
 			path.resolve(fixture, "pkg/typescript")
 		);
-		resolver.resolve(
+		resolverFuzzy.resolve(
 			{},
 			__dirname,
 			"@user/pkg/typescript",
@@ -144,13 +170,19 @@ describe("pnp", () => {
 			"pkg/package-alias",
 			path.resolve(fixture, "pkg/package-alias")
 		);
-		resolver.resolve({}, __dirname, "pkg/package-alias", {}, (err, result) => {
-			if (err) return done(err);
-			result.should.equal(
-				path.resolve(fixture, "pkg/package-alias/browser.js")
-			);
-			done();
-		});
+		resolverFuzzy.resolve(
+			{},
+			__dirname,
+			"pkg/package-alias",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				result.should.equal(
+					path.resolve(fixture, "pkg/package-alias/browser.js")
+				);
+				done();
+			}
+		);
 	});
 	it("should prefer normal modules over pnp resolves", done => {
 		pnpApi.mocks.set("m1/a.js", path.resolve(fixture, "pkg/a.js"));
