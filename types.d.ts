@@ -216,12 +216,10 @@ declare abstract class Resolver {
 					null | (BaseResolveRequest & Partial<ParsedIdentifier>)
 				>,
 				BaseResolveRequest & Partial<ParsedIdentifier>
-			],
-			void
+			]
 		>;
 		noResolve: SyncHook<
-			[BaseResolveRequest & Partial<ParsedIdentifier>, Error],
-			void
+			[BaseResolveRequest & Partial<ParsedIdentifier>, Error]
 		>;
 		resolve: AsyncSeriesBailHook<
 			[BaseResolveRequest & Partial<ParsedIdentifier>, ResolveContext],
