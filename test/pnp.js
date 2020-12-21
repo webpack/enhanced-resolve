@@ -72,10 +72,7 @@ describe("pnp", () => {
 		});
 	});
 	it("should resolve by going through the pnp api", done => {
-		pnpApi.mocks.set(
-			"pkg/dir/index.js",
-			path.resolve(fixture, "pkg/dir/index.js")
-		);
+		pnpApi.mocks.set("pkg", path.resolve(fixture, "pkg"));
 		resolver.resolve({}, __dirname, "pkg/dir/index.js", {}, (err, result) => {
 			if (err) return done(err);
 			result.should.equal(path.resolve(fixture, "pkg/dir/index.js"));
@@ -83,17 +80,14 @@ describe("pnp", () => {
 		});
 	});
 	it("should not resolve a not fully specified request when fullySpecified is set", done => {
-		pnpApi.mocks.set("pkg/dir/index", path.resolve(fixture, "pkg/dir/index"));
+		pnpApi.mocks.set("pkg", path.resolve(fixture, "pkg"));
 		resolver.resolve({}, __dirname, "pkg/dir/index", {}, (err, result) => {
 			err.should.be.instanceof(Error);
 			done();
 		});
 	});
 	it("should track dependency to the pnp api", done => {
-		pnpApi.mocks.set(
-			"pkg/dir/index.js",
-			path.resolve(fixture, "pkg/dir/index.js")
-		);
+		pnpApi.mocks.set("pkg", path.resolve(fixture, "pkg"));
 		pnpApi.mocks.set("pnpapi", path.resolve(fixture, ".pnp.js"));
 		const fileDependencies = new Set();
 		resolver.resolve(
@@ -131,7 +125,7 @@ describe("pnp", () => {
 		"should not resolve symlinks",
 		isAdmin
 			? done => {
-					pnpApi.mocks.set("pkg/symlink", path.resolve(fixture, "pkg/symlink"));
+					pnpApi.mocks.set("pkg", path.resolve(fixture, "pkg"));
 					resolverFuzzy.resolve(
 						{},
 						__dirname,
@@ -149,10 +143,7 @@ describe("pnp", () => {
 			: undefined
 	);
 	it("should properly deal with other extensions", done => {
-		pnpApi.mocks.set(
-			"@user/pkg/typescript",
-			path.resolve(fixture, "pkg/typescript")
-		);
+		pnpApi.mocks.set("@user/pkg", path.resolve(fixture, "pkg"));
 		resolverFuzzy.resolve(
 			{},
 			__dirname,
@@ -166,10 +157,7 @@ describe("pnp", () => {
 		);
 	});
 	it("should properly deal package.json alias", done => {
-		pnpApi.mocks.set(
-			"pkg/package-alias",
-			path.resolve(fixture, "pkg/package-alias")
-		);
+		pnpApi.mocks.set("pkg", path.resolve(fixture, "pkg"));
 		resolverFuzzy.resolve(
 			{},
 			__dirname,
@@ -185,7 +173,7 @@ describe("pnp", () => {
 		);
 	});
 	it("should prefer normal modules over pnp resolves", done => {
-		pnpApi.mocks.set("m1/a.js", path.resolve(fixture, "pkg/a.js"));
+		pnpApi.mocks.set("m1", path.resolve(fixture, "pkg"));
 		resolver.resolve(
 			{},
 			path.resolve(__dirname, "fixtures"),
@@ -199,10 +187,7 @@ describe("pnp", () => {
 		);
 	});
 	it("should prefer alias over pnp resolves", done => {
-		pnpApi.mocks.set(
-			"alias/index.js",
-			path.resolve(fixture, "pkg/dir/index.js")
-		);
+		pnpApi.mocks.set("alias", path.resolve(fixture, "pkg/dir"));
 		resolver.resolve(
 			{},
 			path.resolve(__dirname, "fixtures"),
@@ -216,11 +201,11 @@ describe("pnp", () => {
 		);
 	});
 	it("should prefer pnp over modules after node_modules", done => {
-		pnpApi.mocks.set("m2/a.js", path.resolve(fixture, "pkg/index.js"));
+		pnpApi.mocks.set("m2", path.resolve(fixture, "pkg"));
 		resolver.resolve(
 			{},
 			path.resolve(__dirname, "fixtures"),
-			"m2/a.js",
+			"m2/index.js",
 			{},
 			(err, result) => {
 				if (err) return done(err);
@@ -238,6 +223,34 @@ describe("pnp", () => {
 			(err, result) => {
 				if (err) return done(err);
 				result.should.equal(path.resolve(fixture, "../pnp-a/m2/a.js"));
+				done();
+			}
+		);
+	});
+	it("should handle the exports field when using PnP", done => {
+		pnpApi.mocks.set("m1", path.resolve(fixture, "pkg3"));
+		resolver.resolve(
+			{},
+			path.resolve(__dirname, "fixtures"),
+			"m1",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				result.should.equal(path.resolve(fixture, "pkg3/a.js"));
+				done();
+			}
+		);
+	});
+	it("should handle the exports field when using PnP (with sub path)", done => {
+		pnpApi.mocks.set("@user/m1", path.resolve(fixture, "pkg3"));
+		resolver.resolve(
+			{},
+			path.resolve(__dirname, "fixtures"),
+			"@user/m1/x",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				result.should.equal(path.resolve(fixture, "pkg3/a.js"));
 				done();
 			}
 		);
