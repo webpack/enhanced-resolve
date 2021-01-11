@@ -61,6 +61,7 @@ For more examples creating different types resolvers (sync/async, context, etc) 
 | modules                  | ["node_modules"]            | A list of directories to resolve modules from, can be absolute path or folder name |
 | roots                    | []                          | A list of directories to resolve request starting with `/` from |
 | ignoreRootsErrors        | false                       | Ignore fatal errors happening during handling of `roots` (allows to add `roots` without a breaking change) |
+| preferAbsolute           | false                       | Prefer to resolve server-relative urls as absolute paths before falling back to resolve in roots |
 | unsafeCache              | false                       | Use this cache object to unsafely cache the successful requests |
 | plugins                  | []                          | A list of additional resolve plugins which should be applied |
 | symlinks                 | true                        | Whether to resolve symlinks to their symlinked location |
