@@ -13,7 +13,18 @@ describe("roots", () => {
 			foo: "/fixtures"
 		},
 		roots: [__dirname, fixtures],
-		fileSystem
+		fileSystem,
+		ignoreRootsErrors: true,
+		plugins: [
+			{
+				apply(resolver) {
+					resolver.hooks.file.tap("Test", request => {
+						if (/test.fixtures.*test.fixtures/.test(request.path))
+							throw new Error("Simulate a fatal error in root path");
+					});
+				}
+			}
+		]
 	});
 
 	const contextResolver = ResolverFactory.createResolver({
@@ -94,5 +105,20 @@ describe("roots", () => {
 			err.should.be.instanceof(Error);
 			done();
 		});
+	});
+
+	it("should resolve an absolute path", done => {
+		resolver.resolve(
+			{},
+			fixtures,
+			path.join(fixtures, "b.js"),
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) throw new Error("No result");
+				result.should.equal(path.resolve(fixtures, "b.js"));
+				done();
+			}
+		);
 	});
 });
