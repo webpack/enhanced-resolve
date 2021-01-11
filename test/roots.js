@@ -14,6 +14,7 @@ describe("roots", () => {
 		},
 		roots: [__dirname, fixtures],
 		fileSystem,
+		ignoreRootsErrors: true,
 		plugins: [
 			{
 				apply(resolver) {
