@@ -31,11 +31,37 @@ describe("Process exports field", function exportsField() {
 			]
 		},
 		{
+			name: "sample #1 (wildcard)",
+			expect: ["./dist/test/file.js", "./src/test/file.js"],
+			suite: [
+				{
+					"./foo/*": {
+						import: ["./dist/*", "./src/*"],
+						webpack: "./wp/*"
+					},
+					".": "./main.js"
+				},
+				"./foo/test/file.js",
+				["import", "webpack"]
+			]
+		},
+		{
 			name: "sample #2",
 			expect: ["./data/timezones/pdt.mjs"],
 			suite: [
 				{
 					"./timezones/": "./data/timezones/"
+				},
+				"./timezones/pdt.mjs",
+				[]
+			]
+		},
+		{
+			name: "sample #2 (wildcard)",
+			expect: ["./data/timezones/pdt.mjs"],
+			suite: [
+				{
+					"./timezones/*": "./data/timezones/*"
 				},
 				"./timezones/pdt.mjs",
 				[]
@@ -54,12 +80,40 @@ describe("Process exports field", function exportsField() {
 			]
 		},
 		{
+			name: "sample #3 (wildcard)",
+			// mapping works like concatenating strings not file paths
+			expect: ["./data/timezones/timezones/pdt.mjs"],
+			suite: [
+				{
+					"./*": "./data/timezones/*.mjs"
+				},
+				"./timezones/pdt",
+				[]
+			]
+		},
+		{
 			name: "sample #4",
 			expect: [],
 			suite: [
 				{
 					"./lib/": {
 						browser: ["./browser/"]
+					},
+					"./dist/index.js": {
+						node: "./index.js"
+					}
+				},
+				"./dist/index.js",
+				["browser"]
+			]
+		},
+		{
+			name: "sample #4 (wildcard)",
+			expect: [],
+			suite: [
+				{
+					"./lib/*": {
+						browser: ["./browser/*"]
 					},
 					"./dist/index.js": {
 						node: "./index.js"
@@ -87,6 +141,23 @@ describe("Process exports field", function exportsField() {
 			]
 		},
 		{
+			name: "sample #5 (wildcard)",
+			expect: ["./browser/index.js"], // default condition used
+			suite: [
+				{
+					"./lib/*": {
+						browser: ["./browser/*"]
+					},
+					"./dist/index.js": {
+						node: "./index.js",
+						default: "./browser/index.js"
+					}
+				},
+				"./dist/index.js",
+				["browser"]
+			]
+		},
+		{
 			name: "sample #6",
 			expect: [],
 			suite: [
@@ -103,6 +174,17 @@ describe("Process exports field", function exportsField() {
 			suite: [
 				{
 					"./dist/a/a/": "./dist/index.js"
+				},
+				"./dist/a/a",
+				[]
+			]
+		},
+		{
+			name: "sample #7 (wildcard)",
+			expect: [],
+			suite: [
+				{
+					"./dist/a/a/*": "./dist/index.js"
 				},
 				"./dist/a/a",
 				[]
@@ -140,7 +222,8 @@ describe("Process exports field", function exportsField() {
 					"./🎉": "./ok.js",
 					"./%F0%9F%8E%89": "./other.js",
 					"./bar#foo": "./ok.js",
-					"./#zapp/": "./"
+					"./#zapp/": "./",
+					"./#zipp*": "./zzz*"
 				},
 				"./#foo",
 				[]
@@ -156,7 +239,8 @@ describe("Process exports field", function exportsField() {
 					"./🎉": "./ok.js",
 					"./%F0%9F%8E%89": "./other.js",
 					"./bar#foo": "./ok.js",
-					"./#zapp/": "./"
+					"./#zapp/": "./",
+					"./#zipp*": "./zzz*"
 				},
 				"./bar#foo",
 				[]
@@ -172,7 +256,25 @@ describe("Process exports field", function exportsField() {
 					"./🎉": "./ok.js",
 					"./%F0%9F%8E%89": "./other.js",
 					"./bar#foo": "./ok.js",
-					"./#zapp/": "./"
+					"./#zapp/": "./",
+					"./#zipp*": "./zzz*"
+				},
+				"./#zapp/ok.js#abc",
+				[]
+			]
+		},
+		{
+			name: "sample #12",
+			expect: ["./ok.js#abc"],
+			suite: [
+				{
+					"./#foo": "./ok.js",
+					"./module": "./ok.js",
+					"./🎉": "./ok.js",
+					"./%F0%9F%8E%89": "./other.js",
+					"./bar#foo": "./ok.js",
+					"./#zapp/": "./",
+					"./#zipp*": "./zzz*"
 				},
 				"./#zapp/ok.js#abc",
 				[]
@@ -188,7 +290,8 @@ describe("Process exports field", function exportsField() {
 					"./🎉": "./ok.js",
 					"./%F0%9F%8E%89": "./other.js",
 					"./bar#foo": "./ok.js",
-					"./#zapp/": "./"
+					"./#zapp/": "./",
+					"./#zipp*": "./zzz*"
 				},
 				"./#zapp/ok.js?abc",
 				[]
@@ -204,7 +307,8 @@ describe("Process exports field", function exportsField() {
 					"./🎉": "./ok.js",
 					"./%F0%9F%8E%89": "./other.js",
 					"./bar#foo": "./ok.js",
-					"./#zapp/": "./"
+					"./#zapp/": "./",
+					"./#zipp*": "./zzz*"
 				},
 				"./#zapp/🎉.js",
 				[]
@@ -220,7 +324,8 @@ describe("Process exports field", function exportsField() {
 					"./🎉": "./ok.js",
 					"./%F0%9F%8E%89": "./other.js",
 					"./bar#foo": "./ok.js",
-					"./#zapp/": "./"
+					"./#zapp/": "./",
+					"./#zipp*": "./zzz*"
 				},
 				// "🎉" percent encoded
 				"./#zapp/%F0%9F%8E%89.js",
@@ -237,7 +342,8 @@ describe("Process exports field", function exportsField() {
 					"./🎉": "./ok.js",
 					"./%F0%9F%8E%89": "./other.js",
 					"./bar#foo": "./ok.js",
-					"./#zapp/": "./"
+					"./#zapp/": "./",
+					"./#zipp*": "./zzz*"
 				},
 				"./🎉",
 				[]
@@ -253,7 +359,8 @@ describe("Process exports field", function exportsField() {
 					"./🎉": "./ok.js",
 					"./%F0%9F%8E%89": "./other.js",
 					"./bar#foo": "./ok.js",
-					"./#zapp/": "./"
+					"./#zapp/": "./",
+					"./#zipp*": "./zzz*"
 				},
 				"./%F0%9F%8E%89",
 				[]
@@ -269,7 +376,8 @@ describe("Process exports field", function exportsField() {
 					"./🎉": "./ok.js",
 					"./%F0%9F%8E%89": "./other.js",
 					"./bar#foo": "./ok.js",
-					"./#zapp/": "./"
+					"./#zapp/": "./",
+					"./#zipp*": "./zzz*"
 				},
 				"./module",
 				[]
@@ -285,7 +393,8 @@ describe("Process exports field", function exportsField() {
 					"./🎉": "./ok.js",
 					"./%F0%9F%8E%89": "./other.js",
 					"./bar#foo": "./ok.js",
-					"./#zapp/": "./"
+					"./#zapp/": "./",
+					"./#zipp*": "./zzz*"
 				},
 				"./module#foo",
 				[]
@@ -301,7 +410,8 @@ describe("Process exports field", function exportsField() {
 					"./🎉": "./ok.js",
 					"./%F0%9F%8E%89": "./other.js",
 					"./bar#foo": "./ok.js",
-					"./#zapp/": "./"
+					"./#zapp/": "./",
+					"./#zipp*": "./zzz*"
 				},
 				"./module?foo",
 				[]
@@ -309,6 +419,23 @@ describe("Process exports field", function exportsField() {
 		},
 		{
 			name: "sample #21",
+			expect: ["./zizizi"],
+			suite: [
+				{
+					"./#foo": "./ok.js",
+					"./module": "./ok.js",
+					"./🎉": "./ok.js",
+					"./%F0%9F%8E%89": "./other.js",
+					"./bar#foo": "./ok.js",
+					"./#zapp/": "./",
+					"./#zipp*": "./z*z*z*"
+				},
+				"./#zippi",
+				[]
+			]
+		},
+		{
+			name: "sample #22",
 			expect: ["./d?e?f"],
 			suite: [
 				{
@@ -338,6 +465,7 @@ describe("Process exports field", function exportsField() {
 			suite: [
 				{
 					"./": "./",
+					"./*": "./*",
 					"./dist/index.js": "./dist/index.js"
 				},
 				".",
@@ -350,6 +478,8 @@ describe("Process exports field", function exportsField() {
 			suite: [
 				{
 					"./dist/": "./dist/",
+					"./dist/*": "./dist/*",
+					"./dist*": "./dist*",
 					"./dist/index.js": "./dist/a.js"
 				},
 				"./dist/index.js",
@@ -363,6 +493,9 @@ describe("Process exports field", function exportsField() {
 				{
 					"./": {
 						browser: ["./browser/"]
+					},
+					"./*": {
+						browser: ["./browser/*"]
 					},
 					"./dist/index.js": {
 						browser: "./index.js"
@@ -381,6 +514,9 @@ describe("Process exports field", function exportsField() {
 				{
 					"./": {
 						browser: ["./browser/"]
+					},
+					"./*": {
+						browser: ["./browser/*"]
 					},
 					"./dist/index.js": {
 						node: "./node.js"
@@ -557,11 +693,33 @@ describe("Process exports field", function exportsField() {
 			]
 		},
 		{
+			name: "mapping to a folder root #3 (wildcard)",
+			expect: ["./data/timezones/pdt/index.mjs"],
+			suite: [
+				{
+					"./timezones/pdt/*": "./data/timezones/pdt/*"
+				},
+				"./timezones/pdt/index.mjs",
+				[]
+			]
+		},
+		{
 			name: "mapping to a folder root #4",
 			expect: ["./timezones/pdt.mjs"],
 			suite: [
 				{
 					"./": "./timezones/"
+				},
+				"./pdt.mjs",
+				[]
+			]
+		},
+		{
+			name: "mapping to a folder root #4 (wildcard)",
+			expect: ["./timezones/pdt.mjs"],
+			suite: [
+				{
+					"./*": "./timezones/*"
 				},
 				"./pdt.mjs",
 				[]
@@ -579,6 +737,17 @@ describe("Process exports field", function exportsField() {
 			]
 		},
 		{
+			name: "mapping to a folder root #5 (wildcard)",
+			expect: ["./timezones/pdt.mjs"],
+			suite: [
+				{
+					"./*": "./*"
+				},
+				"./timezones/pdt.mjs",
+				[]
+			]
+		},
+		{
 			name: "mapping to a folder root #6",
 			expect: new Error(), // not a folder mapping
 			suite: [
@@ -590,11 +759,33 @@ describe("Process exports field", function exportsField() {
 			]
 		},
 		{
+			name: "mapping to a folder root #6 (wildcard)",
+			expect: new Error(), // not a valid mapping
+			suite: [
+				{
+					"./*": "."
+				},
+				"./timezones/pdt.mjs",
+				[]
+			]
+		},
+		{
 			name: "mapping to a folder root #7",
 			expect: [], // incorrect export field, but value did not processed
 			suite: [
 				{
 					".": "./"
+				},
+				"./timezones/pdt.mjs",
+				[]
+			]
+		},
+		{
+			name: "mapping to a folder root #7 (wildcard)",
+			expect: [], // incorrect export field, but value did not processed
+			suite: [
+				{
+					".": "./*"
 				},
 				"./timezones/pdt.mjs",
 				[]
@@ -618,12 +809,38 @@ describe("Process exports field", function exportsField() {
 			]
 		},
 		{
+			name: "the longest matching path prefix is prioritized #1 (wildcard)",
+			// it does not work same as conditional mapping,
+			// so there is no match for ./dist/index.mjs
+			expect: ["./lib/index.mjs"],
+			suite: [
+				{
+					"./*": "./*",
+					"./dist/*": "./lib/*"
+				},
+				"./dist/index.mjs",
+				[]
+			]
+		},
+		{
 			name: "the longest matching path prefix is prioritized #2",
 			expect: ["./dist/utils/index.js"],
 			suite: [
 				{
 					"./dist/utils/": "./dist/utils/",
 					"./dist/": "./lib/"
+				},
+				"./dist/utils/index.js",
+				[]
+			]
+		},
+		{
+			name: "the longest matching path prefix is prioritized #2 (wildcard)",
+			expect: ["./dist/utils/index.js"],
+			suite: [
+				{
+					"./dist/utils/*": "./dist/utils/*",
+					"./dist/*": "./lib/*"
 				},
 				"./dist/utils/index.js",
 				[]
@@ -646,6 +863,22 @@ describe("Process exports field", function exportsField() {
 			]
 		},
 		{
+			name: "the longest matching path prefix is prioritized #3 (wildcard)",
+			// direct mapping is prioritize
+			// it does not work same as conditional mapping,
+			// so there is no match for ./dist/utils/index.mjs
+			expect: ["./dist/utils/index.js"],
+			suite: [
+				{
+					"./dist/utils/index.js": "./dist/utils/index.js",
+					"./dist/utils/*": "./dist/utils/index.mjs",
+					"./dist/*": "./lib/*"
+				},
+				"./dist/utils/index.js",
+				[]
+			]
+		},
+		{
 			name: "the longest matching path prefix is prioritized #4",
 			// it does not work same as conditional mapping,
 			// even if right side is a conditional mapping,
@@ -657,6 +890,23 @@ describe("Process exports field", function exportsField() {
 						browser: "./browser/"
 					},
 					"./dist/": "./lib/"
+				},
+				"./dist/index.mjs",
+				["browser"]
+			]
+		},
+		{
+			name: "the longest matching path prefix is prioritized #4 (wildcard)",
+			// it does not work same as conditional mapping,
+			// even if right side is a conditional mapping,
+			// so there is no match for ./browser/dist/index.mjs
+			expect: ["./lib/index.mjs"],
+			suite: [
+				{
+					"./*": {
+						browser: "./browser/*"
+					},
+					"./dist/*": "./lib/*"
 				},
 				"./dist/index.mjs",
 				["browser"]
@@ -680,6 +930,20 @@ describe("Process exports field", function exportsField() {
 			]
 		},
 		{
+			name: "conditional mapping folder #1 (wildcard)",
+			expect: ["lodash/index.js", "./utils/index.js"],
+			suite: [
+				{
+					"./utils/*": {
+						browser: ["lodash/*", "./utils/*"],
+						node: ["./utils-node/*"]
+					}
+				},
+				"./utils/index.js",
+				["browser"]
+			]
+		},
+		{
 			name: "conditional mapping folder #2",
 			expect: [], // no condition names
 			suite: [
@@ -695,6 +959,21 @@ describe("Process exports field", function exportsField() {
 			]
 		},
 		{
+			name: "conditional mapping folder #2 (wildcard)",
+			expect: [], // no condition names
+			suite: [
+				{
+					"./utils/*": {
+						webpack: "./wpk/*",
+						browser: ["lodash/*", "./utils/*"],
+						node: ["./node/*"]
+					}
+				},
+				"./utils/index.mjs",
+				[]
+			]
+		},
+		{
 			name: "conditional mapping folder #3",
 			expect: ["./wpk/index.mjs"],
 			suite: [
@@ -703,6 +982,21 @@ describe("Process exports field", function exportsField() {
 						webpack: "./wpk/",
 						browser: ["lodash/", "./utils/"],
 						node: ["./utils/"]
+					}
+				},
+				"./utils/index.mjs",
+				["browser", "webpack"]
+			]
+		},
+		{
+			name: "conditional mapping folder #3 (wildcard)",
+			expect: ["./wpk/index.mjs"],
+			suite: [
+				{
+					"./utils/*": {
+						webpack: "./wpk/*",
+						browser: ["lodash/*", "./utils/*"],
+						node: ["./utils/*"]
 					}
 				},
 				"./utils/index.mjs",
@@ -754,6 +1048,20 @@ describe("Process exports field", function exportsField() {
 			suite: [
 				{
 					"./utils/": {
+						browser: "/a/",
+						default: "/b/"
+					}
+				},
+				"./utils/index.mjs",
+				["browser"]
+			]
+		},
+		{
+			name: "incorrect exports field #4 (wildcard)",
+			expect: new Error(),
+			suite: [
+				{
+					"./utils/*": {
 						browser: "/a/",
 						default: "/b/"
 					}
@@ -884,11 +1192,33 @@ describe("Process exports field", function exportsField() {
 			]
 		},
 		{
+			name: "backtracking package base #1 (wildcard)",
+			expect: ["./dist/index"], // we don't handle backtracking here
+			suite: [
+				{
+					"./../../utils/*": "./dist/*"
+				},
+				"./../../utils/index",
+				[]
+			]
+		},
+		{
 			name: "backtracking package base #2",
 			expect: new Error(),
 			suite: [
 				{
 					"../../utils/": "./dist/"
+				},
+				"../../utils/index",
+				[]
+			]
+		},
+		{
+			name: "backtracking package base #2 (wildcard)",
+			expect: new Error(),
+			suite: [
+				{
+					"../../utils/*": "./dist/*"
 				},
 				"../../utils/index",
 				[]
@@ -906,11 +1236,33 @@ describe("Process exports field", function exportsField() {
 			]
 		},
 		{
+			name: "backtracking package base #3 (wildcard)",
+			expect: new Error(),
+			suite: [
+				{
+					"./utils/*": "../src/*"
+				},
+				"./utils/index",
+				[]
+			]
+		},
+		{
 			name: "backtracking package base #4",
 			expect: ["./../src/index"], // we don't handle backtracking here
 			suite: [
 				{
 					"./utils/": "./../src/"
+				},
+				"./utils/index",
+				[]
+			]
+		},
+		{
+			name: "backtracking package base #4 (wildcard)",
+			expect: ["./../src/index"], // we don't handle backtracking here
+			suite: [
+				{
+					"./utils/*": "./../src/*"
 				},
 				"./utils/index",
 				[]
@@ -956,6 +1308,20 @@ describe("Process exports field", function exportsField() {
 			]
 		},
 		{
+			name: "backtracking package base #7",
+			// enhanced-resolve don't know is this same package or not
+			expect: new Error(),
+			suite: [
+				{
+					"./utils/*": {
+						browser: "../this/*"
+					}
+				},
+				"./utils/index",
+				["browser"]
+			]
+		},
+		{
 			name: "backtracking package base #8",
 			expect: ["./utils/../index"],
 			suite: [
@@ -969,12 +1335,37 @@ describe("Process exports field", function exportsField() {
 			]
 		},
 		{
+			name: "backtracking package base #8 (wildcard)",
+			expect: ["./utils/../index"],
+			suite: [
+				{
+					"./utils/*": {
+						browser: "./utils/../*"
+					}
+				},
+				"./utils/index",
+				["browser"]
+			]
+		},
+		{
 			name: "backtracking package base #9",
 			expect: ["./dist/index"],
 			suite: [
 				{
 					"./": "./src/../../",
 					"./dist/": "./dist/"
+				},
+				"./dist/index",
+				["browser"]
+			]
+		},
+		{
+			name: "backtracking package base #9 (wildcard)",
+			expect: ["./dist/index"],
+			suite: [
+				{
+					"./*": "./src/../../*",
+					"./dist/*": "./dist/*"
 				},
 				"./dist/index",
 				["browser"]
@@ -995,6 +1386,17 @@ describe("Process exports field", function exportsField() {
 			]
 		},
 		{
+			name: "backtracking target folder #1 (wildcard)",
+			expect: ["./dist/timezone/../../index"],
+			suite: [
+				{
+					"./utils/*": "./dist/*"
+				},
+				"./utils/timezone/../../index",
+				[]
+			]
+		},
+		{
 			name: "backtracking target folder #2",
 			expect: ["./dist/timezone/../index"],
 			suite: [
@@ -1006,11 +1408,33 @@ describe("Process exports field", function exportsField() {
 			]
 		},
 		{
+			name: "backtracking target folder #2 (wildcard)",
+			expect: ["./dist/timezone/../index"],
+			suite: [
+				{
+					"./utils/*": "./dist/*"
+				},
+				"./utils/timezone/../index",
+				[]
+			]
+		},
+		{
 			name: "backtracking target folder #3",
 			expect: ["./dist/target/../../index"],
 			suite: [
 				{
 					"./utils/": "./dist/target/"
+				},
+				"./utils/../../index",
+				[]
+			]
+		},
+		{
+			name: "backtracking target folder #3 (wildcard)",
+			expect: ["./dist/target/../../index"],
+			suite: [
+				{
+					"./utils/*": "./dist/target/*"
 				},
 				"./utils/../../index",
 				[]
@@ -1033,11 +1457,35 @@ describe("Process exports field", function exportsField() {
 			]
 		},
 		{
+			name: "nested node_modules path #1 (wildcard)",
+			expect: ["./node_modules/lodash/dist/index.js"], // we don't handle node_modules here
+			suite: [
+				{
+					"./utils/*": {
+						browser: "./node_modules/*"
+					}
+				},
+				"./utils/lodash/dist/index.js",
+				["browser"]
+			]
+		},
+		{
 			name: "nested node_modules path #2",
 			expect: ["./utils/../node_modules/lodash/dist/index.js"],
 			suite: [
 				{
 					"./utils/": "./utils/../node_modules/"
+				},
+				"./utils/lodash/dist/index.js",
+				[]
+			]
+		},
+		{
+			name: "nested node_modules path #2 (wildcard)",
+			expect: ["./utils/../node_modules/lodash/dist/index.js"],
+			suite: [
+				{
+					"./utils/*": "./utils/../node_modules/*"
 				},
 				"./utils/lodash/dist/index.js",
 				[]
@@ -1065,6 +1513,24 @@ describe("Process exports field", function exportsField() {
 			]
 		},
 		{
+			name: "nested mapping #1 (wildcard)",
+			expect: [],
+			suite: [
+				{
+					"./utils/*": {
+						browser: {
+							webpack: "./*",
+							default: {
+								node: "./node/*"
+							}
+						}
+					}
+				},
+				"./utils/index.js",
+				["browser"]
+			]
+		},
+		{
 			name: "nested mapping #2",
 			expect: ["./index.js", "./node/index.js"],
 			suite: [
@@ -1074,6 +1540,24 @@ describe("Process exports field", function exportsField() {
 							webpack: ["./", "./node/"],
 							default: {
 								node: "./node/"
+							}
+						}
+					}
+				},
+				"./utils/index.js",
+				["browser", "webpack"]
+			]
+		},
+		{
+			name: "nested mapping #2 (wildcard)",
+			expect: ["./index.js", "./node/index.js"],
+			suite: [
+				{
+					"./utils/*": {
+						browser: {
+							webpack: ["./*", "./node/*"],
+							default: {
+								node: "./node/*"
 							}
 						}
 					}
@@ -1101,6 +1585,24 @@ describe("Process exports field", function exportsField() {
 			]
 		},
 		{
+			name: "nested mapping #3 (wildcard)",
+			expect: [], // no browser condition name
+			suite: [
+				{
+					"./utils/*": {
+						browser: {
+							webpack: ["./*", "./node/*"],
+							default: {
+								node: "./node/*"
+							}
+						}
+					}
+				},
+				"./utils/index.js",
+				["webpack"]
+			]
+		},
+		{
 			name: "nested mapping #4",
 			expect: ["./node/index.js"],
 			suite: [
@@ -1110,6 +1612,24 @@ describe("Process exports field", function exportsField() {
 							webpack: ["./", "./node/"],
 							default: {
 								node: "./node/"
+							}
+						}
+					}
+				},
+				"./utils/index.js",
+				["node", "browser"]
+			]
+		},
+		{
+			name: "nested mapping #4 (wildcard)",
+			expect: ["./node/index.js"],
+			suite: [
+				{
+					"./utils/*": {
+						browser: {
+							webpack: ["./*", "./node/*"],
+							default: {
+								node: "./node/*"
 							}
 						}
 					}
@@ -1139,6 +1659,26 @@ describe("Process exports field", function exportsField() {
 			]
 		},
 		{
+			name: "nested mapping #5 (wildcard)",
+			expect: [],
+			suite: [
+				{
+					"./utils/*": {
+						browser: {
+							webpack: ["./*", "./node/*"],
+							default: {
+								node: {
+									webpack: ["./wpck/*"]
+								}
+							}
+						}
+					}
+				},
+				"./utils/index.js",
+				["browser", "node"]
+			]
+		},
+		{
 			name: "nested mapping #6",
 			expect: ["./index.js", "./node/index.js"],
 			suite: [
@@ -1149,6 +1689,26 @@ describe("Process exports field", function exportsField() {
 							default: {
 								node: {
 									webpack: ["./wpck/"]
+								}
+							}
+						}
+					}
+				},
+				"./utils/index.js",
+				["browser", "node", "webpack"]
+			]
+		},
+		{
+			name: "nested mapping #6 (wildcard)",
+			expect: ["./index.js", "./node/index.js"],
+			suite: [
+				{
+					"./utils/*": {
+						browser: {
+							webpack: ["./*", "./node/*"],
+							default: {
+								node: {
+									webpack: ["./wpck/*"]
 								}
 							}
 						}
@@ -1265,12 +1825,80 @@ describe("Process exports field", function exportsField() {
 		},
 		//#endregion
 
+		//#region Wildcards
+		{
+			name: "wildcard longest #1",
+			expect: ["./abc/d"],
+			suite: [
+				{
+					"./ab*": "./ab/*",
+					"./abc*": "./abc/*",
+					"./a*": "./a/*"
+				},
+				"./abcd",
+				["browser"]
+			]
+		},
+		{
+			name: "wildcard longest #2",
+			expect: ["./abc/d/e"],
+			suite: [
+				{
+					"./ab*": "./ab/*",
+					"./abc*": "./abc/*",
+					"./a*": "./a/*"
+				},
+				"./abcd/e",
+				["browser"]
+			]
+		},
+		{
+			name: "wildcard longest #3",
+			expect: ["./abc/d"],
+			suite: [
+				{
+					"./x/ab*": "./ab/*",
+					"./x/abc*": "./abc/*",
+					"./x/a*": "./a/*"
+				},
+				"./x/abcd",
+				["browser"]
+			]
+		},
+		{
+			name: "wildcard longest #4",
+			expect: ["./abc/d/e"],
+			suite: [
+				{
+					"./x/ab*": "./ab/*",
+					"./x/abc*": "./abc/*",
+					"./x/a*": "./a/*"
+				},
+				"./x/abcd/e",
+				["browser"]
+			]
+		},
+
+		//#endregion
+
 		{
 			name: "path tree edge case #1",
 			expect: ["./A/b/d.js"],
 			suite: [
 				{
 					"./a/": "./A/",
+					"./a/b/c": "./c.js"
+				},
+				"./a/b/d.js",
+				[]
+			]
+		},
+		{
+			name: "path tree edge case #1 (wildcard)",
+			expect: ["./A/b/d.js"],
+			suite: [
+				{
+					"./a/*": "./A/*",
 					"./a/b/c": "./c.js"
 				},
 				"./a/b/d.js",
@@ -1286,6 +1914,42 @@ describe("Process exports field", function exportsField() {
 					"./a/b": "./b.js"
 				},
 				"./a/c.js",
+				[]
+			]
+		},
+		{
+			name: "path tree edge case #2 (wildcard)",
+			expect: ["./A/c.js"],
+			suite: [
+				{
+					"./a/*": "./A/*",
+					"./a/b": "./b.js"
+				},
+				"./a/c.js",
+				[]
+			]
+		},
+		{
+			name: "path tree edge case #3",
+			expect: ["./A/b/d/c.js"],
+			suite: [
+				{
+					"./a/": "./A/",
+					"./a/b/c/d": "./c.js"
+				},
+				"./a/b/d/c.js",
+				[]
+			]
+		},
+		{
+			name: "path tree edge case #3 (wildcard)",
+			expect: ["./A/b/d/c.js"],
+			suite: [
+				{
+					"./a/*": "./A/*",
+					"./a/b/c/d": "./c.js"
+				},
+				"./a/b/d/c.js",
 				[]
 			]
 		}
