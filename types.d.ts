@@ -204,6 +204,7 @@ declare interface ResolveOptions {
 	resolveToContext: boolean;
 	restrictions: Set<string | RegExp>;
 	preferRelative: boolean;
+	preferAbsolute: boolean;
 }
 declare abstract class Resolver {
 	fileSystem: FileSystem;
@@ -428,6 +429,11 @@ declare interface UserResolveOptions {
 	 * Prefer to resolve module requests as relative requests before falling back to modules
 	 */
 	preferRelative?: boolean;
+
+	/**
+	 * Prefer to resolve server-relative urls as absolute paths before falling back to resolve in roots
+	 */
+	preferAbsolute?: boolean;
 }
 declare function exports(
 	context?: any,

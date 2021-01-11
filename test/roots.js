@@ -16,6 +16,26 @@ describe("roots", () => {
 		fileSystem
 	});
 
+	const resolverPreferAbsolute = ResolverFactory.createResolver({
+		extensions: [".js"],
+		alias: {
+			foo: "/fixtures"
+		},
+		roots: [__dirname, fixtures],
+		fileSystem,
+		preferAbsolute: true,
+		plugins: [
+			{
+				apply(resolver) {
+					resolver.hooks.file.tap("Test", request => {
+						if (/test.fixtures.*test.fixtures/.test(request.path))
+							throw new Error("Simulate a fatal error in root path");
+					});
+				}
+			}
+		]
+	});
+
 	const contextResolver = ResolverFactory.createResolver({
 		roots: [__dirname],
 		fileSystem,
@@ -94,5 +114,20 @@ describe("roots", () => {
 			err.should.be.instanceof(Error);
 			done();
 		});
+	});
+
+	it("should resolve an absolute path (prefer absolute)", done => {
+		resolverPreferAbsolute.resolve(
+			{},
+			fixtures,
+			path.join(fixtures, "b.js"),
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) throw new Error("No result");
+				result.should.equal(path.resolve(fixtures, "b.js"));
+				done();
+			}
+		);
 	});
 });
