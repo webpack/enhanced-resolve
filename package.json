@@ -52,10 +52,10 @@
     "pretty": "prettier --loglevel warn --write \"lib/**/*.{js,json}\" \"test/*.js\"",
     "pretest": "yarn lint",
     "test": "mocha --full-trace --check-leaks",
+    "test:only": "mocha --full-trace --check-leaks",
     "precover": "yarn lint",
-    "cover": "nyc --reporter=html node node_modules/mocha/bin/_mocha",
-    "pretravis": "yarn lint",
-    "travis": "nyc --reporter=lcovonly node node_modules/mocha/bin/_mocha"
+    "cover": "nyc --reporter=html node node_modules/mocha/bin/_mocha --full-trace --check-leaks",
+    "cover:ci": "nyc --reporter=lcovonly node node_modules/mocha/bin/_mocha --full-trace --check-leaks"
   },
   "husky": {
     "hooks": {
