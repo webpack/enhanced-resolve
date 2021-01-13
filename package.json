@@ -32,8 +32,8 @@
     "nyc": "^15.1.0",
     "prettier": "^2.1.2",
     "should": "^13.2.3",
-    "tooling": "webpack/tooling#v1.11.0",
-    "typescript": "^4.0.2"
+    "tooling": "webpack/tooling#v1.14.0",
+    "typescript": "^4.2.0-beta"
   },
   "engines": {
     "node": ">=10.13.0"

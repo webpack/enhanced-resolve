@@ -6,11 +6,20 @@
 
 import { AsyncSeriesBailHook, AsyncSeriesHook, SyncHook } from "tapable";
 
+declare interface AliasOption {
+	alias: string | false | string[];
+	name: string;
+	onlyModule?: boolean;
+}
+type AliasOptionNewRequest = string | false | string[];
+declare interface AliasOptions {
+	[index: string]: AliasOptionNewRequest;
+}
 declare interface BaseResolveRequest {
 	path: string | false;
 	descriptionFilePath?: string;
 	descriptionFileRoot?: string;
-	descriptionFileData?: any;
+	descriptionFileData?: object;
 	relativePath?: string;
 	ignoreSymlinks?: boolean;
 	fullySpecified?: boolean;
@@ -20,14 +29,22 @@ declare class CachedInputFileSystem {
 	fileSystem: any;
 	lstat?: {
 		(arg0: string, arg1: FileSystemCallback<FileSystemStats>): void;
-		(arg0: string, arg1: any, arg2: FileSystemCallback<string | Buffer>): void;
+		(
+			arg0: string,
+			arg1: object,
+			arg2: FileSystemCallback<string | Buffer>
+		): void;
 	};
-	lstatSync?: (arg0: string, arg1?: any) => FileSystemStats;
+	lstatSync?: (arg0: string, arg1?: object) => FileSystemStats;
 	stat: {
 		(arg0: string, arg1: FileSystemCallback<FileSystemStats>): void;
-		(arg0: string, arg1: any, arg2: FileSystemCallback<string | Buffer>): void;
+		(
+			arg0: string,
+			arg1: object,
+			arg2: FileSystemCallback<string | Buffer>
+		): void;
 	};
-	statSync: (arg0: string, arg1?: any) => FileSystemStats;
+	statSync: (arg0: string, arg1?: object) => FileSystemStats;
 	readdir: {
 		(
 			arg0: string,
@@ -35,29 +52,37 @@ declare class CachedInputFileSystem {
 		): void;
 		(
 			arg0: string,
-			arg1: any,
+			arg1: object,
 			arg2: FileSystemCallback<(string | Buffer)[] | FileSystemDirent[]>
 		): void;
 	};
 	readdirSync: (
 		arg0: string,
-		arg1?: any
+		arg1?: object
 	) => (string | Buffer)[] | FileSystemDirent[];
 	readFile: {
 		(arg0: string, arg1: FileSystemCallback<string | Buffer>): void;
-		(arg0: string, arg1: any, arg2: FileSystemCallback<string | Buffer>): void;
+		(
+			arg0: string,
+			arg1: object,
+			arg2: FileSystemCallback<string | Buffer>
+		): void;
 	};
-	readFileSync: (arg0: string, arg1?: any) => string | Buffer;
+	readFileSync: (arg0: string, arg1?: object) => string | Buffer;
 	readJson?: {
-		(arg0: string, arg1: FileSystemCallback<any>): void;
-		(arg0: string, arg1: any, arg2: FileSystemCallback<any>): void;
+		(arg0: string, arg1: FileSystemCallback<object>): void;
+		(arg0: string, arg1: object, arg2: FileSystemCallback<object>): void;
 	};
-	readJsonSync?: (arg0: string, arg1?: any) => any;
+	readJsonSync?: (arg0: string, arg1?: object) => object;
 	readlink: {
 		(arg0: string, arg1: FileSystemCallback<string | Buffer>): void;
-		(arg0: string, arg1: any, arg2: FileSystemCallback<string | Buffer>): void;
+		(
+			arg0: string,
+			arg1: object,
+			arg2: FileSystemCallback<string | Buffer>
+		): void;
 	};
-	readlinkSync: (arg0: string, arg1?: any) => string | Buffer;
+	readlinkSync: (arg0: string, arg1?: object) => string | Buffer;
 	purge(what?: any): void;
 }
 declare class CloneBasenamePlugin {
@@ -69,7 +94,11 @@ declare class CloneBasenamePlugin {
 declare interface FileSystem {
 	readFile: {
 		(arg0: string, arg1: FileSystemCallback<string | Buffer>): void;
-		(arg0: string, arg1: any, arg2: FileSystemCallback<string | Buffer>): void;
+		(
+			arg0: string,
+			arg1: object,
+			arg2: FileSystemCallback<string | Buffer>
+		): void;
 	};
 	readdir: {
 		(
@@ -78,25 +107,37 @@ declare interface FileSystem {
 		): void;
 		(
 			arg0: string,
-			arg1: any,
+			arg1: object,
 			arg2: FileSystemCallback<(string | Buffer)[] | FileSystemDirent[]>
 		): void;
 	};
 	readJson?: {
-		(arg0: string, arg1: FileSystemCallback<any>): void;
-		(arg0: string, arg1: any, arg2: FileSystemCallback<any>): void;
+		(arg0: string, arg1: FileSystemCallback<object>): void;
+		(arg0: string, arg1: object, arg2: FileSystemCallback<object>): void;
 	};
 	readlink: {
 		(arg0: string, arg1: FileSystemCallback<string | Buffer>): void;
-		(arg0: string, arg1: any, arg2: FileSystemCallback<string | Buffer>): void;
+		(
+			arg0: string,
+			arg1: object,
+			arg2: FileSystemCallback<string | Buffer>
+		): void;
 	};
 	lstat?: {
 		(arg0: string, arg1: FileSystemCallback<FileSystemStats>): void;
-		(arg0: string, arg1: any, arg2: FileSystemCallback<string | Buffer>): void;
+		(
+			arg0: string,
+			arg1: object,
+			arg2: FileSystemCallback<string | Buffer>
+		): void;
 	};
 	stat: {
 		(arg0: string, arg1: FileSystemCallback<FileSystemStats>): void;
-		(arg0: string, arg1: any, arg2: FileSystemCallback<string | Buffer>): void;
+		(
+			arg0: string,
+			arg1: object,
+			arg2: FileSystemCallback<string | Buffer>
+		): void;
 	};
 }
 declare interface FileSystemCallback<T> {
@@ -125,8 +166,11 @@ declare interface ParsedIdentifier {
 	file: boolean;
 	internal: boolean;
 }
+type Plugin =
+	| { apply: (arg0: Resolver) => void }
+	| ((this: Resolver, arg1: Resolver) => void);
 declare interface PnpApiImpl {
-	resolveToUnqualified: (arg0: string, arg1: string, arg2?: any) => string;
+	resolveToUnqualified: (arg0: string, arg1: string, arg2: object) => string;
 }
 declare interface PossibleFileSystemError {
 	code?: string;
@@ -139,17 +183,17 @@ declare interface PossibleFileSystemError {
  * Resolve context
  */
 declare interface ResolveContext {
-	contextDependencies?: { add: (T?: any) => void };
+	contextDependencies?: WriteOnlySet<string>;
 
 	/**
 	 * files that was found on file system
 	 */
-	fileDependencies?: { add: (T?: any) => void };
+	fileDependencies?: WriteOnlySet<string>;
 
 	/**
 	 * dependencies that was not found on file system
 	 */
-	missingDependencies?: { add: (T?: any) => void };
+	missingDependencies?: WriteOnlySet<string>;
 
 	/**
 	 * set of hooks' calls. For instance, `resolve → parsedResolve → describedResolve`,
@@ -162,20 +206,10 @@ declare interface ResolveContext {
 	log?: (arg0: string) => void;
 }
 declare interface ResolveOptions {
-	alias: {
-		alias: string | false | string[];
-		name: string;
-		onlyModule?: boolean;
-	}[];
-	fallback: {
-		alias: string | false | string[];
-		name: string;
-		onlyModule?: boolean;
-	}[];
+	alias: AliasOption[];
+	fallback: AliasOption[];
 	aliasFields: Set<string | string[]>;
-	cachePredicate: (
-		arg0: BaseResolveRequest & Partial<ParsedIdentifier>
-	) => boolean;
+	cachePredicate: (arg0: ResolveRequest) => boolean;
 	cacheWithContext: boolean;
 
 	/**
@@ -188,16 +222,13 @@ declare interface ResolveOptions {
 	importsFields: Set<string | string[]>;
 	extensions: Set<string>;
 	fileSystem: FileSystem;
-	unsafeCache: any;
+	unsafeCache: false | object;
 	symlinks: boolean;
 	resolver?: Resolver;
 	modules: (string | string[])[];
 	mainFields: { name: string[]; forceRelative: boolean }[];
 	mainFiles: Set<string>;
-	plugins: (
-		| { apply: (arg0: Resolver) => void }
-		| ((this: Resolver, arg1: Resolver) => void)
-	)[];
+	plugins: Plugin[];
 	pnpApi: null | PnpApiImpl;
 	roots: Set<string>;
 	fullySpecified: boolean;
@@ -206,6 +237,7 @@ declare interface ResolveOptions {
 	preferRelative: boolean;
 	preferAbsolute: boolean;
 }
+type ResolveRequest = BaseResolveRequest & Partial<ParsedIdentifier>;
 declare abstract class Resolver {
 	fileSystem: FileSystem;
 	options: ResolveOptions;
@@ -213,55 +245,51 @@ declare abstract class Resolver {
 		resolveStep: SyncHook<
 			[
 				AsyncSeriesBailHook<
-					[BaseResolveRequest & Partial<ParsedIdentifier>, ResolveContext],
-					null | (BaseResolveRequest & Partial<ParsedIdentifier>)
+					[ResolveRequest, ResolveContext],
+					null | ResolveRequest
 				>,
-				BaseResolveRequest & Partial<ParsedIdentifier>
+				ResolveRequest
 			]
 		>;
-		noResolve: SyncHook<
-			[BaseResolveRequest & Partial<ParsedIdentifier>, Error]
-		>;
+		noResolve: SyncHook<[ResolveRequest, Error]>;
 		resolve: AsyncSeriesBailHook<
-			[BaseResolveRequest & Partial<ParsedIdentifier>, ResolveContext],
-			null | (BaseResolveRequest & Partial<ParsedIdentifier>)
+			[ResolveRequest, ResolveContext],
+			null | ResolveRequest
 		>;
-		result: AsyncSeriesHook<
-			[BaseResolveRequest & Partial<ParsedIdentifier>, ResolveContext]
-		>;
+		result: AsyncSeriesHook<[ResolveRequest, ResolveContext]>;
 	};
 	ensureHook(
 		name:
 			| string
 			| AsyncSeriesBailHook<
-					[BaseResolveRequest & Partial<ParsedIdentifier>, ResolveContext],
-					null | (BaseResolveRequest & Partial<ParsedIdentifier>)
+					[ResolveRequest, ResolveContext],
+					null | ResolveRequest
 			  >
 	): AsyncSeriesBailHook<
-		[BaseResolveRequest & Partial<ParsedIdentifier>, ResolveContext],
-		null | (BaseResolveRequest & Partial<ParsedIdentifier>)
+		[ResolveRequest, ResolveContext],
+		null | ResolveRequest
 	>;
 	getHook(
 		name:
 			| string
 			| AsyncSeriesBailHook<
-					[BaseResolveRequest & Partial<ParsedIdentifier>, ResolveContext],
-					null | (BaseResolveRequest & Partial<ParsedIdentifier>)
+					[ResolveRequest, ResolveContext],
+					null | ResolveRequest
 			  >
 	): AsyncSeriesBailHook<
-		[BaseResolveRequest & Partial<ParsedIdentifier>, ResolveContext],
-		null | (BaseResolveRequest & Partial<ParsedIdentifier>)
+		[ResolveRequest, ResolveContext],
+		null | ResolveRequest
 	>;
-	resolveSync(context: any, path: string, request: string): string | false;
+	resolveSync(context: object, path: string, request: string): string | false;
 	resolve(
-		context: any,
+		context: object,
 		path: string,
 		request: string,
 		resolveContext: ResolveContext,
 		callback: (
 			arg0: null | Error,
 			arg1?: string | false,
-			arg2?: BaseResolveRequest & Partial<ParsedIdentifier>
+			arg2?: ResolveRequest
 		) => void
 	): void;
 	doResolve(
@@ -282,24 +310,12 @@ declare interface UserResolveOptions {
 	/**
 	 * A list of module alias configurations or an object which maps key to value
 	 */
-	alias?:
-		| { [index: string]: string | false | string[] }
-		| {
-				alias: string | false | string[];
-				name: string;
-				onlyModule?: boolean;
-		  }[];
+	alias?: AliasOptions | AliasOption[];
 
 	/**
 	 * A list of module alias configurations or an object which maps key to value, applied only after modules option
 	 */
-	fallback?:
-		| { [index: string]: string | false | string[] }
-		| {
-				alias: string | false | string[];
-				name: string;
-				onlyModule?: boolean;
-		  }[];
+	fallback?: AliasOptions | AliasOption[];
 
 	/**
 	 * A list of alias fields in description files
@@ -309,9 +325,7 @@ declare interface UserResolveOptions {
 	/**
 	 * A function which decides whether a request should be cached or not. An object is passed with at least `path` and `request` properties.
 	 */
-	cachePredicate?: (
-		arg0: BaseResolveRequest & Partial<ParsedIdentifier>
-	) => boolean;
+	cachePredicate?: (arg0: ResolveRequest) => boolean;
 
 	/**
 	 * Whether or not the unsafeCache should include request context as part of the cache key.
@@ -356,7 +370,7 @@ declare interface UserResolveOptions {
 	/**
 	 * Use this cache object to unsafely cache the successful requests
 	 */
-	unsafeCache?: any;
+	unsafeCache?: boolean | object;
 
 	/**
 	 * Resolve symlinks to their symlinked location
@@ -390,10 +404,7 @@ declare interface UserResolveOptions {
 	/**
 	 * A list of additional resolve plugins which should be applied
 	 */
-	plugins?: (
-		| { apply: (arg0: Resolver) => void }
-		| ((this: Resolver, arg1: Resolver) => void)
-	)[];
+	plugins?: Plugin[];
 
 	/**
 	 * A PnP API that should be used - null is "never", undefined is "auto"
@@ -435,6 +446,9 @@ declare interface UserResolveOptions {
 	 */
 	preferAbsolute?: boolean;
 }
+declare interface WriteOnlySet<T> {
+	add: (T?: any) => void;
+}
 declare function exports(
 	context?: any,
 	path?: any,
@@ -470,10 +484,6 @@ declare namespace exports {
 		iterator?: any,
 		callback?: any
 	) => any;
-	export type ResolveRequest = BaseResolveRequest & Partial<ParsedIdentifier>;
-	export type Plugin =
-		| { apply: (arg0: Resolver) => void }
-		| ((this: Resolver, arg1: Resolver) => void);
 	export {
 		CachedInputFileSystem,
 		CloneBasenamePlugin,
@@ -482,6 +492,8 @@ declare namespace exports {
 		Resolver,
 		FileSystem,
 		ResolveContext,
+		ResolveRequest,
+		Plugin,
 		UserResolveOptions as ResolveOptions
 	};
 }
