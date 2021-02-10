@@ -11,6 +11,17 @@ const resolver = ResolverFactory.createResolver({
 	fileSystem: nodeFileSystem
 });
 
+const resolver2 = ResolverFactory.createResolver({
+	extensions: [".ts", "", ".js"],
+	fileSystem: nodeFileSystem
+});
+
+const resolver3 = ResolverFactory.createResolver({
+	extensions: [".ts", "", ".js"],
+	enforceExtension: false,
+	fileSystem: nodeFileSystem
+});
+
 const fixture = path.resolve(__dirname, "fixtures", "extensions");
 
 describe("extensions", function () {
@@ -67,6 +78,20 @@ describe("extensions", function () {
 		resolver.resolve({}, fixture, "module.js/", {}, (err, result) => {
 			if (!err) throw new Error("No error");
 			err.should.be.instanceof(Error);
+			done();
+		});
+	});
+	it("should default enforceExtension to true when extensions includes an empty string", function (done) {
+		const missingDependencies = new Set();
+		resolver2.resolve({}, fixture, "./foo", { missingDependencies }, () => {
+			missingDependencies.should.not.containEql(fixture + "/foo");
+			done();
+		});
+	});
+	it("should respect enforceExtension when extensions includes an empty string", function (done) {
+		const missingDependencies = new Set();
+		resolver3.resolve({}, fixture, "./foo", { missingDependencies }, () => {
+			missingDependencies.should.containEql(fixture + "/foo");
 			done();
 		});
 	});
