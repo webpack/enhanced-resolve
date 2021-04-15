@@ -172,17 +172,16 @@ describe("pnp", () => {
 			}
 		);
 	});
-	it("should prefer normal modules over pnp resolves", done => {
+	it("should prefer pnp resolves over normal modules", done => {
 		pnpApi.mocks.set("m1", path.resolve(fixture, "pkg"));
 		resolver.resolve(
 			{},
 			path.resolve(__dirname, "fixtures"),
 			"m1/a.js",
 			{},
-			(err, result) => {
-				if (err) return done(err);
-				result.should.equal(path.resolve(fixture, "../node_modules/m1/a.js"));
-				done();
+			err => {
+				if (err) return done();
+				done(new Error("Resolved by normal modules"));
 			}
 		);
 	});
