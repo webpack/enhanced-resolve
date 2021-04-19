@@ -134,12 +134,12 @@ rules:
 
 
 
-# add non-master label to pull request to other branch
+# add non-main label to pull request to other branch
 - filters:
     pull_request:
-      base_ref: "^(?!master)"
+      base_ref: "^(?!main)"
   actions:
-    label: "PR: non-master"
+    label: "PR: non-main"
 
 
 

@@ -144,7 +144,7 @@ enhanced-resolve will try to resolve requests containing `#` as path and as frag
 npm test
 ```
 
-[![Build Status](https://secure.travis-ci.org/webpack/enhanced-resolve.png?branch=master)](http://travis-ci.org/webpack/enhanced-resolve)
+[![Build Status](https://secure.travis-ci.org/webpack/enhanced-resolve.png?branch=main)](http://travis-ci.org/webpack/enhanced-resolve)
 
 ## Passing options from webpack
 
