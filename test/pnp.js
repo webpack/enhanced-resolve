@@ -68,7 +68,11 @@ describe("pnp", () => {
 				alias: path.resolve(fixture, "pkg")
 			},
 			pnpApi,
-			modules: ["node_modules", path.resolve(fixture, "../pnp-a")]
+			modules: [
+				"alternative-modules",
+				"node_modules",
+				path.resolve(fixture, "../pnp-a")
+			]
 		});
 	});
 	it("should resolve by going through the pnp api", done => {
@@ -172,16 +176,35 @@ describe("pnp", () => {
 			}
 		);
 	});
-	it("should prefer normal modules over pnp resolves", done => {
-		pnpApi.mocks.set("m1", path.resolve(fixture, "pkg"));
+	it("should prefer pnp resolves over normal modules", done => {
+		pnpApi.mocks.set("m1", path.resolve(fixture, "../node_modules/m2"));
 		resolver.resolve(
 			{},
 			path.resolve(__dirname, "fixtures"),
-			"m1/a.js",
+			"m1/b.js",
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				result.should.equal(path.resolve(fixture, "../node_modules/m1/a.js"));
+				result.should.equal(path.resolve(fixture, "../node_modules/m2/b.js"));
+				done();
+			}
+		);
+	});
+	it("should prefer alternative module directories over pnp", done => {
+		pnpApi.mocks.set("m1", path.resolve(fixture, "../node_modules/m2"));
+		resolver.resolve(
+			{},
+			path.resolve(__dirname, "fixtures/prefer-pnp"),
+			"m1/b.js",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				result.should.equal(
+					path.resolve(
+						__dirname,
+						"fixtures/prefer-pnp/alternative-modules/m1/b.js"
+					)
+				);
 				done();
 			}
 		);
