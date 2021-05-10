@@ -1196,6 +1196,21 @@ describe("ImportsFieldPlugin", () => {
 		});
 	});
 
+	it("should resolve using imports field instead of self-referencing for a subpath", done => {
+		resolver.resolve(
+			{},
+			path.resolve(fixture, "dir"),
+			"#imports-field",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) throw new Error("No result");
+				result.should.equal(path.resolve(fixture, "b.js"));
+				done();
+			}
+		);
+	});
+
 	it("should resolve out of package scope", done => {
 		resolver.resolve({}, fixture, "#b", {}, (err, result) => {
 			if (err) return done(err);
