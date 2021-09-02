@@ -9,8 +9,8 @@
     "LICENSE"
   ],
   "browser": {
-    "pnpapi": false,
-    "process": "./lib/util/process-browser.js"
+    "process": "./lib/util/process-browser.js",
+    "module": "./lib/util/module-browser.js"
   },
   "dependencies": {
     "graceful-fs": "^4.2.4",

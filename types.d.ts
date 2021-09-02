@@ -289,7 +289,7 @@ type Plugin =
 	| { apply: (arg0: Resolver) => void }
 	| ((this: Resolver, arg1: Resolver) => void);
 declare interface PnpApiImpl {
-	resolveToUnqualified: (arg0: string, arg1: string, arg2: object) => string;
+	resolveToUnqualified: (arg0: string, arg1: string, arg2: object) => string | null;
 }
 declare interface PossibleFileSystemError {
 	code?: string;
