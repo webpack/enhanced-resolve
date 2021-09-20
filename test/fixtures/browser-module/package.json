@@ -3,7 +3,8 @@
     "./lib/ignore.js": false,
     "./lib/replaced.js": "./lib/browser",
     "module-a": "./browser/module-a.js",
-    "module-b": "module-c"
+    "module-b": "module-c",
+    ".": false
   },
   "innerBrowser1": {
     "field": {
