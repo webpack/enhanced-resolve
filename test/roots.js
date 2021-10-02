@@ -108,6 +108,31 @@ describe("roots", () => {
 		);
 	});
 
+	it("should support roots options with resolveToContext and absolute request path", done => {
+		contextResolver.hooks.resolveStep.tap("Test", (hook, request) => {
+			hook.tapAsync("Test", (request, context, callback) => {
+				// this check avoids the wrong request.path e.g.
+				// /Users/webpack/Desktop/enhanced-resolve/test/Users/webpack/Desktop/enhanced-resolve/test/fixtures/lib
+				// this usually happens for all entries in webpack.config.js whose path is a absolute path
+				request.path.should.equal(path.resolve(fixtures));
+				callback();
+			});
+		});
+
+		contextResolver.resolve(
+			{},
+			fixtures,
+			fixtures + "/lib",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) throw new Error("No result");
+				result.should.equal(path.resolve(fixtures, "lib"));
+				done();
+			}
+		);
+	});
+
 	it("should not work with relative path", done => {
 		resolver.resolve({}, fixtures, "fixtures/b.js", {}, (err, result) => {
 			if (!err) throw new Error(`expect error, got ${result}`);
