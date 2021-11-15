@@ -364,3 +364,56 @@ describe("CachedInputFileSystem CacheBackend", function () {
 		next();
 	});
 });
+
+describe("CachedInputFileSystem cached stats", function () {
+	this.timeout(3000);
+	it("should fallback to reading full file when size has changed", done => {
+		let filePos = 0;
+		const fs = new CachedInputFileSystem(
+			{
+				stat: (path, callback) => {
+					callback(null, {
+						size: 100
+					});
+				},
+				readFile: (path, callback) => {
+					callback(new Error("shouldn't be used"));
+				},
+				fstat: (fd, callback) => {
+					callback(new Error("shouldn't be used"));
+				},
+				open: (path, flag, callback) => {
+					path.should.be.eql("/any");
+					flag.should.be.eql("r");
+					filePos = 0;
+					callback(null, 123);
+				},
+				read: (fd, buffer, offset, length, position, callback) => {
+					fd.should.be.eql(123);
+					length = Math.min(length, 32123 - filePos);
+					filePos += length;
+					buffer.fill(1, offset, offset + length);
+					process.nextTick(callback, null, length);
+				},
+				close: (fd, callback) => {
+					fd.should.be.eql(123);
+					callback();
+				}
+			},
+			10000
+		);
+		fs.stat("/any", (err, stats) => {
+			if (err) return done(err);
+			fs.readFile("/any", (err, buffer) => {
+				if (err) return done(err);
+				if (!buffer || typeof buffer === "string")
+					return done(new Error("no buffer"));
+				buffer.length.should.be.eql(32123);
+				for (let i = 0; i < buffer.length; i++) {
+					buffer[i].should.be.eql(1);
+				}
+				done();
+			});
+		});
+	});
+});
