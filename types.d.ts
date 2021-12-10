@@ -432,7 +432,7 @@ declare interface UserResolveOptions {
 	restrictions?: (string | RegExp)[];
 
 	/**
-	 * Use only the sync constiants of the file system calls
+	 * Use only the sync constraints of the file system calls
 	 */
 	useSyncFileSystemCalls?: boolean;
 
