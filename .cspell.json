@@ -11,7 +11,6 @@
     "entrypoints",
     "filesystems",
     "hashishere",
-    "Hierachic",
     "jsons",
     "Kopeykin",
     "Koppers",
@@ -34,5 +33,5 @@
     "zippi",
     "zizizi"
   ],
-  "ignorePaths": ["package.json", "yarn.lock"]
+  "ignorePaths": ["package.json", "yarn.lock", "coverage", "*.log"]
 }
