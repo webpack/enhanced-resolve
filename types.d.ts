@@ -204,6 +204,11 @@ declare interface ResolveContext {
 	 * log function
 	 */
 	log?: (arg0: string) => void;
+
+	/**
+	 * yield result, if provided plugins can return several results
+	 */
+	yield?: (arg0: ResolveRequest) => void;
 }
 declare interface ResolveOptions {
 	alias: AliasOption[];

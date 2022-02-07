@@ -26,7 +26,7 @@
     "eslint-plugin-jsdoc": "^30.5.1",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^3.1.4",
-    "husky": "^4.3.0",
+    "husky": "^6.0.0",
     "lint-staged": "^10.4.0",
     "memfs": "^3.2.0",
     "mocha": "^8.1.3",
@@ -57,17 +57,11 @@
     "test:only": "mocha --full-trace --check-leaks",
     "precover": "yarn lint",
     "cover": "nyc --reporter=html node node_modules/mocha/bin/_mocha --full-trace --check-leaks",
-    "cover:ci": "nyc --reporter=lcovonly node node_modules/mocha/bin/_mocha --full-trace --check-leaks"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
+    "cover:ci": "nyc --reporter=lcovonly node node_modules/mocha/bin/_mocha --full-trace --check-leaks",
+    "prepare": "husky install"
   },
   "lint-staged": {
-    "*.js": [
-      "eslint --cache"
-    ]
+    "*.js": "eslint --cache"
   },
   "repository": {
     "type": "git",
