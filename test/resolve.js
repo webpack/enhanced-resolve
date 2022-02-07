@@ -309,7 +309,7 @@ describe("resolve", function () {
 		});
 	});
 
-	it("should not crash when passing undefined everywere", done => {
+	it("should not crash when passing undefined everywhere", done => {
 		resolve(undefined, undefined, undefined, undefined, err => {
 			err.should.be.instanceof(Error);
 			done();
