@@ -59,7 +59,7 @@
     "prepare": "husky install"
   },
   "lint-staged": {
-    "*.js": "eslint --cache --fix"
+    "*.js": "eslint --cache"
   },
   "repository": {
     "type": "git",
