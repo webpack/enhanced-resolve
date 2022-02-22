@@ -10,7 +10,8 @@ const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
 
 const nodeFileSystem = new CachedInputFileSystem(fs, 4000);
 const fixtures = path.resolve(__dirname, "fixtures", "yield");
-const makeFixturePaths = paths => paths.map(pth => path.join(fixtures, pth));
+const makeFixturePaths = paths =>
+	paths.map(pth => (pth ? path.join(fixtures, pth) : pth));
 const contextifyDependencies = paths =>
 	Array.from(paths)
 		.filter(pth => pth.startsWith(fixtures))
@@ -321,27 +322,35 @@ describe("should resolve all aliases", () => {
 
 			it("default order", done => {
 				resolver = createResolver(["/c/foo", "/a/foo"]);
-				run(done, [
-					"resolve 'index/a' in 'fixtures'",
-					"  Parsed request is a module",
-					"  using description file (relative path: ./test/fixtures/yield)",
-					...cLog,
-					...aLog
-				]);
+				run(
+					done,
+					[false, "/a/foo/a"],
+					[
+						"resolve 'index/a' in 'fixtures'",
+						"  Parsed request is a module",
+						"  using description file (relative path: ./test/fixtures/yield)",
+						...cLog,
+						...aLog
+					]
+				);
 			});
 
 			it("reverse order", done => {
 				resolver = createResolver(["/a/foo", "/c/foo"]);
-				run(done, [
-					"resolve 'index/a' in 'fixtures'",
-					"  Parsed request is a module",
-					"  using description file (relative path: ./test/fixtures/yield)",
-					...aLog,
-					...cLog
-				]);
+				run(
+					done,
+					["/a/foo/a", false],
+					[
+						"resolve 'index/a' in 'fixtures'",
+						"  Parsed request is a module",
+						"  using description file (relative path: ./test/fixtures/yield)",
+						...aLog,
+						...cLog
+					]
+				);
 			});
 
-			function run(done, expectedLogs) {
+			function run(done, expectedResult, expectedLogs) {
 				let calls = 0;
 				const paths = [];
 				const logs = [];
@@ -363,7 +372,7 @@ describe("should resolve all aliases", () => {
 					should(calls).be.eql(1);
 					should(err).be.eql(null);
 					should(result).be.eql(undefined);
-					should(paths).be.eql(makeFixturePaths(["/a/foo/a"]));
+					should(paths).be.eql(makeFixturePaths(expectedResult));
 					should(contextifyDependencies(fileDependencies)).be.eql([
 						"",
 						"/a",
