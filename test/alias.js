@@ -1,7 +1,12 @@
-require("should");
+const should = require("should");
 
-var { Volume } = require("memfs");
-var { ResolverFactory } = require("../");
+const path = require("path");
+const { Volume } = require("memfs");
+const { ResolverFactory } = require("../");
+const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
+const fs = require("fs");
+
+const nodeFileSystem = new CachedInputFileSystem(fs, 4000);
 
 describe("alias", function () {
 	var resolver;
@@ -143,5 +148,21 @@ describe("alias", function () {
 				done();
 			}
 		);
+	});
+
+	it("should work with absolute paths", done => {
+		const resolver = ResolverFactory.createResolver({
+			alias: {
+				[path.resolve(__dirname, "fixtures", "foo")]: false
+			},
+			modules: path.resolve(__dirname, "fixtures"),
+			fileSystem: nodeFileSystem
+		});
+
+		resolver.resolve({}, __dirname, "foo/index", {}, (err, result) => {
+			if (err) done(err);
+			should(result).be.eql(false);
+			done();
+		});
 	});
 });
