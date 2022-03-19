@@ -39,6 +39,9 @@ describe("alias", function () {
 				recursive: "recursive/dir",
 				"/d/dir": "/c/dir",
 				"/d/index.js": "/c/index",
+				// alias configuration should work
+				"#": "/c/dir",
+				"@": "/c/dir",
 				ignored: false
 			},
 			modules: "/",
