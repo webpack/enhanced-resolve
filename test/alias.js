@@ -64,6 +64,14 @@ describe("alias", function () {
 			.resolveSync({}, "/", "aliasA/dir/index")
 			.should.be.eql("/a/dir/index");
 	});
+	it('should resolve "#" alias', () => {
+		resolver.resolveSync({}, "/", "#").should.be.eql("/c/dir/index");
+		resolver.resolveSync({}, "/", "#/index").should.be.eql("/c/dir/index");
+	});
+	it('should resolve "@" alias', () => {
+		resolver.resolveSync({}, "/", "@").should.be.eql("/c/dir/index");
+		resolver.resolveSync({}, "/", "@/index").should.be.eql("/c/dir/index");
+	});
 	it("should resolve an ignore module", () => {
 		resolver.resolveSync({}, "/", "ignored").should.be.eql(false);
 	});
