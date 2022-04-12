@@ -84,4 +84,10 @@ describe("browserField", function () {
 			.resolveSync({}, p(), "./lib/main2.js")
 			.should.be.eql(p("lib", "browser.js"));
 	});
+
+	it("should check only alias field properties", () => {
+		resolver
+			.resolveSync({}, p(), "./toString")
+			.should.be.eql(p("lib", "toString.js"));
+	});
 });
