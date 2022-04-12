@@ -39,6 +39,9 @@ describe("alias", function () {
 				recursive: "recursive/dir",
 				"/d/dir": "/c/dir",
 				"/d/index.js": "/c/index",
+				// alias configuration should work
+				"#": "/c/dir",
+				"@": "/c/dir",
 				ignored: false
 			},
 			modules: "/",
@@ -60,6 +63,14 @@ describe("alias", function () {
 		resolver
 			.resolveSync({}, "/", "aliasA/dir/index")
 			.should.be.eql("/a/dir/index");
+	});
+	it('should resolve "#" alias', () => {
+		resolver.resolveSync({}, "/", "#").should.be.eql("/c/dir/index");
+		resolver.resolveSync({}, "/", "#/index").should.be.eql("/c/dir/index");
+	});
+	it('should resolve "@" alias', () => {
+		resolver.resolveSync({}, "/", "@").should.be.eql("/c/dir/index");
+		resolver.resolveSync({}, "/", "@/index").should.be.eql("/c/dir/index");
 	});
 	it("should resolve an ignore module", () => {
 		resolver.resolveSync({}, "/", "ignored").should.be.eql(false);
