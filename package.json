@@ -1,6 +1,6 @@
 {
   "name": "enhanced-resolve",
-  "version": "5.9.2",
+  "version": "5.9.3",
   "author": "Tobias Koppers @sokra",
   "description": "Offers a async require.resolve function. It's highly configurable.",
   "files": [
