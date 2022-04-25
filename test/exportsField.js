@@ -264,23 +264,6 @@ describe("Process exports field", function exportsField() {
 			]
 		},
 		{
-			name: "sample #12",
-			expect: ["./ok.js#abc"],
-			suite: [
-				{
-					"./#foo": "./ok.js",
-					"./module": "./ok.js",
-					"./🎉": "./ok.js",
-					"./%F0%9F%8E%89": "./other.js",
-					"./bar#foo": "./ok.js",
-					"./#zapp/": "./",
-					"./#zipp*": "./zzz*"
-				},
-				"./#zapp/ok.js#abc",
-				[]
-			]
-		},
-		{
 			name: "sample #13",
 			expect: ["./ok.js?abc"],
 			suite: [
