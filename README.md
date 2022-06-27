@@ -77,9 +77,10 @@ myResolver.resolve({}, lookupStartPath, request, resolveContext, (
 #### Resolver Options
 
 | Field            | Default                     | Description                                                                                                                                               |
-| ---------------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|------------------|-----------------------------| --------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | alias            | []                          | A list of module alias configurations or an object which maps key to value                                                                                |
 | aliasFields      | []                          | A list of alias fields in description files                                                                                                               |
+| extensionAlias   | {}                          | An object which maps extension to extension aliases                                                                                                       |
 | cachePredicate   | function() { return true }; | A function which decides whether a request should be cached or not. An object is passed to the function with `path` and `request` properties.             |
 | cacheWithContext | true                        | If unsafe cache is enabled, includes `request.context` in the cache key                                                                                   |
 | conditionNames   | ["node"]                    | A list of exports field condition names                                                                                                                   |
@@ -142,7 +143,7 @@ enhanced-resolve will try to resolve requests containing `#` as path and as frag
 ## Tests
 
 ```javascript
-npm test
+yarn test
 ```
 
 [![Build Status](https://secure.travis-ci.org/webpack/enhanced-resolve.png?branch=main)](http://travis-ci.org/webpack/enhanced-resolve)
