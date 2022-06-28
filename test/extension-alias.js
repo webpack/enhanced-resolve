@@ -16,7 +16,8 @@ describe("extension-alias", () => {
 		fileSystem: nodeFileSystem,
 		mainFiles: ["index.js"],
 		extensionAlias: {
-			".js": [".ts", ".js"]
+			".js": [".ts", ".js"],
+			".mjs": ".mts"
 		}
 	});
 
@@ -28,23 +29,15 @@ describe("extension-alias", () => {
 		});
 	});
 
-	it("should alias specified extension", done => {
-		resolver.resolve({}, fixture, "./dir", {}, (err, result) => {
+	it("should alias fully specified file when there are two alternatives", done => {
+		resolver.resolve({}, fixture, "./dir/index.js", {}, (err, result) => {
 			if (err) return done(err);
 			should(result).be.eql(path.resolve(fixture, "dir", "index.ts"));
 			done();
 		});
 	});
 
-	it("should result successfully without aliasing #1", done => {
-		resolver.resolve({}, fixture, "./dir2", {}, (err, result) => {
-			if (err) return done(err);
-			should(result).be.eql(path.resolve(fixture, "dir2", "index.js"));
-			done();
-		});
-	});
-
-	it("should result successfully without aliasing #2", done => {
+	it("should also allow the second alternative", done => {
 		resolver.resolve({}, fixture, "./dir2/index.js", {}, (err, result) => {
 			if (err) return done(err);
 			should(result).be.eql(path.resolve(fixture, "dir2", "index.js"));
@@ -52,7 +45,22 @@ describe("extension-alias", () => {
 		});
 	});
 
-	describe("should result successfully without alias array", () => {
+	it("should support alias option without an array", done => {
+		resolver.resolve({}, fixture, "./dir2/index.mjs", {}, (err, result) => {
+			if (err) return done(err);
+			should(result).be.eql(path.resolve(fixture, "dir2", "index.mts"));
+			done();
+		});
+	});
+
+	it("should not allow to fallback to the original extension or add extensions", done => {
+		resolver.resolve({}, fixture, "./index.mjs", {}, (err, result) => {
+			should(err).be.instanceOf(Error);
+			done();
+		});
+	});
+
+	describe("should not apply extension alias to extensions or mainFiles field", () => {
 		const resolver = ResolverFactory.createResolver({
 			extensions: [".js"],
 			fileSystem: nodeFileSystem,
@@ -71,7 +79,7 @@ describe("extension-alias", () => {
 		});
 
 		it("file", done => {
-			resolver.resolve({}, fixture, "./dir2/index.js", {}, (err, result) => {
+			resolver.resolve({}, fixture, "./dir2/index", {}, (err, result) => {
 				if (err) return done(err);
 				should(result).be.eql(path.resolve(fixture, "dir2", "index.js"));
 				done();

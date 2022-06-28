@@ -96,7 +96,7 @@ declare interface ExtensionAliasOption {
 	extension: string;
 }
 declare interface ExtensionAliasOptions {
-	[index: string]: string[];
+	[index: string]: string | string[];
 }
 declare interface FileSystem {
 	readFile: {
