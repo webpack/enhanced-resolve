@@ -91,6 +91,13 @@ declare class CloneBasenamePlugin {
 	target: any;
 	apply(resolver: Resolver): void;
 }
+declare interface ExtensionAliasOption {
+	alias: string | string[];
+	extension: string;
+}
+declare interface ExtensionAliasOptions {
+	[index: string]: string | string[];
+}
 declare interface FileSystem {
 	readFile: {
 		(arg0: string, arg1: FileSystemCallback<string | Buffer>): void;
@@ -214,6 +221,7 @@ declare interface ResolveOptions {
 	alias: AliasOption[];
 	fallback: AliasOption[];
 	aliasFields: Set<string | string[]>;
+	extensionAlias: ExtensionAliasOption[];
 	cachePredicate: (arg0: ResolveRequest) => boolean;
 	cacheWithContext: boolean;
 
@@ -321,6 +329,11 @@ declare interface UserResolveOptions {
 	 * A list of module alias configurations or an object which maps key to value, applied only after modules option
 	 */
 	fallback?: AliasOptions | AliasOption[];
+
+	/**
+	 * An object which maps extension to extension aliases
+	 */
+	extensionAlias?: ExtensionAliasOptions;
 
 	/**
 	 * A list of alias fields in description files
