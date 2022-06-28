@@ -1211,11 +1211,11 @@ describe("ImportsFieldPlugin", () => {
 		);
 	});
 
-	it("should resolve out of package scope", done => {
+	it("should disallow resolve out of package scope", done => {
 		resolver.resolve({}, fixture, "#b", {}, (err, result) => {
-			if (err) return done(err);
-			if (!result) throw new Error("No result");
-			result.should.equal(path.resolve(fixture, "../b.js"));
+			if (!err) throw new Error(`expect error, got ${result}`);
+			err.should.be.instanceof(Error);
+			err.message.should.match(/Trying to access out of package scope/);
 			done();
 		});
 	});
@@ -1229,10 +1229,10 @@ describe("ImportsFieldPlugin", () => {
 			conditionNames: ["webpack"]
 		});
 
-		resolver.resolve({}, fixture, "#b", {}, (err, result) => {
+		resolver.resolve({}, fixture, "#imports-field", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) throw new Error("No result");
-			result.should.equal(path.resolve(fixture, "../b.js"));
+			result.should.equal(path.resolve(fixture, "./b.js"));
 			done();
 		});
 	});

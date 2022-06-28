@@ -10,6 +10,7 @@ const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
 const fixture = path.resolve(__dirname, "fixtures", "exports-field");
 const fixture2 = path.resolve(__dirname, "fixtures", "exports-field2");
 const fixture3 = path.resolve(__dirname, "fixtures", "exports-field3");
+const fixture4 = path.resolve(__dirname, "fixtures", "exports-field-error");
 
 describe("Process exports field", function exportsField() {
 	/** @type {Array<{name: string, expect: string[]|Error, suite: [ExportsField, string, string[]]}>} */
@@ -2387,6 +2388,15 @@ describe("ExportsFieldPlugin", () => {
 			if (!err) throw new Error(`expect error, got ${result}`);
 			err.should.be.instanceof(Error);
 			err.message.should.match(/Resolving to directories is not possible/);
+			done();
+		});
+	});
+
+	it("should throw error if target is invalid", done => {
+		resolver.resolve({}, fixture4, "exports-field", {}, (err, result) => {
+			if (!err) throw new Error(`expect error, got ${result}`);
+			err.should.be.instanceof(Error);
+			err.message.should.match(/Trying to access out of package scope/);
 			done();
 		});
 	});
