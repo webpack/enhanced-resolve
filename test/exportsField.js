@@ -1953,6 +1953,28 @@ describe("Process exports field", function exportsField() {
 				"./a/b/d/c.js",
 				[]
 			]
+		},
+		{
+			name: "wildcard pattern with suffix #1",
+			expect: ["./A/b.js"],
+			suite: [
+				{
+					"./a/*.js": "./A/*.js"
+				},
+				"./a/b.js",
+				[]
+			]
+		},
+		{
+			name: "wildcard pattern with suffix #2",
+			expect: ["./A/b/c.js"],
+			suite: [
+				{
+					"./a/*.js": "./A/*.js"
+				},
+				"./a/b/c.js",
+				[]
+			]
 		}
 	];
 
@@ -2451,5 +2473,37 @@ describe("ExportsFieldPlugin", () => {
 				done();
 			}
 		);
+	});
+
+	it("should resolve with wildcard pattern #1", done => {
+		const fixture = path.resolve(
+			__dirname,
+			"./fixtures/imports-exports-wildcard/"
+		);
+
+		resolver.resolve({}, fixture, "m/features/f.js", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) throw new Error("No result");
+			result.should.equal(
+				path.resolve(fixture, "./node_modules/m/src/features/f.js")
+			);
+			done();
+		});
+	});
+
+	it("should resolve with wildcard pattern #2", done => {
+		const fixture = path.resolve(
+			__dirname,
+			"./fixtures/imports-exports-wildcard/"
+		);
+
+		resolver.resolve({}, fixture, "m/features/y/y.js", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) throw new Error("No result");
+			result.should.equal(
+				path.resolve(fixture, "./node_modules/m/src/features/y/y.js")
+			);
+			done();
+		});
 	});
 });

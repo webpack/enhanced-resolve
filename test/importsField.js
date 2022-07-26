@@ -1357,4 +1357,17 @@ describe("ImportsFieldPlugin", () => {
 			}
 		);
 	});
+
+	it("should resolve with wildcard pattern", done => {
+		const fixture = path.resolve(
+			__dirname,
+			"./fixtures/imports-exports-wildcard/node_modules/m/"
+		);
+		resolver.resolve({}, fixture, "#internal/i.js", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) throw new Error("No result");
+			result.should.equal(path.resolve(fixture, "./src/internal/i.js"));
+			done();
+		});
+	});
 });
