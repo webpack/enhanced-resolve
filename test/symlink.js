@@ -214,15 +214,19 @@ describe("symlink", function () {
 				resolve(pathToIt[0], pathToIt[1], function (err, filename) {
 					if (err) return done(err);
 					should.exist(filename);
-					filename.should.have.type("string");
-					filename.should.be.eql(path.join(__dirname, "..", "lib", "index.js"));
+					/** @type {string} */ (filename).should.have.type("string");
+					/** @type {string} */ (filename).should.be.eql(
+						path.join(__dirname, "..", "lib", "index.js")
+					);
 					resolveWithoutSymlinks(pathToIt[0], pathToIt[1], function (
 						err,
 						filename
 					) {
 						if (err) return done(err);
-						filename.should.have.type("string");
-						filename.should.be.eql(path.resolve(pathToIt[0], pathToIt[1]));
+						/** @type {string} */ (filename).should.have.type("string");
+						/** @type {string} */ (filename).should.be.eql(
+							path.resolve(pathToIt[0], pathToIt[1])
+						);
 						done();
 					});
 				});

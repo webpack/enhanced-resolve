@@ -91,6 +91,7 @@ declare class CloneBasenamePlugin {
 	target: any;
 	apply(resolver: Resolver): void;
 }
+type ErrorWithDetail = Error & { details?: string };
 declare interface ExtensionAliasOption {
 	alias: string | string[];
 	extension: string;
@@ -250,6 +251,8 @@ declare interface ResolveOptions {
 	preferRelative: boolean;
 	preferAbsolute: boolean;
 }
+type ResolveOptionsOptionalFS = Omit<UserResolveOptions, "fileSystem"> &
+	Partial<Pick<UserResolveOptions, "fileSystem">>;
 type ResolveRequest = BaseResolveRequest & Partial<ParsedIdentifier>;
 declare abstract class Resolver {
 	fileSystem: FileSystem;
@@ -300,9 +303,9 @@ declare abstract class Resolver {
 		request: string,
 		resolveContext: ResolveContext,
 		callback: (
-			arg0: null | Error,
-			arg1?: string | false,
-			arg2?: ResolveRequest
+			err: null | ErrorWithDetail,
+			res?: string | false,
+			req?: ResolveRequest
 		) => void
 	): void;
 	doResolve(
@@ -468,31 +471,101 @@ declare interface WriteOnlySet<T> {
 	add: (T?: any) => void;
 }
 declare function exports(
-	context?: any,
-	path?: any,
-	request?: any,
-	resolveContext?: any,
-	callback?: any
+	context: object,
+	path: string,
+	request: string,
+	resolveContext: ResolveContext,
+	callback: (
+		err: null | ErrorWithDetail,
+		res?: string | false,
+		req?: ResolveRequest
+	) => void
+): void;
+declare function exports(
+	context: object,
+	path: string,
+	request: string,
+	callback: (
+		err: null | ErrorWithDetail,
+		res?: string | false,
+		req?: ResolveRequest
+	) => void
+): void;
+declare function exports(
+	path: string,
+	request: string,
+	resolveContext: ResolveContext,
+	callback: (
+		err: null | ErrorWithDetail,
+		res?: string | false,
+		req?: ResolveRequest
+	) => void
+): void;
+declare function exports(
+	path: string,
+	request: string,
+	callback: (
+		err: null | ErrorWithDetail,
+		res?: string | false,
+		req?: ResolveRequest
+	) => void
 ): void;
 declare namespace exports {
-	export const sync: (
-		context?: any,
-		path?: any,
-		request?: any
-	) => string | false;
+	export const sync: {
+		(context: object, path: string, request: string): string | false;
+		(path: string, request: string): string | false;
+	};
 	export function create(
-		options?: any
-	): (
-		context?: any,
-		path?: any,
-		request?: any,
-		resolveContext?: any,
-		callback?: any
-	) => void;
+		options: ResolveOptionsOptionalFS
+	): {
+		(
+			context: object,
+			path: string,
+			request: string,
+			resolveContext: ResolveContext,
+			callback: (
+				err: null | ErrorWithDetail,
+				res?: string | false,
+				req?: ResolveRequest
+			) => void
+		): void;
+		(
+			context: object,
+			path: string,
+			request: string,
+			callback: (
+				err: null | ErrorWithDetail,
+				res?: string | false,
+				req?: ResolveRequest
+			) => void
+		): void;
+		(
+			path: string,
+			request: string,
+			resolveContext: ResolveContext,
+			callback: (
+				err: null | ErrorWithDetail,
+				res?: string | false,
+				req?: ResolveRequest
+			) => void
+		): void;
+		(
+			path: string,
+			request: string,
+			callback: (
+				err: null | ErrorWithDetail,
+				res?: string | false,
+				req?: ResolveRequest
+			) => void
+		): void;
+	};
 	export namespace create {
 		export const sync: (
-			options?: any
-		) => (context?: any, path?: any, request?: any) => string | false;
+			options: ResolveOptionsOptionalFS
+		) => {
+			(context: object, path: string, request: string): string | false;
+			(path: string, request: string): string | false;
+		};
 	}
 	export namespace ResolverFactory {
 		export let createResolver: (options: UserResolveOptions) => Resolver;
@@ -502,10 +575,16 @@ declare namespace exports {
 		iterator?: any,
 		callback?: any
 	) => any;
+	export type ResolveCallback = (
+		err: null | ErrorWithDetail,
+		res?: string | false,
+		req?: ResolveRequest
+	) => void;
 	export {
 		CachedInputFileSystem,
 		CloneBasenamePlugin,
 		LogInfoPlugin,
+		ResolveOptionsOptionalFS,
 		PnpApiImpl as PnpApi,
 		Resolver,
 		FileSystem,

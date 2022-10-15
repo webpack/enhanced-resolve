@@ -35,7 +35,7 @@ function testResolve(name, context, moduleName, result) {
 			resolve(context, moduleName, function (err, filename) {
 				if (err) return done(err);
 				should.exist(filename);
-				filename.should.equal(result);
+				/** @type {string} */ (filename).should.equal(result);
 				done();
 			});
 		});
@@ -48,7 +48,7 @@ function testResolveContext(name, context, moduleName, result) {
 			asyncContextResolve(context, moduleName, function (err, filename) {
 				if (err) done(err);
 				should.exist(filename);
-				filename.should.equal(result);
+				/** @type {string} */ (filename).should.equal(result);
 				done();
 			});
 		});
@@ -269,7 +269,7 @@ describe("resolve", function () {
 			function (err, filename) {
 				if (err) done(err);
 				should.exist(filename);
-				filename.should.equal(
+				/** @type {string} */ (filename).should.equal(
 					path.resolve(issue238, "./src/common/config/myObjectFile.js")
 				);
 				done();
@@ -281,7 +281,9 @@ describe("resolve", function () {
 		preferRelativeResolve(fixtures, "main1.js", function (err, filename) {
 			if (err) done(err);
 			should.exist(filename);
-			filename.should.equal(path.join(fixtures, "main1.js"));
+			/** @type {string} */ (filename).should.equal(
+				path.join(fixtures, "main1.js")
+			);
 			done();
 		});
 	});
@@ -290,29 +292,46 @@ describe("resolve", function () {
 		preferRelativeResolve(fixtures, "m1/a.js", function (err, filename) {
 			if (err) done(err);
 			should.exist(filename);
-			filename.should.equal(path.join(fixtures, "node_modules", "m1", "a.js"));
+			/** @type {string} */ (filename).should.equal(
+				path.join(fixtures, "node_modules", "m1", "a.js")
+			);
 			done();
 		});
 	});
 
 	it("should not crash when passing undefined as path", done => {
-		resolve(fixtures, undefined, err => {
-			err.should.be.instanceof(Error);
-			done();
-		});
+		resolve(
+			fixtures,
+			/** @type {string} */ (/** @type {unknown} */ (undefined)),
+			err => {
+				/** @type {Error} */ (err).should.be.instanceof(Error);
+				done();
+			}
+		);
 	});
 
 	it("should not crash when passing undefined as context", done => {
-		resolve({}, undefined, "./test/resolve.js", err => {
-			err.should.be.instanceof(Error);
-			done();
-		});
+		resolve(
+			{},
+			/** @type {string} */ (/** @type {unknown} */ (undefined)),
+			"./test/resolve.js",
+			err => {
+				/** @type {Error} */ (err).should.be.instanceof(Error);
+				done();
+			}
+		);
 	});
 
 	it("should not crash when passing undefined everywhere", done => {
-		resolve(undefined, undefined, undefined, undefined, err => {
-			err.should.be.instanceof(Error);
-			done();
-		});
+		resolve(
+			/** @type {object} */ (undefined),
+			/** @type {string} */ (/** @type {unknown} */ (undefined)),
+			/** @type {string} */ (/** @type {unknown} */ (undefined)),
+			/** @type {object} */ (/** @type {unknown} */ (undefined)),
+			err => {
+				/** @type {Error} */ (err).should.be.instanceof(Error);
+				done();
+			}
+		);
 	});
 });
