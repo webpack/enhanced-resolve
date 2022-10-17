@@ -218,6 +218,52 @@ declare interface ResolveContext {
 	 */
 	yield?: (arg0: ResolveRequest) => void;
 }
+declare interface ResolveFunction {
+	(context: object, path: string, request: string): string | false;
+	(path: string, request: string): string | false;
+}
+declare interface ResolveFunctionAsync {
+	(
+		context: object,
+		path: string,
+		request: string,
+		resolveContext: ResolveContext,
+		callback: (
+			err: null | ErrorWithDetail,
+			res?: string | false,
+			req?: ResolveRequest
+		) => void
+	): void;
+	(
+		context: object,
+		path: string,
+		request: string,
+		callback: (
+			err: null | ErrorWithDetail,
+			res?: string | false,
+			req?: ResolveRequest
+		) => void
+	): void;
+	(
+		path: string,
+		request: string,
+		resolveContext: ResolveContext,
+		callback: (
+			err: null | ErrorWithDetail,
+			res?: string | false,
+			req?: ResolveRequest
+		) => void
+	): void;
+	(
+		path: string,
+		request: string,
+		callback: (
+			err: null | ErrorWithDetail,
+			res?: string | false,
+			req?: ResolveRequest
+		) => void
+	): void;
+}
 declare interface ResolveOptions {
 	alias: AliasOption[];
 	fallback: AliasOption[];
@@ -511,61 +557,12 @@ declare function exports(
 	) => void
 ): void;
 declare namespace exports {
-	export const sync: {
-		(context: object, path: string, request: string): string | false;
-		(path: string, request: string): string | false;
-	};
+	export const sync: ResolveFunction;
 	export function create(
 		options: ResolveOptionsOptionalFS
-	): {
-		(
-			context: object,
-			path: string,
-			request: string,
-			resolveContext: ResolveContext,
-			callback: (
-				err: null | ErrorWithDetail,
-				res?: string | false,
-				req?: ResolveRequest
-			) => void
-		): void;
-		(
-			context: object,
-			path: string,
-			request: string,
-			callback: (
-				err: null | ErrorWithDetail,
-				res?: string | false,
-				req?: ResolveRequest
-			) => void
-		): void;
-		(
-			path: string,
-			request: string,
-			resolveContext: ResolveContext,
-			callback: (
-				err: null | ErrorWithDetail,
-				res?: string | false,
-				req?: ResolveRequest
-			) => void
-		): void;
-		(
-			path: string,
-			request: string,
-			callback: (
-				err: null | ErrorWithDetail,
-				res?: string | false,
-				req?: ResolveRequest
-			) => void
-		): void;
-	};
+	): ResolveFunctionAsync;
 	export namespace create {
-		export const sync: (
-			options: ResolveOptionsOptionalFS
-		) => {
-			(context: object, path: string, request: string): string | false;
-			(path: string, request: string): string | false;
-		};
+		export const sync: (options: ResolveOptionsOptionalFS) => ResolveFunction;
 	}
 	export namespace ResolverFactory {
 		export let createResolver: (options: UserResolveOptions) => Resolver;
@@ -591,7 +588,9 @@ declare namespace exports {
 		ResolveContext,
 		ResolveRequest,
 		Plugin,
-		UserResolveOptions as ResolveOptions
+		UserResolveOptions as ResolveOptions,
+		ResolveFunctionAsync,
+		ResolveFunction
 	};
 }
 
