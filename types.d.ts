@@ -32,7 +32,7 @@ declare class CachedInputFileSystem {
 		(
 			arg0: string,
 			arg1: object,
-			arg2: FileSystemCallback<string | Buffer>
+			arg2: FileSystemCallback<FileSystemStats>
 		): void;
 	};
 	lstatSync?: (arg0: string, arg1?: object) => FileSystemStats;
@@ -41,7 +41,7 @@ declare class CachedInputFileSystem {
 		(
 			arg0: string,
 			arg1: object,
-			arg2: FileSystemCallback<string | Buffer>
+			arg2: FileSystemCallback<FileSystemStats>
 		): void;
 	};
 	statSync: (arg0: string, arg1?: object) => FileSystemStats;
@@ -135,7 +135,7 @@ declare interface FileSystem {
 		(
 			arg0: string,
 			arg1: object,
-			arg2: FileSystemCallback<string | Buffer>
+			arg2: FileSystemCallback<FileSystemStats>
 		): void;
 	};
 	stat: {
@@ -143,7 +143,7 @@ declare interface FileSystem {
 		(
 			arg0: string,
 			arg1: object,
-			arg2: FileSystemCallback<string | Buffer>
+			arg2: FileSystemCallback<FileSystemStats>
 		): void;
 	};
 }
