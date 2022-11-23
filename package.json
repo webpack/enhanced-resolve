@@ -13,7 +13,7 @@
     "process": "./lib/util/process-browser.js"
   },
   "dependencies": {
-    "graceful-fs": "^4.2.9",
+    "graceful-fs": "^4.2.4",
     "tapable": "^2.2.0"
   },
   "license": "MIT",
