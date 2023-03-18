@@ -45,17 +45,30 @@ declare class CachedInputFileSystem {
 		): void;
 	};
 	statSync: (arg0: string, arg1?: object) => FileSystemStats;
-	readdir: {
-		(
-			arg0: string,
-			arg1: FileSystemCallback<(string | Buffer)[] | FileSystemDirent[]>
-		): void;
-		(
-			arg0: string,
-			arg1: object,
-			arg2: FileSystemCallback<(string | Buffer)[] | FileSystemDirent[]>
-		): void;
-	};
+	readdir: (
+		arg0: string,
+		arg1?:
+			| null
+			| ((
+					arg0?: null | NodeJS.ErrnoException,
+					arg1?: (string | Buffer)[] | any[]
+			  ) => void)
+			| ReaddirOptions
+			| "ascii"
+			| "utf8"
+			| "utf-8"
+			| "utf16le"
+			| "ucs2"
+			| "ucs-2"
+			| "base64"
+			| "latin1"
+			| "binary"
+			| "hex",
+		arg2?: (
+			arg0?: null | NodeJS.ErrnoException,
+			arg1?: (string | Buffer)[] | any[]
+		) => void
+	) => void;
 	readdirSync: (
 		arg0: string,
 		arg1?: object
@@ -107,17 +120,30 @@ declare interface FileSystem {
 			arg2: FileSystemCallback<string | Buffer>
 		): void;
 	};
-	readdir: {
-		(
-			arg0: string,
-			arg1: FileSystemCallback<(string | Buffer)[] | FileSystemDirent[]>
-		): void;
-		(
-			arg0: string,
-			arg1: object,
-			arg2: FileSystemCallback<(string | Buffer)[] | FileSystemDirent[]>
-		): void;
-	};
+	readdir: (
+		arg0: string,
+		arg1?:
+			| null
+			| ((
+					arg0?: null | NodeJS.ErrnoException,
+					arg1?: (string | Buffer)[] | any[]
+			  ) => void)
+			| ReaddirOptions
+			| "ascii"
+			| "utf8"
+			| "utf-8"
+			| "utf16le"
+			| "ucs2"
+			| "ucs-2"
+			| "base64"
+			| "latin1"
+			| "binary"
+			| "hex",
+		arg2?: (
+			arg0?: null | NodeJS.ErrnoException,
+			arg1?: (string | Buffer)[] | any[]
+		) => void
+	) => void;
 	readJson?: {
 		(arg0: string, arg1: FileSystemCallback<object>): void;
 		(arg0: string, arg1: object, arg2: FileSystemCallback<object>): void;
@@ -184,6 +210,21 @@ declare interface PossibleFileSystemError {
 	errno?: number;
 	path?: string;
 	syscall?: string;
+}
+declare interface ReaddirOptions {
+	encoding?:
+		| null
+		| "ascii"
+		| "utf8"
+		| "utf-8"
+		| "utf16le"
+		| "ucs2"
+		| "ucs-2"
+		| "base64"
+		| "latin1"
+		| "binary"
+		| "hex";
+	withFileTypes?: boolean;
 }
 
 /**
