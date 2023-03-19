@@ -63,7 +63,8 @@ declare class CachedInputFileSystem {
 			| "base64"
 			| "latin1"
 			| "binary"
-			| "hex",
+			| "hex"
+			| "buffer",
 		arg2?: (
 			arg0?: null | NodeJS.ErrnoException,
 			arg1?: (string | Buffer)[] | any[]
@@ -138,7 +139,8 @@ declare interface FileSystem {
 			| "base64"
 			| "latin1"
 			| "binary"
-			| "hex",
+			| "hex"
+			| "buffer",
 		arg2?: (
 			arg0?: null | NodeJS.ErrnoException,
 			arg1?: (string | Buffer)[] | any[]
@@ -223,7 +225,8 @@ declare interface ReaddirOptions {
 		| "base64"
 		| "latin1"
 		| "binary"
-		| "hex";
+		| "hex"
+		| "buffer";
 	withFileTypes?: boolean;
 }
 
