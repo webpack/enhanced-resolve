@@ -260,11 +260,13 @@ describe("pnp", () => {
 		resolver.resolve(
 			{},
 			path.resolve(__dirname, "fixtures"),
-			"m2/a.js",
+			"m2/b.js",
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				result.should.equal(path.resolve(fixture, "../pnp-a/m2/a.js"));
+				result.should.equal(
+					path.resolve(__dirname, "fixtures/node_modules/m2/b.js")
+				);
 				done();
 			}
 		);
