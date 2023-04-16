@@ -2506,4 +2506,64 @@ describe("ExportsFieldPlugin", () => {
 			done();
 		});
 	});
+
+	it("should resolve with wildcard pattern #2", done => {
+		const fixture = path.resolve(
+			__dirname,
+			"./fixtures/imports-exports-wildcard/"
+		);
+
+		resolver.resolve({}, fixture, "m/features/y/y.js", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) throw new Error("No result");
+			result.should.equal(
+				path.resolve(fixture, "./node_modules/m/src/features/y/y.js")
+			);
+			done();
+		});
+	});
+
+	it("should resolve with wildcard pattern #3", done => {
+		const fixture = path.resolve(
+			__dirname,
+			"./fixtures/imports-exports-wildcard/"
+		);
+
+		resolver.resolve(
+			{},
+			fixture,
+			"m/features-no-ext/y/y.js",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) throw new Error("No result");
+				result.should.equal(
+					path.resolve(fixture, "./node_modules/m/src/features/y/y.js")
+				);
+				done();
+			}
+		);
+	});
+
+	it("should throw error if target is 'null'", done => {
+		const fixture = path.resolve(
+			__dirname,
+			"./fixtures/imports-exports-wildcard/"
+		);
+
+		resolver.resolve(
+			{},
+			fixture,
+			"m/features/internal/file.js",
+			{},
+			(err, result) => {
+				if (!err) throw new Error(`expect error, got ${result}`);
+				err.should.be.instanceof(Error);
+				err.message.should.match(
+					/Package path \.\/features\/internal\/file\.js is not exported/
+				);
+				done();
+			}
+		);
+	});
 });
