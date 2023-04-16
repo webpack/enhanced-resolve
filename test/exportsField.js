@@ -2545,6 +2545,104 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
+	it("should resolve with wildcard pattern #4", done => {
+		const fixture = path.resolve(
+			__dirname,
+			"./fixtures/imports-exports-wildcard/"
+		);
+
+		resolver.resolve({}, fixture, "m/middle/nested/f.js", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) throw new Error("No result");
+			result.should.equal(
+				path.resolve(fixture, "./node_modules/m/src/middle/nested/f.js")
+			);
+			done();
+		});
+	});
+
+	it("should resolve with wildcard pattern #5", done => {
+		const fixture = path.resolve(
+			__dirname,
+			"./fixtures/imports-exports-wildcard/"
+		);
+
+		resolver.resolve(
+			{},
+			fixture,
+			"m/middle-1/nested/f.js",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) throw new Error("No result");
+				result.should.equal(
+					path.resolve(fixture, "./node_modules/m/src/middle-1/nested/f.js")
+				);
+				done();
+			}
+		);
+	});
+
+	it("should resolve with wildcard pattern #6", done => {
+		const fixture = path.resolve(
+			__dirname,
+			"./fixtures/imports-exports-wildcard/"
+		);
+
+		resolver.resolve(
+			{},
+			fixture,
+			"m/middle-2/nested/f.js",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) throw new Error("No result");
+				result.should.equal(
+					path.resolve(fixture, "./node_modules/m/src/middle-1/nested/f.js")
+				);
+				done();
+			}
+		);
+	});
+
+	it("should resolve with wildcard pattern #7", done => {
+		const fixture = path.resolve(
+			__dirname,
+			"./fixtures/imports-exports-wildcard/"
+		);
+
+		resolver.resolve({}, fixture, "m/middle-3/nested/f", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) throw new Error("No result");
+			result.should.equal(
+				path.resolve(
+					fixture,
+					"./node_modules/m/src/middle-3/nested/f/nested/f.js"
+				)
+			);
+			done();
+		});
+	});
+
+	it("should resolve with wildcard pattern #7", done => {
+		const fixture = path.resolve(
+			__dirname,
+			"./fixtures/imports-exports-wildcard/"
+		);
+
+		resolver.resolve({}, fixture, "m/middle-4/f/nested", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) throw new Error("No result");
+			result.should.equal(
+				path.resolve(
+					fixture,
+					"./node_modules/m/src/middle-3/nested/f/nested/f.js"
+				)
+			);
+			done();
+		});
+	});
+
 	it("should throw error if target is 'null'", done => {
 		const fixture = path.resolve(
 			__dirname,
