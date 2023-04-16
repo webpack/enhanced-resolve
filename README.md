@@ -63,10 +63,10 @@ const myResolver = ResolverFactory.createResolver({
 
 // resolve a file with the new resolver
 const context = {};
-const resolveContext = {};
 const lookupStartPath = "/Users/webpack/some/root/dir";
 const request = "./path/to-look-up.js";
-myResolver.resolve({}, lookupStartPath, request, resolveContext, (
+const resolveContext = {};
+myResolver.resolve(context, lookupStartPath, request, resolveContext, (
 	err /*Error*/,
 	filepath /*string*/
 ) => {
