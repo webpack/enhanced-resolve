@@ -1955,7 +1955,7 @@ describe("Process exports field", function exportsField() {
 			]
 		},
 		{
-			name: "wildcard pattern with suffix #1",
+			name: "wildcard pattern #1",
 			expect: ["./A/b.js"],
 			suite: [
 				{
@@ -1966,7 +1966,7 @@ describe("Process exports field", function exportsField() {
 			]
 		},
 		{
-			name: "wildcard pattern with suffix #2",
+			name: "wildcard pattern #2",
 			expect: ["./A/b/c.js"],
 			suite: [
 				{
@@ -1974,6 +1974,62 @@ describe("Process exports field", function exportsField() {
 				},
 				"./a/b/c.js",
 				[]
+			]
+		},
+		{
+			name: "wildcard pattern #3",
+			expect: ["./A/b/c.js"],
+			suite: [
+				{
+					"./a/*/c.js": "./A/*/c.js"
+				},
+				"./a/b/c.js",
+				[]
+			]
+		},
+		{
+			name: "wildcard pattern #4",
+			expect: ["./A/b/b.js"],
+			suite: [
+				{
+					"./a/*/c.js": "./A/*/*.js"
+				},
+				"./a/b/c.js",
+				[]
+			]
+		},
+		{
+			name: "wildcard pattern #5",
+			expect: ["./browser/index.js"], // default condition used
+			suite: [
+				{
+					"./lib/*": {
+						browser: ["./browser/*"]
+					},
+					"./dist/*.js": {
+						node: "./*.js",
+						default: "./browser/*.js"
+					}
+				},
+				"./dist/index.js",
+				["browser"]
+			]
+		},
+		{
+			name: "wildcard pattern #5",
+			expect: ["./browser/index.js"], // default condition used
+			suite: [
+				{
+					"./lib/*": {
+						browser: ["./browser/*"]
+					},
+					"./dist/*.js": {
+						node: "./*.js",
+						default: "./browser/*.js"
+					}
+				},
+				"./lib/index.js",
+				["browser"]
 			]
 		}
 	];
