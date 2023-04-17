@@ -2598,7 +2598,7 @@ describe("ExportsFieldPlugin", () => {
 				if (err) return done(err);
 				if (!result) throw new Error("No result");
 				result.should.equal(
-					path.resolve(fixture, "./node_modules/m/src/middle-1/nested/f.js")
+					path.resolve(fixture, "./node_modules/m/src/middle-2/nested/f.js")
 				);
 				done();
 			}
@@ -2624,7 +2624,7 @@ describe("ExportsFieldPlugin", () => {
 		});
 	});
 
-	it("should resolve with wildcard pattern #7", done => {
+	it("should resolve with wildcard pattern #8", done => {
 		const fixture = path.resolve(
 			__dirname,
 			"./fixtures/imports-exports-wildcard/"
@@ -2634,10 +2634,7 @@ describe("ExportsFieldPlugin", () => {
 			if (err) return done(err);
 			if (!result) throw new Error("No result");
 			result.should.equal(
-				path.resolve(
-					fixture,
-					"./node_modules/m/src/middle-3/nested/f/nested/f.js"
-				)
+				path.resolve(fixture, "./node_modules/m/src/middle-4/f/f.js")
 			);
 			done();
 		});
