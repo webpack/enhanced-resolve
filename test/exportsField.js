@@ -594,6 +594,56 @@ describe("Process exports field", function exportsField() {
 				[]
 			]
 		},
+		{
+			name: "Direct mapping #11",
+			expect: ["./foo.js"],
+			suite: [
+				{
+					"./": "./",
+					"./*": "./*",
+					"./dist/index.js": "./dist/index.js"
+				},
+				"./foo.js",
+				[]
+			]
+		},
+		{
+			name: "Direct mapping #12",
+			expect: ["./foo/bar/baz.js"],
+			suite: [
+				{
+					"./": "./",
+					"./*": "./*",
+					"./dist/index.js": "./dist/index.js"
+				},
+				"./foo/bar/baz.js",
+				[]
+			]
+		},
+		{
+			name: "Direct mapping #13",
+			expect: ["./foo/bar/baz.js"],
+			suite: [
+				{
+					"./": "./",
+					"./dist/index.js": "./dist/index.js"
+				},
+				"./foo/bar/baz.js",
+				[]
+			]
+		},
+		{
+			name: "Direct mapping #14",
+			expect: ["./foo/bar/baz.js"],
+			suite: [
+				{
+					"./*": "./*",
+					"./dist/index.js": "./dist/index.js"
+				},
+				"./foo/bar/baz.js",
+				[]
+			]
+		},
 		//#endregion
 
 		//#region Direct and conditional mapping
