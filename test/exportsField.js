@@ -594,6 +594,56 @@ describe("Process exports field", function exportsField() {
 				[]
 			]
 		},
+		{
+			name: "Direct mapping #11",
+			expect: ["./foo.js"],
+			suite: [
+				{
+					"./": "./",
+					"./*": "./*",
+					"./dist/index.js": "./dist/index.js"
+				},
+				"./foo.js",
+				[]
+			]
+		},
+		{
+			name: "Direct mapping #12",
+			expect: ["./foo/bar/baz.js"],
+			suite: [
+				{
+					"./": "./",
+					"./*": "./*",
+					"./dist/index.js": "./dist/index.js"
+				},
+				"./foo/bar/baz.js",
+				[]
+			]
+		},
+		{
+			name: "Direct mapping #13",
+			expect: ["./foo/bar/baz.js"],
+			suite: [
+				{
+					"./": "./",
+					"./dist/index.js": "./dist/index.js"
+				},
+				"./foo/bar/baz.js",
+				[]
+			]
+		},
+		{
+			name: "Direct mapping #14",
+			expect: ["./foo/bar/baz.js"],
+			suite: [
+				{
+					"./*": "./*",
+					"./dist/index.js": "./dist/index.js"
+				},
+				"./foo/bar/baz.js",
+				[]
+			]
+		},
 		//#endregion
 
 		//#region Direct and conditional mapping
@@ -1953,6 +2003,212 @@ describe("Process exports field", function exportsField() {
 				"./a/b/d/c.js",
 				[]
 			]
+		},
+		{
+			name: "wildcard pattern #1",
+			expect: ["./A/b.js"],
+			suite: [
+				{
+					"./a/*.js": "./A/*.js"
+				},
+				"./a/b.js",
+				[]
+			]
+		},
+		{
+			name: "wildcard pattern #2",
+			expect: ["./A/b/c.js"],
+			suite: [
+				{
+					"./a/*.js": "./A/*.js"
+				},
+				"./a/b/c.js",
+				[]
+			]
+		},
+		{
+			name: "wildcard pattern #3",
+			expect: ["./A/b/c.js"],
+			suite: [
+				{
+					"./a/*/c.js": "./A/*/c.js"
+				},
+				"./a/b/c.js",
+				[]
+			]
+		},
+		{
+			name: "wildcard pattern #4",
+			expect: ["./A/b/b.js"],
+			suite: [
+				{
+					"./a/*/c.js": "./A/*/*.js"
+				},
+				"./a/b/c.js",
+				[]
+			]
+		},
+		{
+			name: "wildcard pattern #5",
+			expect: ["./browser/index.js"],
+			suite: [
+				{
+					"./lib/*": {
+						browser: ["./browser/*"]
+					},
+					"./dist/*.js": {
+						node: "./*.js",
+						default: "./browser/*.js"
+					}
+				},
+				"./dist/index.js",
+				["browser"]
+			]
+		},
+		{
+			name: "wildcard pattern #5",
+			expect: ["./browser/index.js"],
+			suite: [
+				{
+					"./lib/*": {
+						browser: ["./browser/*"]
+					},
+					"./dist/*.js": {
+						node: "./*.js",
+						default: "./browser/*.js"
+					}
+				},
+				"./lib/index.js",
+				["browser"]
+			]
+		},
+		{
+			name: "wildcard pattern #6",
+			expect: ["./browser/foo/bar.js"],
+			suite: [
+				{
+					"./lib/*/bar.js": {
+						browser: ["./browser/*/bar.js"]
+					},
+					"./dist/*/bar.js": {
+						node: "./*.js",
+						default: "./browser/*.js"
+					}
+				},
+				"./lib/foo/bar.js",
+				["browser"]
+			]
+		},
+		{
+			name: "wildcard pattern #6",
+			expect: ["./browser/foo.js"],
+			suite: [
+				{
+					"./lib/*/bar.js": {
+						browser: ["./browser/*/bar.js"]
+					},
+					"./dist/*/bar.js": {
+						node: "./*.js",
+						default: "./browser/*.js"
+					}
+				},
+				"./dist/foo/bar.js",
+				["browser"]
+			]
+		},
+		{
+			name: "wildcard pattern #7",
+			expect: ["./browser/foo/default.js"],
+			suite: [
+				{
+					"./lib/*/bar.js": {
+						browser: ["./browser/*/bar.js"]
+					},
+					"./dist/*/bar.js": {
+						node: "./*.js",
+						default: "./browser/*/default.js"
+					}
+				},
+				"./dist/foo/bar.js",
+				["default"]
+			]
+		},
+		{
+			name: "wildcard pattern #8",
+			expect: ["./A/b/b/b.js"],
+			suite: [
+				{
+					"./a/*/c.js": "./A/*/*/*.js"
+				},
+				"./a/b/c.js",
+				[]
+			]
+		},
+		{
+			name: "wildcard pattern #9",
+			expect: ["./A/b/b/b.js", "./B/b/b/b.js"],
+			suite: [
+				{
+					"./a/*/c.js": ["./A/*/*/*.js", "./B/*/*/*.js"]
+				},
+				"./a/b/c.js",
+				[]
+			]
+		},
+		{
+			name: "wildcard pattern #10",
+			expect: ["./A/b/b/b.js"],
+			suite: [
+				{
+					"./a/foo-*/c.js": "./A/*/*/*.js"
+				},
+				"./a/foo-b/c.js",
+				[]
+			]
+		},
+		{
+			name: "wildcard pattern #11",
+			expect: ["./A/b/b/b.js"],
+			suite: [
+				{
+					"./a/*-foo/c.js": "./A/*/*/*.js"
+				},
+				"./a/b-foo/c.js",
+				[]
+			]
+		},
+		{
+			name: "wildcard pattern #12",
+			expect: ["./A/b/b/b.js"],
+			suite: [
+				{
+					"./a/foo-*-foo/c.js": "./A/*/*/*.js"
+				},
+				"./a/foo-b-foo/c.js",
+				[]
+			]
+		},
+		{
+			name: "wildcard pattern #13",
+			expect: ["./A/b/c/d.js"],
+			suite: [
+				{
+					"./a/foo-*-foo/c.js": "./A/b/c/d.js"
+				},
+				"./a/foo-b-foo/c.js",
+				[]
+			]
+		},
+		{
+			name: "wildcard pattern #13",
+			expect: ["./A/b/c/*.js"],
+			suite: [
+				{
+					"./a/foo-foo/c.js": "./A/b/c/*.js"
+				},
+				"./a/foo-foo/c.js",
+				[]
+			]
 		}
 	];
 
@@ -2448,6 +2704,209 @@ describe("ExportsFieldPlugin", () => {
 						"                existing file: .../node_modules/exports-field/lib/browser.js",
 						"                  reporting result .../node_modules/exports-field/lib/browser.js"
 					]);
+				done();
+			}
+		);
+	});
+
+	it("should resolve with wildcard pattern #1", done => {
+		const fixture = path.resolve(
+			__dirname,
+			"./fixtures/imports-exports-wildcard/"
+		);
+
+		resolver.resolve({}, fixture, "m/features/f.js", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) throw new Error("No result");
+			result.should.equal(
+				path.resolve(fixture, "./node_modules/m/src/features/f.js")
+			);
+			done();
+		});
+	});
+
+	it("should resolve with wildcard pattern #2", done => {
+		const fixture = path.resolve(
+			__dirname,
+			"./fixtures/imports-exports-wildcard/"
+		);
+
+		resolver.resolve({}, fixture, "m/features/y/y.js", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) throw new Error("No result");
+			result.should.equal(
+				path.resolve(fixture, "./node_modules/m/src/features/y/y.js")
+			);
+			done();
+		});
+	});
+
+	it("should resolve with wildcard pattern #2", done => {
+		const fixture = path.resolve(
+			__dirname,
+			"./fixtures/imports-exports-wildcard/"
+		);
+
+		resolver.resolve({}, fixture, "m/features/y/y.js", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) throw new Error("No result");
+			result.should.equal(
+				path.resolve(fixture, "./node_modules/m/src/features/y/y.js")
+			);
+			done();
+		});
+	});
+
+	it("should resolve with wildcard pattern #3", done => {
+		const fixture = path.resolve(
+			__dirname,
+			"./fixtures/imports-exports-wildcard/"
+		);
+
+		resolver.resolve(
+			{},
+			fixture,
+			"m/features-no-ext/y/y.js",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) throw new Error("No result");
+				result.should.equal(
+					path.resolve(fixture, "./node_modules/m/src/features/y/y.js")
+				);
+				done();
+			}
+		);
+	});
+
+	it("should resolve with wildcard pattern #4", done => {
+		const fixture = path.resolve(
+			__dirname,
+			"./fixtures/imports-exports-wildcard/"
+		);
+
+		resolver.resolve({}, fixture, "m/middle/nested/f.js", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) throw new Error("No result");
+			result.should.equal(
+				path.resolve(fixture, "./node_modules/m/src/middle/nested/f.js")
+			);
+			done();
+		});
+	});
+
+	it("should resolve with wildcard pattern #5", done => {
+		const fixture = path.resolve(
+			__dirname,
+			"./fixtures/imports-exports-wildcard/"
+		);
+
+		resolver.resolve(
+			{},
+			fixture,
+			"m/middle-1/nested/f.js",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) throw new Error("No result");
+				result.should.equal(
+					path.resolve(fixture, "./node_modules/m/src/middle-1/nested/f.js")
+				);
+				done();
+			}
+		);
+	});
+
+	it("should resolve with wildcard pattern #6", done => {
+		const fixture = path.resolve(
+			__dirname,
+			"./fixtures/imports-exports-wildcard/"
+		);
+
+		resolver.resolve(
+			{},
+			fixture,
+			"m/middle-2/nested/f.js",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) throw new Error("No result");
+				result.should.equal(
+					path.resolve(fixture, "./node_modules/m/src/middle-2/nested/f.js")
+				);
+				done();
+			}
+		);
+	});
+
+	it("should resolve with wildcard pattern #7", done => {
+		const fixture = path.resolve(
+			__dirname,
+			"./fixtures/imports-exports-wildcard/"
+		);
+
+		resolver.resolve({}, fixture, "m/middle-3/nested/f", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) throw new Error("No result");
+			result.should.equal(
+				path.resolve(
+					fixture,
+					"./node_modules/m/src/middle-3/nested/f/nested/f.js"
+				)
+			);
+			done();
+		});
+	});
+
+	it("should resolve with wildcard pattern #8", done => {
+		const fixture = path.resolve(
+			__dirname,
+			"./fixtures/imports-exports-wildcard/"
+		);
+
+		resolver.resolve({}, fixture, "m/middle-4/f/nested", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) throw new Error("No result");
+			result.should.equal(
+				path.resolve(fixture, "./node_modules/m/src/middle-4/f/f.js")
+			);
+			done();
+		});
+	});
+
+	it("should resolve with wildcard pattern #9", done => {
+		const fixture = path.resolve(
+			__dirname,
+			"./fixtures/imports-exports-wildcard/"
+		);
+
+		resolver.resolve({}, fixture, "m/middle-5/f$/$", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) throw new Error("No result");
+			result.should.equal(
+				path.resolve(fixture, "./node_modules/m/src/middle-5/f$/$.js")
+			);
+			done();
+		});
+	});
+
+	it("should throw error if target is 'null'", done => {
+		const fixture = path.resolve(
+			__dirname,
+			"./fixtures/imports-exports-wildcard/"
+		);
+
+		resolver.resolve(
+			{},
+			fixture,
+			"m/features/internal/file.js",
+			{},
+			(err, result) => {
+				if (!err) throw new Error(`expect error, got ${result}`);
+				err.should.be.instanceof(Error);
+				err.message.should.match(
+					/Package path \.\/features\/internal\/file\.js is not exported/
+				);
 				done();
 			}
 		);
