@@ -22,8 +22,10 @@ describe("simple", function () {
 						new Error([err.message, err.stack, err.details].join("\n"))
 					);
 				should.exist(filename);
-				filename.should.have.type("string");
-				filename.should.be.eql(path.join(__dirname, "..", "lib", "index.js"));
+				/** @type {string} */ (filename).should.have.type("string");
+				/** @type {string} */ (filename).should.be.eql(
+					path.join(__dirname, "..", "lib", "index.js")
+				);
 				done();
 			});
 		});
