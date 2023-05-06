@@ -1,15 +1,13 @@
-require("should");
+const path = require("path");
+const resolve = require("../");
 
-var path = require("path");
-var resolve = require("../");
+describe("unsafe-cache", () => {
+	let cache;
+	let cachedResolve;
+	let context;
+	let otherContext;
 
-describe("unsafe-cache", function () {
-	var cache;
-	var cachedResolve;
-	var context;
-	var otherContext;
-
-	beforeEach(function () {
+	beforeEach(() => {
 		context = {
 			some: "context"
 		};
@@ -18,20 +16,20 @@ describe("unsafe-cache", function () {
 		};
 	});
 
-	describe("with no other options", function () {
-		beforeEach(function () {
+	describe("with no other options", () => {
+		beforeEach(() => {
 			cache = {};
 			cachedResolve = resolve.create({
 				unsafeCache: cache
 			});
 		});
-		it("should cache request", function (done) {
+		it("should cache request", done => {
 			cachedResolve(path.join(__dirname, "fixtures"), "m2/b", function (
 				err,
 				result
 			) {
 				if (err) return done(err);
-				Object.keys(cache).should.have.length(1);
+				expect(Object.keys(cache)).toHaveLength(1);
 				Object.keys(cache).forEach(function (key) {
 					cache[key] = {
 						path: "yep"
@@ -42,19 +40,19 @@ describe("unsafe-cache", function () {
 					result
 				) {
 					if (err) return done(err);
-					result.should.be.eql("yep");
+					expect(result).toEqual("yep");
 					done();
 				});
 			});
 		});
-		it("should not return from cache if context does not match", function (done) {
+		it("should not return from cache if context does not match", done => {
 			cachedResolve(
 				context,
 				path.join(__dirname, "fixtures"),
 				"m2/b",
 				function (err, result) {
 					if (err) return done(err);
-					Object.keys(cache).should.have.length(1);
+					expect(Object.keys(cache)).toHaveLength(1);
 					Object.keys(cache).forEach(function (key) {
 						cache[key] = {
 							path: "yep"
@@ -66,20 +64,20 @@ describe("unsafe-cache", function () {
 						"m2/b",
 						function (err, result) {
 							if (err) return done(err);
-							result.should.not.be.eql("yep");
+							expect(result).not.toEqual("yep");
 							done();
 						}
 					);
 				}
 			);
 		});
-		it("should not return from cache if query does not match", function (done) {
+		it("should not return from cache if query does not match", done => {
 			cachedResolve(path.join(__dirname, "fixtures"), "m2/b?query", function (
 				err,
 				result
 			) {
 				if (err) return done(err);
-				Object.keys(cache).should.have.length(1);
+				expect(Object.keys(cache)).toHaveLength(1);
 				Object.keys(cache).forEach(function (key) {
 					cache[key] = {
 						path: "yep"
@@ -90,7 +88,7 @@ describe("unsafe-cache", function () {
 					"m2/b?query2",
 					function (err, result) {
 						if (err) return done(err);
-						result.should.not.be.eql("yep");
+						expect(result).not.toEqual("yep");
 						done();
 					}
 				);
@@ -98,22 +96,22 @@ describe("unsafe-cache", function () {
 		});
 	});
 
-	describe("with cacheWithContext false", function () {
-		beforeEach(function () {
+	describe("with cacheWithContext false", () => {
+		beforeEach(() => {
 			cache = {};
 			cachedResolve = resolve.create({
 				unsafeCache: cache,
 				cacheWithContext: false
 			});
 		});
-		it("should cache request", function (done) {
+		it("should cache request", done => {
 			cachedResolve(
 				context,
 				path.join(__dirname, "fixtures"),
 				"m2/b",
 				function (err, result) {
 					if (err) return done(err);
-					Object.keys(cache).should.have.length(1);
+					expect(Object.keys(cache)).toHaveLength(1);
 					Object.keys(cache).forEach(function (key) {
 						cache[key] = {
 							path: "yep"
@@ -125,21 +123,21 @@ describe("unsafe-cache", function () {
 						"m2/b",
 						function (err, result) {
 							if (err) return done(err);
-							result.should.be.eql("yep");
+							expect(result).toEqual("yep");
 							done();
 						}
 					);
 				}
 			);
 		});
-		it("should return from cache even if context does not match", function (done) {
+		it("should return from cache even if context does not match", done => {
 			cachedResolve(
 				context,
 				path.join(__dirname, "fixtures"),
 				"m2/b",
 				function (err, result) {
 					if (err) return done(err);
-					Object.keys(cache).should.have.length(1);
+					expect(Object.keys(cache)).toHaveLength(1);
 					Object.keys(cache).forEach(function (key) {
 						cache[key] = {
 							path: "yep"
@@ -151,7 +149,7 @@ describe("unsafe-cache", function () {
 						"m2/b",
 						function (err, result) {
 							if (err) return done(err);
-							result.should.be.eql("yep");
+							expect(result).toEqual("yep");
 							done();
 						}
 					);
