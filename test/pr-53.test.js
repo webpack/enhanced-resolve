@@ -1,7 +1,7 @@
 const { CachedInputFileSystem } = require("../");
 
-describe("pr-53", function () {
-	it("should allow to readJsonSync in CachedInputFileSystem", function () {
+describe("pr-53", () => {
+	it("should allow to readJsonSync in CachedInputFileSystem", () => {
 		var cfs = new CachedInputFileSystem(
 			{
 				readFileSync: function (path) {
