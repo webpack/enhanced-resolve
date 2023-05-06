@@ -1,6 +1,4 @@
-require("should");
-
-var { CachedInputFileSystem } = require("../");
+const { CachedInputFileSystem } = require("../");
 
 describe("pr-53", function () {
 	it("should allow to readJsonSync in CachedInputFileSystem", function () {
@@ -13,6 +11,6 @@ describe("pr-53", function () {
 			1000
 		);
 		if (!cfs.readJsonSync) throw new Error("readJsonSync must be available");
-		cfs.readJsonSync("xyz").should.be.eql("abcxyz");
+		expect(cfs.readJsonSync("xyz")).toEqual("abcxyz");
 	});
 });
