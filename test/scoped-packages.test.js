@@ -1,5 +1,3 @@
-require("should");
-
 const path = require("path");
 const fs = require("fs");
 const { CachedInputFileSystem, ResolverFactory } = require("../");
@@ -18,7 +16,7 @@ describe("scoped-packages", () => {
 		resolver.resolve({}, fixture, "@scope/pack1", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) throw new Error("No result");
-			result.should.equal(
+			expect(result).toEqual(
 				path.resolve(fixture, "./node_modules/@scope/pack1/main.js")
 			);
 			done();
@@ -29,7 +27,7 @@ describe("scoped-packages", () => {
 		resolver.resolve({}, fixture, "@scope/pack2", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) throw new Error("No result");
-			result.should.equal(
+			expect(result).toEqual(
 				path.resolve(fixture, "./node_modules/@scope/pack2/main.js")
 			);
 			done();
@@ -40,7 +38,7 @@ describe("scoped-packages", () => {
 		resolver.resolve({}, fixture, "@scope/pack2/lib", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) throw new Error("No result");
-			result.should.equal(
+			expect(result).toEqual(
 				path.resolve(fixture, "./node_modules/@scope/pack2/lib/index.js")
 			);
 			done();
