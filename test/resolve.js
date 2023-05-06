@@ -1,9 +1,7 @@
-var should = require("should");
+const path = require("path");
+const resolve = require("../");
 
-var path = require("path");
-var resolve = require("../");
-
-var fixtures = path.join(__dirname, "fixtures");
+const fixtures = path.join(__dirname, "fixtures");
 
 const asyncContextResolve = resolve.create({
 	extensions: [".js", ".json", ".node"],
@@ -25,17 +23,17 @@ const preferRelativeResolve = resolve.create({
 });
 
 function testResolve(name, context, moduleName, result) {
-	describe(name, function () {
-		it("should resolve sync correctly", function () {
-			var filename = resolve.sync(context, moduleName);
-			should.exist(filename);
-			filename.should.equal(result);
+	describe(name, () => {
+		it("should resolve sync correctly", () => {
+			const filename = resolve.sync(context, moduleName);
+			expect(filename).toBeDefined();
+			expect(filename).toEqual(result);
 		});
 		it("should resolve async correctly", function (done) {
 			resolve(context, moduleName, function (err, filename) {
 				if (err) return done(err);
-				should.exist(filename);
-				/** @type {string} */ (filename).should.equal(result);
+				expect(filename).toBeDefined();
+				expect(filename).toEqual(result);
 				done();
 			});
 		});
@@ -43,23 +41,23 @@ function testResolve(name, context, moduleName, result) {
 }
 
 function testResolveContext(name, context, moduleName, result) {
-	describe(name, function () {
+	describe(name, () => {
 		it("should resolve async correctly", function (done) {
 			asyncContextResolve(context, moduleName, function (err, filename) {
 				if (err) done(err);
-				should.exist(filename);
-				/** @type {string} */ (filename).should.equal(result);
+				expect(filename).toBeDefined();
+				expect(filename).toEqual(result);
 				done();
 			});
 		});
-		it("should resolve sync correctly", function () {
-			var filename = syncContextResolve(context, moduleName);
-			should.exist(filename);
-			filename.should.equal(result);
+		it("should resolve sync correctly", () => {
+			const filename = syncContextResolve(context, moduleName);
+			expect(filename).toBeDefined();
+			expect(filename).toEqual(result);
 		});
 	});
 }
-describe("resolve", function () {
+describe("resolve", () => {
 	testResolve(
 		"absolute path",
 		fixtures,
@@ -268,8 +266,8 @@ describe("resolve", function () {
 			"config/myObjectFile",
 			function (err, filename) {
 				if (err) done(err);
-				should.exist(filename);
-				/** @type {string} */ (filename).should.equal(
+				expect(filename).toBeDefined();
+				expect(filename).toEqual(
 					path.resolve(issue238, "./src/common/config/myObjectFile.js")
 				);
 				done();
@@ -280,10 +278,8 @@ describe("resolve", function () {
 	it("should correctly resolve with preferRelative", function (done) {
 		preferRelativeResolve(fixtures, "main1.js", function (err, filename) {
 			if (err) done(err);
-			should.exist(filename);
-			/** @type {string} */ (filename).should.equal(
-				path.join(fixtures, "main1.js")
-			);
+			expect(filename).toBeDefined();
+			expect(filename).toEqual(path.join(fixtures, "main1.js"));
 			done();
 		});
 	});
@@ -291,8 +287,8 @@ describe("resolve", function () {
 	it("should correctly resolve with preferRelative", function (done) {
 		preferRelativeResolve(fixtures, "m1/a.js", function (err, filename) {
 			if (err) done(err);
-			should.exist(filename);
-			/** @type {string} */ (filename).should.equal(
+			expect(filename).toBeDefined();
+			expect(filename).toEqual(
 				path.join(fixtures, "node_modules", "m1", "a.js")
 			);
 			done();
@@ -300,38 +296,23 @@ describe("resolve", function () {
 	});
 
 	it("should not crash when passing undefined as path", done => {
-		resolve(
-			fixtures,
-			/** @type {string} */ (/** @type {unknown} */ (undefined)),
-			err => {
-				/** @type {Error} */ (err).should.be.instanceof(Error);
-				done();
-			}
-		);
+		resolve(fixtures, err => {
+			expect(err).toBeInstanceOf(Error);
+			done();
+		});
 	});
 
 	it("should not crash when passing undefined as context", done => {
-		resolve(
-			{},
-			/** @type {string} */ (/** @type {unknown} */ (undefined)),
-			"./test/resolve.js",
-			err => {
-				/** @type {Error} */ (err).should.be.instanceof(Error);
-				done();
-			}
-		);
+		resolve({}, "./test/resolve.js", err => {
+			expect(err).toBeInstanceOf(Error);
+			done();
+		});
 	});
 
 	it("should not crash when passing undefined everywhere", done => {
-		resolve(
-			/** @type {object} */ (undefined),
-			/** @type {string} */ (/** @type {unknown} */ (undefined)),
-			/** @type {string} */ (/** @type {unknown} */ (undefined)),
-			/** @type {object} */ (/** @type {unknown} */ (undefined)),
-			err => {
-				/** @type {Error} */ (err).should.be.instanceof(Error);
-				done();
-			}
-		);
+		resolve(err => {
+			expect(err).toBeInstanceOf(Error);
+			done();
+		});
 	});
 });
