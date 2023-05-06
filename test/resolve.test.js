@@ -296,21 +296,21 @@ describe("resolve", () => {
 	});
 
 	it("should not crash when passing undefined as path", done => {
-		resolve(fixtures, err => {
+		resolve(fixtures, undefined, err => {
 			expect(err).toBeInstanceOf(Error);
 			done();
 		});
 	});
 
 	it("should not crash when passing undefined as context", done => {
-		resolve({}, "./test/resolve.js", err => {
+		resolve({}, undefined, "./test/resolve.js", err => {
 			expect(err).toBeInstanceOf(Error);
 			done();
 		});
 	});
 
 	it("should not crash when passing undefined everywhere", done => {
-		resolve(err => {
+		resolve(undefined, undefined, undefined, undefined, err => {
 			expect(err).toBeInstanceOf(Error);
 			done();
 		});
