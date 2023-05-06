@@ -1,14 +1,12 @@
-var should = require("should");
-
-var path = require("path");
-var fs = require("fs");
+const path = require("path");
+const fs = require("fs");
 const { platform } = require("os");
-var resolve = require("../");
+const resolve = require("../");
 
-var tempPath = path.join(__dirname, "temp");
+const tempPath = path.join(__dirname, "temp");
 
-describe("symlink", function () {
-	var isAdmin = true;
+describe("symlink", () => {
+	let isAdmin = true;
 	try {
 		fs.mkdirSync(tempPath);
 		fs.symlinkSync(
@@ -45,7 +43,7 @@ describe("symlink", function () {
 		const isWindows = platform() === "win32";
 		const oldCWD = (isWindows && process.cwd()) || "";
 
-		before(function () {
+		beforeEach(() => {
 			// Create some cool symlinks
 			try {
 				fs.mkdirSync(tempPath);
@@ -88,7 +86,7 @@ describe("symlink", function () {
 			}
 		});
 
-		after(function () {
+		afterEach(() => {
 			// PR #150: Restore the original working directory.
 			if (isWindows) {
 				process.chdir(oldCWD);
@@ -102,10 +100,10 @@ describe("symlink", function () {
 			fs.rmdirSync(tempPath);
 		});
 
-		var resolveWithoutSymlinks = resolve.create({
+		const resolveWithoutSymlinks = resolve.create({
 			symlinks: false
 		});
-		var resolveSyncWithoutSymlinks = resolve.create.sync({
+		const resolveSyncWithoutSymlinks = resolve.create.sync({
 			symlinks: false
 		});
 
@@ -213,16 +211,20 @@ describe("symlink", function () {
 			it("should resolve symlink to itself " + pathToIt[2], function (done) {
 				resolve(pathToIt[0], pathToIt[1], function (err, filename) {
 					if (err) return done(err);
-					should.exist(filename);
-					/** @type {string} */ (filename).should.have.type("string");
-					/** @type {string} */ (filename).should.be.eql(
+					// should.exist(filename);
+					expect(filename).toBeDefined();
+					expect(typeof filename).toBe("string");
+					expect(filename).toEqual(
 						path.join(__dirname, "..", "lib", "index.js")
 					);
+
 					resolveWithoutSymlinks(pathToIt[0], pathToIt[1], function (
 						err,
 						filename
 					) {
 						if (err) return done(err);
+						expect(typeof filename).toBe("string");
+						expect(filename).toEqual(path.resolve(pathToIt[0], pathToIt[1]));
 						/** @type {string} */ (filename).should.have.type("string");
 						/** @type {string} */ (filename).should.be.eql(
 							path.resolve(pathToIt[0], pathToIt[1])
@@ -231,14 +233,16 @@ describe("symlink", function () {
 					});
 				});
 			});
-			it("should resolve symlink to itself sync " + pathToIt[2], function () {
-				var filename = resolve.sync(pathToIt[0], pathToIt[1]);
-				should.exist(filename);
-				filename.should.have.type("string");
-				filename.should.be.eql(path.join(__dirname, "..", "lib", "index.js"));
+			it("should resolve symlink to itself sync " + pathToIt[2], () => {
+				let filename = resolve.sync(pathToIt[0], pathToIt[1]);
+				expect(filename).toBeDefined();
+				expect(typeof filename).toBe("string");
+				expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+
 				filename = resolveSyncWithoutSymlinks(pathToIt[0], pathToIt[1]);
-				filename.should.have.type("string");
-				filename.should.be.eql(path.resolve(pathToIt[0], pathToIt[1]));
+
+				expect(typeof filename).toBe("string");
+				expect(filename).toEqual(path.resolve(pathToIt[0], pathToIt[1]));
 			});
 		});
 	} else {
