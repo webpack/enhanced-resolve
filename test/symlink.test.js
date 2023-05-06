@@ -211,7 +211,6 @@ describe("symlink", () => {
 			it("should resolve symlink to itself " + pathToIt[2], function (done) {
 				resolve(pathToIt[0], pathToIt[1], function (err, filename) {
 					if (err) return done(err);
-					// should.exist(filename);
 					expect(filename).toBeDefined();
 					expect(typeof filename).toBe("string");
 					expect(filename).toEqual(
@@ -225,10 +224,6 @@ describe("symlink", () => {
 						if (err) return done(err);
 						expect(typeof filename).toBe("string");
 						expect(filename).toEqual(path.resolve(pathToIt[0], pathToIt[1]));
-						/** @type {string} */ (filename).should.have.type("string");
-						/** @type {string} */ (filename).should.be.eql(
-							path.resolve(pathToIt[0], pathToIt[1])
-						);
 						done();
 					});
 				});
