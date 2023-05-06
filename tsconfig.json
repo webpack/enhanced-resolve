@@ -13,5 +13,5 @@
     "types": ["node", "mocha"],
     "esModuleInterop": true
   },
-  "include": ["lib/**/*.js", "test/*.js", "declarations.d.ts"]
+  "include": ["lib/**/*.js", "declarations.d.ts"]
 }

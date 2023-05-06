@@ -1,5 +1,3 @@
-const should = require("should");
-
 const path = require("path");
 const { Volume } = require("memfs");
 const { ResolverFactory } = require("../");
@@ -8,7 +6,7 @@ const fs = require("fs");
 
 const nodeFileSystem = new CachedInputFileSystem(fs, 4000);
 
-describe("alias", function () {
+describe("alias", () => {
 	let resolver;
 
 	beforeEach(() => {
@@ -51,71 +49,79 @@ describe("alias", function () {
 	});
 
 	it("should resolve a not aliased module", () => {
-        expect(resolver.resolveSync({}, "/", "a")).toEqual("/a/index");
-        expect(resolver.resolveSync({}, "/", "a/index")).toEqual("/a/index");
-        expect(resolver.resolveSync({}, "/", "a/dir")).toEqual("/a/dir/index");
-        expect(resolver.resolveSync({}, "/", "a/dir/index")).toEqual("/a/dir/index");
+		expect(resolver.resolveSync({}, "/", "a")).toEqual("/a/index");
+		expect(resolver.resolveSync({}, "/", "a/index")).toEqual("/a/index");
+		expect(resolver.resolveSync({}, "/", "a/dir")).toEqual("/a/dir/index");
+		expect(resolver.resolveSync({}, "/", "a/dir/index")).toEqual(
+			"/a/dir/index"
+		);
 	});
-	it("should resolve an aliased module", function () {
-		resolver.resolveSync({}, "/", "aliasA").should.be.eql("/a/index");
-		resolver.resolveSync({}, "/", "aliasA/index").should.be.eql("/a/index");
-		resolver.resolveSync({}, "/", "aliasA/dir").should.be.eql("/a/dir/index");
-		resolver
-			.resolveSync({}, "/", "aliasA/dir/index")
-			.should.be.eql("/a/dir/index");
+	it("should resolve an aliased module", () => {
+		expect(resolver.resolveSync({}, "/", "aliasA")).toEqual("/a/index");
+		expect(resolver.resolveSync({}, "/", "aliasA/index")).toEqual("/a/index");
+		expect(resolver.resolveSync({}, "/", "aliasA/dir")).toEqual("/a/dir/index");
+		expect(resolver.resolveSync({}, "/", "aliasA/dir/index")).toEqual(
+			"/a/dir/index"
+		);
 	});
 	it('should resolve "#" alias', () => {
-		resolver.resolveSync({}, "/", "#").should.be.eql("/c/dir/index");
-		resolver.resolveSync({}, "/", "#/index").should.be.eql("/c/dir/index");
+		expect(resolver.resolveSync({}, "/", "#")).toEqual("/c/dir/index");
+		expect(resolver.resolveSync({}, "/", "#/index")).toEqual("/c/dir/index");
 	});
 	it('should resolve "@" alias', () => {
-		resolver.resolveSync({}, "/", "@").should.be.eql("/c/dir/index");
-		resolver.resolveSync({}, "/", "@/index").should.be.eql("/c/dir/index");
+		expect(resolver.resolveSync({}, "/", "@")).toEqual("/c/dir/index");
+		expect(resolver.resolveSync({}, "/", "@/index")).toEqual("/c/dir/index");
 	});
 	it("should resolve an ignore module", () => {
-		resolver.resolveSync({}, "/", "ignored").should.be.eql(false);
+		expect(resolver.resolveSync({}, "/", "ignored")).toEqual(false);
 	});
-	it("should resolve a recursive aliased module", function () {
-		resolver
-			.resolveSync({}, "/", "recursive")
-			.should.be.eql("/recursive/dir/index");
-		resolver
-			.resolveSync({}, "/", "recursive/index")
-			.should.be.eql("/recursive/dir/index");
-		resolver
-			.resolveSync({}, "/", "recursive/dir")
-			.should.be.eql("/recursive/dir/index");
-		resolver
-			.resolveSync({}, "/", "recursive/dir/index")
-			.should.be.eql("/recursive/dir/index");
+	it("should resolve a recursive aliased module", () => {
+		expect(resolver.resolveSync({}, "/", "recursive")).toEqual(
+			"/recursive/dir/index"
+		);
+		expect(resolver.resolveSync({}, "/", "recursive/index")).toEqual(
+			"/recursive/dir/index"
+		);
+		expect(resolver.resolveSync({}, "/", "recursive/dir")).toEqual(
+			"/recursive/dir/index"
+		);
+		expect(resolver.resolveSync({}, "/", "recursive/dir/index")).toEqual(
+			"/recursive/dir/index"
+		);
 	});
-	it("should resolve a file aliased module", function () {
-		resolver.resolveSync({}, "/", "b").should.be.eql("/a/index");
-		resolver.resolveSync({}, "/", "c").should.be.eql("/a/index");
+	it("should resolve a file aliased module", () => {
+		expect(resolver.resolveSync({}, "/", "b")).toEqual("/a/index");
+		expect(resolver.resolveSync({}, "/", "c")).toEqual("/a/index");
 	});
-	it("should resolve a file aliased module with a query", function () {
-		resolver.resolveSync({}, "/", "b?query").should.be.eql("/a/index?query");
-		resolver.resolveSync({}, "/", "c?query").should.be.eql("/a/index?query");
+	it("should resolve a file aliased module with a query", () => {
+		expect(resolver.resolveSync({}, "/", "b?query")).toEqual("/a/index?query");
+		expect(resolver.resolveSync({}, "/", "c?query")).toEqual("/a/index?query");
 	});
-	it("should resolve a path in a file aliased module", function () {
-		resolver.resolveSync({}, "/", "b/index").should.be.eql("/b/index");
-		resolver.resolveSync({}, "/", "b/dir").should.be.eql("/b/dir/index");
-		resolver.resolveSync({}, "/", "b/dir/index").should.be.eql("/b/dir/index");
-		resolver.resolveSync({}, "/", "c/index").should.be.eql("/c/index");
-		resolver.resolveSync({}, "/", "c/dir").should.be.eql("/c/dir/index");
-		resolver.resolveSync({}, "/", "c/dir/index").should.be.eql("/c/dir/index");
+	it("should resolve a path in a file aliased module", () => {
+		expect(resolver.resolveSync({}, "/", "b/index")).toEqual("/b/index");
+		expect(resolver.resolveSync({}, "/", "b/dir")).toEqual("/b/dir/index");
+		expect(resolver.resolveSync({}, "/", "b/dir/index")).toEqual(
+			"/b/dir/index"
+		);
+		expect(resolver.resolveSync({}, "/", "c/index")).toEqual("/c/index");
+		expect(resolver.resolveSync({}, "/", "c/dir")).toEqual("/c/dir/index");
+		expect(resolver.resolveSync({}, "/", "c/dir/index")).toEqual(
+			"/c/dir/index"
+		);
 	});
-	it("should resolve a file aliased file", function () {
-		resolver.resolveSync({}, "/", "d").should.be.eql("/c/index");
-		resolver.resolveSync({}, "/", "d/dir/index").should.be.eql("/c/dir/index");
+	it("should resolve a file aliased file", () => {
+		expect(resolver.resolveSync({}, "/", "d")).toEqual("/c/index");
+		expect(resolver.resolveSync({}, "/", "d/dir/index")).toEqual(
+			"/c/dir/index"
+		);
 	});
-	it("should resolve a file in multiple aliased dirs", function () {
-		resolver
-			.resolveSync({}, "/", "multiAlias/dir/file")
-			.should.be.eql("/e/dir/file");
-		resolver
-			.resolveSync({}, "/", "multiAlias/anotherDir")
-			.should.be.eql("/e/anotherDir/index");
+	it("should resolve a file in multiple aliased dirs", () => {
+		expect(resolver.resolveSync({}, "/", "multiAlias/dir/file")).toEqual(
+			"/e/dir/file"
+		);
+		expect(resolver.resolveSync({}, "/", "multiAlias/anotherDir")).toEqual(
+			"/e/anotherDir/index"
+		);
 	});
 	it("should log the correct info", done => {
 		const log = [];
@@ -126,36 +132,10 @@ describe("alias", function () {
 			{ log: v => log.push(v) },
 			(err, result) => {
 				if (err) return done(err);
-				result.should.be.eql("/a/dir/index");
-				log.should.be.eql([
-					"resolve 'aliasA/dir' in '/'",
-					"  Parsed request is a module",
-					"  No description file found in / or above",
-					"  aliased with mapping 'aliasA': 'a' to 'a/dir'",
-					"    Parsed request is a module",
-					"    No description file found in / or above",
-					"    resolve as module",
-					"      looking for modules in /",
-					"        existing directory /a",
-					"          No description file found in /a or above",
-					"          No description file found in /a or above",
-					"          no extension",
-					"            /a/dir is not a file",
-					"          .js",
-					"            /a/dir.js doesn't exist",
-					"          .json",
-					"            /a/dir.json doesn't exist",
-					"          .node",
-					"            /a/dir.node doesn't exist",
-					"          as directory",
-					"            existing directory /a/dir",
-					"              No description file found in /a/dir or above",
-					"              using path: /a/dir/index",
-					"                No description file found in /a/dir or above",
-					"                no extension",
-					"                  existing file: /a/dir/index",
-					"                    reporting result /a/dir/index"
-				]);
+
+				expect(result).toEqual("/a/dir/index");
+				expect(log).toMatchSnapshot();
+
 				done();
 			}
 		);
@@ -172,12 +152,8 @@ describe("alias", function () {
 
 		resolver.resolve({}, __dirname, "foo/index", {}, (err, result) => {
 			if (err) done(err);
-			should(result).be.eql(false);
+			expect(result).toEqual(false);
 			done();
 		});
 	});
 });
-function expect(arg0) {
-    throw new Error("Function not implemented.");
-}
-

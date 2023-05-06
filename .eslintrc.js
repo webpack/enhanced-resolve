@@ -75,7 +75,8 @@ module.exports = {
 		{
 			files: ["test/**/*.js"],
 			env: {
-				mocha: true
+				mocha: true,
+				jest: true
 			}
 		}
 	]
