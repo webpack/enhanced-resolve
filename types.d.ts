@@ -51,7 +51,7 @@ declare class CachedInputFileSystem {
 			| null
 			| ((
 					arg0?: null | NodeJS.ErrnoException,
-					arg1?: (string | Buffer)[] | any[]
+					arg1?: (string | Buffer)[] | unresolved[]
 			  ) => void)
 			| ReaddirOptions
 			| "ascii"
@@ -67,7 +67,7 @@ declare class CachedInputFileSystem {
 			| "buffer",
 		arg2?: (
 			arg0?: null | NodeJS.ErrnoException,
-			arg1?: (string | Buffer)[] | any[]
+			arg1?: (string | Buffer)[] | unresolved[]
 		) => void
 	) => void;
 	readdirSync: (
@@ -128,7 +128,7 @@ declare interface FileSystem {
 			| null
 			| ((
 					arg0?: null | NodeJS.ErrnoException,
-					arg1?: (string | Buffer)[] | any[]
+					arg1?: (string | Buffer)[] | unresolved[]
 			  ) => void)
 			| ReaddirOptions
 			| "ascii"
@@ -144,7 +144,7 @@ declare interface FileSystem {
 			| "buffer",
 		arg2?: (
 			arg0?: null | NodeJS.ErrnoException,
-			arg1?: (string | Buffer)[] | any[]
+			arg1?: (string | Buffer)[] | unresolved[]
 		) => void
 	) => void;
 	readJson?: {
@@ -189,8 +189,20 @@ declare interface FileSystemStats {
 	isFile: () => boolean;
 }
 declare class LogInfoPlugin {
-	constructor(source?: any);
-	source: any;
+	constructor(
+		source:
+			| string
+			| AsyncSeriesBailHook<
+					[ResolveRequest, ResolveContext],
+					null | ResolveRequest
+			  >
+	);
+	source:
+		| string
+		| AsyncSeriesBailHook<
+				[ResolveRequest, ResolveContext],
+				null | ResolveRequest
+		  >;
 	apply(resolver: Resolver): void;
 }
 declare interface ParsedIdentifier {
@@ -399,18 +411,21 @@ declare abstract class Resolver {
 		) => void
 	): void;
 	doResolve(
-		hook?: any,
-		request?: any,
-		message?: any,
-		resolveContext?: any,
-		callback?: any
-	): any;
+		hook: AsyncSeriesBailHook<
+			[ResolveRequest, ResolveContext],
+			null | ResolveRequest
+		>,
+		request: ResolveRequest,
+		message: null | string,
+		resolveContext: ResolveContext,
+		callback: (err?: null | Error, result?: any) => void
+	): void;
 	parse(identifier: string): ParsedIdentifier;
-	isModule(path?: any): boolean;
-	isPrivate(path?: any): boolean;
+	isModule(path: string): boolean;
+	isPrivate(path: string): boolean;
 	isDirectory(path: string): boolean;
-	join(path?: any, request?: any): string;
-	normalize(path?: any): string;
+	join(path: string, request: string): string;
+	normalize(path: string): string;
 }
 declare interface UserResolveOptions {
 	/**
