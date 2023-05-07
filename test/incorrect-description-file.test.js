@@ -1,10 +1,8 @@
-require("should");
+const path = require("path");
+const fs = require("fs");
+const { CachedInputFileSystem, ResolverFactory } = require("../");
 
-var path = require("path");
-var fs = require("fs");
-var { CachedInputFileSystem, ResolverFactory } = require("../");
-
-var fixtures = path.join(__dirname, "fixtures", "incorrect-package");
+const fixtures = path.join(__dirname, "fixtures", "incorrect-package");
 const nodeFileSystem = new CachedInputFileSystem(fs, 4000);
 
 function p() {
@@ -30,9 +28,9 @@ describe("incorrect description file", () => {
 		};
 		resolver.resolve({}, p("pack1"), ".", ctx, function (err, result) {
 			if (!err) throw new Error("No error");
-			err.should.be.instanceof(Error);
-			ctx.fileDependencies.has(p("package.json"));
-			called.should.be.eql(true);
+			expect(err).toBeInstanceOf(Error);
+			expect(ctx.fileDependencies.has(p("package.json"))).toEqual(true);
+			expect(called).toBe(true);
 			done();
 		});
 	});
@@ -47,8 +45,8 @@ describe("incorrect description file", () => {
 		};
 		resolver.resolve({}, p("pack2"), ".", ctx, function (err, result) {
 			if (!err) throw new Error("No error");
-			ctx.fileDependencies.has(p("package.json"));
-			called.should.be.eql(true);
+			expect(ctx.fileDependencies.has(p("package.json"))).toEqual(true);
+			expect(called).toBe(true);
 			done();
 		});
 	});
@@ -56,7 +54,7 @@ describe("incorrect description file", () => {
 	it("should not resolve main in incorrect description file #3", done => {
 		resolver.resolve({}, p("pack2"), ".", {}, function (err, result) {
 			if (!err) throw new Error("No error");
-			err.should.be.instanceof(Error);
+			expect(err).toBeInstanceOf(Error);
 			done();
 		});
 	});
