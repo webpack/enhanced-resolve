@@ -2911,4 +2911,125 @@ describe("ExportsFieldPlugin", () => {
 			}
 		);
 	});
+
+	it("should resolve with the `extensionAlias` option", done => {
+		const resolver = ResolverFactory.createResolver({
+			extensions: [".js"],
+			extensionAlias: {
+				".js": [".ts", ".js"]
+			},
+			fileSystem: nodeFileSystem,
+			fullySpecified: true,
+			conditionNames: ["webpack", "default"]
+		});
+		const fixture = path.resolve(
+			__dirname,
+			"./fixtures/exports-field-and-extension-alias/"
+		);
+
+		resolver.resolve({}, fixture, "@org/pkg/string.js", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) throw new Error("No result");
+			result.should.equal(
+				path.resolve(fixture, "./node_modules/@org/pkg/dist/string.js")
+			);
+			done();
+		});
+	});
+
+	it("should resolve with the `extensionAlias` option #2", done => {
+		const resolver = ResolverFactory.createResolver({
+			extensions: [".js"],
+			extensionAlias: {
+				".js": [".ts", ".js"]
+			},
+			fileSystem: nodeFileSystem,
+			fullySpecified: true,
+			conditionNames: ["webpack", "default"]
+		});
+		const fixture = path.resolve(
+			__dirname,
+			"./fixtures/exports-field-and-extension-alias/"
+		);
+
+		resolver.resolve({}, fixture, "pkg/string.js", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) throw new Error("No result");
+			result.should.equal(
+				path.resolve(fixture, "./node_modules/pkg/dist/string.js")
+			);
+			done();
+		});
+	});
+
+	it("should resolve with the `extensionAlias` option #3", done => {
+		const resolver = ResolverFactory.createResolver({
+			extensions: [".js"],
+			extensionAlias: {
+				".js": [".foo", ".baz", ".baz", ".ts", ".js"]
+			},
+			fileSystem: nodeFileSystem,
+			fullySpecified: true,
+			conditionNames: ["webpack", "default"]
+		});
+		const fixture = path.resolve(
+			__dirname,
+			"./fixtures/exports-field-and-extension-alias/"
+		);
+
+		resolver.resolve({}, fixture, "pkg/string.js", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) throw new Error("No result");
+			result.should.equal(
+				path.resolve(fixture, "./node_modules/pkg/dist/string.js")
+			);
+			done();
+		});
+	});
+
+	it("should throw error with the `extensionAlias` option", done => {
+		const resolver = ResolverFactory.createResolver({
+			extensions: [".js"],
+			extensionAlias: {
+				".js": [".ts"]
+			},
+			fileSystem: nodeFileSystem,
+			fullySpecified: true,
+			conditionNames: ["webpack", "default"]
+		});
+		const fixture = path.resolve(
+			__dirname,
+			"./fixtures/exports-field-and-extension-alias/"
+		);
+
+		resolver.resolve({}, fixture, "pkg/string.js", {}, (err, result) => {
+			if (!err) throw new Error(`expect error, got ${result}`);
+			err.should.be.instanceof(Error);
+			err.message.should.match(/Package path \.\/string\.ts is not exported/);
+			done();
+		});
+	});
+
+	it("should throw error with the `extensionAlias` option #2", done => {
+		const resolver = ResolverFactory.createResolver({
+			extensions: [".js"],
+			extensionAlias: {
+				".js": ".ts"
+			},
+			fileSystem: nodeFileSystem,
+			fullySpecified: true,
+			conditionNames: ["webpack", "default"]
+		});
+		const fixture = path.resolve(
+			__dirname,
+			"./fixtures/exports-field-and-extension-alias/"
+		);
+
+		resolver.resolve({}, fixture, "pkg/string.js", {}, (err, result) => {
+			if (!err) throw new Error(`expect error, got ${result}`);
+			err.should.be.instanceof(Error);
+			err.message.should.match(/Package path \.\/string\.ts is not exported/);
+			done();
+		});
+	});
 });
