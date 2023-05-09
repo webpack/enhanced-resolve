@@ -4,6 +4,7 @@
  * Run `yarn special-lint-fix` to update
  */
 
+import { Dirent } from "fs";
 import { AsyncSeriesBailHook, AsyncSeriesHook, SyncHook } from "tapable";
 
 declare interface AliasOption {
@@ -51,7 +52,7 @@ declare class CachedInputFileSystem {
 			| null
 			| ((
 					arg0?: null | NodeJS.ErrnoException,
-					arg1?: (string | Buffer)[] | unresolved[]
+					arg1?: (string | Buffer)[] | Dirent[]
 			  ) => void)
 			| ReaddirOptions
 			| "ascii"
@@ -67,7 +68,7 @@ declare class CachedInputFileSystem {
 			| "buffer",
 		arg2?: (
 			arg0?: null | NodeJS.ErrnoException,
-			arg1?: (string | Buffer)[] | unresolved[]
+			arg1?: (string | Buffer)[] | Dirent[]
 		) => void
 	) => void;
 	readdirSync: (
@@ -100,9 +101,32 @@ declare class CachedInputFileSystem {
 	purge(what?: any): void;
 }
 declare class CloneBasenamePlugin {
-	constructor(source?: any, target?: any);
-	source: any;
-	target: any;
+	constructor(
+		source:
+			| string
+			| AsyncSeriesBailHook<
+					[ResolveRequest, ResolveContext],
+					null | ResolveRequest
+			  >,
+		target:
+			| string
+			| AsyncSeriesBailHook<
+					[ResolveRequest, ResolveContext],
+					null | ResolveRequest
+			  >
+	);
+	source:
+		| string
+		| AsyncSeriesBailHook<
+				[ResolveRequest, ResolveContext],
+				null | ResolveRequest
+		  >;
+	target:
+		| string
+		| AsyncSeriesBailHook<
+				[ResolveRequest, ResolveContext],
+				null | ResolveRequest
+		  >;
 	apply(resolver: Resolver): void;
 }
 type ErrorWithDetail = Error & { details?: string };
@@ -128,7 +152,7 @@ declare interface FileSystem {
 			| null
 			| ((
 					arg0?: null | NodeJS.ErrnoException,
-					arg1?: (string | Buffer)[] | unresolved[]
+					arg1?: (string | Buffer)[] | Dirent[]
 			  ) => void)
 			| ReaddirOptions
 			| "ascii"
@@ -144,7 +168,7 @@ declare interface FileSystem {
 			| "buffer",
 		arg2?: (
 			arg0?: null | NodeJS.ErrnoException,
-			arg1?: (string | Buffer)[] | unresolved[]
+			arg1?: (string | Buffer)[] | Dirent[]
 		) => void
 	) => void;
 	readJson?: {
@@ -626,11 +650,14 @@ declare namespace exports {
 	export namespace ResolverFactory {
 		export let createResolver: (options: UserResolveOptions) => Resolver;
 	}
-	export const forEachBail: (
-		array?: any,
-		iterator?: any,
-		callback?: any
-	) => any;
+	export const forEachBail: <T>(
+		array: T[],
+		iterator: (
+			item: T,
+			callback: (err?: null | Error, result?: any) => void
+		) => void,
+		callback: (err?: null | Error, result?: ResolveRequest) => void
+	) => void;
 	export type ResolveCallback = (
 		err: null | ErrorWithDetail,
 		res?: string | false,
