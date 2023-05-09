@@ -149,7 +149,7 @@ for (const filePath of allFiles) {
 			const update = current.update(...match);
 			if (update !== match[0]) {
 				newContent =
-					newContent.substr(0, pos) +
+					newContent.slice(0, pos) +
 					update +
 					newContent.slice(pos + match[0].length);
 				pos += update.length;
