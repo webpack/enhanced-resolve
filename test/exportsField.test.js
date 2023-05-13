@@ -2916,7 +2916,7 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve({}, fixture, "@org/pkg/string.js", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) throw new Error("No result");
-			result.should.equal(
+			expect(result).toEqual(
 				path.resolve(fixture, "./node_modules/@org/pkg/dist/string.js")
 			);
 			done();
@@ -2941,7 +2941,7 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve({}, fixture, "pkg/string.js", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) throw new Error("No result");
-			result.should.equal(
+			expect(result).toEqual(
 				path.resolve(fixture, "./node_modules/pkg/dist/string.js")
 			);
 			done();
@@ -2966,7 +2966,7 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve({}, fixture, "pkg/string.js", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) throw new Error("No result");
-			result.should.equal(
+			expect(result).toEqual(
 				path.resolve(fixture, "./node_modules/pkg/dist/string.js")
 			);
 			done();
@@ -2990,8 +2990,10 @@ describe("ExportsFieldPlugin", () => {
 
 		resolver.resolve({}, fixture, "pkg/string.js", {}, (err, result) => {
 			if (!err) throw new Error(`expect error, got ${result}`);
-			err.should.be.instanceof(Error);
-			err.message.should.match(/Package path \.\/string\.ts is not exported/);
+			expect(err).toBeInstanceOf(Error);
+			expect(err.message).toMatch(
+				/Package path \.\/string\.ts is not exported/
+			);
 			done();
 		});
 	});
@@ -3013,8 +3015,10 @@ describe("ExportsFieldPlugin", () => {
 
 		resolver.resolve({}, fixture, "pkg/string.js", {}, (err, result) => {
 			if (!err) throw new Error(`expect error, got ${result}`);
-			err.should.be.instanceof(Error);
-			err.message.should.match(/Package path \.\/string\.ts is not exported/);
+			expect(err).toBeInstanceOf(Error);
+			expect(err.message).toMatch(
+				/Package path \.\/string\.ts is not exported/
+			);
 			done();
 		});
 	});
