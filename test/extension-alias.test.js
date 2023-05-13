@@ -1,6 +1,5 @@
 const path = require("path");
 const fs = require("fs");
-const should = require("should");
 
 const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
 const ResolverFactory = require("../lib/ResolverFactory");
@@ -24,7 +23,7 @@ describe("extension-alias", () => {
 	it("should alias fully specified file", done => {
 		resolver.resolve({}, fixture, "./index.js", {}, (err, result) => {
 			if (err) return done(err);
-			should(result).be.eql(path.resolve(fixture, "index.ts"));
+			expect(result).toEqual(path.resolve(fixture, "index.ts"));
 			done();
 		});
 	});
@@ -32,7 +31,7 @@ describe("extension-alias", () => {
 	it("should alias fully specified file when there are two alternatives", done => {
 		resolver.resolve({}, fixture, "./dir/index.js", {}, (err, result) => {
 			if (err) return done(err);
-			should(result).be.eql(path.resolve(fixture, "dir", "index.ts"));
+			expect(result).toEqual(path.resolve(fixture, "dir", "index.ts"));
 			done();
 		});
 	});
@@ -40,7 +39,7 @@ describe("extension-alias", () => {
 	it("should also allow the second alternative", done => {
 		resolver.resolve({}, fixture, "./dir2/index.js", {}, (err, result) => {
 			if (err) return done(err);
-			should(result).be.eql(path.resolve(fixture, "dir2", "index.js"));
+			expect(result).toEqual(path.resolve(fixture, "dir2", "index.js"));
 			done();
 		});
 	});
@@ -48,14 +47,14 @@ describe("extension-alias", () => {
 	it("should support alias option without an array", done => {
 		resolver.resolve({}, fixture, "./dir2/index.mjs", {}, (err, result) => {
 			if (err) return done(err);
-			should(result).be.eql(path.resolve(fixture, "dir2", "index.mts"));
+			expect(result).toEqual(path.resolve(fixture, "dir2", "index.mts"));
 			done();
 		});
 	});
 
 	it("should not allow to fallback to the original extension or add extensions", done => {
 		resolver.resolve({}, fixture, "./index.mjs", {}, (err, result) => {
-			should(err).be.instanceOf(Error);
+			expect(err).toBeInstanceOf(Error);
 			done();
 		});
 	});
@@ -73,7 +72,7 @@ describe("extension-alias", () => {
 		it("directory", done => {
 			resolver.resolve({}, fixture, "./dir2", {}, (err, result) => {
 				if (err) return done(err);
-				should(result).be.eql(path.resolve(fixture, "dir2", "index.js"));
+				expect(result).toEqual(path.resolve(fixture, "dir2", "index.js"));
 				done();
 			});
 		});
@@ -81,7 +80,7 @@ describe("extension-alias", () => {
 		it("file", done => {
 			resolver.resolve({}, fixture, "./dir2/index", {}, (err, result) => {
 				if (err) return done(err);
-				should(result).be.eql(path.resolve(fixture, "dir2", "index.js"));
+				expect(result).toEqual(path.resolve(fixture, "dir2", "index.js"));
 				done();
 			});
 		});
