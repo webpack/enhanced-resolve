@@ -1,5 +1,3 @@
-require("should");
-
 const getPaths = require("../lib/getPaths");
 
 /**
@@ -19,7 +17,7 @@ const cases = [
 cases.forEach(case_ => {
 	it(case_[0], () => {
 		const { paths, segments } = getPaths(case_[0]);
-		paths.should.be.eql(case_[1].paths);
-		segments.should.be.eql(case_[1].segments);
+		expect(paths).toEqual(case_[1].paths);
+		expect(segments).toEqual(case_[1].segments);
 	});
 });

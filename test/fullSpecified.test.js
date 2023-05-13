@@ -1,5 +1,3 @@
-require("should");
-
 const { Volume } = require("memfs");
 const { ResolverFactory } = require("../");
 
@@ -77,9 +75,9 @@ describe("fullSpecified", function () {
 	for (const key of Object.keys(failingResolves)) {
 		const request = failingResolves[key];
 		it(`should fail resolving ${key}`, () => {
-			(() => {
+			expect(() => {
 				resolver.resolveSync({}, "/a", request);
-			}).should.throwError();
+			}).toThrowError();
 		});
 	}
 
@@ -87,7 +85,7 @@ describe("fullSpecified", function () {
 		const [request, expected] = successfulResolves[key];
 		it(`should resolve ${key} successfully`, () => {
 			try {
-				resolver.resolveSync({}, "/a", request).should.be.eql(expected);
+				expect(resolver.resolveSync({}, "/a", request)).toEqual(expected);
 			} catch (e) {
 				e.message += `\n${e.details}`;
 				throw e;
@@ -116,7 +114,9 @@ describe("fullSpecified", function () {
 		const [request, expected] = successfulContextResolves[key];
 		it(`should resolve ${key} successfully to an context`, () => {
 			try {
-				contextResolver.resolveSync({}, "/a", request).should.be.eql(expected);
+				expect(contextResolver.resolveSync({}, "/a", request)).toEqual(
+					expected
+				);
 			} catch (e) {
 				e.message += `\n${e.details}`;
 				throw e;
