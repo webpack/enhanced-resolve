@@ -1,21 +1,20 @@
-require("should");
 const { parseIdentifier } = require("../lib/util/identifier");
 
 /**
- * @typedef {{input: string, expect: [string, string, string]}} TestSuite
+ * @typedef {{input: string, expected: [string, string, string]}} TestSuite
  */
 
 /**
  * @param {TestSuite[]} suites suites
  */
 function run(suites) {
-	suites.forEach(({ input, expect }) => {
+	suites.forEach(({ input, expected }) => {
 		it(input, () => {
 			const parsed = parseIdentifier(input);
 
 			if (!parsed) throw new Error("should not be null");
 
-			parsed.should.eql(expect);
+			expect(parsed).toEqual(expected);
 		});
 	});
 }
@@ -25,35 +24,35 @@ describe("parse identifier. edge cases", () => {
 	const tests = [
 		{
 			input: "path/#",
-			expect: ["path/", "", "#"]
+			expected: ["path/", "", "#"]
 		},
 		{
 			input: "path/as/?",
-			expect: ["path/as/", "?", ""]
+			expected: ["path/as/", "?", ""]
 		},
 		{
 			input: "path/#/?",
-			expect: ["path/", "", "#/?"]
+			expected: ["path/", "", "#/?"]
 		},
 		{
 			input: "path/#repo#hash",
-			expect: ["path/", "", "#repo#hash"]
+			expected: ["path/", "", "#repo#hash"]
 		},
 		{
 			input: "path/#r#hash",
-			expect: ["path/", "", "#r#hash"]
+			expected: ["path/", "", "#r#hash"]
 		},
 		{
 			input: "path/#repo/#repo2#hash",
-			expect: ["path/", "", "#repo/#repo2#hash"]
+			expected: ["path/", "", "#repo/#repo2#hash"]
 		},
 		{
 			input: "path/#r/#r#hash",
-			expect: ["path/", "", "#r/#r#hash"]
+			expected: ["path/", "", "#r/#r#hash"]
 		},
 		{
 			input: "path/#/not/a/hash?not-a-query",
-			expect: ["path/", "", "#/not/a/hash?not-a-query"]
+			expected: ["path/", "", "#/not/a/hash?not-a-query"]
 		}
 	];
 
@@ -65,27 +64,27 @@ describe("parse identifier. Windows-like paths", () => {
 	const tests = [
 		{
 			input: "path\\#",
-			expect: ["path\\", "", "#"]
+			expected: ["path\\", "", "#"]
 		},
 		{
 			input: "C:path\\as\\?",
-			expect: ["C:path\\as\\", "?", ""]
+			expected: ["C:path\\as\\", "?", ""]
 		},
 		{
 			input: "path\\#\\?",
-			expect: ["path\\", "", "#\\?"]
+			expected: ["path\\", "", "#\\?"]
 		},
 		{
 			input: "path\\#repo#hash",
-			expect: ["path\\", "", "#repo#hash"]
+			expected: ["path\\", "", "#repo#hash"]
 		},
 		{
 			input: "path\\#r#hash",
-			expect: ["path\\", "", "#r#hash"]
+			expected: ["path\\", "", "#r#hash"]
 		},
 		{
 			input: "path\\#/not/a/hash?not-a-query",
-			expect: ["path\\", "", "#/not/a/hash?not-a-query"]
+			expected: ["path\\", "", "#/not/a/hash?not-a-query"]
 		}
 	];
 
