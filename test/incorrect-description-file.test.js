@@ -29,7 +29,9 @@ describe("incorrect description file", () => {
 		resolver.resolve({}, p("pack1"), ".", ctx, function (err, result) {
 			if (!err) throw new Error("No error");
 			expect(err).toBeInstanceOf(Error);
-			expect(ctx.fileDependencies.has(p("package.json"))).toEqual(true);
+			expect(ctx.fileDependencies.has(p("pack1", "package.json"))).toEqual(
+				true
+			);
 			expect(called).toBe(true);
 			done();
 		});
@@ -45,7 +47,9 @@ describe("incorrect description file", () => {
 		};
 		resolver.resolve({}, p("pack2"), ".", ctx, function (err, result) {
 			if (!err) throw new Error("No error");
-			expect(ctx.fileDependencies.has(p("package.json"))).toEqual(true);
+			expect(ctx.fileDependencies.has(p("pack2", "package.json"))).toEqual(
+				true
+			);
 			expect(called).toBe(true);
 			done();
 		});
