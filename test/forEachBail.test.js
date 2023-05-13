@@ -1,5 +1,3 @@
-require("should");
-
 const { forEachBail } = require("../");
 
 describe("forEachBail", () => {
@@ -16,8 +14,8 @@ describe("forEachBail", () => {
 			},
 			(err, result) => {
 				if (err) return done(err);
-				result.should.be.eql("result");
-				log.should.be.eql([0, 1, 2, 3, 4, 5]);
+				expect(result).toBe("result");
+				expect(log).toEqual([0, 1, 2, 3, 4, 5]);
 				done();
 			}
 		);
@@ -29,7 +27,8 @@ describe("forEachBail", () => {
 				done(new Error("Should not be called"));
 			},
 			(err, result) => {
-				[err, result].should.be.eql([undefined, undefined]);
+				expect(err).toBeUndefined();
+				expect(result).toBeUndefined();
 				done();
 			}
 		);
@@ -41,7 +40,8 @@ describe("forEachBail", () => {
 				return callback();
 			},
 			(err, result) => {
-				[err, result].should.be.eql([undefined, undefined]);
+				expect(err).toBeUndefined();
+				expect(result).toBeUndefined();
 				done();
 			}
 		);
@@ -53,7 +53,8 @@ describe("forEachBail", () => {
 				process.nextTick(callback);
 			},
 			(err, result) => {
-				[err, result].should.be.eql([undefined, undefined]);
+				expect(err).toBeUndefined();
+				expect(result).toBeUndefined();
 				done();
 			}
 		);
