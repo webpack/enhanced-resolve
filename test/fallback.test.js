@@ -1,13 +1,11 @@
-require("should");
-
-var { Volume } = require("memfs");
-var { ResolverFactory } = require("../");
+const { Volume } = require("memfs");
+const { ResolverFactory } = require("../");
 
 describe("fallback", function () {
-	var resolver;
+	let resolver;
 
 	beforeEach(function () {
-		var fileSystem = Volume.fromJSON(
+		const fileSystem = Volume.fromJSON(
 			{
 				"/a/index": "",
 				"/a/dir/index": "",
