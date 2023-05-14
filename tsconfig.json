@@ -10,7 +10,7 @@
     "noImplicitThis": true,
     "alwaysStrict": true,
     "strictNullChecks": true,
-    "types": ["node", "mocha"],
+    "types": ["node"],
     "esModuleInterop": true
   },
   "include": ["lib/**/*.js", "declarations.d.ts"]
