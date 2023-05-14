@@ -1,4 +1,3 @@
-const should = require("should");
 const path = require("path");
 const fs = require("fs");
 
@@ -58,10 +57,10 @@ describe("should resolve all aliases", () => {
 		};
 
 		resolver.resolve({}, fixtures, "index/b", context, (err, result) => {
-			should(err).be.eql(null);
-			should(result).be.eql(undefined);
-			should(paths).be.eql(makeFixturePaths(["/a/foo/b", "/a/foo-2/b"]));
-			should(contextifyDependencies(fileDependencies)).be.eql([
+			expect(err).toEqual(null);
+			expect(result).toBeUndefined();
+			expect(paths).toEqual(makeFixturePaths(["/a/foo/b", "/a/foo-2/b"]));
+			expect(contextifyDependencies(fileDependencies)).toEqual([
 				"",
 				"/a",
 				"/a/foo",
@@ -69,7 +68,7 @@ describe("should resolve all aliases", () => {
 				"/a/foo-2/b",
 				"/a/foo/b"
 			]);
-			should(contextifyDependencies(missingDependencies)).be.eql([
+			expect(contextifyDependencies(missingDependencies)).toEqual([
 				"/a/foo-2/b",
 				"/a/foo-2/b.js",
 				"/a/foo-2/package.json",
@@ -79,7 +78,7 @@ describe("should resolve all aliases", () => {
 				"/a/package.json",
 				"/package.json"
 			]);
-			should(Array.from(contextDependencies).sort()).be.eql([]);
+			expect(Array.from(contextDependencies).sort()).toEqual([]);
 			done();
 		});
 	});
@@ -99,10 +98,10 @@ describe("should resolve all aliases", () => {
 		};
 
 		modulesResolver.resolve({}, fixtures, "foo/a", context, (err, result) => {
-			should(err).be.eql(null);
-			should(result).be.eql(undefined);
-			should(paths).be.eql(makeFixturePaths(["/a/foo/a", "/b/foo/a"]));
-			should(contextifyDependencies(fileDependencies)).be.eql([
+			expect(err).toEqual(null);
+			expect(result).toBeUndefined();
+			expect(paths).toEqual(makeFixturePaths(["/a/foo/a", "/b/foo/a"]));
+			expect(contextifyDependencies(fileDependencies)).toEqual([
 				"",
 				"/a",
 				"/a/foo",
@@ -111,7 +110,7 @@ describe("should resolve all aliases", () => {
 				"/b/foo",
 				"/b/foo/a"
 			]);
-			should(contextifyDependencies(missingDependencies)).be.eql([
+			expect(contextifyDependencies(missingDependencies)).toEqual([
 				"/a/foo/a",
 				"/a/foo/a.js",
 				"/a/foo/package.json",
@@ -122,7 +121,7 @@ describe("should resolve all aliases", () => {
 				"/b/package.json",
 				"/package.json"
 			]);
-			should(Array.from(contextDependencies).sort()).be.eql([]);
+			expect(Array.from(contextDependencies).sort()).toEqual([]);
 			done();
 		});
 	});
@@ -136,9 +135,9 @@ describe("should resolve all aliases", () => {
 		};
 
 		resolver.resolve({}, fixtures, "index/c", context, (err, result) => {
-			should(err).be.eql(null);
-			should(result).be.eql(undefined);
-			should(paths).be.eql(makeFixturePaths(["/a/foo-2/c"]));
+			expect(err).toEqual(null);
+			expect(result).toBeUndefined();
+			expect(paths).toEqual(makeFixturePaths(["/a/foo-2/c"]));
 			done();
 		});
 	});
@@ -158,15 +157,15 @@ describe("should resolve all aliases", () => {
 		};
 
 		resolver.resolve({}, fixtures, "foo", context, (err, result) => {
-			should(err).be.eql(null);
-			should(result).be.eql(undefined);
-			should(paths).be.eql([false]);
-			should(contextifyDependencies(fileDependencies)).be.eql([]);
-			should(contextifyDependencies(missingDependencies)).be.eql([
+			expect(err).toEqual(null);
+			expect(result).toBeUndefined();
+			expect(paths).toEqual([false]);
+			expect(contextifyDependencies(fileDependencies)).toEqual([]);
+			expect(contextifyDependencies(missingDependencies)).toEqual([
 				"/node_modules",
 				"/package.json"
 			]);
-			should(Array.from(contextDependencies).sort()).be.eql([]);
+			expect(Array.from(contextDependencies).sort()).toEqual([]);
 			done();
 		});
 	});
@@ -186,12 +185,12 @@ describe("should resolve all aliases", () => {
 		};
 
 		resolver.resolve({}, fixtures, "index/unknown", context, (err, result) => {
-			should(err).not.be.eql(null);
-			should(err).not.be.eql(undefined);
-			should(result).be.eql(undefined);
-			should(paths).be.eql([]);
-			should(contextifyDependencies(fileDependencies)).be.eql([]);
-			should(contextifyDependencies(missingDependencies)).be.eql([
+			expect(err).not.toEqual(null);
+			expect(err).not.toBeUndefined();
+			expect(result).toBeUndefined();
+			expect(paths).toEqual([]);
+			expect(contextifyDependencies(fileDependencies)).toEqual([]);
+			expect(contextifyDependencies(missingDependencies)).toEqual([
 				"/a/foo-2/package.json",
 				"/a/foo-2/unknown",
 				"/a/foo-2/unknown.js",
@@ -201,7 +200,7 @@ describe("should resolve all aliases", () => {
 				"/a/package.json",
 				"/package.json"
 			]);
-			should(Array.from(contextDependencies).sort()).be.eql([]);
+			expect(Array.from(contextDependencies).sort()).toEqual([]);
 			done();
 		});
 	});
@@ -236,20 +235,21 @@ describe("should resolve all aliases", () => {
 
 			resolver.resolve({}, fixtures, "index/a", context, (err, result) => {
 				calls++;
-				should(calls).be.eql(1);
-				should(err).be.eql(null);
-				should(result).be.eql(undefined);
-				should(paths).be.eql([false]);
-				should(contextifyDependencies(fileDependencies)).be.eql([
+				expect(calls).toEqual(1);
+				expect(err).toEqual(null);
+				expect(result).toBeUndefined();
+				expect(paths).toEqual([false]);
+				expect(contextifyDependencies(fileDependencies)).toEqual([
 					"/c/foo/package.json"
 				]);
-				should(contextifyDependencies(missingDependencies)).be.eql([
+				expect(contextifyDependencies(missingDependencies)).toEqual([
 					"/c/foo/a",
 					"/c/foo/a.js",
 					"/package.json"
 				]);
-				should(Array.from(contextDependencies).sort()).be.eql([]);
-				should(beatifyLogs(logs)).be.eql([
+				expect(Array.from(contextDependencies).sort()).toEqual([]);
+
+				expect(beatifyLogs(logs)).toEqual([
 					"resolve 'index/a' in 'fixtures'",
 					"  Parsed request is a module",
 					"  using description file (relative path: ./test/fixtures/yield)",
@@ -267,6 +267,7 @@ describe("should resolve all aliases", () => {
 						path.sep
 					)} is not a directory`
 				]);
+
 				done();
 			});
 		});
@@ -369,18 +370,18 @@ describe("should resolve all aliases", () => {
 
 				resolver.resolve({}, fixtures, "index/a", context, (err, result) => {
 					calls++;
-					should(calls).be.eql(1);
-					should(err).be.eql(null);
-					should(result).be.eql(undefined);
-					should(paths).be.eql(makeFixturePaths(expectedResult));
-					should(contextifyDependencies(fileDependencies)).be.eql([
+					expect(calls).toEqual(1);
+					expect(err).toEqual(null);
+					expect(result).toBeUndefined();
+					expect(paths).toEqual(makeFixturePaths(expectedResult));
+					expect(contextifyDependencies(fileDependencies)).toEqual([
 						"",
 						"/a",
 						"/a/foo",
 						"/a/foo/a",
 						"/c/foo/package.json"
 					]);
-					should(contextifyDependencies(missingDependencies)).be.eql([
+					expect(contextifyDependencies(missingDependencies)).toEqual([
 						"/a/foo/a",
 						"/a/foo/a.js",
 						"/a/foo/package.json",
@@ -389,8 +390,9 @@ describe("should resolve all aliases", () => {
 						"/c/foo/a.js",
 						"/package.json"
 					]);
-					should(Array.from(contextDependencies).sort()).be.eql([]);
-					should(beatifyLogs(logs)).be.eql(expectedLogs);
+					expect(Array.from(contextDependencies).sort()).toEqual([]);
+					expect(beatifyLogs(logs)).toEqual(expectedLogs);
+
 					done();
 				});
 			}
@@ -424,9 +426,9 @@ describe("should resolve all aliases", () => {
 				};
 				resolver.resolve({}, fixtures, "unknown", context, (err, result) => {
 					if (err) done(err);
-					should(err).be.eql(null);
-					should(result).be.eql(undefined);
-					should(paths).be.eql(["/a"]);
+					expect(err).toBeNull();
+					expect(result).toBeUndefined();
+					expect(paths).toEqual(["/a"]);
 					done();
 				});
 			});
@@ -446,10 +448,10 @@ describe("should resolve all aliases", () => {
 					yield: obj => paths.push(obj.path)
 				};
 				resolver.resolve({}, fixtures, "unknown", context, (err, result) => {
-					should(err).not.be.eql(null);
-					should(/** @type {Error} */ (err).message).be.eql("error");
-					should(result).be.eql(undefined);
-					should(paths).be.eql([]);
+					expect(err).not.toBe(null);
+					expect(err.message).toBe("error");
+					expect(result).toBeUndefined();
+					expect(paths).toEqual([]);
 					done();
 				});
 			});
@@ -477,24 +479,23 @@ describe("should resolve all aliases", () => {
 						"index/b",
 						{ yield: obj => paths.push(obj.path) },
 						(err, result) => {
-							should(err).be.eql(null);
-							should(result).be.eql(undefined);
-							should(paths).be.eql(
+							expect(err).toBe(null);
+							expect(result).toBeUndefined();
+							expect(paths).toEqual(
 								makeFixturePaths(["/a/foo/b", "/a/foo-2/b"])
 							);
 							// original + 2 aliases
-							should(Object.keys(cache)).have.length(3);
+							expect(Object.keys(cache)).toHaveLength(3);
+
 							const cacheId = Object.keys(cache).find(id => {
 								const { request } = JSON.parse(id);
 								return request === "index/b";
 							});
-							should(cacheId).not.be.eql(undefined);
-							should(
-								Array.isArray(cache[/** @type {string} */ (cacheId)])
-							).be.eql(true);
-							should(
-								cache[/** @type {string} */ (cacheId)].map(o => o.path)
-							).be.eql(makeFixturePaths(["/a/foo/b", "/a/foo-2/b"]));
+							expect(cacheId).not.toBeUndefined();
+							expect(Array.isArray(cache[cacheId])).toBe(true);
+							expect(cache[cacheId].map(o => o.path)).toEqual(
+								makeFixturePaths(["/a/foo/b", "/a/foo-2/b"])
+							);
 							done();
 						}
 					);
@@ -522,19 +523,17 @@ describe("should resolve all aliases", () => {
 						"foo",
 						{ yield: obj => paths.push(obj.path) },
 						(err, result) => {
-							should(err).be.eql(null);
-							should(result).be.eql(undefined);
-							should(paths).be.eql([false]);
+							expect(err).toBe(null);
+							expect(result).toBeUndefined();
+							expect(paths).toEqual([false]);
+
 							// original + 0 aliases
-							should(Object.keys(cache)).have.length(1);
+							expect(Object.keys(cache)).toHaveLength(1);
+
 							const cacheId = Object.keys(cache)[0];
-							should(cacheId).not.be.eql(undefined);
-							should(
-								Array.isArray(cache[/** @type {string} */ (cacheId)])
-							).be.eql(true);
-							should(
-								cache[/** @type {string} */ (cacheId)].map(o => o.path)
-							).be.eql([false]);
+							expect(cacheId).not.toBeUndefined();
+							expect(Array.isArray(cache[cacheId])).toBe(true);
+							expect(cache[cacheId].map(o => o.path)).toEqual([false]);
 							done();
 						}
 					);
