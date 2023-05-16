@@ -9,11 +9,12 @@ describe("forEachBail", () => {
 				log.push(value);
 				if (value % 4 === 0) return callback(null, undefined);
 				if (value % 2 === 0) return callback();
-				if (value === 5) return callback(null, "result");
+				if (value === 5) return callback(null, { path: "test" });
 				process.nextTick(callback);
 			},
 			(err, result) => {
 				if (err) return done(err);
+				if (!result) throw new Error("Should have result");
 				expect(result).toBe("result");
 				expect(log).toEqual([0, 1, 2, 3, 4, 5]);
 				done();

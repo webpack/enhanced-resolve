@@ -18,6 +18,7 @@ declare interface AliasOptions {
 }
 declare interface BaseResolveRequest {
 	path: string | false;
+	context?: object;
 	descriptionFilePath?: string;
 	descriptionFileRoot?: string;
 	descriptionFileData?: object;
@@ -211,6 +212,13 @@ declare interface FileSystemDirent {
 declare interface FileSystemStats {
 	isDirectory: () => boolean;
 	isFile: () => boolean;
+}
+declare interface Iterator<T> {
+	(
+		item: T,
+		callback: (err?: null | Error, result?: null | ResolveRequest) => void,
+		i: number
+	): void;
 }
 declare class LogInfoPlugin {
 	constructor(
@@ -442,7 +450,7 @@ declare abstract class Resolver {
 		request: ResolveRequest,
 		message: null | string,
 		resolveContext: ResolveContext,
-		callback: (err?: null | Error, result?: any) => void
+		callback: (err?: null | Error, result?: ResolveRequest) => void
 	): void;
 	parse(identifier: string): ParsedIdentifier;
 	isModule(path: string): boolean;
@@ -652,11 +660,8 @@ declare namespace exports {
 	}
 	export const forEachBail: <T>(
 		array: T[],
-		iterator: (
-			item: T,
-			callback: (err?: null | Error, result?: any) => void
-		) => void,
-		callback: (err?: null | Error, result?: ResolveRequest) => void
+		iterator: Iterator<T>,
+		callback: (err?: null | Error, result?: null | ResolveRequest) => void
 	) => void;
 	export type ResolveCallback = (
 		err: null | ErrorWithDetail,
