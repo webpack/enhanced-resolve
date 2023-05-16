@@ -26,6 +26,9 @@ declare interface BaseResolveRequest {
 	relativePath?: string;
 	ignoreSymlinks?: boolean;
 	fullySpecified?: boolean;
+	__innerRequest?: string;
+	__innerRequest_request?: string;
+	__innerRequest_relativePath?: string;
 }
 declare class CachedInputFileSystem {
 	constructor(fileSystem?: any, duration?: any);
