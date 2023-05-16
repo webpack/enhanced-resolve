@@ -7,8 +7,9 @@
 import { Dirent } from "fs";
 import { AsyncSeriesBailHook, AsyncSeriesHook, SyncHook } from "tapable";
 
+type Alias = string | false | string[];
 declare interface AliasOption {
-	alias: string | false | string[];
+	alias: Alias;
 	name: string;
 	onlyModule?: boolean;
 }
@@ -213,10 +214,10 @@ declare interface FileSystemStats {
 	isDirectory: () => boolean;
 	isFile: () => boolean;
 }
-declare interface Iterator<T> {
+declare interface Iterator<T, Z> {
 	(
 		item: T,
-		callback: (err?: null | Error, result?: null | ResolveRequest) => void,
+		callback: (err?: null | Error, result?: null | Z) => void,
 		i: number
 	): void;
 }
@@ -658,10 +659,10 @@ declare namespace exports {
 	export namespace ResolverFactory {
 		export let createResolver: (options: UserResolveOptions) => Resolver;
 	}
-	export const forEachBail: <T>(
+	export const forEachBail: <T, Z>(
 		array: T[],
-		iterator: Iterator<T>,
-		callback: (err?: null | Error, result?: null | ResolveRequest) => void
+		iterator: Iterator<T, Z>,
+		callback: (err?: null | Error, result?: null | Z) => void
 	) => void;
 	export type ResolveCallback = (
 		err: null | ErrorWithDetail,
