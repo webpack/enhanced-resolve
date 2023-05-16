@@ -22,7 +22,7 @@ declare interface BaseResolveRequest {
 	context?: object;
 	descriptionFilePath?: string;
 	descriptionFileRoot?: string;
-	descriptionFileData?: object;
+	descriptionFileData?: JsonObject;
 	relativePath?: string;
 	ignoreSymlinks?: boolean;
 	fullySpecified?: boolean;
@@ -31,7 +31,7 @@ declare interface BaseResolveRequest {
 	__innerRequest_relativePath?: string;
 }
 declare class CachedInputFileSystem {
-	constructor(fileSystem?: any, duration?: any);
+	constructor(fileSystem: any, duration: number);
 	fileSystem: any;
 	lstat?: {
 		(arg0: string, arg1: FileSystemCallback<FileSystemStats>): void;
@@ -103,7 +103,7 @@ declare class CachedInputFileSystem {
 		): void;
 	};
 	readlinkSync: (arg0: string, arg1?: object) => string | Buffer;
-	purge(what?: any): void;
+	purge(what?: string | string[] | Set<string>): void;
 }
 declare class CloneBasenamePlugin {
 	constructor(
@@ -224,6 +224,17 @@ declare interface Iterator<T, Z> {
 		i: number
 	): void;
 }
+type JsonObject = { [index: string]: JsonValue } & {
+	[index: string]:
+		| undefined
+		| null
+		| string
+		| number
+		| boolean
+		| JsonObject
+		| JsonValue[];
+};
+type JsonValue = null | string | number | boolean | JsonObject | JsonValue[];
 declare class LogInfoPlugin {
 	constructor(
 		source:
@@ -609,7 +620,7 @@ declare interface UserResolveOptions {
 	preferAbsolute?: boolean;
 }
 declare interface WriteOnlySet<T> {
-	add: (T?: any) => void;
+	add: (item: T) => void;
 }
 declare function exports(
 	context: object,
