@@ -103,7 +103,7 @@ declare class CachedInputFileSystem {
 		): void;
 	};
 	readlinkSync: (arg0: string, arg1?: object) => string | Buffer;
-	purge(what?: string | string[] | Set<string>): void;
+	purge(what?: string | Set<string> | string[]): void;
 }
 declare class CloneBasenamePlugin {
 	constructor(
@@ -235,6 +235,23 @@ type JsonObject = { [index: string]: JsonValue } & {
 		| JsonValue[];
 };
 type JsonValue = null | string | number | boolean | JsonObject | JsonValue[];
+declare interface KnownHooks {
+	resolveStep: SyncHook<
+		[
+			AsyncSeriesBailHook<
+				[ResolveRequest, ResolveContext],
+				null | ResolveRequest
+			>,
+			ResolveRequest
+		]
+	>;
+	noResolve: SyncHook<[ResolveRequest, Error]>;
+	resolve: AsyncSeriesBailHook<
+		[ResolveRequest, ResolveContext],
+		null | ResolveRequest
+	>;
+	result: AsyncSeriesHook<[ResolveRequest, ResolveContext]>;
+}
 declare class LogInfoPlugin {
 	constructor(
 		source:
@@ -406,23 +423,7 @@ type ResolveRequest = BaseResolveRequest & Partial<ParsedIdentifier>;
 declare abstract class Resolver {
 	fileSystem: FileSystem;
 	options: ResolveOptions;
-	hooks: {
-		resolveStep: SyncHook<
-			[
-				AsyncSeriesBailHook<
-					[ResolveRequest, ResolveContext],
-					null | ResolveRequest
-				>,
-				ResolveRequest
-			]
-		>;
-		noResolve: SyncHook<[ResolveRequest, Error]>;
-		resolve: AsyncSeriesBailHook<
-			[ResolveRequest, ResolveContext],
-			null | ResolveRequest
-		>;
-		result: AsyncSeriesHook<[ResolveRequest, ResolveContext]>;
-	};
+	hooks: KnownHooks;
 	ensureHook(
 		name:
 			| string
