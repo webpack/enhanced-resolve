@@ -32,8 +32,12 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: yarn
-      - name: Install dependencies
-        run: yarn --frozen-lockfile
+      - run: |
+          yarn upgrade typescript@^4 --ignore-engines
+          yarn --frozen-lockfile
+        if: matrix.node-version == '10.x'
+      - run: yarn --frozen-lockfile
+        if: matrix.node-version != '10.x'
       - name: Run tests with coverage
         run: npm run test:coverage -- --ci
       - if: ${{ matrix.os != 'windows-latest' }}
