@@ -42,11 +42,12 @@
   "types": "types.d.ts",
   "homepage": "http://github.com/webpack/enhanced-resolve",
   "scripts": {
-    "lint": "yarn run code-lint && yarn run type-lint && yarn run special-lint && yarn run spelling",
+    "lint": "yarn run code-lint && yarn run type-lint && yarn typings-test && yarn run special-lint && yarn run spelling",
     "fix": "yarn run code-lint-fix && yarn run special-lint-fix",
     "code-lint": "eslint --cache lib test",
     "code-lint-fix": "eslint --cache lib test --fix",
     "type-lint": "tsc",
+    "typings-test": "tsc -p tsconfig.types.test.json",
     "type-report": "rimraf coverage && yarn cover:types && yarn cover:report && open-cli coverage/lcov-report/index.html",
     "special-lint": "node node_modules/tooling/lockfile-lint && node node_modules/tooling/inherit-types && node node_modules/tooling/format-file-header && node node_modules/tooling/generate-types",
     "special-lint-fix": "node node_modules/tooling/inherit-types --write && node node_modules/tooling/format-file-header --write && node node_modules/tooling/generate-types --write",
