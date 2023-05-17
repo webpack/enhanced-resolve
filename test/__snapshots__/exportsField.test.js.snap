@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ExportsFieldPlugin should log the correct info 1`] = `
+Array [
+  "resolve 'exports-field/dist/browser.js' in '...'",
+  "  Parsed request is a module",
+  "  using description file: .../package.json (relative path: .)",
+  "    resolve as module",
+  "      looking for modules in .../node_modules",
+  "        existing directory .../node_modules/exports-field",
+  "          using description file: .../node_modules/exports-field/package.json (relative path: .)",
+  "            using exports field: ./lib/lib2/browser.js",
+  "              using description file: .../node_modules/exports-field/package.json (relative path: ./lib/lib2/browser.js)",
+  "                .../node_modules/exports-field/lib/lib2/browser.js doesn't exist",
+  "            using exports field: ./lib/browser.js",
+  "              using description file: .../node_modules/exports-field/package.json (relative path: ./lib/browser.js)",
+  "                existing file: .../node_modules/exports-field/lib/browser.js",
+  "                  reporting result .../node_modules/exports-field/lib/browser.js",
+]
+`;

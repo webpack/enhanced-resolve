@@ -2,7 +2,6 @@
 
 const fs = require("fs");
 const path = require("path");
-const should = require("should");
 const SyncAsyncFileSystemDecorator = require("../lib/SyncAsyncFileSystemDecorator");
 
 describe("SyncAsyncFileSystemDecorator  stat", function () {
@@ -12,9 +11,10 @@ describe("SyncAsyncFileSystemDecorator  stat", function () {
 			path.join(__dirname, "fixtures", "decorated-fs", "exists.js"),
 			{ bigint: true },
 			function (error, result) {
-				should(error).be.null();
-				should(result).have.properties(["size", "birthtime"]);
-				should(result.size).be.of.type("bigint");
+				expect(error).toBeNull();
+				expect(result).toHaveProperty("size");
+				expect(result).toHaveProperty("birthtime");
+				expect(typeof result.size).toEqual("bigint");
 				done();
 			}
 		);
@@ -25,9 +25,10 @@ describe("SyncAsyncFileSystemDecorator  stat", function () {
 		decoratedFs.stat(
 			path.join(__dirname, "fixtures", "decorated-fs", "exists.js"),
 			function (error, result) {
-				should(error).be.null();
-				should(result).have.properties(["size", "birthtime"]);
-				should(result.size).be.of.type("number");
+				expect(error).toBeNull();
+				expect(result).toHaveProperty("size");
+				expect(result).toHaveProperty("birthtime");
+				expect(typeof result.size).toEqual("number");
 				done();
 			}
 		);

@@ -1,13 +1,11 @@
-var should = require("should");
-
-var path = require("path");
-var resolve = require("../");
+const path = require("path");
+const resolve = require("../");
 
 describe("missing", function () {
 	/**
 	 * @type {Array<[string, string, Array<string>]>}
 	 */
-	var testCases = [
+	const testCases = [
 		[
 			path.join(__dirname, "fixtures"),
 			"./missing-file",
@@ -74,11 +72,11 @@ describe("missing", function () {
 	testCases.forEach(function (testCase) {
 		it(
 			"should tell about missing file when trying to resolve " + testCase[1],
-			function (done) {
-				var callback = function (err, filename) {
-					Array.from(missingDependencies)
-						.sort()
-						.should.containDeep(testCase[2].sort());
+			done => {
+				const callback = function (err, filename) {
+					expect(Array.from(missingDependencies).sort()).toEqual(
+						expect.arrayContaining(testCase[2].sort())
+					);
 					done();
 				};
 				const missingDependencies = new Set();
@@ -88,13 +86,14 @@ describe("missing", function () {
 		it(
 			"should report error details exactly once when trying to resolve " +
 				testCase[1],
-			function (done) {
-				var callback = function (err, filename) {
+			done => {
+				const callback = function (err, filename) {
 					if (err) {
-						var details = err.details.split("\n");
-						var firstDetail = details.shift();
-						should.notEqual(firstDetail.indexOf(testCase[1]), -1);
-						details.should.not.containDeep([firstDetail]);
+						const details = err.details.split("\n");
+						const firstDetail = details.shift();
+
+						expect(firstDetail).toContain(testCase[1]);
+						expect(details).not.toContain(firstDetail);
 					}
 					done();
 				};

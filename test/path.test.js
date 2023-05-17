@@ -1,5 +1,3 @@
-require("should");
-
 const { checkImportsExportsFieldTarget } = require("../lib/util/path");
 
 describe("checkImportsExportsFieldTarget", () => {
@@ -22,8 +20,9 @@ describe("checkImportsExportsFieldTarget", () => {
 		it(case_, done => {
 			const error = checkImportsExportsFieldTarget(case_);
 			if (!error) return done("expect error");
-			error.should.be.instanceof(Error);
-			error.message.should.match(/Trying to access out of package scope/);
+
+			expect(error).toBeInstanceOf(Error);
+			expect(error.message).toMatch(/Trying to access out of package scope/);
 			done();
 		});
 	});

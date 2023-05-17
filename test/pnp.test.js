@@ -1,16 +1,12 @@
-require("should");
-
 const path = require("path");
 const fs = require("fs");
 const { ResolverFactory, CachedInputFileSystem } = require("../");
 
-/** @typedef {import("../lib/PnpPlugin").PnpApiImpl} PnpApi */
-
 const nodeFileSystem = new CachedInputFileSystem(fs, 4000);
-
 const fixture = path.resolve(__dirname, "fixtures", "pnp");
 
 let isAdmin = false;
+
 try {
 	fs.symlinkSync("dir", path.resolve(fixture, "pkg/symlink"), "dir");
 	isAdmin = true;
@@ -29,10 +25,10 @@ describe("pnp", () => {
 	let resolverFuzzy;
 	let resolver;
 	if (isAdmin) {
-		before(() => {
+		beforeAll(() => {
 			fs.symlinkSync("dir", path.resolve(fixture, "pkg/symlink"), "dir");
 		});
-		after(() => {
+		afterAll(() => {
 			fs.unlinkSync(path.resolve(fixture, "pkg/symlink"));
 		});
 	}
@@ -79,14 +75,14 @@ describe("pnp", () => {
 		pnpApi.mocks.set("pkg", path.resolve(fixture, "pkg"));
 		resolver.resolve({}, __dirname, "pkg/dir/index.js", {}, (err, result) => {
 			if (err) return done(err);
-			result.should.equal(path.resolve(fixture, "pkg/dir/index.js"));
+			expect(result).toEqual(path.resolve(fixture, "pkg/dir/index.js"));
 			done();
 		});
 	});
 	it("should not resolve a not fully specified request when fullySpecified is set", done => {
 		pnpApi.mocks.set("pkg", path.resolve(fixture, "pkg"));
 		resolver.resolve({}, __dirname, "pkg/dir/index", {}, (err, result) => {
-			err.should.be.instanceof(Error);
+			expect(err).toBeInstanceOf(Error);
 			done();
 		});
 	});
@@ -101,8 +97,8 @@ describe("pnp", () => {
 			{ fileDependencies },
 			(err, result) => {
 				if (err) return done(err);
-				result.should.equal(path.resolve(fixture, "pkg/dir/index.js"));
-				Array.from(fileDependencies).should.containEql(
+				expect(result).toEqual(path.resolve(fixture, "pkg/dir/index.js"));
+				expect(Array.from(fileDependencies)).toContainEqual(
 					path.resolve(fixture, ".pnp.js")
 				);
 				done();
@@ -113,7 +109,7 @@ describe("pnp", () => {
 		pnpApi.mocks.set("pkg", path.resolve(fixture, "pkg"));
 		resolver.resolve({}, __dirname, "pkg", {}, (err, result) => {
 			if (err) return done(err);
-			result.should.equal(path.resolve(fixture, "pkg/main.js"));
+			expect(result).toEqual(path.resolve(fixture, "pkg/main.js"));
 			done();
 		});
 	});
@@ -121,7 +117,7 @@ describe("pnp", () => {
 		pnpApi.mocks.set("@user/pkg", path.resolve(fixture, "pkg"));
 		resolver.resolve({}, __dirname, "@user/pkg", {}, (err, result) => {
 			if (err) return done(err);
-			result.should.equal(path.resolve(fixture, "pkg/main.js"));
+			expect(result).toEqual(path.resolve(fixture, "pkg/main.js"));
 			done();
 		});
 	});
@@ -137,7 +133,7 @@ describe("pnp", () => {
 						{},
 						(err, result) => {
 							if (err) return done(err);
-							result.should.equal(
+							expect(result).toEqual(
 								path.resolve(fixture, "pkg/symlink/index.js")
 							);
 							done();
@@ -155,7 +151,9 @@ describe("pnp", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				result.should.equal(path.resolve(fixture, "pkg/typescript/index.ts"));
+				expect(result).toEqual(
+					path.resolve(fixture, "pkg/typescript/index.ts")
+				);
 				done();
 			}
 		);
@@ -169,7 +167,7 @@ describe("pnp", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				result.should.equal(
+				expect(result).toEqual(
 					path.resolve(fixture, "pkg/package-alias/browser.js")
 				);
 				done();
@@ -185,7 +183,9 @@ describe("pnp", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				result.should.equal(path.resolve(fixture, "../node_modules/m2/b.js"));
+				expect(result).toEqual(
+					path.resolve(fixture, "../node_modules/m2/b.js")
+				);
 				done();
 			}
 		);
@@ -199,7 +199,7 @@ describe("pnp", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				result.should.equal(
+				expect(result).toEqual(
 					path.resolve(
 						__dirname,
 						"fixtures/prefer-pnp/alternative-modules/m1/b.js"
@@ -218,7 +218,7 @@ describe("pnp", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				result.should.equal(path.resolve(fixture, "pkg/index.js"));
+				expect(result).toEqual(path.resolve(fixture, "pkg/index.js"));
 				done();
 			}
 		);
@@ -232,7 +232,7 @@ describe("pnp", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				result.should.equal(path.resolve(fixture, "pkg/index.js"));
+				expect(result).toEqual(path.resolve(fixture, "pkg/index.js"));
 				done();
 			}
 		);
@@ -245,7 +245,7 @@ describe("pnp", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				result.should.equal(path.resolve(fixture, "../pnp-a/m2/a.js"));
+				expect(result).toEqual(path.resolve(fixture, "../pnp-a/m2/a.js"));
 				done();
 			}
 		);
@@ -259,7 +259,7 @@ describe("pnp", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				result.should.equal(path.resolve(fixture, "pkg3/a.js"));
+				expect(result).toEqual(path.resolve(fixture, "pkg3/a.js"));
 				done();
 			}
 		);
@@ -273,7 +273,7 @@ describe("pnp", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				result.should.equal(path.resolve(fixture, "pkg3/a.js"));
+				expect(result).toEqual(path.resolve(fixture, "pkg3/a.js"));
 				done();
 			}
 		);

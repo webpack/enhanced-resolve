@@ -1,6 +1,5 @@
 const path = require("path");
 const fs = require("fs");
-const should = require("should");
 const { processImportsField } = require("../lib/util/entrypoints");
 const ResolverFactory = require("../lib/ResolverFactory");
 const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
@@ -1161,17 +1160,19 @@ describe("Process imports field", function exportsField() {
 	testCases.forEach(testCase => {
 		it(testCase.name, () => {
 			if (testCase.expect instanceof Error) {
-				should.throws(() =>
+				expect(() =>
 					processImportsField(testCase.suite[0])(
 						testCase.suite[1],
 						new Set(testCase.suite[2])
 					)
-				);
+				).toThrowError();
 			} else {
-				processImportsField(testCase.suite[0])(
-					testCase.suite[1],
-					new Set(testCase.suite[2])
-				).should.eql(testCase.expect);
+				expect(
+					processImportsField(testCase.suite[0])(
+						testCase.suite[1],
+						new Set(testCase.suite[2])
+					)
+				).toEqual(testCase.expect);
 			}
 		});
 	});
@@ -1191,7 +1192,7 @@ describe("ImportsFieldPlugin", () => {
 		resolver.resolve({}, fixture, "#imports-field", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) throw new Error("No result");
-			result.should.equal(path.resolve(fixture, "b.js"));
+			expect(result).toEqual(path.resolve(fixture, "b.js"));
 			done();
 		});
 	});
@@ -1205,7 +1206,7 @@ describe("ImportsFieldPlugin", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) throw new Error("No result");
-				result.should.equal(path.resolve(fixture, "b.js"));
+				expect(result).toEqual(path.resolve(fixture, "b.js"));
 				done();
 			}
 		);
@@ -1214,8 +1215,8 @@ describe("ImportsFieldPlugin", () => {
 	it("should disallow resolve out of package scope", done => {
 		resolver.resolve({}, fixture, "#b", {}, (err, result) => {
 			if (!err) throw new Error(`expect error, got ${result}`);
-			err.should.be.instanceof(Error);
-			err.message.should.match(/Trying to access out of package scope/);
+			expect(err).toBeInstanceOf(Error);
+			expect(err.message).toMatch(/Trying to access out of package scope/);
 			done();
 		});
 	});
@@ -1232,7 +1233,7 @@ describe("ImportsFieldPlugin", () => {
 		resolver.resolve({}, fixture, "#imports-field", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) throw new Error("No result");
-			result.should.equal(path.resolve(fixture, "./b.js"));
+			expect(result).toEqual(path.resolve(fixture, "b.js"));
 			done();
 		});
 	});
@@ -1249,7 +1250,7 @@ describe("ImportsFieldPlugin", () => {
 		resolver.resolve({}, fixture, "#b", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) throw new Error("No result");
-			result.should.equal(path.resolve(fixture, "./a.js"));
+			expect(result).toEqual(path.resolve(fixture, "a.js"));
 			done();
 		});
 	});
@@ -1258,7 +1259,7 @@ describe("ImportsFieldPlugin", () => {
 		resolver.resolve({}, fixture, "#a/dist/main.js", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) throw new Error("No result");
-			result.should.equal(
+			expect(result).toEqual(
 				path.resolve(fixture, "node_modules/a/lib/lib2/main.js")
 			);
 			done();
@@ -1268,8 +1269,8 @@ describe("ImportsFieldPlugin", () => {
 	it("should resolve package #2", done => {
 		resolver.resolve({}, fixture, "#a", {}, (err, result) => {
 			if (!err) throw new Error(`expect error, got ${result}`);
-			err.should.be.instanceof(Error);
-			err.message.should.match(/is not imported from package/);
+			expect(err).toBeInstanceOf(Error);
+			expect(err.message).toMatch(/is not imported from package/);
 			done();
 		});
 	});
@@ -1278,7 +1279,7 @@ describe("ImportsFieldPlugin", () => {
 		resolver.resolve({}, fixture, "#ccc/index.js", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) throw new Error("No result");
-			result.should.equal(path.resolve(fixture, "node_modules/c/index.js"));
+			expect(result).toEqual(path.resolve(fixture, "node_modules/c/index.js"));
 			done();
 		});
 	});
@@ -1287,7 +1288,7 @@ describe("ImportsFieldPlugin", () => {
 		resolver.resolve({}, fixture, "#c", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) throw new Error("No result");
-			result.should.equal(path.resolve(fixture, "node_modules/c/index.js"));
+			expect(result).toEqual(path.resolve(fixture, "node_modules/c/index.js"));
 			done();
 		});
 	});
@@ -1309,7 +1310,7 @@ describe("ImportsFieldPlugin", () => {
 				if (err) return done(err);
 				if (!result) throw new Error("No result");
 				console.log(result);
-				result.should.equal(file);
+				expect(result).toEqual(file);
 				done();
 			});
 		});
@@ -1325,34 +1326,12 @@ describe("ImportsFieldPlugin", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) throw new Error("No result");
-				result.should.be.eql(path.join(fixture, "node_modules/a/lib/index.js"));
-				log
-					.map(line => line.replace(fixture, "...").replace(/\\/g, "/"))
-					.should.be.eql([
-						"resolve '#a/dist/index.js' in '...'",
-						"  using description file: .../package.json (relative path: .)",
-						"    resolve as internal import",
-						"      using imports field: a/dist/index.js",
-						"        Parsed request is a module",
-						"        using description file: .../package.json (relative path: .)",
-						"          resolve as module",
-						"            looking for modules in .../node_modules",
-						"              existing directory .../node_modules/a",
-						"                using description file: .../node_modules/a/package.json (relative path: .)",
-						"                  using exports field: ./lib/lib2/index.js",
-						"                    using description file: .../node_modules/a/package.json (relative path: ./lib/lib2/index.js)",
-						"                      no extension",
-						"                        .../node_modules/a/lib/lib2/index.js doesn't exist",
-						"                      .js",
-						"                        .../node_modules/a/lib/lib2/index.js.js doesn't exist",
-						"                      as directory",
-						"                        .../node_modules/a/lib/lib2/index.js doesn't exist",
-						"                  using exports field: ./lib/index.js",
-						"                    using description file: .../node_modules/a/package.json (relative path: ./lib/index.js)",
-						"                      no extension",
-						"                        existing file: .../node_modules/a/lib/index.js",
-						"                          reporting result .../node_modules/a/lib/index.js"
-					]);
+				expect(result).toEqual(
+					path.join(fixture, "node_modules/a/lib/index.js")
+				);
+				expect(
+					log.map(line => line.replace(fixture, "...").replace(/\\/g, "/"))
+				).toMatchSnapshot();
 				done();
 			}
 		);
@@ -1366,7 +1345,7 @@ describe("ImportsFieldPlugin", () => {
 		resolver.resolve({}, fixture, "#internal/i.js", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) throw new Error("No result");
-			result.should.equal(path.resolve(fixture, "./src/internal/i.js"));
+			expect(result).toEqual(path.resolve(fixture, "./src/internal/i.js"));
 			done();
 		});
 	});

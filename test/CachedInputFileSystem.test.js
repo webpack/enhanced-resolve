@@ -1,12 +1,9 @@
-var should = require("should");
+const { CachedInputFileSystem } = require("../");
 
-var { CachedInputFileSystem } = require("../");
+describe("CachedInputFileSystem OperationMergerBackend ('stat' and 'statSync')", () => {
+	let fs;
 
-describe("CachedInputFileSystem OperationMergerBackend ('stat' and 'statSync')", function () {
-	this.timeout(3000);
-	var fs;
-
-	beforeEach(function () {
+	beforeEach(() => {
 		fs = new CachedInputFileSystem(
 			{
 				stat: function (path, options, callback) {
@@ -33,34 +30,34 @@ describe("CachedInputFileSystem OperationMergerBackend ('stat' and 'statSync')",
 			0
 		);
 	});
-	afterEach(function () {
+	afterEach(() => {
 		fs.purge();
 	});
 
 	it("should join accesses", function (done) {
 		fs.stat("a", function (err, result) {
-			should.exist(result);
+			expect(result).toBeDefined();
 			result.a = true;
 		});
 		fs.stat("a", function (err, result) {
-			should.exist(result);
-			should.exist(result.a);
+			expect(result).toBeDefined();
+			expect(result.a).toBeDefined();
 			done();
 		});
 	});
 
 	it("should not join accesses with options", function (done) {
 		fs.stat("a", function (err, result) {
-			should.exist(result);
+			expect(result).toBeDefined();
 			result.a = true;
-			result.path.should.be.eql("a");
-			should.not.exist(result.options);
+			expect(result.path).toEqual("a");
+			expect(result.options).toBeUndefined();
 		});
 		fs.stat("a", { options: true }, function (err, result) {
-			should.exist(result);
-			should.not.exist(result.a);
-			result.path.should.be.eql("a");
-			result.options.should.eql({ options: true });
+			expect(result).toBeDefined();
+			expect(result.a).toBeUndefined();
+			expect(result.path).toEqual("a");
+			expect(result.options).toMatchObject({ options: true });
 			done();
 		});
 	});
@@ -69,25 +66,25 @@ describe("CachedInputFileSystem OperationMergerBackend ('stat' and 'statSync')",
 		fs.stat("a", function (err, result) {
 			result.a = true;
 			fs.stat("a", function (err, result) {
-				should.not.exist(result.a);
+				expect(result.a).toBeUndefined();
 				done();
 			});
 		});
 	});
 
-	it("should not cache sync accesses", function () {
+	it("should not cache sync accesses", () => {
 		const result = fs.statSync("a");
 		result.a = true;
 		const result2 = fs.statSync("a");
-		should.not.exist(result2.a);
+
+		expect(result2.a).toBeUndefined();
 	});
 });
 
-describe("CachedInputFileSystem OperationMergerBackend ('lstat' and 'lstatSync')", function () {
-	this.timeout(3000);
-	var fs;
+describe("CachedInputFileSystem OperationMergerBackend ('lstat' and 'lstatSync')", () => {
+	let fs;
 
-	beforeEach(function () {
+	beforeEach(() => {
 		fs = new CachedInputFileSystem(
 			{
 				lstat: function (path, options, callback) {
@@ -114,34 +111,37 @@ describe("CachedInputFileSystem OperationMergerBackend ('lstat' and 'lstatSync')
 			0
 		);
 	});
-	afterEach(function () {
+	afterEach(() => {
 		fs.purge();
 	});
 
 	it("should join accesses", function (done) {
 		fs.lstat("a", function (err, result) {
-			should.exist(result);
+			expect(result).toBeDefined();
 			result.a = true;
 		});
 		fs.lstat("a", function (err, result) {
-			should.exist(result);
-			should.exist(result.a);
+			expect(result).toBeDefined();
+			expect(result.a).toBeDefined();
 			done();
 		});
 	});
 
 	it("should not join accesses with options", function (done) {
 		fs.lstat("a", function (err, result) {
-			should.exist(result);
+			expect(result).toBeDefined();
+
 			result.a = true;
-			result.path.should.be.eql("a");
-			should.not.exist(result.options);
+
+			expect(result).toBeDefined();
+			expect(result.path).toEqual("a");
+			expect(result.options).toBeUndefined();
 		});
 		fs.lstat("a", { options: true }, function (err, result) {
-			should.exist(result);
-			should.not.exist(result.a);
-			result.path.should.be.eql("a");
-			result.options.should.eql({ options: true });
+			expect(result).toBeDefined();
+			expect(result.a).toBeUndefined();
+			expect(result.path).toEqual("a");
+			expect(result.options).toMatchObject({ options: true });
 			done();
 		});
 	});
@@ -150,25 +150,25 @@ describe("CachedInputFileSystem OperationMergerBackend ('lstat' and 'lstatSync')
 		fs.lstat("a", function (err, result) {
 			result.a = true;
 			fs.lstat("a", function (err, result) {
-				should.not.exist(result.a);
+				expect(result.a).toBeUndefined();
 				done();
 			});
 		});
 	});
 
-	it("should not cache sync accesses", function () {
+	it("should not cache sync accesses", () => {
 		const result = fs.lstatSync("a");
 		result.a = true;
 		const result2 = fs.lstatSync("a");
-		should.not.exist(result2.a);
+
+		expect(result2.a).toBeUndefined();
 	});
 });
 
-describe("CachedInputFileSystem CacheBackend", function () {
-	this.timeout(3000);
-	var fs;
+describe("CachedInputFileSystem CacheBackend", () => {
+	let fs;
 
-	beforeEach(function () {
+	beforeEach(() => {
 		let counter = 0;
 		fs = new CachedInputFileSystem(
 			{
@@ -198,7 +198,7 @@ describe("CachedInputFileSystem CacheBackend", function () {
 			1000
 		);
 	});
-	afterEach(function () {
+	afterEach(() => {
 		fs.purge();
 	});
 
@@ -207,7 +207,7 @@ describe("CachedInputFileSystem CacheBackend", function () {
 			result.a = true;
 		});
 		fs.stat("a", function (err, result) {
-			should.exist(result.a);
+			expect(result.a).toBeDefined();
 			done();
 		});
 	});
@@ -217,25 +217,26 @@ describe("CachedInputFileSystem CacheBackend", function () {
 		fs.stat("a", function (err, result) {
 			if (called) return done(new Error("callback was called twice"));
 			called = true;
-			should.exist(result);
+			expect(result).toBeDefined();
 			result.a = true;
 			done();
 		});
 		const syncResult = fs.statSync("a");
-		should.exist(syncResult);
-		should.exist(syncResult.a);
+
+		expect(syncResult).toBeDefined();
+		expect(syncResult.a).toBeDefined();
 	});
 
 	it("should not join accesses with options", function (done) {
 		fs.stat("a", function (err, result) {
 			result.a = true;
-			result.path.should.be.eql("a");
-			should.not.exist(result.options);
+			expect(result.path).toEqual("a");
+			expect(result.options).toBeUndefined();
 		});
 		fs.stat("a", { options: true }, function (err, result) {
-			should.not.exist(result.a);
-			result.path.should.be.eql("a");
-			result.options.should.eql({ options: true });
+			expect(result.a).toBeUndefined();
+			expect(result.path).toEqual("a");
+			expect(result.options).toMatchObject({ options: true });
 			done();
 		});
 	});
@@ -245,55 +246,55 @@ describe("CachedInputFileSystem CacheBackend", function () {
 			result.a = true;
 			var sync = true;
 			fs.stat("a", function (err, result) {
-				should.exist(result.a);
-				sync.should.be.eql(true);
-				setTimeout(function () {
+				expect(result.a).toBeDefined();
+				expect(sync).toEqual(true);
+				setTimeout(() => {
 					fs.stat("a", function (err, result) {
-						should.not.exist(result.a);
+						expect(result.a).toBeUndefined();
 						result.b = true;
 						var sync2 = true;
 						fs.stat("a", function (err, result) {
-							should.not.exist(result.a);
-							should.exist(result.b);
-							sync2.should.be.eql(true);
+							expect(result.b).toBeDefined();
+							expect(result.a).toBeUndefined();
+							expect(sync2).toEqual(true);
 							done();
 						});
-						setTimeout(function () {
+						setTimeout(() => {
 							sync2 = false;
 						}, 50);
 					});
 				}, 1100);
 			});
-			setTimeout(function () {
+			setTimeout(() => {
 				sync = false;
 			}, 50);
 		});
 	});
 
-	it("should cache sync accesses", function () {
+	it("should cache sync accesses", () => {
 		const result = fs.statSync("a");
 		result.a = true;
 		const result2 = fs.statSync("a");
-		should.exist(result2.a);
+		expect(result2.a).toBeDefined();
 		const result3 = fs.statSync("a", { options: true });
-		should.not.exist(result3.a);
-		result3.options.should.be.eql({ options: true });
+		expect(result3.a).toBeUndefined();
+		expect(result3.options).toMatchObject({ options: true });
 	});
 
 	it("should recover after passive periods", function (done) {
 		fs.stat("a", function (err, result) {
 			result.a = true;
-			setTimeout(function () {
+			setTimeout(() => {
 				fs.stat("a", function (err, result) {
-					should.exist(result.a);
-					setTimeout(function () {
+					expect(result.a).toBeDefined();
+					setTimeout(() => {
 						fs.stat("a", function (err, result) {
-							should.not.exist(result.a);
+							expect(result.a).toBeUndefined();
 							result.b = true;
-							setTimeout(function () {
+							setTimeout(() => {
 								fs.stat("a", function (err, result) {
-									should.not.exist(result.a);
-									should.exist(result.b);
+									expect(result.b).toBeDefined();
+									expect(result.a).toBeUndefined();
 									done();
 								});
 							}, 500);
@@ -307,14 +308,14 @@ describe("CachedInputFileSystem CacheBackend", function () {
 	it("should restart after timeout", function (done) {
 		fs.stat("a", function (err, result) {
 			result.a = true;
-			setTimeout(function () {
+			setTimeout(() => {
 				fs.stat("a", function (err, result) {
-					should.not.exist(result.a);
+					expect(result.a).toBeUndefined();
 					result.b = true;
-					setTimeout(function () {
+					setTimeout(() => {
 						fs.stat("a", function (err, result) {
-							should.not.exist(result.a);
-							should.exist(result.b);
+							expect(result.b).toBeDefined();
+							expect(result.a).toBeUndefined();
 							done();
 						});
 					}, 50);
@@ -333,16 +334,16 @@ describe("CachedInputFileSystem CacheBackend", function () {
 
 	it("should purge readdir correctly", function (done) {
 		fs.readdir("/test/path", (err, r) => {
-			r[0].should.be.eql("0");
+			expect(r[0]).toEqual("0");
 			fs.purge(["/test/path/sub/path"]);
 			fs.readdir("/test/path", (err, r) => {
-				r[0].should.be.eql("0");
+				expect(r[0]).toEqual("0");
 				fs.purge(["/test/path/sub"]);
 				fs.readdir("/test/path", (err, r) => {
-					r[0].should.be.eql("1");
+					expect(r[0]).toEqual("1");
 					fs.purge(["/test/path"]);
 					fs.readdir("/test/path", (err, r) => {
-						r[0].should.be.eql("2");
+						expect(r[0]).toEqual("2");
 						done();
 					});
 				});

@@ -1,13 +1,11 @@
-require("should");
-
-var { Volume } = require("memfs");
-var resolve = require("../");
+const { Volume } = require("memfs");
+const resolve = require("../");
 
 describe("dependencies", function () {
-	var resolver;
+	let resolver;
 
 	beforeEach(function () {
-		var fileSystem = Volume.fromJSON(
+		const fileSystem = Volume.fromJSON(
 			{
 				"/a/b/node_modules/some-module/index.js": "",
 				"/a/node_modules/module/package.json": JSON.stringify({
@@ -96,13 +94,13 @@ describe("dependencies", function () {
 				(err, result) => {
 					if (err) return done(err);
 
-					result.should.be.eql(testCase.result);
-					Array.from(fileDependencies)
-						.sort()
-						.should.eql(testCase.fileDependencies.sort());
-					Array.from(missingDependencies)
-						.sort()
-						.should.eql(testCase.missingDependencies.sort());
+					expect(result).toEqual(testCase.result);
+					expect(Array.from(fileDependencies).sort()).toEqual(
+						testCase.fileDependencies.sort()
+					);
+					expect(Array.from(missingDependencies).sort()).toEqual(
+						testCase.missingDependencies.sort()
+					);
 					done();
 				}
 			);
