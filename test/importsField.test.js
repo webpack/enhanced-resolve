@@ -1191,7 +1191,7 @@ describe("ImportsFieldPlugin", () => {
 	it("should resolve using imports field instead of self-referencing", done => {
 		resolver.resolve({}, fixture, "#imports-field", {}, (err, result) => {
 			if (err) return done(err);
-			if (!result) return done(new Error("No resul"));
+			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(path.resolve(fixture, "b.js"));
 			done();
 		});
@@ -1205,7 +1205,7 @@ describe("ImportsFieldPlugin", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				if (!result) return done(new Error("No resul"));
+				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(path.resolve(fixture, "b.js"));
 				done();
 			}
@@ -1232,7 +1232,7 @@ describe("ImportsFieldPlugin", () => {
 
 		resolver.resolve({}, fixture, "#imports-field", {}, (err, result) => {
 			if (err) return done(err);
-			if (!result) return done(new Error("No resul"));
+			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(path.resolve(fixture, "b.js"));
 			done();
 		});
@@ -1249,7 +1249,7 @@ describe("ImportsFieldPlugin", () => {
 
 		resolver.resolve({}, fixture, "#b", {}, (err, result) => {
 			if (err) return done(err);
-			if (!result) return done(new Error("No resul"));
+			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(path.resolve(fixture, "a.js"));
 			done();
 		});
@@ -1258,7 +1258,7 @@ describe("ImportsFieldPlugin", () => {
 	it("should resolve package #1", done => {
 		resolver.resolve({}, fixture, "#a/dist/main.js", {}, (err, result) => {
 			if (err) return done(err);
-			if (!result) return done(new Error("No resul"));
+			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(
 				path.resolve(fixture, "node_modules/a/lib/lib2/main.js")
 			);
@@ -1278,7 +1278,7 @@ describe("ImportsFieldPlugin", () => {
 	it("should resolve package #3", done => {
 		resolver.resolve({}, fixture, "#ccc/index.js", {}, (err, result) => {
 			if (err) return done(err);
-			if (!result) return done(new Error("No resul"));
+			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(path.resolve(fixture, "node_modules/c/index.js"));
 			done();
 		});
@@ -1287,7 +1287,7 @@ describe("ImportsFieldPlugin", () => {
 	it("should resolve package #4", done => {
 		resolver.resolve({}, fixture, "#c", {}, (err, result) => {
 			if (err) return done(err);
-			if (!result) return done(new Error("No resul"));
+			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(path.resolve(fixture, "node_modules/c/index.js"));
 			done();
 		});
@@ -1308,7 +1308,7 @@ describe("ImportsFieldPlugin", () => {
 				fs.unlinkSync(pjson);
 				fs.rmdirSync(dir);
 				if (err) return done(err);
-				if (!result) return done(new Error("No resul"));
+				if (!result) return done(new Error("No result"));
 				console.log(result);
 				expect(result).toEqual(file);
 				done();
@@ -1325,7 +1325,7 @@ describe("ImportsFieldPlugin", () => {
 			{ log: v => log.push(v) },
 			(err, result) => {
 				if (err) return done(err);
-				if (!result) return done(new Error("No resul"));
+				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
 					path.join(fixture, "node_modules/a/lib/index.js")
 				);
@@ -1344,7 +1344,7 @@ describe("ImportsFieldPlugin", () => {
 		);
 		resolver.resolve({}, fixture, "#internal/i.js", {}, (err, result) => {
 			if (err) return done(err);
-			if (!result) return done(new Error("No resul"));
+			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(path.resolve(fixture, "./src/internal/i.js"));
 			done();
 		});
