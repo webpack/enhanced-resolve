@@ -2251,7 +2251,7 @@ describe("ExportsFieldPlugin", () => {
 	it("resolve root using exports field, not a main field", done => {
 		resolver.resolve({}, fixture, "exports-field", {}, (err, result) => {
 			if (err) return done(err);
-			if (!result) throw new Error("No result");
+			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(
 				path.resolve(fixture, "node_modules/exports-field/x.js")
 			);
@@ -2274,7 +2274,7 @@ describe("ExportsFieldPlugin", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				if (!result) throw new Error("No result");
+				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
 					path.resolve(fixture, "node_modules/exports-field/lib/lib2/main.js")
 				);
@@ -2298,7 +2298,7 @@ describe("ExportsFieldPlugin", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				if (!result) throw new Error("No result");
+				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
 					path.resolve(fixture2, "node_modules/exports-field/lib/browser.js")
 				);
@@ -2314,7 +2314,7 @@ describe("ExportsFieldPlugin", () => {
 			"exports-field/dist/main",
 			{},
 			(err, result) => {
-				if (!err) throw new Error(`expect error, got ${result}`);
+				if (!err) return done(new Error(`expect error, got ${result}`));
 				expect(err).toBeInstanceOf(Error);
 				expect(err.message).toMatch(/Can't resolve/);
 				done();
@@ -2329,7 +2329,7 @@ describe("ExportsFieldPlugin", () => {
 			"exports-field/dist/main",
 			{},
 			(err, result) => {
-				if (!err) throw new Error(`expect error, got ${result}`);
+				if (!err) return done(new Error(`expect error, got ${result}`));
 				expect(err).toBeInstanceOf(Error);
 				expect(err.message).toMatch(/Can't resolve/);
 				done();
@@ -2345,7 +2345,7 @@ describe("ExportsFieldPlugin", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				if (!result) throw new Error("No result");
+				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
 					path.resolve(fixture2, "node_modules/exports-field/lib/lib2/main.js")
 				);
@@ -2362,7 +2362,7 @@ describe("ExportsFieldPlugin", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				if (!result) throw new Error("No result");
+				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
 					path.resolve(fixture, "node_modules/exports-field/lib/lib2/main.js")
 				);
@@ -2379,7 +2379,7 @@ describe("ExportsFieldPlugin", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				if (!result) throw new Error("No result");
+				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
 					path.resolve(fixture2, "node_modules/exports-field/lib/browser.js")
 				);
@@ -2396,7 +2396,7 @@ describe("ExportsFieldPlugin", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				if (!result) throw new Error("No result");
+				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
 					path.resolve(
 						fixture2,
@@ -2410,7 +2410,7 @@ describe("ExportsFieldPlugin", () => {
 
 	it("resolver should respect query parameters #2. Direct matching", done => {
 		resolver.resolve({}, fixture2, "exports-field?foo", {}, (err, result) => {
-			if (!err) throw new Error(`expect error, got ${result}`);
+			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
 			expect(err.message).toMatch(/Package path \.\/\?foo is not exported/);
 			done();
@@ -2425,7 +2425,7 @@ describe("ExportsFieldPlugin", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				if (!result) throw new Error("No result");
+				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
 					path.resolve(
 						fixture2,
@@ -2439,7 +2439,7 @@ describe("ExportsFieldPlugin", () => {
 
 	it("resolver should respect fragment parameters #2. Direct matching", done => {
 		resolver.resolve({}, fixture2, "exports-field#foo", {}, (err, result) => {
-			if (!err) throw new Error(`expect error, got ${result}`);
+			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
 			expect(err.message).toMatch(/Package path \.\/#foo is not exported/);
 			done();
@@ -2454,7 +2454,7 @@ describe("ExportsFieldPlugin", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				if (!result) throw new Error("No result");
+				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
 					path.resolve(fixture, "node_modules/exports-field/lib/main.js")
 				);
@@ -2470,7 +2470,7 @@ describe("ExportsFieldPlugin", () => {
 			"./node_modules/exports-field/dist/main.js",
 			{},
 			(err, result) => {
-				if (!err) throw new Error(`expect error, got ${result}`);
+				if (!err) return done(new Error(`expect error, got ${result}`));
 				expect(err).toBeInstanceOf(Error);
 				expect(err.message).toMatch(/Can't resolve/);
 				done();
@@ -2485,7 +2485,7 @@ describe("ExportsFieldPlugin", () => {
 			"exports-field/dist/../../../a.js",
 			{},
 			(err, result) => {
-				if (!err) throw new Error(`expect error, got ${result}`);
+				if (!err) return done(new Error(`expect error, got ${result}`));
 				expect(err).toBeInstanceOf(Error);
 				expect(err.message).toMatch(/out of package scope/);
 				done();
@@ -2500,7 +2500,7 @@ describe("ExportsFieldPlugin", () => {
 			"exports-field/dist/a.js",
 			{},
 			(err, result) => {
-				if (!err) throw new Error(`expect error, got ${result}`);
+				if (!err) return done(new Error(`expect error, got ${result}`));
 				expect(err).toBeInstanceOf(Error);
 				expect(err.message).toMatch(/out of package scope/);
 				done();
@@ -2511,7 +2511,7 @@ describe("ExportsFieldPlugin", () => {
 	it("self-resolving root", done => {
 		resolver.resolve({}, fixture, "@exports-field/core", {}, (err, result) => {
 			if (err) return done(err);
-			if (!result) throw new Error("No result");
+			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(path.resolve(fixture, "./a.js"));
 			done();
 		});
@@ -2524,7 +2524,7 @@ describe("ExportsFieldPlugin", () => {
 			"exports-field/anything/else",
 			{},
 			(err, result) => {
-				if (!err) throw new Error(`expect error, got ${result}`);
+				if (!err) return done(new Error(`expect error, got ${result}`));
 				expect(err).toBeInstanceOf(Error);
 				expect(err.message).toMatch(/not exported from package/);
 				done();
@@ -2542,7 +2542,7 @@ describe("ExportsFieldPlugin", () => {
 
 		resolver.resolve({}, fixture3, "exports-field", {}, (err, result) => {
 			if (err) return done(err);
-			if (!result) throw new Error("No result");
+			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(
 				path.resolve(fixture3, "node_modules/exports-field/main.js")
 			);
@@ -2560,7 +2560,7 @@ describe("ExportsFieldPlugin", () => {
 
 		resolver.resolve({}, fixture3, "exports-field", {}, (err, result) => {
 			if (err) return done(err);
-			if (!result) throw new Error("No result");
+			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(
 				path.resolve(fixture3, "node_modules/exports-field/main.js")
 			);
@@ -2578,7 +2578,7 @@ describe("ExportsFieldPlugin", () => {
 
 		resolver.resolve({}, fixture3, "exports-field", {}, (err, result) => {
 			if (err) return done(err);
-			if (!result) throw new Error("No result");
+			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(
 				path.resolve(fixture3, "node_modules/exports-field/main.js")
 			);
@@ -2596,7 +2596,7 @@ describe("ExportsFieldPlugin", () => {
 
 		resolver.resolve({}, fixture2, "exports-field", {}, (err, result) => {
 			if (err) return done(err);
-			if (!result) throw new Error("No result");
+			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(
 				path.resolve(fixture2, "node_modules/exports-field/index.js")
 			);
@@ -2614,7 +2614,7 @@ describe("ExportsFieldPlugin", () => {
 
 		resolver.resolve({}, fixture3, "exports-field", {}, (err, result) => {
 			if (err) return done(err);
-			if (!result) throw new Error("No result");
+			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(
 				path.resolve(fixture3, "node_modules/exports-field/index")
 			);
@@ -2624,7 +2624,7 @@ describe("ExportsFieldPlugin", () => {
 
 	it("request ending with slash #1", done => {
 		resolver.resolve({}, fixture, "exports-field/", {}, (err, result) => {
-			if (!err) throw new Error(`expect error, got ${result}`);
+			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
 			expect(err.message).toMatch(/Resolving to directories is not possible/);
 			done();
@@ -2633,7 +2633,7 @@ describe("ExportsFieldPlugin", () => {
 
 	it("request ending with slash #2", done => {
 		resolver.resolve({}, fixture, "exports-field/dist/", {}, (err, result) => {
-			if (!err) throw new Error(`expect error, got ${result}`);
+			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
 			expect(err.message).toMatch(/Resolving to directories is not possible/);
 			done();
@@ -2642,7 +2642,7 @@ describe("ExportsFieldPlugin", () => {
 
 	it("request ending with slash #3", done => {
 		resolver.resolve({}, fixture, "exports-field/lib/", {}, (err, result) => {
-			if (!err) throw new Error(`expect error, got ${result}`);
+			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
 			expect(err.message).toMatch(/Resolving to directories is not possible/);
 			done();
@@ -2651,7 +2651,7 @@ describe("ExportsFieldPlugin", () => {
 
 	it("should throw error if target is invalid", done => {
 		resolver.resolve({}, fixture4, "exports-field", {}, (err, result) => {
-			if (!err) throw new Error(`expect error, got ${result}`);
+			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
 			expect(err.message).toMatch(/Trying to access out of package scope/);
 			done();
@@ -2665,7 +2665,7 @@ describe("ExportsFieldPlugin", () => {
 			"invalid-exports-field",
 			{},
 			(err, result) => {
-				if (!err) throw new Error(`expect error, got ${result}`);
+				if (!err) return done(new Error(`expect error, got ${result}`));
 				expect(err).toBeInstanceOf(Error);
 				expect(err.message).toMatch(/should be relative path/);
 				expect(err.message).toMatch(/umd/);
@@ -2683,7 +2683,7 @@ describe("ExportsFieldPlugin", () => {
 			{ log: v => log.push(v) },
 			(err, result) => {
 				if (err) return done(err);
-				if (!result) throw new Error("No result");
+				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
 					path.resolve(fixture, "node_modules/exports-field/lib/browser.js")
 				);
@@ -2703,7 +2703,7 @@ describe("ExportsFieldPlugin", () => {
 
 		resolver.resolve({}, fixture, "m/features/f.js", {}, (err, result) => {
 			if (err) return done(err);
-			if (!result) throw new Error("No result");
+			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(
 				path.resolve(fixture, "./node_modules/m/src/features/f.js")
 			);
@@ -2719,7 +2719,7 @@ describe("ExportsFieldPlugin", () => {
 
 		resolver.resolve({}, fixture, "m/features/y/y.js", {}, (err, result) => {
 			if (err) return done(err);
-			if (!result) throw new Error("No result");
+			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(
 				path.resolve(fixture, "./node_modules/m/src/features/y/y.js")
 			);
@@ -2735,7 +2735,7 @@ describe("ExportsFieldPlugin", () => {
 
 		resolver.resolve({}, fixture, "m/features/y/y.js", {}, (err, result) => {
 			if (err) return done(err);
-			if (!result) throw new Error("No result");
+			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(
 				path.resolve(fixture, "./node_modules/m/src/features/y/y.js")
 			);
@@ -2756,7 +2756,7 @@ describe("ExportsFieldPlugin", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				if (!result) throw new Error("No result");
+				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
 					path.resolve(fixture, "./node_modules/m/src/features/y/y.js")
 				);
@@ -2773,7 +2773,7 @@ describe("ExportsFieldPlugin", () => {
 
 		resolver.resolve({}, fixture, "m/middle/nested/f.js", {}, (err, result) => {
 			if (err) return done(err);
-			if (!result) throw new Error("No result");
+			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(
 				path.resolve(fixture, "./node_modules/m/src/middle/nested/f.js")
 			);
@@ -2794,7 +2794,7 @@ describe("ExportsFieldPlugin", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				if (!result) throw new Error("No result");
+				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
 					path.resolve(fixture, "./node_modules/m/src/middle-1/nested/f.js")
 				);
@@ -2816,7 +2816,7 @@ describe("ExportsFieldPlugin", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				if (!result) throw new Error("No result");
+				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
 					path.resolve(fixture, "./node_modules/m/src/middle-2/nested/f.js")
 				);
@@ -2833,7 +2833,7 @@ describe("ExportsFieldPlugin", () => {
 
 		resolver.resolve({}, fixture, "m/middle-3/nested/f", {}, (err, result) => {
 			if (err) return done(err);
-			if (!result) throw new Error("No result");
+			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(
 				path.resolve(
 					fixture,
@@ -2852,7 +2852,7 @@ describe("ExportsFieldPlugin", () => {
 
 		resolver.resolve({}, fixture, "m/middle-4/f/nested", {}, (err, result) => {
 			if (err) return done(err);
-			if (!result) throw new Error("No result");
+			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(
 				path.resolve(fixture, "./node_modules/m/src/middle-4/f/f.js")
 			);
@@ -2868,7 +2868,7 @@ describe("ExportsFieldPlugin", () => {
 
 		resolver.resolve({}, fixture, "m/middle-5/f$/$", {}, (err, result) => {
 			if (err) return done(err);
-			if (!result) throw new Error("No result");
+			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(
 				path.resolve(fixture, "./node_modules/m/src/middle-5/f$/$.js")
 			);
@@ -2888,7 +2888,7 @@ describe("ExportsFieldPlugin", () => {
 			"m/features/internal/file.js",
 			{},
 			(err, result) => {
-				if (!err) throw new Error(`expect error, got ${result}`);
+				if (!err) return done(new Error(`expect error, got ${result}`));
 				expect(err).toBeInstanceOf(Error);
 				expect(err.message).toMatch(
 					/Package path \.\/features\/internal\/file\.js is not exported/
@@ -2915,7 +2915,7 @@ describe("ExportsFieldPlugin", () => {
 
 		resolver.resolve({}, fixture, "@org/pkg/string.js", {}, (err, result) => {
 			if (err) return done(err);
-			if (!result) throw new Error("No result");
+			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(
 				path.resolve(fixture, "./node_modules/@org/pkg/dist/string.js")
 			);
@@ -2940,7 +2940,7 @@ describe("ExportsFieldPlugin", () => {
 
 		resolver.resolve({}, fixture, "pkg/string.js", {}, (err, result) => {
 			if (err) return done(err);
-			if (!result) throw new Error("No result");
+			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(
 				path.resolve(fixture, "./node_modules/pkg/dist/string.js")
 			);
@@ -2965,7 +2965,7 @@ describe("ExportsFieldPlugin", () => {
 
 		resolver.resolve({}, fixture, "pkg/string.js", {}, (err, result) => {
 			if (err) return done(err);
-			if (!result) throw new Error("No result");
+			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(
 				path.resolve(fixture, "./node_modules/pkg/dist/string.js")
 			);
@@ -2989,7 +2989,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 
 		resolver.resolve({}, fixture, "pkg/string.js", {}, (err, result) => {
-			if (!err) throw new Error(`expect error, got ${result}`);
+			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
 			expect(err.message).toMatch(
 				/Package path \.\/string\.ts is not exported/
@@ -3014,7 +3014,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 
 		resolver.resolve({}, fixture, "pkg/string.js", {}, (err, result) => {
-			if (!err) throw new Error(`expect error, got ${result}`);
+			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
 			expect(err.message).toMatch(
 				/Package path \.\/string\.ts is not exported/

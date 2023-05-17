@@ -10,8 +10,8 @@
     "noImplicitThis": true,
     "alwaysStrict": true,
     "strictNullChecks": true,
-    "types": ["node", "mocha"],
+    "types": ["node", "jest"],
     "esModuleInterop": true
   },
-  "include": ["test/*.js", "declarations.d.ts"]
+  "include": ["test/*.js"]
 }

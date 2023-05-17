@@ -44,7 +44,7 @@ describe("roots", () => {
 	it("should respect roots option", done => {
 		resolver.resolve({}, fixtures, "/fixtures/b.js", {}, (err, result) => {
 			if (err) return done(err);
-			if (!result) throw new Error("No result");
+			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(path.resolve(fixtures, "b.js"));
 			done();
 		});
@@ -53,7 +53,7 @@ describe("roots", () => {
 	it("should try another root option, if it exists", done => {
 		resolver.resolve({}, fixtures, "/b.js", {}, (err, result) => {
 			if (err) return done(err);
-			if (!result) throw new Error("No result");
+			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(path.resolve(fixtures, "b.js"));
 			done();
 		});
@@ -62,7 +62,7 @@ describe("roots", () => {
 	it("should respect extension", done => {
 		resolver.resolve({}, fixtures, "/fixtures/b", {}, (err, result) => {
 			if (err) return done(err);
-			if (!result) throw new Error("No result");
+			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(path.resolve(fixtures, "b.js"));
 			done();
 		});
@@ -76,7 +76,7 @@ describe("roots", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				if (!result) throw new Error("No result");
+				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
 					path.resolve(fixtures, "extensions/dir/index.js")
 				);
@@ -88,7 +88,7 @@ describe("roots", () => {
 	it("should respect aliases", done => {
 		resolver.resolve({}, fixtures, "foo/b", {}, (err, result) => {
 			if (err) return done(err);
-			if (!result) throw new Error("No result");
+			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(path.resolve(fixtures, "b.js"));
 			done();
 		});
@@ -102,7 +102,7 @@ describe("roots", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				if (!result) throw new Error("No result");
+				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(path.resolve(fixtures, "lib"));
 				done();
 			}
@@ -111,7 +111,7 @@ describe("roots", () => {
 
 	it("should not work with relative path", done => {
 		resolver.resolve({}, fixtures, "fixtures/b.js", {}, (err, result) => {
-			if (!err) throw new Error(`expect error, got ${result}`);
+			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
 			done();
 		});
@@ -125,7 +125,7 @@ describe("roots", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				if (!result) throw new Error("No result");
+				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(path.resolve(fixtures, "b.js"));
 				done();
 			}

@@ -15,7 +15,7 @@ describe("restrictions", () => {
 		});
 
 		resolver.resolve({}, fixture, "pck1", {}, (err, result) => {
-			if (!err) throw new Error(`expect error, got ${result}`);
+			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
 			done();
 		});
@@ -31,7 +31,7 @@ describe("restrictions", () => {
 
 		resolver.resolve({}, fixture, "pck1", {}, (err, result) => {
 			if (err) return done(err);
-			if (!result) throw new Error("No result");
+			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(
 				path.resolve(fixture, "node_modules/pck1/index.css")
 			);
@@ -47,7 +47,7 @@ describe("restrictions", () => {
 		});
 
 		resolver.resolve({}, fixture, "pck2", {}, (err, result) => {
-			if (!err) throw new Error(`expect error, got ${result}`);
+			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
 			done();
 		});
@@ -63,7 +63,7 @@ describe("restrictions", () => {
 
 		resolver.resolve({}, fixture, "pck2", {}, (err, result) => {
 			if (err) return done(err);
-			if (!result) throw new Error("No result");
+			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(
 				path.resolve(fixture, "node_modules/pck2/index.css")
 			);
@@ -88,7 +88,7 @@ describe("restrictions", () => {
 			{ log: log.push.bind(log) },
 			(err, result) => {
 				if (err) return done(err);
-				if (!result) throw new Error("No result");
+				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
 					path.resolve(fixture, "node_modules/pck2/index.css")
 				);

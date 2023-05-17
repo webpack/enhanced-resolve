@@ -14,8 +14,8 @@ describe("forEachBail", () => {
 			},
 			(err, result) => {
 				if (err) return done(err);
-				if (!result) throw new Error("Should have result");
-				expect(result).toBe("result");
+				if (!result) return done(new Error("Should have result"));
+				expect(result).toEqual({ path: "test" });
 				expect(log).toEqual([0, 1, 2, 3, 4, 5]);
 				done();
 			}

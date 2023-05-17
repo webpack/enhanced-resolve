@@ -33,7 +33,7 @@ describe("pnp", () => {
 		});
 	}
 	beforeEach(() => {
-		pnpApi = /** @type {PnpApi} */ ({
+		pnpApi = /** @type {any} */ ({
 			mocks: new Map(),
 			resolveToUnqualified(request, issuer) {
 				if (pnpApi.mocks.has(request)) {

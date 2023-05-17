@@ -448,6 +448,7 @@ describe("should resolve all aliases", () => {
 					yield: obj => paths.push(obj.path)
 				};
 				resolver.resolve({}, fixtures, "unknown", context, (err, result) => {
+					if (!err) return done(new Error("error expected"));
 					expect(err).not.toBe(null);
 					expect(err.message).toBe("error");
 					expect(result).toBeUndefined();

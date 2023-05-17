@@ -26,7 +26,7 @@ describe("extensions", function () {
 	it("should resolve according to order of provided extensions", function (done) {
 		resolver.resolve({}, fixture, "./foo", {}, (err, result) => {
 			if (err) return done(err);
-			if (!result) throw new Error("No result");
+			if (!result) return done(new Error("No resul"));
 			expect(result).toEqual(path.resolve(fixture, "foo.ts"));
 			done();
 		});
@@ -34,7 +34,7 @@ describe("extensions", function () {
 	it("should resolve according to order of provided extensions (dir index)", function (done) {
 		resolver.resolve({}, fixture, "./dir", {}, (err, result) => {
 			if (err) return done(err);
-			if (!result) throw new Error("No result");
+			if (!result) return done(new Error("No resul"));
 			expect(result).toEqual(path.resolve(fixture, "dir/index.ts"));
 			done();
 		});
@@ -42,7 +42,7 @@ describe("extensions", function () {
 	it("should resolve according to main field in module root", function (done) {
 		resolver.resolve({}, fixture, ".", {}, (err, result) => {
 			if (err) return done(err);
-			if (!result) throw new Error("No result");
+			if (!result) return done(new Error("No resul"));
 			expect(result).toEqual(path.resolve(fixture, "index.js"));
 			done();
 		});
@@ -50,7 +50,7 @@ describe("extensions", function () {
 	it("should resolve single file module before directory", function (done) {
 		resolver.resolve({}, fixture, "module", {}, (err, result) => {
 			if (err) return done(err);
-			if (!result) throw new Error("No result");
+			if (!result) return done(new Error("No resul"));
 			expect(result).toEqual(path.resolve(fixture, "node_modules/module.js"));
 			done();
 		});
@@ -58,7 +58,7 @@ describe("extensions", function () {
 	it("should resolve trailing slash directory before single file", function (done) {
 		resolver.resolve({}, fixture, "module/", {}, (err, result) => {
 			if (err) return done(err);
-			if (!result) throw new Error("No result");
+			if (!result) return done(new Error("No resul"));
 			expect(result).toEqual(
 				path.resolve(fixture, "node_modules/module/index.ts")
 			);
@@ -67,14 +67,14 @@ describe("extensions", function () {
 	});
 	it("should not resolve to file when request has a trailing slash (relative)", function (done) {
 		resolver.resolve({}, fixture, "./foo.js/", {}, (err, result) => {
-			if (!err) throw new Error("No error");
+			if (!err) return done(new Error("No error"));
 			expect(err).toBeInstanceOf(Error);
 			done();
 		});
 	});
 	it("should not resolve to file when request has a trailing slash (module)", function (done) {
 		resolver.resolve({}, fixture, "module.js/", {}, (err, result) => {
-			if (!err) throw new Error("No error");
+			if (!err) return done(new Error("No error"));
 			expect(err).toBeInstanceOf(Error);
 			done();
 		});

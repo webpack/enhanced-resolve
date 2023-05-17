@@ -44,6 +44,7 @@ describe("alias", () => {
 			},
 			modules: "/",
 			useSyncFileSystemCalls: true,
+			//@ts-ignore
 			fileSystem: fileSystem
 		});
 	});
