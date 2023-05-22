@@ -31,7 +31,8 @@
     "zapp",
     "zipp",
     "zippi",
-    "zizizi"
+    "zizizi",
+    "codecov"
   ],
   "ignorePaths": ["package.json", "yarn.lock", "coverage", "*.log"]
 }

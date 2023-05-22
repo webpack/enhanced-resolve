@@ -1,5 +1,11 @@
 # enhanced-resolve
 
+[![npm][npm]][npm-url]
+[![Build Status][build-status]][build-status-url]
+[![codecov][codecov-badge]][codecov-url]
+[![Install Size][size]][size-url]
+[![GitHub Discussions][discussion]][discussion-url]
+
 Offers an async require.resolve function. It's highly configurable.
 
 ## Features
@@ -146,8 +152,6 @@ enhanced-resolve will try to resolve requests containing `#` as path and as frag
 yarn test
 ```
 
-[![Build Status](https://secure.travis-ci.org/webpack/enhanced-resolve.png?branch=main)](http://travis-ci.org/webpack/enhanced-resolve)
-
 ## Passing options from webpack
 
 If you are using `webpack`, and you want to pass custom options to `enhanced-resolve`, the options are passed from the `resolve` key of your webpack configuration e.g.:
@@ -166,3 +170,14 @@ resolve: {
 Copyright (c) 2012-2019 JS Foundation and other contributors
 
 MIT (http://www.opensource.org/licenses/mit-license.php)
+
+[npm]: https://img.shields.io/npm/v/enhanced-resolve.svg
+[npm-url]: https://www.npmjs.com/package/enhanced-resolve
+[build-status]: https://github.com/webpack/enhanced-resolve/actions/workflows/test.yml/badge.svg?branch=master
+[build-status-url]: https://github.com/webpack/enhanced-resolve/actions
+[codecov-badge]: https://codecov.io/gh/webpack/enhanced-resolve/branch/main/graph/badge.svg?token=6B6NxtsZc3
+[codecov-url]: https://codecov.io/gh/webpack/enhanced-resolve
+[size]: https://packagephobia.com/badge?p=enhanced-resolve
+[size-url]: https://packagephobia.com/result?p=enhanced-resolve
+[discussion]: https://img.shields.io/github/discussions/webpack/webpack
+[discussion-url]: https://github.com/webpack/webpack/discussions
