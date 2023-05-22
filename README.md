@@ -171,7 +171,6 @@ Copyright (c) 2012-2019 JS Foundation and other contributors
 
 MIT (http://www.opensource.org/licenses/mit-license.php)
 
-
 [npm]: https://img.shields.io/npm/v/enhanced-resolve.svg
 [npm-url]: https://www.npmjs.com/package/enhanced-resolve
 [build-status]: https://github.com/webpack/enhanced-resolve/actions/workflows/test.yml/badge.svg?branch=master
