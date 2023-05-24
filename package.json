@@ -62,7 +62,7 @@
     "prepare": "husky install"
   },
   "lint-staged": {
-    "*": "cspell",
+    "*": "cspell --no-must-find-files",
     "*.js": "eslint --cache"
   },
   "repository": {
