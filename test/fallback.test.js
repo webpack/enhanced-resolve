@@ -38,6 +38,7 @@ describe("fallback", function () {
 			},
 			modules: "/",
 			useSyncFileSystemCalls: true,
+			//@ts-ignore
 			fileSystem: fileSystem
 		});
 	});

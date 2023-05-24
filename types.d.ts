@@ -4,10 +4,12 @@
  * Run `yarn special-lint-fix` to update
  */
 
+import { Dirent } from "fs";
 import { AsyncSeriesBailHook, AsyncSeriesHook, SyncHook } from "tapable";
 
+type Alias = string | false | string[];
 declare interface AliasOption {
-	alias: string | false | string[];
+	alias: Alias;
 	name: string;
 	onlyModule?: boolean;
 }
@@ -17,15 +19,19 @@ declare interface AliasOptions {
 }
 declare interface BaseResolveRequest {
 	path: string | false;
+	context?: object;
 	descriptionFilePath?: string;
 	descriptionFileRoot?: string;
-	descriptionFileData?: object;
+	descriptionFileData?: JsonObject;
 	relativePath?: string;
 	ignoreSymlinks?: boolean;
 	fullySpecified?: boolean;
+	__innerRequest?: string;
+	__innerRequest_request?: string;
+	__innerRequest_relativePath?: string;
 }
 declare class CachedInputFileSystem {
-	constructor(fileSystem?: any, duration?: any);
+	constructor(fileSystem: any, duration: number);
 	fileSystem: any;
 	lstat?: {
 		(arg0: string, arg1: FileSystemCallback<FileSystemStats>): void;
@@ -51,7 +57,7 @@ declare class CachedInputFileSystem {
 			| null
 			| ((
 					arg0?: null | NodeJS.ErrnoException,
-					arg1?: (string | Buffer)[] | any[]
+					arg1?: (string | Buffer)[] | Dirent[]
 			  ) => void)
 			| ReaddirOptions
 			| "ascii"
@@ -61,13 +67,14 @@ declare class CachedInputFileSystem {
 			| "ucs2"
 			| "ucs-2"
 			| "base64"
+			| "base64url"
 			| "latin1"
 			| "binary"
 			| "hex"
 			| "buffer",
 		arg2?: (
 			arg0?: null | NodeJS.ErrnoException,
-			arg1?: (string | Buffer)[] | any[]
+			arg1?: (string | Buffer)[] | Dirent[]
 		) => void
 	) => void;
 	readdirSync: (
@@ -97,12 +104,35 @@ declare class CachedInputFileSystem {
 		): void;
 	};
 	readlinkSync: (arg0: string, arg1?: object) => string | Buffer;
-	purge(what?: any): void;
+	purge(what?: string | Set<string> | string[]): void;
 }
 declare class CloneBasenamePlugin {
-	constructor(source?: any, target?: any);
-	source: any;
-	target: any;
+	constructor(
+		source:
+			| string
+			| AsyncSeriesBailHook<
+					[ResolveRequest, ResolveContext],
+					null | ResolveRequest
+			  >,
+		target:
+			| string
+			| AsyncSeriesBailHook<
+					[ResolveRequest, ResolveContext],
+					null | ResolveRequest
+			  >
+	);
+	source:
+		| string
+		| AsyncSeriesBailHook<
+				[ResolveRequest, ResolveContext],
+				null | ResolveRequest
+		  >;
+	target:
+		| string
+		| AsyncSeriesBailHook<
+				[ResolveRequest, ResolveContext],
+				null | ResolveRequest
+		  >;
 	apply(resolver: Resolver): void;
 }
 type ErrorWithDetail = Error & { details?: string };
@@ -128,7 +158,7 @@ declare interface FileSystem {
 			| null
 			| ((
 					arg0?: null | NodeJS.ErrnoException,
-					arg1?: (string | Buffer)[] | any[]
+					arg1?: (string | Buffer)[] | Dirent[]
 			  ) => void)
 			| ReaddirOptions
 			| "ascii"
@@ -138,13 +168,14 @@ declare interface FileSystem {
 			| "ucs2"
 			| "ucs-2"
 			| "base64"
+			| "base64url"
 			| "latin1"
 			| "binary"
 			| "hex"
 			| "buffer",
 		arg2?: (
 			arg0?: null | NodeJS.ErrnoException,
-			arg1?: (string | Buffer)[] | any[]
+			arg1?: (string | Buffer)[] | Dirent[]
 		) => void
 	) => void;
 	readJson?: {
@@ -188,9 +219,56 @@ declare interface FileSystemStats {
 	isDirectory: () => boolean;
 	isFile: () => boolean;
 }
+declare interface Iterator<T, Z> {
+	(
+		item: T,
+		callback: (err?: null | Error, result?: null | Z) => void,
+		i: number
+	): void;
+}
+type JsonObject = { [index: string]: JsonValue } & {
+	[index: string]:
+		| undefined
+		| null
+		| string
+		| number
+		| boolean
+		| JsonObject
+		| JsonValue[];
+};
+type JsonValue = null | string | number | boolean | JsonObject | JsonValue[];
+declare interface KnownHooks {
+	resolveStep: SyncHook<
+		[
+			AsyncSeriesBailHook<
+				[ResolveRequest, ResolveContext],
+				null | ResolveRequest
+			>,
+			ResolveRequest
+		]
+	>;
+	noResolve: SyncHook<[ResolveRequest, Error]>;
+	resolve: AsyncSeriesBailHook<
+		[ResolveRequest, ResolveContext],
+		null | ResolveRequest
+	>;
+	result: AsyncSeriesHook<[ResolveRequest, ResolveContext]>;
+}
 declare class LogInfoPlugin {
-	constructor(source?: any);
-	source: any;
+	constructor(
+		source:
+			| string
+			| AsyncSeriesBailHook<
+					[ResolveRequest, ResolveContext],
+					null | ResolveRequest
+			  >
+	);
+	source:
+		| string
+		| AsyncSeriesBailHook<
+				[ResolveRequest, ResolveContext],
+				null | ResolveRequest
+		  >;
 	apply(resolver: Resolver): void;
 }
 declare interface ParsedIdentifier {
@@ -224,6 +302,7 @@ declare interface ReaddirOptions {
 		| "ucs2"
 		| "ucs-2"
 		| "base64"
+		| "base64url"
 		| "latin1"
 		| "binary"
 		| "hex"
@@ -347,23 +426,7 @@ type ResolveRequest = BaseResolveRequest & Partial<ParsedIdentifier>;
 declare abstract class Resolver {
 	fileSystem: FileSystem;
 	options: ResolveOptions;
-	hooks: {
-		resolveStep: SyncHook<
-			[
-				AsyncSeriesBailHook<
-					[ResolveRequest, ResolveContext],
-					null | ResolveRequest
-				>,
-				ResolveRequest
-			]
-		>;
-		noResolve: SyncHook<[ResolveRequest, Error]>;
-		resolve: AsyncSeriesBailHook<
-			[ResolveRequest, ResolveContext],
-			null | ResolveRequest
-		>;
-		result: AsyncSeriesHook<[ResolveRequest, ResolveContext]>;
-	};
+	hooks: KnownHooks;
 	ensureHook(
 		name:
 			| string
@@ -399,18 +462,21 @@ declare abstract class Resolver {
 		) => void
 	): void;
 	doResolve(
-		hook?: any,
-		request?: any,
-		message?: any,
-		resolveContext?: any,
-		callback?: any
-	): any;
+		hook: AsyncSeriesBailHook<
+			[ResolveRequest, ResolveContext],
+			null | ResolveRequest
+		>,
+		request: ResolveRequest,
+		message: null | string,
+		resolveContext: ResolveContext,
+		callback: (err?: null | Error, result?: ResolveRequest) => void
+	): void;
 	parse(identifier: string): ParsedIdentifier;
-	isModule(path?: any): boolean;
-	isPrivate(path?: any): boolean;
+	isModule(path: string): boolean;
+	isPrivate(path: string): boolean;
 	isDirectory(path: string): boolean;
-	join(path?: any, request?: any): string;
-	normalize(path?: any): string;
+	join(path: string, request: string): string;
+	normalize(path: string): string;
 }
 declare interface UserResolveOptions {
 	/**
@@ -558,7 +624,7 @@ declare interface UserResolveOptions {
 	preferAbsolute?: boolean;
 }
 declare interface WriteOnlySet<T> {
-	add: (T?: any) => void;
+	add: (item: T) => void;
 }
 declare function exports(
 	context: object,
@@ -611,11 +677,11 @@ declare namespace exports {
 	export namespace ResolverFactory {
 		export let createResolver: (options: UserResolveOptions) => Resolver;
 	}
-	export const forEachBail: (
-		array?: any,
-		iterator?: any,
-		callback?: any
-	) => any;
+	export const forEachBail: <T, Z>(
+		array: T[],
+		iterator: Iterator<T, Z>,
+		callback: (err?: null | Error, result?: null | Z) => void
+	) => void;
 	export type ResolveCallback = (
 		err: null | ErrorWithDetail,
 		res?: string | false,

@@ -35,6 +35,7 @@ describe("fullSpecified", function () {
 		aliasFields: ["browser"],
 		fullySpecified: true,
 		useSyncFileSystemCalls: true,
+		// @ts-ignore
 		fileSystem: fileSystem
 	});
 	const contextResolver = ResolverFactory.createResolver({
@@ -46,6 +47,7 @@ describe("fullSpecified", function () {
 		fullySpecified: true,
 		resolveToContext: true,
 		useSyncFileSystemCalls: true,
+		// @ts-ignore
 		fileSystem: fileSystem
 	});
 

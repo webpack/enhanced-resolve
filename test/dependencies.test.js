@@ -19,6 +19,7 @@ describe("dependencies", function () {
 		resolver = resolve.create({
 			extensions: [".json", ".js"],
 			modules: ["/modules", "node_modules"],
+			// @ts-ignore
 			fileSystem: fileSystem
 		});
 	});

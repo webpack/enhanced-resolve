@@ -22,7 +22,7 @@ describe("plugins", function () {
 			{},
 			function (err, result) {
 				if (err) return done(err);
-				if (!result) throw new Error("No result");
+				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
 					path.resolve(
 						__dirname,

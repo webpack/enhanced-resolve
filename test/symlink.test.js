@@ -217,15 +217,16 @@ describe("symlink", () => {
 						path.join(__dirname, "..", "lib", "index.js")
 					);
 
-					resolveWithoutSymlinks(pathToIt[0], pathToIt[1], function (
-						err,
-						filename
-					) {
-						if (err) return done(err);
-						expect(typeof filename).toBe("string");
-						expect(filename).toEqual(path.resolve(pathToIt[0], pathToIt[1]));
-						done();
-					});
+					resolveWithoutSymlinks(
+						pathToIt[0],
+						pathToIt[1],
+						function (err, filename) {
+							if (err) return done(err);
+							expect(typeof filename).toBe("string");
+							expect(filename).toEqual(path.resolve(pathToIt[0], pathToIt[1]));
+							done();
+						}
+					);
 				});
 			});
 			it("should resolve symlink to itself sync " + pathToIt[2], () => {
