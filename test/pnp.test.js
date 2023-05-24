@@ -264,7 +264,7 @@ describe("pnp", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				result.should.equal(
+				expect(result).toEqual(
 					path.resolve(__dirname, "fixtures/node_modules/m2/b.js")
 				);
 				done();
