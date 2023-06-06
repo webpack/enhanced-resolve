@@ -44,6 +44,8 @@ describe("plugins", function () {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem: require("fs"),
 			plugins: [
+				0,
+				"",
 				false,
 				null,
 				undefined,
