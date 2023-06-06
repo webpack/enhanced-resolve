@@ -6,6 +6,9 @@
     "anotherhashishere",
     "arcanis",
     "Builtins",
+    "burhanuday",
+    "Burhanuddin",
+    "codecov",
     "complexm",
     "endregion",
     "entrypoints",
@@ -24,6 +27,7 @@
     "sokra",
     "subpaths",
     "tapable",
+    "Udaipurwala",
     "undescribed",
     "unreviewed",
     "vankop",
@@ -31,8 +35,12 @@
     "zapp",
     "zipp",
     "zippi",
-    "zizizi",
-    "codecov"
+    "zizizi"
   ],
-  "ignorePaths": ["package.json", "yarn.lock", "coverage", "*.log"]
+  "ignorePaths": [
+    "package.json",
+    "yarn.lock",
+    "coverage",
+    "*.log"
+  ]
 }
