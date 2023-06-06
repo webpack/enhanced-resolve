@@ -33,4 +33,44 @@ describe("plugins", function () {
 			}
 		);
 	});
+
+	it("should ignore 'false'/'null'/'undefined' plugins", done => {
+		const FailedPlugin = class {
+			apply() {
+				throw new Error("FailedPlugin");
+			}
+		};
+		const falsy = false;
+		const resolver = ResolverFactory.createResolver({
+			fileSystem: require("fs"),
+			plugins: [
+				false,
+				null,
+				undefined,
+				falsy && new FailedPlugin(),
+				new CloneBasenamePlugin(
+					"after-existing-directory",
+					"undescribed-raw-file"
+				)
+			]
+		});
+
+		resolver.resolve(
+			{},
+			__dirname,
+			"./fixtures/directory-default",
+			{},
+			function (err, result) {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(
+					path.resolve(
+						__dirname,
+						"fixtures/directory-default/directory-default.js"
+					)
+				);
+				done();
+			}
+		);
+	});
 });
