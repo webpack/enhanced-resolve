@@ -281,6 +281,11 @@ declare interface ParsedIdentifier {
 	internal: boolean;
 }
 type Plugin =
+	| undefined
+	| null
+	| false
+	| ""
+	| 0
 	| { apply: (arg0: Resolver) => void }
 	| ((this: Resolver, arg1: Resolver) => void);
 declare interface PnpApiImpl {
