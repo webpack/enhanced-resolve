@@ -1,7 +1,6 @@
 {
   "name": "enhanced-resolve",
   "version": "5.15.0",
-  "packageManager": "yarn@1.22.19",
   "author": "Tobias Koppers @sokra",
   "description": "Offers a async require.resolve function. It's highly configurable.",
   "files": [
