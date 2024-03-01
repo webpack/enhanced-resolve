@@ -13,7 +13,7 @@
     "module": "./lib/util/module-browser.js"
   },
   "dependencies": {
-    "graceful-fs": "^4.2.4",
+    "graceful-fs": "^4.2.9",
     "tapable": "^2.2.0"
   },
   "license": "MIT",
