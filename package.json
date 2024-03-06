@@ -20,7 +20,7 @@
   "devDependencies": {
     "@types/graceful-fs": "^4.1.6",
     "@types/jest": "^27.5.1",
-    "@types/node": "^14.11.1",
+    "@types/node": "20.9.5",
     "cspell": "4.2.8",
     "eslint": "^7.9.0",
     "eslint-config-prettier": "^6.11.0",
@@ -32,8 +32,8 @@
     "lint-staged": "^10.4.0",
     "memfs": "^3.2.0",
     "prettier": "^2.1.2",
-    "tooling": "webpack/tooling#v1.14.0",
-    "typescript": "^5.0.4"
+    "tooling": "webpack/tooling#v1.23.1",
+    "typescript": "^5.3.3"
   },
   "engines": {
     "node": ">=10.13.0"

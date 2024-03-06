@@ -14,7 +14,9 @@ describe("SyncAsyncFileSystemDecorator  stat", function () {
 				expect(error).toBeNull();
 				expect(result).toHaveProperty("size");
 				expect(result).toHaveProperty("birthtime");
-				expect(typeof result.size).toEqual("bigint");
+				expect(
+					typeof (/** @type {import("fs").BigIntStats} */ (result).size)
+				).toEqual("bigint");
 				done();
 			}
 		);
@@ -28,7 +30,9 @@ describe("SyncAsyncFileSystemDecorator  stat", function () {
 				expect(error).toBeNull();
 				expect(result).toHaveProperty("size");
 				expect(result).toHaveProperty("birthtime");
-				expect(typeof result.size).toEqual("number");
+				expect(
+					typeof (/** @type {import("fs").Stats} */ (result).size)
+				).toEqual("number");
 				done();
 			}
 		);
