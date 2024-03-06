@@ -104,6 +104,15 @@ declare class CachedInputFileSystem {
 		): void;
 	};
 	readlinkSync: (arg0: string, arg1?: object) => string | Buffer;
+	realpath?: {
+		(arg0: string, arg1: FileSystemCallback<string | Buffer>): void;
+		(
+			arg0: string,
+			arg1: object,
+			arg2: FileSystemCallback<string | Buffer>
+		): void;
+	};
+	realpathSync?: (arg0: string, arg1?: object) => string | Buffer;
 	purge(what?: string | Set<string> | string[]): void;
 }
 declare class CloneBasenamePlugin {
@@ -200,6 +209,14 @@ declare interface FileSystem {
 	};
 	stat: {
 		(arg0: string, arg1: FileSystemCallback<FileSystemStats>): void;
+		(
+			arg0: string,
+			arg1: object,
+			arg2: FileSystemCallback<string | Buffer>
+		): void;
+	};
+	realpath?: {
+		(arg0: string, arg1: FileSystemCallback<string | Buffer>): void;
 		(
 			arg0: string,
 			arg1: object,
