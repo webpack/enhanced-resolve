@@ -32,8 +32,8 @@
     "lint-staged": "^10.4.0",
     "memfs": "^3.2.0",
     "prettier": "^2.1.2",
-    "tooling": "webpack/tooling#v1.14.0",
-    "typescript": "^5.0.4"
+    "tooling": "webpack/tooling#v1.23.1",
+    "typescript": "^5.3.3"
   },
   "engines": {
     "node": ">=10.13.0"
