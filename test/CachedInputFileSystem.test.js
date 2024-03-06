@@ -165,6 +165,90 @@ describe("CachedInputFileSystem OperationMergerBackend ('lstat' and 'lstatSync')
 	});
 });
 
+describe("CachedInputFileSystem OperationMergerBackend ('realpath' and 'realpathSync')", () => {
+	let fs;
+
+	beforeEach(() => {
+		fs = new CachedInputFileSystem(
+			{
+				realpath: function (path, options, callback) {
+					if (!callback) {
+						callback = options;
+						options = undefined;
+					}
+					setTimeout(
+						() =>
+							callback(null, {
+								path,
+								options
+							}),
+						100
+					);
+				},
+				realpathSync: function (path, options) {
+					return {
+						path,
+						options
+					};
+				}
+			},
+			0
+		);
+	});
+	afterEach(() => {
+		fs.purge();
+	});
+
+	it("should join accesses", function (done) {
+		fs.realpath("a", function (err, result) {
+			expect(result).toBeDefined();
+			result.a = true;
+		});
+		fs.realpath("a", function (err, result) {
+			expect(result).toBeDefined();
+			expect(result.a).toBeDefined();
+			done();
+		});
+	});
+
+	it("should not join accesses with options", function (done) {
+		fs.realpath("a", function (err, result) {
+			expect(result).toBeDefined();
+
+			result.a = true;
+
+			expect(result).toBeDefined();
+			expect(result.path).toEqual("a");
+			expect(result.options).toBeUndefined();
+		});
+		fs.realpath("a", { options: true }, function (err, result) {
+			expect(result).toBeDefined();
+			expect(result.a).toBeUndefined();
+			expect(result.path).toEqual("a");
+			expect(result.options).toMatchObject({ options: true });
+			done();
+		});
+	});
+
+	it("should not cache accesses", function (done) {
+		fs.realpath("a", function (err, result) {
+			result.a = true;
+			fs.realpath("a", function (err, result) {
+				expect(result.a).toBeUndefined();
+				done();
+			});
+		});
+	});
+
+	it("should not cache sync accesses", () => {
+		const result = fs.realpathSync("a");
+		result.a = true;
+		const result2 = fs.realpathSync("a");
+
+		expect(result2.a).toBeUndefined();
+	});
+});
+
 describe("CachedInputFileSystem CacheBackend", () => {
 	let fs;
 
