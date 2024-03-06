@@ -4,6 +4,7 @@ describe("pr-53", () => {
 	it("should allow to readJsonSync in CachedInputFileSystem", () => {
 		var cfs = new CachedInputFileSystem(
 			{
+				// @ts-ignore
 				readFileSync: function (path) {
 					return JSON.stringify("abc" + path);
 				}

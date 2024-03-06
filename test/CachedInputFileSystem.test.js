@@ -20,6 +20,7 @@ describe("CachedInputFileSystem OperationMergerBackend ('stat' and 'statSync')",
 						100
 					);
 				},
+				// @ts-ignore
 				statSync: function (path, options) {
 					return {
 						path,
@@ -101,6 +102,7 @@ describe("CachedInputFileSystem OperationMergerBackend ('lstat' and 'lstatSync')
 						100
 					);
 				},
+				// @ts-ignore
 				lstatSync: function (path, options) {
 					return {
 						path,
@@ -185,6 +187,7 @@ describe("CachedInputFileSystem OperationMergerBackend ('realpath' and 'realpath
 						100
 					);
 				},
+				// @ts-ignore
 				realpathSync: function (path, options) {
 					return {
 						path,
@@ -269,6 +272,7 @@ describe("CachedInputFileSystem CacheBackend", () => {
 						100
 					);
 				},
+				// @ts-ignore
 				statSync: function (path, options) {
 					return {
 						path,
