@@ -1,43 +1,6 @@
 bot: "webpack-bot"
 rules:
 
-# Add ci-ok, ci-not-ok labels depending on travis status
-# comment to point the user to the results
-# comment in case of success
-- filters:
-    open: true
-    pull_request:
-      mergeable: true
-    status_1:
-      context: "continuous-integration/travis-ci/pr"
-    ensure_1:
-      value: "{{status_1.state}}"
-      equals: "success"
-  actions:
-    label:
-      add: "PR: CI-ok"
-      remove: "PR: CI-not-ok"
-    comment:
-      identifier: "ci-result"
-      message: |-
-        Thank you for your pull request! The most important CI builds succeeded, we’ll review the pull request soon.
-- filters:
-    open: true
-    pull_request:
-      mergeable: true
-    status_1:
-      context: "continuous-integration/travis-ci/pr"
-    any:
-      ensure_1:
-        value: "{{status_1.state}}"
-        equals: "failure"
-  actions:
-    label:
-      add: "PR: CI-not-ok"
-      remove: "PR: CI-ok"
-
-
-
 # add conflict label to pull requests with conflict
 # on conflict all result labels are removed
 - filters:
