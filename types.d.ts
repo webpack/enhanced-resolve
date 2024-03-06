@@ -475,7 +475,55 @@ declare abstract class Resolver {
 		[ResolveRequest, ResolveContext],
 		null | ResolveRequest
 	>;
-	resolveSync(context: object, path: string, request: string): string | false;
+
+	//#region resolveSync
+	resolveSync(
+		context: object,
+		path: string,
+		request: string,
+		resolveContext?: ResolveContext,
+		multiArgs?: false
+	): string | false;
+	resolveSync(
+		context: object,
+		path: string,
+		request: string,
+		resolveContext: ResolveContext,
+		multiArgs: true
+	): [result: string | false, ressolveRequest: ResolveRequest | undefined];
+	resolveSync(
+		context: object,
+		path: string,
+		request: string,
+		resolveContext?: ResolveContext,
+		multiArgs?: boolean
+	): string | false | [result: string | false, ressolveRequest: ResolveRequest | undefined];
+	//#endregion resolveSync
+
+	//#region resolveAsync
+	resolveAsync(
+		context: object,
+		path: string,
+		request: string,
+		resolveContext?: ResolveContext,
+		multiArgs?: false
+	): Promise<string | false>
+	resolveAsync(
+		context: object,
+		path: string,
+		request: string,
+		resolveContext: ResolveContext,
+		multiArgs: true
+	): Promise<[result: string | false, ressolveRequest: ResolveRequest | undefined]>
+	resolveAsync(
+		context: object,
+		path: string,
+		request: string,
+		resolveContext?: ResolveContext,
+		multiArgs?: boolean
+	): Promise<string | false | [result: string | false, ressolveRequest: ResolveRequest | undefined]>
+	//#endregion resolveAsync
+
 	resolve(
 		context: object,
 		path: string,
