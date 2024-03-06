@@ -24,6 +24,7 @@ type AliasOptionNewRequest = string | false | string[];
 declare interface AliasOptions {
 	[index: string]: AliasOptionNewRequest;
 }
+type BaseFileSystem = FileSystem & SyncFileSystem;
 declare interface BaseResolveRequest {
 	path: string | false;
 	context?: object;
@@ -52,8 +53,8 @@ type BufferEncoding =
 	| "hex";
 type BufferEncodingOption = "buffer" | { encoding: "buffer" };
 declare class CachedInputFileSystem {
-	constructor(fileSystem: any, duration: number);
-	fileSystem: any;
+	constructor(fileSystem: BaseFileSystem, duration: number);
+	fileSystem: BaseFileSystem;
 	lstat?: LStat;
 	lstatSync?: LStatSync;
 	stat: Stat;
@@ -1024,6 +1025,15 @@ declare interface StatSync {
 declare interface StatSyncOptions {
 	bigint?: boolean;
 	throwIfNoEntry?: boolean;
+}
+declare interface SyncFileSystem {
+	readFileSync: ReadFileSync;
+	readdirSync: ReaddirSync;
+	readJsonSync?: (arg0: PathOrFileDescriptor) => JsonObject;
+	readlinkSync: ReadlinkSync;
+	lstatSync?: LStatSync;
+	statSync: StatSync;
+	realpathSync?: RealPathSync;
 }
 
 /**
