@@ -75,7 +75,15 @@ declare class CachedInputFileSystem {
 	readlinkSync: ReadlinkSync;
 	realpath?: RealPath;
 	realpathSync?: RealPathSync;
-	purge(what?: string | Set<string> | string[]): void;
+	purge(
+		what?:
+			| string
+			| number
+			| Buffer
+			| URL_url
+			| (string | number | Buffer | URL_url)[]
+			| Set<string | number | Buffer | URL_url>
+	): void;
 }
 declare class CloneBasenamePlugin {
 	constructor(
