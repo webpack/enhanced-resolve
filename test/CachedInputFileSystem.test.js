@@ -434,7 +434,19 @@ describe("CachedInputFileSystem CacheBackend", () => {
 					fs.purge(["/test/path"]);
 					fs.readdir("/test/path", (err, r) => {
 						expect(r[0]).toEqual("2");
-						done();
+						fs.purge([url.pathToFileURL("/test/path")]);
+						fs.readdir("/test/path", (err, r) => {
+							expect(r[0]).toEqual("2");
+							fs.purge(Buffer.from("/test/path"));
+							fs.readdir("/test/path", (err, r) => {
+								expect(r[0]).toEqual("3");
+								fs.purge([Buffer.from("/test/path")]);
+								fs.readdir("/test/path", (err, r) => {
+									expect(r[0]).toEqual("4");
+									done();
+								});
+							});
+						});
 					});
 				});
 			});
