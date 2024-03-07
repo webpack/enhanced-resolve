@@ -1,4 +1,6 @@
 const { CachedInputFileSystem } = require("../");
+const path = require("path");
+const url = require("url");
 
 describe("CachedInputFileSystem OperationMergerBackend ('stat' and 'statSync')", () => {
 	let fs;
@@ -451,5 +453,121 @@ describe("CachedInputFileSystem CacheBackend", () => {
 			});
 		};
 		next();
+	});
+});
+
+describe("CachedInputFileSystem CacheBackend and Node.JS filesystem", () => {
+	let fs;
+
+	beforeEach(() => {
+		fs = new CachedInputFileSystem(require("fs"), 1);
+	});
+
+	const file = path.resolve(__dirname, "./fixtures/abc.txt");
+
+	it("should work with string async", function (done) {
+		fs.readFile(file, (err, r) => {
+			if (err) {
+				done(err);
+				return;
+			}
+			expect(r.toString()).toEqual("abc");
+			done();
+		});
+	});
+
+	it("should work with string sync", function () {
+		const r = fs.readFileSync(file);
+		expect(r.toString()).toEqual("abc");
+	});
+
+	it("should work with Buffer async", function (done) {
+		fs.readFile(Buffer.from(file), (err, r) => {
+			if (err) {
+				done(err);
+				return;
+			}
+			expect(r.toString()).toEqual("abc");
+			done();
+		});
+	});
+
+	it("should work with Buffer sync", function () {
+		const r = fs.readFileSync(Buffer.from(file));
+		expect(r.toString()).toEqual("abc");
+	});
+
+	it("should work with URL async", function (done) {
+		fs.readFile(url.pathToFileURL(file), (err, r) => {
+			if (err) {
+				done(err);
+				return;
+			}
+			expect(r.toString()).toEqual("abc");
+			done();
+		});
+	});
+
+	it("should work with URL sync", function () {
+		const r = fs.readFileSync(url.pathToFileURL(file));
+		expect(r.toString()).toEqual("abc");
+	});
+});
+
+describe("CachedInputFileSystem OperationMergerBackend and Node.JS filesystem", () => {
+	let fs;
+
+	beforeEach(() => {
+		fs = new CachedInputFileSystem(require("fs"), 0);
+	});
+
+	const file = path.resolve(__dirname, "./fixtures/abc.txt");
+
+	it("should work with string async", function (done) {
+		fs.readFile(file, (err, r) => {
+			if (err) {
+				done(err);
+				return;
+			}
+			expect(r.toString()).toEqual("abc");
+			done();
+		});
+	});
+
+	it("should work with string sync", function () {
+		const r = fs.readFileSync(file);
+		expect(r.toString()).toEqual("abc");
+	});
+
+	it("should work with Buffer async", function (done) {
+		fs.readFile(Buffer.from(file), (err, r) => {
+			if (err) {
+				done(err);
+				return;
+			}
+			expect(r.toString()).toEqual("abc");
+			done();
+		});
+	});
+
+	it("should work with Buffer sync", function () {
+		const r = fs.readFileSync(Buffer.from(file));
+		expect(r.toString()).toEqual("abc");
+	});
+
+	it("should work with URL async", function (done) {
+		fs.readFile(url.pathToFileURL(file), (err, r) => {
+			if (err) {
+				done(err);
+				return;
+			}
+			expect(r.toString()).toEqual("abc");
+			done();
+		});
+	});
+
+	it("should work with URL sync", function () {
+		const r = fs.readFileSync(url.pathToFileURL(file));
+		expect(r.toString()).toEqual("abc");
 	});
 });
