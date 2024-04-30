@@ -1,5 +1,5 @@
 {
-  "name": "enhanced-resolve",
+  "name": "@galcarmi/enhanced-resolve",
   "version": "5.16.0",
   "author": "Tobias Koppers @sokra",
   "description": "Offers a async require.resolve function. It's highly configurable.",
