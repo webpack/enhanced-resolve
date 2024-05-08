@@ -10,6 +10,7 @@ const fixture = path.resolve(__dirname, "fixtures", "exports-field");
 const fixture2 = path.resolve(__dirname, "fixtures", "exports-field2");
 const fixture3 = path.resolve(__dirname, "fixtures", "exports-field3");
 const fixture4 = path.resolve(__dirname, "fixtures", "exports-field-error");
+const fixture5 = path.resolve(__dirname, "fixtures", "exports-field4");
 
 describe("Process exports field", function exportsField() {
 	/** @type {Array<{name: string, expect: string[]|Error, suite: [ExportsField, string, string[]]}>} */
@@ -3025,6 +3026,25 @@ describe("ExportsFieldPlugin", () => {
 			expect(err.message).toMatch(
 				/Package path \.\/string\.ts is not exported/
 			);
+			done();
+		});
+	});
+
+	it("should try to resolve first absolute or relative url", done => {
+		const resolver = ResolverFactory.createResolver({
+			extensions: [".js"],
+			extensionAlias: {
+				".js": ".ts"
+			},
+			fileSystem: nodeFileSystem,
+			fullySpecified: true,
+			conditionNames: ["webpack", "default"]
+		});
+
+		resolver.resolve({}, fixture5, "exports-field", {}, (err, result) => {
+			if (!err) return done(new Error(`expect error, got ${result}`));
+			expect(err).toBeInstanceOf(Error);
+			expect(err.message).toMatch(/Can't resolve 'exports-field' in/);
 			done();
 		});
 	});
