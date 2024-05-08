@@ -2381,7 +2381,10 @@ describe("ExportsFieldPlugin", () => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
-					path.resolve(fixture2, "node_modules/exports-field/lib/browser.js")
+					path.resolve(
+						fixture2,
+						"node_modules/exports-field/lib/lib2/browser.js"
+					)
 				);
 				done();
 			}
@@ -2400,7 +2403,7 @@ describe("ExportsFieldPlugin", () => {
 				expect(result).toEqual(
 					path.resolve(
 						fixture2,
-						"node_modules/exports-field/lib/browser.js?foo"
+						"node_modules/exports-field/lib/lib2/browser.js?foo"
 					)
 				);
 				done();
@@ -2429,7 +2432,7 @@ describe("ExportsFieldPlugin", () => {
 				expect(result).toEqual(
 					path.resolve(
 						fixture2,
-						"node_modules/exports-field/lib/browser.js#foo"
+						"node_modules/exports-field/lib/lib2/browser.js#foo"
 					)
 				);
 				done();
@@ -2685,7 +2688,10 @@ describe("ExportsFieldPlugin", () => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
-					path.resolve(fixture, "node_modules/exports-field/lib/browser.js")
+					path.resolve(
+						fixture,
+						"node_modules/exports-field/lib/lib2/browser.js"
+					)
 				);
 				expect(
 					log.map(line => line.replace(fixture, "...").replace(/\\/g, "/"))

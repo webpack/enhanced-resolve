@@ -1327,7 +1327,7 @@ describe("ImportsFieldPlugin", () => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
-					path.join(fixture, "node_modules/a/lib/index.js")
+					path.join(fixture, "node_modules/a/lib/lib2/index.js")
 				);
 				expect(
 					log.map(line => line.replace(fixture, "...").replace(/\\/g, "/"))
