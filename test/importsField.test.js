@@ -451,7 +451,7 @@ describe("Process imports field", function exportsField() {
 		},
 		{
 			name: "Direct mapping #7",
-			expect: new Error(), // Default is first one
+			expect: ["./src/index.js"], // Default is first one
 			suite: [
 				{
 					"#a": {
@@ -1309,7 +1309,6 @@ describe("ImportsFieldPlugin", () => {
 				fs.rmdirSync(dir);
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				console.log(result);
 				expect(result).toEqual(file);
 				done();
 			});
