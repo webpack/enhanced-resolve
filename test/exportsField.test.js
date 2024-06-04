@@ -543,7 +543,7 @@ describe("Process exports field", function exportsField() {
 		},
 		{
 			name: "Direct mapping #7",
-			expect: new Error(), // Default is first one
+			expect: ["./src/index.js"], // Default is first one
 			suite: [
 				{
 					".": {
