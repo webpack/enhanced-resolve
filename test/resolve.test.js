@@ -319,3 +319,283 @@ describe("resolve", () => {
 		});
 	});
 });
+
+const isWin32 = process.platform === "win32";
+
+describe(`resolve based on path-type: ${isWin32 ? "win32" : "posix"} (${
+	path.sep
+})`, () => {
+	// path.join/path.resolve work based on process.platform,
+	// and we only have to actualize independently passed paths with platform-based separator
+	// to make sure that it works the same on different platforms
+
+	testResolve(
+		"absolute path",
+		fixtures,
+		path.join(fixtures, "main1.js"),
+		path.join(fixtures, "main1.js")
+	);
+
+	testResolve(
+		"file with .js",
+		fixtures,
+		`.${path.sep}main1.js`,
+		path.join(fixtures, "main1.js")
+	);
+	testResolve(
+		"file without extension",
+		fixtures,
+		`.${path.sep}main1`,
+		path.join(fixtures, "main1.js")
+	);
+	testResolve(
+		"another file with .js",
+		fixtures,
+		`.${path.sep}a.js`,
+		path.join(fixtures, "a.js")
+	);
+	testResolve(
+		"another file without extension",
+		fixtures,
+		`.${path.sep}a`,
+		path.join(fixtures, "a.js")
+	);
+	testResolve(
+		"file in module with .js",
+		fixtures,
+		`m1${path.sep}a.js`,
+		path.join(fixtures, "node_modules", "m1", "a.js")
+	);
+	testResolve(
+		"file in module without extension",
+		fixtures,
+		`m1${path.sep}a`,
+		path.join(fixtures, "node_modules", "m1", "a.js")
+	);
+	testResolve(
+		"another file in module without extension",
+		fixtures,
+		`complexm${path.sep}step1`,
+		path.join(fixtures, "node_modules", "complexm", "step1.js")
+	);
+	testResolve(
+		"from submodule to file in sibling module",
+		path.join(fixtures, "node_modules", "complexm"),
+		`m2${path.sep}b.js`,
+		path.join(fixtures, "node_modules", "m2", "b.js")
+	);
+	testResolve(
+		"from submodule to file in sibling of parent module",
+		path.join(fixtures, "node_modules", "complexm", "web_modules", "m1"),
+		`m2${path.sep}b.js`,
+		path.join(fixtures, "node_modules", "m2", "b.js")
+	);
+	testResolve(
+		"from nested directory to overwritten file in module",
+		path.join(fixtures, "multiple_modules"),
+		`m1${path.sep}a.js`,
+		path.join(fixtures, "multiple_modules", "node_modules", "m1", "a.js")
+	);
+	testResolve(
+		"from nested directory to not overwritten file in module",
+		path.join(fixtures, "multiple_modules"),
+		`m1${path.sep}b.js`,
+		path.join(fixtures, "node_modules", "m1", "b.js")
+	);
+
+	testResolve(
+		"file with query",
+		fixtures,
+		`.${path.sep}main1.js?query`,
+		path.join(fixtures, "main1.js") + "?query"
+	);
+	testResolve(
+		"file with fragment",
+		fixtures,
+		`.${path.sep}main1.js#fragment`,
+		path.join(fixtures, "main1.js") + "#fragment"
+	);
+	testResolve(
+		"file with fragment and query",
+		fixtures,
+		`.${path.sep}main1.js#fragment?query`,
+		path.join(fixtures, "main1.js") + "#fragment?query"
+	);
+	testResolve(
+		"file with query and fragment",
+		fixtures,
+		`.${path.sep}main1.js?#fragment`,
+		path.join(fixtures, "main1.js") + "?#fragment"
+	);
+
+	testResolve(
+		"file in module with query",
+		fixtures,
+		`m1${path.sep}a?query`,
+		path.join(fixtures, "node_modules", "m1", "a.js") + "?query"
+	);
+	testResolve(
+		"file in module with fragment",
+		fixtures,
+		`m1${path.sep}a#fragment`,
+		path.join(fixtures, "node_modules", "m1", "a.js") + "#fragment"
+	);
+	testResolve(
+		"file in module with fragment and query",
+		fixtures,
+		`m1${path.sep}a#fragment?query`,
+		path.join(fixtures, "node_modules", "m1", "a.js") + "#fragment?query"
+	);
+	testResolve(
+		"file in module with query and fragment",
+		fixtures,
+		`m1${path.sep}a?#fragment`,
+		path.join(fixtures, "node_modules", "m1", "a.js") + "?#fragment"
+	);
+
+	testResolveContext(
+		"context for fixtures",
+		fixtures,
+		`.${path.sep}`,
+		fixtures
+	);
+	testResolveContext(
+		"context for fixtures/lib",
+		fixtures,
+		`.${path.sep}lib`,
+		path.join(fixtures, "lib")
+	);
+	testResolveContext(
+		"context for fixtures with ..",
+		fixtures,
+		`.${path.sep}lib${path.sep}..${path.sep}..${path.sep}fixtures${path.sep}.${path.sep}lib${path.sep}..`,
+		fixtures
+	);
+
+	testResolveContext(
+		"context for fixtures with query",
+		fixtures,
+		`.${path.sep}?query`,
+		fixtures + "?query"
+	);
+
+	testResolve(
+		"differ between directory and file, resolve file",
+		fixtures,
+		`.${path.sep}dirOrFile`,
+		path.join(fixtures, "dirOrFile.js")
+	);
+	testResolve(
+		"differ between directory and file, resolve directory",
+		fixtures,
+		`.${path.sep}dirOrFile${path.sep}`,
+		path.join(fixtures, "dirOrFile", "index.js")
+	);
+
+	testResolve(
+		"find node_modules outside of node_modules",
+		path.join(fixtures, "browser-module", "node_modules"),
+		`m1${path.sep}a`,
+		path.join(fixtures, "node_modules", "m1", "a.js")
+	);
+
+	testResolve(
+		"don't crash on main field pointing to self",
+		fixtures,
+		`.${path.sep}main-field-self`,
+		path.join(fixtures, "main-field-self", "index.js")
+	);
+
+	testResolve(
+		"don't crash on main field pointing to self",
+		fixtures,
+		`.${path.sep}main-field-self2`,
+		path.join(fixtures, "main-field-self2", "index.js")
+	);
+
+	testResolve(
+		"handle fragment edge case (no fragment)",
+		fixtures,
+		`.${path.sep}no#fragment${path.sep}#${path.sep}#`,
+		path.join(fixtures, "no\0#fragment/\0#", "\0#.js")
+	);
+
+	testResolve(
+		"handle fragment edge case (fragment)",
+		fixtures,
+		`.${path.sep}no#fragment${path.sep}#${path.sep}`,
+		path.join(fixtures, "no.js") + `#fragment${path.sep}#${path.sep}`
+	);
+
+	testResolve(
+		"handle fragment escaping",
+		fixtures,
+		`.${path.sep}no\0#fragment${path.sep}\0#${path.sep}\0##fragment`,
+		path.join(fixtures, "no\0#fragment/\0#", "\0#.js") + "#fragment"
+	);
+
+	it("should correctly resolve", function (done) {
+		const issue238 = path.resolve(fixtures, "issue-238");
+
+		issue238Resolve(
+			path.resolve(issue238, "./src/common"),
+			"config/myObjectFile",
+			function (err, filename) {
+				if (err) done(err);
+				expect(filename).toBeDefined();
+				expect(filename).toEqual(
+					path.resolve(issue238, "./src/common/config/myObjectFile.js")
+				);
+				done();
+			}
+		);
+	});
+
+	it("should correctly resolve with preferRelative", function (done) {
+		preferRelativeResolve(fixtures, "main1.js", function (err, filename) {
+			if (err) done(err);
+			expect(filename).toBeDefined();
+			expect(filename).toEqual(path.join(fixtures, "main1.js"));
+			done();
+		});
+	});
+
+	it(`should correctly resolve with preferRelative (separator: ${path.sep})`, function (done) {
+		preferRelativeResolve(
+			fixtures,
+			`m1${path.sep}a.js`,
+			function (err, filename) {
+				if (err) done(err);
+				expect(filename).toBeDefined();
+				expect(filename).toEqual(
+					path.join(fixtures, "node_modules", "m1", "a.js")
+				);
+				done();
+			}
+		);
+	});
+
+	it("should not crash when passing undefined as path", done => {
+		// @ts-expect-error testing invalid arguments
+		resolve(fixtures, undefined, err => {
+			expect(err).toBeInstanceOf(Error);
+			done();
+		});
+	});
+
+	it(`should not crash when passing undefined as context (separator: ${path.sep})`, done => {
+		// @ts-expect-error testing invalid arguments
+		resolve({}, undefined, `.${path.sep}test${path.sep}resolve.js`, err => {
+			expect(err).toBeInstanceOf(Error);
+			done();
+		});
+	});
+
+	it("should not crash when passing undefined everywhere", done => {
+		// @ts-expect-error testing invalid arguments
+		resolve(undefined, undefined, undefined, undefined, err => {
+			expect(err).toBeInstanceOf(Error);
+			done();
+		});
+	});
+});
