@@ -54,7 +54,7 @@
     "pretty": "prettier --loglevel warn --write \"lib/**/*.{js,json}\" \"test/*.js\"",
     "pretest": "yarn lint",
     "spelling": "cspell \"**\"",
-    "test:only": "jest",
+    "test:only": "node_modules/.bin/jest",
     "test:watch": "yarn test:only -- --watch",
     "test:coverage": "yarn test:only -- --collectCoverageFrom=\"lib/**/*.js\" --coverage",
     "test": "yarn test:coverage",

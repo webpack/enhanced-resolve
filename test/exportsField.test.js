@@ -10,6 +10,11 @@ const fixture = path.resolve(__dirname, "fixtures", "exports-field");
 const fixture2 = path.resolve(__dirname, "fixtures", "exports-field2");
 const fixture3 = path.resolve(__dirname, "fixtures", "exports-field3");
 const fixture4 = path.resolve(__dirname, "fixtures", "exports-field-error");
+const fixture5 = path.resolve(
+	__dirname,
+	"fixtures",
+	"exports-field-invalid-package-target"
+);
 
 describe("Process exports field", function exportsField() {
 	/** @type {Array<{name: string, expect: string[]|Error, suite: [ExportsField, string, string[]]}>} */
@@ -809,17 +814,6 @@ describe("Process exports field", function exportsField() {
 			]
 		},
 		{
-			name: "mapping to a folder root #6 (wildcard)",
-			expect: new Error(), // not a valid mapping
-			suite: [
-				{
-					"./*": "."
-				},
-				"./timezones/pdt.mjs",
-				[]
-			]
-		},
-		{
 			name: "mapping to a folder root #7",
 			expect: [], // incorrect export field, but value did not processed
 			suite: [
@@ -1072,17 +1066,6 @@ describe("Process exports field", function exportsField() {
 			expect: new Error(),
 			suite: [
 				{
-					"./utils/": "/a/"
-				},
-				"./utils/index.mjs",
-				[]
-			]
-		},
-		{
-			name: "incorrect exports field #3",
-			expect: new Error(),
-			suite: [
-				{
 					"/utils/": {
 						browser: "./a/",
 						default: "./b/"
@@ -1093,21 +1076,7 @@ describe("Process exports field", function exportsField() {
 			]
 		},
 		{
-			name: "incorrect exports field #4",
-			expect: new Error(),
-			suite: [
-				{
-					"./utils/": {
-						browser: "/a/",
-						default: "/b/"
-					}
-				},
-				"./utils/index.mjs",
-				["browser"]
-			]
-		},
-		{
-			name: "incorrect exports field #4 (wildcard)",
+			name: "incorrect exports field #3 (wildcard)",
 			expect: new Error(),
 			suite: [
 				{
@@ -1121,7 +1090,7 @@ describe("Process exports field", function exportsField() {
 			]
 		},
 		{
-			name: "incorrect exports field #5",
+			name: "incorrect exports field #4",
 			expect: [],
 			suite: [
 				{
@@ -1132,7 +1101,7 @@ describe("Process exports field", function exportsField() {
 			]
 		},
 		{
-			name: "incorrect exports field #6",
+			name: "incorrect exports field #5",
 			expect: [],
 			suite: [
 				{
@@ -1143,7 +1112,7 @@ describe("Process exports field", function exportsField() {
 			]
 		},
 		{
-			name: "incorrect exports field #7",
+			name: "incorrect exports field #6",
 			expect: [],
 			suite: [
 				{
@@ -1157,7 +1126,7 @@ describe("Process exports field", function exportsField() {
 			]
 		},
 		{
-			name: "incorrect exports field #8",
+			name: "incorrect exports field #7",
 			expect: [],
 			suite: [
 				{
@@ -1276,28 +1245,6 @@ describe("Process exports field", function exportsField() {
 		},
 		{
 			name: "backtracking package base #3",
-			expect: new Error(),
-			suite: [
-				{
-					"./utils/": "../src/"
-				},
-				"./utils/index",
-				[]
-			]
-		},
-		{
-			name: "backtracking package base #3 (wildcard)",
-			expect: new Error(),
-			suite: [
-				{
-					"./utils/*": "../src/*"
-				},
-				"./utils/index",
-				[]
-			]
-		},
-		{
-			name: "backtracking package base #4",
 			expect: ["./../src/index"], // we don't handle backtracking here
 			suite: [
 				{
@@ -1308,7 +1255,7 @@ describe("Process exports field", function exportsField() {
 			]
 		},
 		{
-			name: "backtracking package base #4 (wildcard)",
+			name: "backtracking package base #3 (wildcard)",
 			expect: ["./../src/index"], // we don't handle backtracking here
 			suite: [
 				{
@@ -1319,7 +1266,7 @@ describe("Process exports field", function exportsField() {
 			]
 		},
 		{
-			name: "backtracking package base #5",
+			name: "backtracking package base #4",
 			// fits package base depth
 			expect: ["./src/../index.js"],
 			suite: [
@@ -1331,7 +1278,7 @@ describe("Process exports field", function exportsField() {
 			]
 		},
 		{
-			name: "backtracking package base #6",
+			name: "backtracking package base #5",
 			// fits package base depth,
 			// but matching works as string concatenation not file paths
 			expect: [],
@@ -1344,35 +1291,7 @@ describe("Process exports field", function exportsField() {
 			]
 		},
 		{
-			name: "backtracking package base #7",
-			// enhanced-resolve don't know is this same package or not
-			expect: new Error(),
-			suite: [
-				{
-					"./utils/": {
-						browser: "../this/"
-					}
-				},
-				"./utils/index",
-				["browser"]
-			]
-		},
-		{
-			name: "backtracking package base #7",
-			// enhanced-resolve don't know is this same package or not
-			expect: new Error(),
-			suite: [
-				{
-					"./utils/*": {
-						browser: "../this/*"
-					}
-				},
-				"./utils/index",
-				["browser"]
-			]
-		},
-		{
-			name: "backtracking package base #8",
+			name: "backtracking package base #6",
 			expect: ["./utils/../index"],
 			suite: [
 				{
@@ -1385,7 +1304,7 @@ describe("Process exports field", function exportsField() {
 			]
 		},
 		{
-			name: "backtracking package base #8 (wildcard)",
+			name: "backtracking package base #6 (wildcard)",
 			expect: ["./utils/../index"],
 			suite: [
 				{
@@ -1398,7 +1317,7 @@ describe("Process exports field", function exportsField() {
 			]
 		},
 		{
-			name: "backtracking package base #9",
+			name: "backtracking package base #7",
 			expect: ["./dist/index"],
 			suite: [
 				{
@@ -1410,7 +1329,7 @@ describe("Process exports field", function exportsField() {
 			]
 		},
 		{
-			name: "backtracking package base #9 (wildcard)",
+			name: "backtracking package base #7 (wildcard)",
 			expect: ["./dist/index"],
 			suite: [
 				{
@@ -2218,14 +2137,14 @@ describe("Process exports field", function exportsField() {
 					processExportsField(testCase.suite[0])(
 						testCase.suite[1],
 						new Set(testCase.suite[2])
-					);
+					)[0];
 				}).toThrowError();
 			} else {
 				expect(
 					processExportsField(testCase.suite[0])(
 						testCase.suite[1],
 						new Set(testCase.suite[2])
-					)
+					)[0]
 				).toEqual(testCase.expect);
 			}
 		});
@@ -2487,7 +2406,7 @@ describe("ExportsFieldPlugin", () => {
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
 				expect(err).toBeInstanceOf(Error);
-				expect(err.message).toMatch(/out of package scope/);
+				expect(err.message).toMatch(/Can't resolve/);
 				done();
 			}
 		);
@@ -3021,5 +2940,233 @@ describe("ExportsFieldPlugin", () => {
 			);
 			done();
 		});
+	});
+
+	it("invalid package target #1", done => {
+		resolver.resolve(
+			{},
+			fixture5,
+			"@exports-field/bad-specifier",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(path.resolve(fixture5, "./a.js") + "?foo=../");
+				done();
+			}
+		);
+	});
+
+	it("invalid package target #2", done => {
+		resolver.resolve(
+			{},
+			fixture5,
+			"@exports-field/bad-specifier/foo/file.js",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(
+					path.resolve(fixture5, "./a.js") + "?foo=../#../"
+				);
+				done();
+			}
+		);
+	});
+
+	it("invalid package target #3", done => {
+		resolver.resolve(
+			{},
+			fixture5,
+			"@exports-field/bad-specifier/bar",
+			{},
+			(err, result) => {
+				if (!err) return done(new Error(`expect error, got ${result}`));
+				expect(err).toBeInstanceOf(Error);
+				expect(err.message).toMatch(
+					/Invalid "exports" target "-bad-specifier-" defined for "\.\/bar"/
+				);
+				done();
+			}
+		);
+	});
+
+	it("invalid package target #4", done => {
+		resolver.resolve(
+			{},
+			fixture5,
+			"@exports-field/bad-specifier/baz-multi",
+			{},
+			(err, result) => {
+				if (!err) return done(new Error(`expect error, got ${result}`));
+				expect(err).toBeInstanceOf(Error);
+				expect(err.message).toMatch(/Can't resolve/);
+				done();
+			}
+		);
+	});
+
+	it("invalid package target #5", done => {
+		resolver.resolve(
+			{},
+			fixture5,
+			"@exports-field/bad-specifier/pattern/a.js",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(path.resolve(fixture5, "./a.js"));
+				done();
+			}
+		);
+	});
+
+	it("invalid package target #6", done => {
+		resolver.resolve(
+			{},
+			fixture5,
+			"@exports-field/bad-specifier/slash",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(path.resolve(fixture5, "./a.js"));
+				done();
+			}
+		);
+	});
+
+	it("invalid package target #7", done => {
+		resolver.resolve(
+			{},
+			fixture5,
+			"@exports-field/bad-specifier/no-slash",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(path.resolve(fixture5, "./a.js"));
+				done();
+			}
+		);
+	});
+
+	it("invalid package target #8", done => {
+		resolver.resolve(
+			{},
+			fixture5,
+			"@exports-field/bad-specifier/utils/index.mjs",
+			{},
+			(err, result) => {
+				if (!err) return done(new Error(`expect error, got ${result}`));
+				expect(err).toBeInstanceOf(Error);
+				expect(err.message).toMatch(
+					/Invalid "exports" target "\/b\/index\.mjs" defined for "\.\/utils\//
+				);
+				done();
+			}
+		);
+	});
+
+	it("invalid package target #9", done => {
+		resolver.resolve(
+			{},
+			fixture5,
+			"@exports-field/bad-specifier/utils1/index.mjs",
+			{},
+			(err, result) => {
+				if (!err) return done(new Error(`expect error, got ${result}`));
+				expect(err).toBeInstanceOf(Error);
+				expect(err.message).toMatch(
+					/Invalid "exports" target "\/a\/index.mjs" defined for "\.\/utils1\/"/
+				);
+				done();
+			}
+		);
+	});
+
+	it("invalid package target #10", done => {
+		resolver.resolve(
+			{},
+			fixture5,
+			"@exports-field/bad-specifier/utils2/index",
+			{},
+			(err, result) => {
+				if (!err) return done(new Error(`expect error, got ${result}`));
+				expect(err).toBeInstanceOf(Error);
+				expect(err.message).toMatch(
+					/Invalid "exports" target "\.\.\/this\/index" defined for "\.\/utils2\/"/
+				);
+				done();
+			}
+		);
+	});
+
+	it("invalid package target #11", done => {
+		resolver.resolve(
+			{},
+			fixture5,
+			"@exports-field/bad-specifier/utils3/index",
+			{},
+			(err, result) => {
+				if (!err) return done(new Error(`expect error, got ${result}`));
+				expect(err).toBeInstanceOf(Error);
+				expect(err.message).toMatch(
+					/Invalid "exports" target "\.\.\/this\/index" defined for "\.\/utils3\/\*"/
+				);
+				done();
+			}
+		);
+	});
+
+	it("invalid package target #12", done => {
+		resolver.resolve(
+			{},
+			fixture5,
+			"@exports-field/bad-specifier/utils4/index",
+			{},
+			(err, result) => {
+				if (!err) return done(new Error(`expect error, got ${result}`));
+				expect(err).toBeInstanceOf(Error);
+				expect(err.message).toMatch(
+					/Invalid "exports" target "\.\.\/src\/index" defined for "\.\/utils4\/\*"/
+				);
+				done();
+			}
+		);
+	});
+
+	it("invalid package target #13", done => {
+		resolver.resolve(
+			{},
+			fixture5,
+			"@exports-field/bad-specifier/utils5/index",
+			{},
+			(err, result) => {
+				if (!err) return done(new Error(`expect error, got ${result}`));
+				expect(err).toBeInstanceOf(Error);
+				expect(err.message).toMatch(
+					/Invalid "exports" target "\.\.\/src\/index" defined for "\.\/utils5\/"/
+				);
+				done();
+			}
+		);
+	});
+
+	it("invalid package target #14", done => {
+		resolver.resolve(
+			{},
+			fixture5,
+			"@exports-field/bad-specifier/timezones/pdt.mjs",
+			{},
+			(err, result) => {
+				if (!err) return done(new Error(`expect error, got ${result}`));
+				expect(err).toBeInstanceOf(Error);
+				expect(err.message).toMatch(
+					/Invalid "exports" target "\." defined for "\.\/\*"/
+				);
+				done();
+			}
+		);
 	});
 });

@@ -1,0 +1,44 @@
+{
+  "name": "@exports-field/bad-specifier",
+  "version": "1.0.0",
+  "exports": {
+    ".": [
+      "",
+      "./a/../b/../../pack1/index.js",
+      "././-bad-specifier-",
+      "-bad-specifier-",
+      "file.js",
+      "./a.js?foo=../"
+    ],
+    "./foo/*": [
+      "",
+      "./a/../b/../../pack1/index.js",
+      "././-bad-specifier-",
+      "-bad-specifier-",
+      "file.js",
+      "./a.js?foo=../#../"
+    ],
+    "./bar": "-bad-specifier-",
+    "./baz": ["-bad-specifier-"],
+    "./baz-multi": ["-bad-specifier-", "foo"],
+    "./pattern/*.js": {
+      "default": ["-bad-specifier-", "./*.js"]
+    },
+    "./slash": ["/bar", "./a.js"],
+    "./no-slash": [".bar", "./a.js"],
+    "./utils/": {
+      "browser": "/a/",
+      "default": "/b/"
+    },
+    "./utils1/": "/a/",
+    "./utils2/": {
+      "default": "../this/"
+    },
+    "./utils3/*": {
+      "default": "../this/*"
+    },
+    "./utils4/*": "../src/*",
+    "./utils5/": "../src/",
+    "./*": "."
+  }
+}

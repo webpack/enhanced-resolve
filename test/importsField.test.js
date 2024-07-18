@@ -7,6 +7,7 @@ const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
 /** @typedef {import("../lib/util/entrypoints").ImportsField} ImportsField */
 
 const fixture = path.resolve(__dirname, "fixtures", "imports-field");
+const fixture1 = path.resolve(__dirname, "fixtures", "imports-field-different");
 
 describe("Process imports field", function exportsField() {
 	/** @type {Array<{name: string, expect: string[]|Error, suite: [ImportsField, string, string[]]}>} */
@@ -791,31 +792,6 @@ describe("Process imports field", function exportsField() {
 		//#region Incorrect imports field definition
 		{
 			name: "incorrect exports field #1",
-			expect: new Error(),
-			suite: [
-				{
-					"/utils/": "./a/"
-				},
-				"#a/index.mjs",
-				[]
-			]
-		},
-		{
-			name: "incorrect exports field #2",
-			expect: new Error(),
-			suite: [
-				{
-					"/utils/": {
-						browser: "./a/",
-						default: "./b/"
-					}
-				},
-				"#a/index.mjs",
-				["browser"]
-			]
-		},
-		{
-			name: "incorrect exports field #3",
 			expect: [],
 			suite: [
 				{
@@ -826,7 +802,7 @@ describe("Process imports field", function exportsField() {
 			]
 		},
 		{
-			name: "incorrect exports field #4",
+			name: "incorrect exports field #2",
 			expect: [],
 			suite: [
 				{
@@ -837,7 +813,7 @@ describe("Process imports field", function exportsField() {
 			]
 		},
 		{
-			name: "incorrect exports field #5",
+			name: "incorrect exports field #3",
 			expect: [],
 			suite: [
 				{
@@ -851,7 +827,7 @@ describe("Process imports field", function exportsField() {
 			]
 		},
 		{
-			name: "incorrect exports field #6",
+			name: "incorrect exports field #4",
 			expect: [],
 			suite: [
 				{
@@ -1171,7 +1147,7 @@ describe("Process imports field", function exportsField() {
 					processImportsField(testCase.suite[0])(
 						testCase.suite[1],
 						new Set(testCase.suite[2])
-					)
+					)[0]
 				).toEqual(testCase.expect);
 			}
 		});
@@ -1345,6 +1321,152 @@ describe("ImportsFieldPlugin", () => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(path.resolve(fixture, "./src/internal/i.js"));
+			done();
+		});
+	});
+
+	it("should work and throw an error on invalid imports #1", done => {
+		resolver.resolve({}, fixture, "#/dep", {}, (err, result) => {
+			if (!err) return done(new Error(`expect error, got ${result}`));
+			expect(err).toBeInstanceOf(Error);
+			expect(err.message).toMatch(/Request should not start with "#\/"/);
+			done();
+		});
+	});
+
+	it("should work and throw an error on invalid imports #2", done => {
+		resolver.resolve({}, fixture, "#dep/", {}, (err, result) => {
+			if (!err) return done(new Error(`expect error, got ${result}`));
+			expect(err).toBeInstanceOf(Error);
+			expect(err.message).toMatch(
+				/Resolving to directories is not possible with the imports field \(request was #dep\/\)/
+			);
+			done();
+		});
+	});
+
+	it("should work with invalid imports #1", done => {
+		resolver.resolve({}, fixture1, "#dep", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) return done(new Error("No result"));
+			expect(result).toEqual(path.resolve(fixture1, "./a.js") + "?foo=../");
+			done();
+		});
+	});
+
+	it("should work with invalid imports #2", done => {
+		resolver.resolve({}, fixture1, "#dep/foo/a.js", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) return done(new Error("No result"));
+			expect(result).toEqual(path.resolve(fixture1, "./a.js") + "?foo=../#../");
+			done();
+		});
+	});
+
+	it("should work with invalid imports #3", done => {
+		resolver.resolve({}, fixture1, "#dep/bar", {}, (err, result) => {
+			if (!err) return done(new Error(`expect error, got ${result}`));
+			expect(err).toBeInstanceOf(Error);
+			expect(err.message).toMatch(/Can't resolve '#dep\/bar' in/);
+			done();
+		});
+	});
+
+	it("should work with invalid imports #3", done => {
+		resolver.resolve({}, fixture1, "#dep/baz", {}, (err, result) => {
+			if (!err) return done(new Error(`expect error, got ${result}`));
+			expect(err).toBeInstanceOf(Error);
+			expect(err.message).toMatch(/Can't resolve '#dep\/baz' in/);
+			done();
+		});
+	});
+
+	it("should work with invalid imports #4", done => {
+		resolver.resolve({}, fixture1, "#dep/baz-multi", {}, (err, result) => {
+			if (!err) return done(new Error(`expect error, got ${result}`));
+			expect(err).toBeInstanceOf(Error);
+			expect(err.message).toMatch(/Can't resolve '#dep\/baz-multi' in/);
+			done();
+		});
+	});
+
+	it("should work with invalid imports #5", done => {
+		resolver.resolve({}, fixture1, "#dep/baz-multi", {}, (err, result) => {
+			if (!err) return done(new Error(`expect error, got ${result}`));
+			expect(err).toBeInstanceOf(Error);
+			expect(err.message).toMatch(/Can't resolve '#dep\/baz-multi' in/);
+			done();
+		});
+	});
+
+	it("should work with invalid imports #6", done => {
+		resolver.resolve({}, fixture1, "#dep/pattern/a.js", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) return done(new Error("No result"));
+			expect(result).toEqual(path.resolve(fixture1, "./a.js"));
+			done();
+		});
+	});
+
+	it("should work with invalid imports #7", done => {
+		resolver.resolve({}, fixture1, "#dep/array", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) return done(new Error("No result"));
+			expect(result).toEqual(path.resolve(fixture1, "./a.js"));
+			done();
+		});
+	});
+
+	it("should work with invalid imports #8", done => {
+		resolver.resolve({}, fixture1, "#dep/array2", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) return done(new Error("No result"));
+			expect(result).toEqual(path.resolve(fixture1, "./a.js"));
+			done();
+		});
+	});
+
+	it("should work with invalid imports #9", done => {
+		resolver.resolve({}, fixture1, "#dep/array3", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) return done(new Error("No result"));
+			expect(result).toEqual(path.resolve(fixture1, "./a.js"));
+			done();
+		});
+	});
+
+	it("should work with invalid imports #10", done => {
+		resolver.resolve({}, fixture1, "#dep/empty", {}, (err, result) => {
+			if (!err) return done(new Error(`expect error, got ${result}`));
+			expect(err).toBeInstanceOf(Error);
+			expect(err.message).toMatch(/Can't resolve '#dep\/empty' in/);
+			done();
+		});
+	});
+
+	it("should work with invalid imports #10", done => {
+		resolver.resolve({}, fixture1, "#dep/with-bad", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) return done(new Error("No result"));
+			expect(result).toEqual(path.resolve(fixture1, "./a.js"));
+			done();
+		});
+	});
+
+	it("should work with invalid imports #10", done => {
+		resolver.resolve({}, fixture1, "#dep/with-bad2", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) return done(new Error("No result"));
+			expect(result).toEqual(path.resolve(fixture1, "./a.js"));
+			done();
+		});
+	});
+
+	it("should work with invalid imports #11", done => {
+		resolver.resolve({}, fixture1, "#timezones/pdt.mjs", {}, (err, result) => {
+			if (!err) return done(new Error(`expect error, got ${result}`));
+			expect(err).toBeInstanceOf(Error);
+			expect(err.message).toMatch(/Expecting folder to folder mapping/);
 			done();
 		});
 	});
