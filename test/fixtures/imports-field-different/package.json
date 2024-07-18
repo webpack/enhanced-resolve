@@ -33,7 +33,10 @@
     "#dep/array3": ["./a.js"],
     "#dep/empty": "",
     "#dep/with-bad": ["../foo", "./a.js"],
-    "#dep/with-bad2": ["./a.js" ,"../foo"],
-    "#timezones/": "./data/timezones"
+    "#dep/with-bad2": ["./a.js", "../foo"],
+    "#timezones/": "./data/timezones",
+    "#dep/multi": ["../../test", "./a.js"],
+    "#dep/multi1": ["../../test", "../../test/foo"],
+    "#dep/multi2": ["../../test"]
   }
 }

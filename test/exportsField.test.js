@@ -2181,7 +2181,7 @@ describe("ExportsFieldPlugin", () => {
 	it("resolve using exports field, not a browser field #1", done => {
 		const resolver = ResolverFactory.createResolver({
 			aliasFields: ["browser"],
-			conditionNames: ["webpack"],
+			conditionNames: ["custom"],
 			extensions: [".js"],
 			fileSystem: nodeFileSystem
 		});
@@ -2205,9 +2205,9 @@ describe("ExportsFieldPlugin", () => {
 	it("resolve using exports field and a browser alias field #2", done => {
 		const resolver = ResolverFactory.createResolver({
 			aliasFields: ["browser"],
+			conditionNames: ["node"],
 			extensions: [".js"],
-			fileSystem: nodeFileSystem,
-			conditionNames: ["node"]
+			fileSystem: nodeFileSystem
 		});
 
 		resolver.resolve(
@@ -2266,7 +2266,7 @@ describe("ExportsFieldPlugin", () => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
-					path.resolve(fixture2, "node_modules/exports-field/lib/lib2/main.js")
+					path.resolve(fixture2, "node_modules/exports-field/lib/main.js")
 				);
 				done();
 			}
@@ -2283,7 +2283,7 @@ describe("ExportsFieldPlugin", () => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
-					path.resolve(fixture, "node_modules/exports-field/lib/lib2/main.js")
+					path.resolve(fixture, "node_modules/exports-field/lib/main.js")
 				);
 				done();
 			}
@@ -2406,7 +2406,9 @@ describe("ExportsFieldPlugin", () => {
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
 				expect(err).toBeInstanceOf(Error);
-				expect(err.message).toMatch(/Can't resolve/);
+				expect(err.message).toMatch(
+					/Invalid "exports" target "\.\/lib\/lib2\/\.\.\/\.\.\/\.\.\/a\.js" defined for "\.\/dist\/"/
+				);
 				done();
 			}
 		);
@@ -2421,7 +2423,9 @@ describe("ExportsFieldPlugin", () => {
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
 				expect(err).toBeInstanceOf(Error);
-				expect(err.message).toMatch(/out of package scope/);
+				expect(err.message).toMatch(
+					/Invalid "exports" target "\.\/\.\.\/\.\.\/a\.js" defined for "\.\/dist\/a\.js"/
+				);
 				done();
 			}
 		);
@@ -2572,7 +2576,9 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve({}, fixture4, "exports-field", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
-			expect(err.message).toMatch(/Trying to access out of package scope/);
+			expect(err.message).toMatch(
+				/Invalid "exports" target "\.\/a\/\.\.\/b\/\.\.\/\.\.\/pack1\/index\.js" defined for "\."/
+			);
 			done();
 		});
 	});
@@ -3000,7 +3006,9 @@ describe("ExportsFieldPlugin", () => {
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
 				expect(err).toBeInstanceOf(Error);
-				expect(err.message).toMatch(/Can't resolve/);
+				expect(err.message).toMatch(
+					/Invalid "exports" target "foo" defined for "\.\/baz-multi"/
+				);
 				done();
 			}
 		);
@@ -3165,6 +3173,151 @@ describe("ExportsFieldPlugin", () => {
 				expect(err.message).toMatch(
 					/Invalid "exports" target "\." defined for "\.\/\*"/
 				);
+				done();
+			}
+		);
+	});
+
+	it("invalid package target #15", done => {
+		resolver.resolve(
+			{},
+			fixture5,
+			"@exports-field/bad-specifier/non-existent.js",
+			{},
+			(err, result) => {
+				if (!err) return done(new Error(`expect error, got ${result}`));
+				expect(err).toBeInstanceOf(Error);
+				expect(err.message).toMatch(
+					/Can't resolve '@exports-field\/bad-specifier\/non-existent\.js'/
+				);
+				done();
+			}
+		);
+	});
+
+	it("invalid package target #16", done => {
+		resolver.resolve(
+			{},
+			fixture5,
+			"@exports-field/bad-specifier/dep/multi1",
+			{},
+			(err, result) => {
+				if (!err) return done(new Error(`expect error, got ${result}`));
+				expect(err).toBeInstanceOf(Error);
+				expect(err.message).toMatch(
+					/Invalid "exports" target "\.\.\/\.\.\/test\/foo" defined for "\.\/dep\/multi1"/
+				);
+				done();
+			}
+		);
+	});
+
+	it("invalid package target #17", done => {
+		resolver.resolve(
+			{},
+			fixture5,
+			"@exports-field/bad-specifier/dep/multi2",
+			{},
+			(err, result) => {
+				if (!err) return done(new Error(`expect error, got ${result}`));
+				expect(err).toBeInstanceOf(Error);
+				expect(err.message).toMatch(
+					/Invalid "exports" target "\.\.\/\.\.\/test" defined for "\.\/dep\/multi2"/
+				);
+				done();
+			}
+		);
+	});
+
+	it("invalid package target #18", done => {
+		resolver.resolve(
+			{},
+			fixture5,
+			"@exports-field/bad-specifier/dep/multi4",
+			{},
+			(err, result) => {
+				if (!err) return done(new Error(`expect error, got ${result}`));
+				expect(err).toBeInstanceOf(Error);
+				expect(err.message).toMatch(
+					/Invalid "exports" target "\.\/c\/\.\.\/b\/\.\.\/\.\.\/pack1\/index\.js" defined for "\.\/dep\/multi4"/
+				);
+				done();
+			}
+		);
+	});
+
+	it("invalid package target #19", done => {
+		resolver.resolve(
+			{},
+			fixture5,
+			"@exports-field/bad-specifier/dep/multi5",
+			{},
+			(err, result) => {
+				if (!err) return done(new Error(`expect error, got ${result}`));
+				expect(err).toBeInstanceOf(Error);
+				expect(err.message).toMatch(
+					/Invalid "exports" target "\.\/a\/\.\.\/b\/\.\.\/\.\.\/pack1\/index\.js" defined for "\.\/dep\/multi5"/
+				);
+				done();
+			}
+		);
+	});
+
+	it("should resolve the valid thing in array of export #1", done => {
+		resolver.resolve(
+			{},
+			fixture5,
+			"@exports-field/bad-specifier/bad-specifier.js",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(path.resolve(fixture5, "./a.js"));
+				done();
+			}
+		);
+	});
+
+	it("should resolve the valid thing in array of export #2", done => {
+		resolver.resolve(
+			{},
+			fixture5,
+			"@exports-field/bad-specifier/bad-specifier1.js",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(path.resolve(fixture5, "./a.js"));
+				done();
+			}
+		);
+	});
+
+	it("should resolve the valid thing in array of export #3", done => {
+		resolver.resolve(
+			{},
+			fixture5,
+			"@exports-field/bad-specifier/dep/multi",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(path.resolve(fixture5, "./a.js"));
+				done();
+			}
+		);
+	});
+
+	it("should resolve the valid thing in array of export #4", done => {
+		resolver.resolve(
+			{},
+			fixture5,
+			"@exports-field/bad-specifier/dep/multi3",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(path.resolve(fixture5, "./a.js"));
 				done();
 			}
 		);
