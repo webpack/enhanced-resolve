@@ -1192,7 +1192,9 @@ describe("ImportsFieldPlugin", () => {
 		resolver.resolve({}, fixture, "#b", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
-			expect(err.message).toMatch(/Trying to access out of package scope/);
+			expect(err.message).toMatch(
+				/Invalid "imports" target "\.\.\/b\.js" defined for "#b"/
+			);
 			done();
 		});
 	});
@@ -1236,7 +1238,7 @@ describe("ImportsFieldPlugin", () => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(
-				path.resolve(fixture, "node_modules/a/lib/lib2/main.js")
+				path.resolve(fixture, "node_modules/a/lib/main.js")
 			);
 			done();
 		});
@@ -1401,9 +1403,9 @@ describe("ImportsFieldPlugin", () => {
 
 	it("should work with invalid imports #6", done => {
 		resolver.resolve({}, fixture1, "#dep/pattern/a.js", {}, (err, result) => {
-			if (err) return done(err);
-			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(path.resolve(fixture1, "./a.js"));
+			if (!err) return done(new Error(`expect error, got ${result}`));
+			expect(err).toBeInstanceOf(Error);
+			expect(err.message).toMatch(/Can't resolve '#dep\/pattern\/a.js' in/);
 			done();
 		});
 	});
@@ -1419,9 +1421,9 @@ describe("ImportsFieldPlugin", () => {
 
 	it("should work with invalid imports #8", done => {
 		resolver.resolve({}, fixture1, "#dep/array2", {}, (err, result) => {
-			if (err) return done(err);
-			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(path.resolve(fixture1, "./a.js"));
+			if (!err) return done(new Error(`expect error, got ${result}`));
+			expect(err).toBeInstanceOf(Error);
+			expect(err.message).toMatch(/Can't resolve '#dep\/array2' in/);
 			done();
 		});
 	});
@@ -1467,6 +1469,59 @@ describe("ImportsFieldPlugin", () => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
 			expect(err.message).toMatch(/Expecting folder to folder mapping/);
+			done();
+		});
+	});
+
+	it("should work with invalid imports #12", done => {
+		resolver.resolve({}, fixture1, "#dep/multi1", {}, (err, result) => {
+			if (!err) return done(new Error(`expect error, got ${result}`));
+			expect(err).toBeInstanceOf(Error);
+			expect(err.message).toMatch(
+				/Invalid "imports" target "\.\.\/\.\.\/test\/foo" defined for "#dep\/multi1"/
+			);
+			done();
+		});
+	});
+
+	it("should work with invalid imports #13", done => {
+		resolver.resolve({}, fixture1, "#dep/multi2", {}, (err, result) => {
+			if (!err) return done(new Error(`expect error, got ${result}`));
+			expect(err).toBeInstanceOf(Error);
+			expect(err.message).toMatch(
+				/Invalid "imports" target "\.\.\/\.\.\/test" defined for "#dep\/multi2"/
+			);
+			done();
+		});
+	});
+
+	it("should work with invalid imports #13", done => {
+		resolver.resolve({}, fixture1, "#dep/multi1", {}, (err, result) => {
+			if (!err) return done(new Error(`expect error, got ${result}`));
+			expect(err).toBeInstanceOf(Error);
+			expect(err.message).toMatch(
+				/Invalid "imports" target "\.\.\/\.\.\/test\/foo" defined for "#dep\/multi1"/
+			);
+			done();
+		});
+	});
+
+	it("should work with invalid imports #14", done => {
+		resolver.resolve({}, fixture1, "#dep/multi2", {}, (err, result) => {
+			if (!err) return done(new Error(`expect error, got ${result}`));
+			expect(err).toBeInstanceOf(Error);
+			expect(err.message).toMatch(
+				/Invalid "imports" target "\.\.\/\.\.\/test" defined for "#dep\/multi2"/
+			);
+			done();
+		});
+	});
+
+	it("should work and resolve with array imports", done => {
+		resolver.resolve({}, fixture1, "#dep/multi", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) return done(new Error("No result"));
+			expect(result).toEqual(path.resolve(fixture1, "./a.js"));
 			done();
 		});
 	});

@@ -39,6 +39,30 @@
     },
     "./utils4/*": "../src/*",
     "./utils5/": "../src/",
-    "./*": "."
+    "./*": ".",
+    "./valid/*.js": {
+      "default": ["-bad-specifier-", "./*.js"]
+    },
+    "./non-existent.js": [
+      "-bad-specifier-",
+      "./non-existent.js",
+      "./a.js"
+    ],
+    "./bad-specifier.js": [
+      "-bad-specifier-",
+      "../../a.js",
+      "./a.js"
+    ],
+    "./bad-specifier1.js": [
+      "-bad-specifier-",
+      "foo",
+      "./a.js"
+    ],
+    "./dep/multi": ["../../test", "./a.js"],
+    "./dep/multi1": ["../../test", "../../test/foo"],
+    "./dep/multi2": ["../../test"],
+    "./dep/multi3": ["./a/../b/../../pack1/index.js", "./a.js"],
+    "./dep/multi4": ["./a/../b/../../pack1/index.js", "./c/../b/../../pack1/index.js"],
+    "./dep/multi5": ["./a/../b/../../pack1/index.js"]
   }
 }

@@ -1108,7 +1108,7 @@ declare namespace exports {
 	export const forEachBail: <T, Z>(
 		array: T[],
 		iterator: Iterator<T, Z>,
-		callback: (err?: null | Error, result?: null | Z) => void
+		callback: (err?: null | Error, result?: null | Z, i?: number) => void
 	) => void;
 	export type ResolveCallback = (
 		err: null | ErrorWithDetail,
