@@ -31,3 +31,67 @@ Array [
   "                    reporting result /a/dir/index",
 ]
 `;
+
+exports[`alias should log the correct info: posix 1`] = `
+Array [
+  "resolve 'aliasA/dir' in '/'",
+  "  Parsed request is a module",
+  "  No description file found in / or above",
+  "  aliased with mapping 'aliasA': 'a' to 'a/dir'",
+  "    Parsed request is a module",
+  "    No description file found in / or above",
+  "    resolve as module",
+  "      looking for modules in /",
+  "        existing directory /a",
+  "          No description file found in /a or above",
+  "          No description file found in /a or above",
+  "          no extension",
+  "            /a/dir is not a file",
+  "          .js",
+  "            /a/dir.js doesn't exist",
+  "          .json",
+  "            /a/dir.json doesn't exist",
+  "          .node",
+  "            /a/dir.node doesn't exist",
+  "          as directory",
+  "            existing directory /a/dir",
+  "              No description file found in /a/dir or above",
+  "              using path: /a/dir/index",
+  "                No description file found in /a/dir or above",
+  "                no extension",
+  "                  existing file: /a/dir/index",
+  "                    reporting result /a/dir/index",
+]
+`;
+
+exports[`alias should log the correct info: win32 1`] = `
+Array [
+  "resolve 'aliasA/dir' in 'X:/'",
+  "  Parsed request is a module",
+  "  No description file found in X:/ or above",
+  "  aliased with mapping 'aliasA': 'a' to 'a/dir'",
+  "    Parsed request is a module",
+  "    No description file found in X:/ or above",
+  "    resolve as module",
+  "      looking for modules in X:/",
+  "        existing directory X:/a",
+  "          No description file found in X:/a or above",
+  "          No description file found in X:/a or above",
+  "          no extension",
+  "            X:/a/dir is not a file",
+  "          .js",
+  "            X:/a/dir.js doesn't exist",
+  "          .json",
+  "            X:/a/dir.json doesn't exist",
+  "          .node",
+  "            X:/a/dir.node doesn't exist",
+  "          as directory",
+  "            existing directory X:/a/dir",
+  "              No description file found in X:/a/dir or above",
+  "              using path: X:/a/dir/index",
+  "                No description file found in X:/a/dir or above",
+  "                no extension",
+  "                  existing file: X:/a/dir/index",
+  "                    reporting result X:/a/dir/index",
+]
+`;

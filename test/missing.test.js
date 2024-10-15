@@ -1,5 +1,6 @@
 const path = require("path");
 const resolve = require("../");
+const { transferPathToPosix, obps } = require("./util/path-separator");
 
 describe("missing", function () {
 	/**
@@ -8,7 +9,7 @@ describe("missing", function () {
 	const testCases = [
 		[
 			path.join(__dirname, "fixtures"),
-			"./missing-file",
+			`.${obps}missing-file`,
 			[
 				path.join(__dirname, "fixtures", "missing-file"),
 				path.join(__dirname, "fixtures", "missing-file.js"),
@@ -25,7 +26,7 @@ describe("missing", function () {
 		],
 		[
 			path.join(__dirname, "fixtures"),
-			"missing-module/missing-file",
+			`missing-module${obps}missing-file`,
 			[
 				path.join(__dirname, "fixtures", "node_modules", "missing-module"),
 				path.join(__dirname, "..", "node_modules", "missing-module")
@@ -33,7 +34,7 @@ describe("missing", function () {
 		],
 		[
 			path.join(__dirname, "fixtures"),
-			"m1/missing-file",
+			`m1${obps}missing-file`,
 			[
 				path.join(__dirname, "fixtures", "node_modules", "m1", "missing-file"),
 				path.join(
@@ -55,7 +56,7 @@ describe("missing", function () {
 		],
 		[
 			path.join(__dirname, "fixtures"),
-			"m1/",
+			`m1${obps}`,
 			[
 				path.join(__dirname, "fixtures", "node_modules", "m1", "index"),
 				path.join(__dirname, "fixtures", "node_modules", "m1", "index.js"),
@@ -65,7 +66,7 @@ describe("missing", function () {
 		],
 		[
 			path.join(__dirname, "fixtures"),
-			"m1/a",
+			`m1${obps}a`,
 			[path.join(__dirname, "fixtures", "node_modules", "m1", "a")]
 		]
 	];
@@ -75,7 +76,7 @@ describe("missing", function () {
 			done => {
 				const callback = function (err, filename) {
 					expect(Array.from(missingDependencies).sort()).toEqual(
-						expect.arrayContaining(testCase[2].sort())
+						expect.arrayContaining(testCase[2].map(transferPathToPosix).sort())
 					);
 					done();
 				};
@@ -92,7 +93,7 @@ describe("missing", function () {
 						const details = err.details.split("\n");
 						const firstDetail = details.shift();
 
-						expect(firstDetail).toContain(testCase[1]);
+						expect(firstDetail).toContain(transferPathToPosix(testCase[1]));
 						expect(details).not.toContain(firstDetail);
 					}
 					done();

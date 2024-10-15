@@ -33,7 +33,9 @@
     "zipp",
     "zippi",
     "zizizi",
-    "codecov"
+    "codecov",
+    "obps",
+    "posix"
   ],
   "ignorePaths": ["package.json", "yarn.lock", "coverage", "*.log"]
 }

@@ -3,6 +3,12 @@ const { Volume } = require("memfs");
 const { ResolverFactory } = require("../");
 const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
 const fs = require("fs");
+const {
+	posixSep,
+	absoluteOsBasedResolvedPath,
+	absoluteOsBasedPath,
+	obps
+} = require("./util/path-separator");
 
 const nodeFileSystem = new CachedInputFileSystem(fs, 4000);
 
@@ -12,37 +18,37 @@ describe("alias", () => {
 	beforeEach(() => {
 		const fileSystem = Volume.fromJSON(
 			{
-				"/a/index": "",
-				"/a/dir/index": "",
-				"/recursive/index": "",
-				"/recursive/dir/index": "",
-				"/b/index": "",
-				"/b/dir/index": "",
-				"/c/index": "",
-				"/c/dir/index": "",
-				"/d/index.js": "",
-				"/d/dir/.empty": "",
-				"/e/index": "",
-				"/e/anotherDir/index": "",
-				"/e/dir/file": ""
+				[`${absoluteOsBasedPath}a${obps}index`]: "",
+				[`${absoluteOsBasedPath}a${obps}dir${obps}index`]: "",
+				[`${absoluteOsBasedPath}recursive${obps}index`]: "",
+				[`${absoluteOsBasedPath}recursive${obps}dir${obps}index`]: "",
+				[`${absoluteOsBasedPath}b${obps}index`]: "",
+				[`${absoluteOsBasedPath}b${obps}dir${obps}index`]: "",
+				[`${absoluteOsBasedPath}c${obps}index`]: "",
+				[`${absoluteOsBasedPath}c${obps}dir${obps}index`]: "",
+				[`${absoluteOsBasedPath}d${obps}index.js`]: "",
+				[`${absoluteOsBasedPath}d${obps}dir${obps}.empty`]: "",
+				[`${absoluteOsBasedPath}e${obps}index`]: "",
+				[`${absoluteOsBasedPath}e${obps}anotherDir${obps}index`]: "",
+				[`${absoluteOsBasedPath}e${obps}dir${obps}file`]: ""
 			},
-			"/"
+			absoluteOsBasedPath
 		);
 		resolver = ResolverFactory.createResolver({
 			alias: {
 				aliasA: "a",
-				b$: "a/index",
-				c$: "/a/index",
+				b$: `a${obps}index`,
+				c$: `${absoluteOsBasedPath}a${obps}index`,
 				multiAlias: ["b", "c", "d", "e", "a"],
-				recursive: "recursive/dir",
-				"/d/dir": "/c/dir",
-				"/d/index.js": "/c/index",
+				recursive: `recursive${obps}dir`,
+				[`${absoluteOsBasedPath}d${obps}dir`]: `${absoluteOsBasedPath}c${obps}dir`,
+				[`${absoluteOsBasedPath}d${obps}index.js`]: `${absoluteOsBasedPath}c${obps}index`,
 				// alias configuration should work
-				"#": "/c/dir",
-				"@": "/c/dir",
+				"#": `${absoluteOsBasedPath}c${obps}dir`,
+				"@": `${absoluteOsBasedPath}c${obps}dir`,
 				ignored: false
 			},
-			modules: "/",
+			modules: absoluteOsBasedPath,
 			useSyncFileSystemCalls: true,
 			//@ts-ignore
 			fileSystem: fileSystem
@@ -50,92 +56,176 @@ describe("alias", () => {
 	});
 
 	it("should resolve a not aliased module", () => {
-		expect(resolver.resolveSync({}, "/", "a")).toEqual("/a/index");
-		expect(resolver.resolveSync({}, "/", "a/index")).toEqual("/a/index");
-		expect(resolver.resolveSync({}, "/", "a/dir")).toEqual("/a/dir/index");
-		expect(resolver.resolveSync({}, "/", "a/dir/index")).toEqual(
-			"/a/dir/index"
+		expect(resolver.resolveSync({}, absoluteOsBasedPath, "a")).toEqual(
+			`${absoluteOsBasedResolvedPath}a${posixSep}index`
 		);
+		expect(
+			resolver.resolveSync({}, absoluteOsBasedPath, `a${obps}index`)
+		).toEqual(`${absoluteOsBasedResolvedPath}a${posixSep}index`);
+		expect(
+			resolver.resolveSync({}, absoluteOsBasedPath, `a${obps}dir`)
+		).toEqual(`${absoluteOsBasedResolvedPath}a${posixSep}dir${posixSep}index`);
+		expect(
+			resolver.resolveSync({}, absoluteOsBasedPath, `a${obps}dir${obps}index`)
+		).toEqual(`${absoluteOsBasedResolvedPath}a${posixSep}dir${posixSep}index`);
 	});
 	it("should resolve an aliased module", () => {
-		expect(resolver.resolveSync({}, "/", "aliasA")).toEqual("/a/index");
-		expect(resolver.resolveSync({}, "/", "aliasA/index")).toEqual("/a/index");
-		expect(resolver.resolveSync({}, "/", "aliasA/dir")).toEqual("/a/dir/index");
-		expect(resolver.resolveSync({}, "/", "aliasA/dir/index")).toEqual(
-			"/a/dir/index"
-		);
+		expect(
+			resolver.resolveSync({}, `${absoluteOsBasedPath}`, "aliasA")
+		).toEqual(`${absoluteOsBasedResolvedPath}a${posixSep}index`);
+		expect(
+			resolver.resolveSync({}, `${absoluteOsBasedPath}`, `aliasA${obps}index`)
+		).toEqual(`${absoluteOsBasedResolvedPath}a${posixSep}index`);
+		expect(
+			resolver.resolveSync({}, `${absoluteOsBasedPath}`, `aliasA${obps}dir`)
+		).toEqual(`${absoluteOsBasedResolvedPath}a${posixSep}dir${posixSep}index`);
+		expect(
+			resolver.resolveSync(
+				{},
+				`${absoluteOsBasedPath}`,
+				`aliasA${obps}dir${obps}index`
+			)
+		).toEqual(`${absoluteOsBasedResolvedPath}a${posixSep}dir${posixSep}index`);
 	});
 	it('should resolve "#" alias', () => {
-		expect(resolver.resolveSync({}, "/", "#")).toEqual("/c/dir/index");
-		expect(resolver.resolveSync({}, "/", "#/index")).toEqual("/c/dir/index");
+		expect(resolver.resolveSync({}, `${absoluteOsBasedPath}`, "#")).toEqual(
+			`${absoluteOsBasedResolvedPath}c${posixSep}dir${posixSep}index`
+		);
+		expect(
+			resolver.resolveSync({}, `${absoluteOsBasedPath}`, `#${obps}index`)
+		).toEqual(`${absoluteOsBasedResolvedPath}c${posixSep}dir${posixSep}index`);
 	});
 	it('should resolve "@" alias', () => {
-		expect(resolver.resolveSync({}, "/", "@")).toEqual("/c/dir/index");
-		expect(resolver.resolveSync({}, "/", "@/index")).toEqual("/c/dir/index");
+		expect(resolver.resolveSync({}, `${absoluteOsBasedPath}`, "@")).toEqual(
+			`${absoluteOsBasedResolvedPath}c${posixSep}dir${posixSep}index`
+		);
+		expect(
+			resolver.resolveSync({}, `${absoluteOsBasedPath}`, `@${obps}index`)
+		).toEqual(`${absoluteOsBasedResolvedPath}c${posixSep}dir${posixSep}index`);
 	});
 	it("should resolve an ignore module", () => {
-		expect(resolver.resolveSync({}, "/", "ignored")).toEqual(false);
+		expect(
+			resolver.resolveSync({}, `${absoluteOsBasedPath}`, "ignored")
+		).toEqual(false);
 	});
 	it("should resolve a recursive aliased module", () => {
-		expect(resolver.resolveSync({}, "/", "recursive")).toEqual(
-			"/recursive/dir/index"
+		expect(
+			resolver.resolveSync({}, `${absoluteOsBasedPath}`, "recursive")
+		).toEqual(
+			`${absoluteOsBasedResolvedPath}recursive${posixSep}dir${posixSep}index`
 		);
-		expect(resolver.resolveSync({}, "/", "recursive/index")).toEqual(
-			"/recursive/dir/index"
+		expect(
+			resolver.resolveSync(
+				{},
+				`${absoluteOsBasedPath}`,
+				`recursive${obps}index`
+			)
+		).toEqual(
+			`${absoluteOsBasedResolvedPath}recursive${posixSep}dir${posixSep}index`
 		);
-		expect(resolver.resolveSync({}, "/", "recursive/dir")).toEqual(
-			"/recursive/dir/index"
+		expect(
+			resolver.resolveSync({}, `${absoluteOsBasedPath}`, `recursive${obps}dir`)
+		).toEqual(
+			`${absoluteOsBasedResolvedPath}recursive${posixSep}dir${posixSep}index`
 		);
-		expect(resolver.resolveSync({}, "/", "recursive/dir/index")).toEqual(
-			"/recursive/dir/index"
+		expect(
+			resolver.resolveSync(
+				{},
+				`${absoluteOsBasedPath}`,
+				`recursive${posixSep}dir${posixSep}index`
+			)
+		).toEqual(
+			`${absoluteOsBasedResolvedPath}recursive${posixSep}dir${posixSep}index`
 		);
 	});
 	it("should resolve a file aliased module", () => {
-		expect(resolver.resolveSync({}, "/", "b")).toEqual("/a/index");
-		expect(resolver.resolveSync({}, "/", "c")).toEqual("/a/index");
+		expect(resolver.resolveSync({}, `${absoluteOsBasedPath}`, "b")).toEqual(
+			`${absoluteOsBasedResolvedPath}a${posixSep}index`
+		);
+		expect(resolver.resolveSync({}, `${absoluteOsBasedPath}`, "c")).toEqual(
+			`${absoluteOsBasedResolvedPath}a${posixSep}index`
+		);
 	});
 	it("should resolve a file aliased module with a query", () => {
-		expect(resolver.resolveSync({}, "/", "b?query")).toEqual("/a/index?query");
-		expect(resolver.resolveSync({}, "/", "c?query")).toEqual("/a/index?query");
+		expect(
+			resolver.resolveSync({}, `${absoluteOsBasedPath}`, "b?query")
+		).toEqual(`${absoluteOsBasedResolvedPath}a${posixSep}index?query`);
+		expect(
+			resolver.resolveSync({}, `${absoluteOsBasedPath}`, "c?query")
+		).toEqual(`${absoluteOsBasedResolvedPath}a${posixSep}index?query`);
 	});
 	it("should resolve a path in a file aliased module", () => {
-		expect(resolver.resolveSync({}, "/", "b/index")).toEqual("/b/index");
-		expect(resolver.resolveSync({}, "/", "b/dir")).toEqual("/b/dir/index");
-		expect(resolver.resolveSync({}, "/", "b/dir/index")).toEqual(
-			"/b/dir/index"
-		);
-		expect(resolver.resolveSync({}, "/", "c/index")).toEqual("/c/index");
-		expect(resolver.resolveSync({}, "/", "c/dir")).toEqual("/c/dir/index");
-		expect(resolver.resolveSync({}, "/", "c/dir/index")).toEqual(
-			"/c/dir/index"
-		);
+		expect(
+			resolver.resolveSync({}, `${absoluteOsBasedPath}`, `b${obps}index`)
+		).toEqual(`${absoluteOsBasedResolvedPath}b${posixSep}index`);
+		expect(
+			resolver.resolveSync({}, `${absoluteOsBasedPath}`, `b${obps}dir`)
+		).toEqual(`${absoluteOsBasedResolvedPath}b${posixSep}dir${posixSep}index`);
+		expect(
+			resolver.resolveSync(
+				{},
+				`${absoluteOsBasedPath}`,
+				`b${obps}dir${obps}index`
+			)
+		).toEqual(`${absoluteOsBasedResolvedPath}b${posixSep}dir${posixSep}index`);
+		expect(
+			resolver.resolveSync({}, `${absoluteOsBasedPath}`, `c${obps}index`)
+		).toEqual(`${absoluteOsBasedResolvedPath}c${posixSep}index`);
+		expect(
+			resolver.resolveSync({}, `${absoluteOsBasedPath}`, `c${obps}dir`)
+		).toEqual(`${absoluteOsBasedResolvedPath}c${posixSep}dir${posixSep}index`);
+		expect(
+			resolver.resolveSync(
+				{},
+				`${absoluteOsBasedPath}`,
+				`c${obps}dir${obps}index`
+			)
+		).toEqual(`${absoluteOsBasedResolvedPath}c${posixSep}dir${posixSep}index`);
 	});
 	it("should resolve a file aliased file", () => {
-		expect(resolver.resolveSync({}, "/", "d")).toEqual("/c/index");
-		expect(resolver.resolveSync({}, "/", "d/dir/index")).toEqual(
-			"/c/dir/index"
+		expect(resolver.resolveSync({}, `${absoluteOsBasedPath}`, "d")).toEqual(
+			`${absoluteOsBasedResolvedPath}c${posixSep}index`
 		);
+		expect(
+			resolver.resolveSync(
+				{},
+				`${absoluteOsBasedPath}`,
+				`d${obps}dir${obps}index`
+			)
+		).toEqual(`${absoluteOsBasedResolvedPath}c${posixSep}dir${posixSep}index`);
 	});
 	it("should resolve a file in multiple aliased dirs", () => {
-		expect(resolver.resolveSync({}, "/", "multiAlias/dir/file")).toEqual(
-			"/e/dir/file"
-		);
-		expect(resolver.resolveSync({}, "/", "multiAlias/anotherDir")).toEqual(
-			"/e/anotherDir/index"
+		expect(
+			resolver.resolveSync(
+				{},
+				`${absoluteOsBasedPath}`,
+				`multiAlias${obps}dir${obps}file`
+			)
+		).toEqual(`${absoluteOsBasedResolvedPath}e${posixSep}dir${posixSep}file`);
+		expect(
+			resolver.resolveSync(
+				{},
+				`${absoluteOsBasedPath}`,
+				`multiAlias${obps}anotherDir`
+			)
+		).toEqual(
+			`${absoluteOsBasedResolvedPath}e${posixSep}anotherDir${posixSep}index`
 		);
 	});
 	it("should log the correct info", done => {
 		const log = [];
 		resolver.resolve(
 			{},
-			"/",
-			"aliasA/dir",
+			`${absoluteOsBasedPath}`,
+			`aliasA${obps}dir`,
 			{ log: v => log.push(v) },
 			(err, result) => {
 				if (err) return done(err);
 
-				expect(result).toEqual("/a/dir/index");
-				expect(log).toMatchSnapshot();
+				expect(result).toEqual(
+					`${absoluteOsBasedResolvedPath}a${posixSep}dir${posixSep}index`
+				);
+				expect(log).toMatchSnapshot(path.sep === "/" ? "posix" : "win32");
 
 				done();
 			}
@@ -151,7 +241,7 @@ describe("alias", () => {
 			fileSystem: nodeFileSystem
 		});
 
-		resolver.resolve({}, __dirname, "foo/index", {}, (err, result) => {
+		resolver.resolve({}, __dirname, `foo${obps}index`, {}, (err, result) => {
 			if (err) done(err);
 			expect(result).toEqual(false);
 			done();

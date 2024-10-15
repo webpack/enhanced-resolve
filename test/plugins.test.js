@@ -2,6 +2,11 @@
 
 const path = require("path");
 const { ResolverFactory, CloneBasenamePlugin } = require("../");
+const {
+	posixSep,
+	transferPathToPosix,
+	obps
+} = require("./util/path-separator");
 
 describe("plugins", function () {
 	it("should resolve with the CloneBasenamePlugin", done => {
@@ -18,15 +23,17 @@ describe("plugins", function () {
 		resolver.resolve(
 			{},
 			__dirname,
-			"./fixtures/directory-default",
+			`.${obps}fixtures${obps}directory-default`,
 			{},
 			function (err, result) {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
-					path.resolve(
-						__dirname,
-						"fixtures/directory-default/directory-default.js"
+					transferPathToPosix(
+						path.resolve(
+							__dirname,
+							`fixtures${posixSep}directory-default${posixSep}directory-default.js`
+						)
 					)
 				);
 				done();
@@ -34,7 +41,7 @@ describe("plugins", function () {
 		);
 	});
 
-	it("should ignore 'false'/'null'/'undefined' plugins", done => {
+	it(`should ignore 'false'/'null'/'undefined' plugins`, done => {
 		const FailedPlugin = class {
 			apply() {
 				throw new Error("FailedPlugin");
@@ -60,15 +67,17 @@ describe("plugins", function () {
 		resolver.resolve(
 			{},
 			__dirname,
-			"./fixtures/directory-default",
+			`.${obps}fixtures${obps}directory-default`,
 			{},
 			function (err, result) {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
-					path.resolve(
-						__dirname,
-						"fixtures/directory-default/directory-default.js"
+					transferPathToPosix(
+						path.resolve(
+							__dirname,
+							`fixtures${posixSep}directory-default${posixSep}directory-default.js`
+						)
 					)
 				);
 				done();

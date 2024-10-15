@@ -3,6 +3,7 @@ const fs = require("fs");
 const { processExportsField } = require("../lib/util/entrypoints");
 const ResolverFactory = require("../lib/ResolverFactory");
 const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
+const { transferPathToPosix, obps } = require("./util/path-separator");
 
 /** @typedef {import("../lib/util/entrypoints").ExportsField} ExportsField */
 
@@ -2172,7 +2173,9 @@ describe("ExportsFieldPlugin", () => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(
-				path.resolve(fixture, "node_modules/exports-field/x.js")
+				transferPathToPosix(
+					path.resolve(fixture, `node_modules${obps}exports-field${obps}x.js`)
+				)
 			);
 			done();
 		});
@@ -2189,13 +2192,18 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve(
 			{},
 			fixture,
-			"exports-field/dist/main.js",
+			`exports-field${obps}dist${obps}main.js`,
 			{},
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
-					path.resolve(fixture, "node_modules/exports-field/lib/lib2/main.js")
+					transferPathToPosix(
+						path.resolve(
+							fixture,
+							`node_modules${obps}exports-field${obps}lib${obps}lib2${obps}main.js`
+						)
+					)
 				);
 				done();
 			}
@@ -2213,13 +2221,18 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve(
 			{},
 			fixture2,
-			"exports-field/dist/main.js",
+			`exports-field${obps}dist${obps}main.js`,
 			{},
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
-					path.resolve(fixture2, "node_modules/exports-field/lib/browser.js")
+					transferPathToPosix(
+						path.resolve(
+							fixture2,
+							`node_modules${obps}exports-field${obps}lib${obps}browser.js`
+						)
+					)
 				);
 				done();
 			}
@@ -2230,7 +2243,7 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve(
 			{},
 			fixture2,
-			"exports-field/dist/main",
+			`exports-field${obps}dist${obps}main`,
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
@@ -2245,7 +2258,7 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve(
 			{},
 			fixture2,
-			"exports-field/dist/main",
+			`exports-field${obps}dist${obps}main`,
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
@@ -2260,13 +2273,18 @@ describe("ExportsFieldPlugin", () => {
 		commonjsResolver.resolve(
 			{},
 			fixture2,
-			"exports-field/dist/main",
+			`exports-field${obps}dist${obps}main`,
 			{},
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
-					path.resolve(fixture2, "node_modules/exports-field/lib/main.js")
+					transferPathToPosix(
+						path.resolve(
+							fixture2,
+							`node_modules${obps}exports-field${obps}lib${obps}main.js`
+						)
+					)
 				);
 				done();
 			}
@@ -2277,13 +2295,18 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve(
 			{},
 			fixture,
-			"exports-field/dist/main.js",
+			`exports-field${obps}dist${obps}main.js`,
 			{},
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
-					path.resolve(fixture, "node_modules/exports-field/lib/main.js")
+					transferPathToPosix(
+						path.resolve(
+							fixture,
+							`node_modules${obps}exports-field${obps}lib${obps}main.js`
+						)
+					)
 				);
 				done();
 			}
@@ -2294,13 +2317,18 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve(
 			{},
 			fixture2,
-			"exports-field/dist/browser.js",
+			`exports-field${obps}dist${obps}browser.js`,
 			{},
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
-					path.resolve(fixture2, "node_modules/exports-field/lib/browser.js")
+					transferPathToPosix(
+						path.resolve(
+							fixture2,
+							`node_modules${obps}exports-field${obps}lib${obps}browser.js`
+						)
+					)
 				);
 				done();
 			}
@@ -2311,15 +2339,17 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve(
 			{},
 			fixture2,
-			"exports-field/dist/browser.js?foo",
+			`exports-field${obps}dist${obps}browser.js?foo`,
 			{},
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
-					path.resolve(
-						fixture2,
-						"node_modules/exports-field/lib/browser.js?foo"
+					transferPathToPosix(
+						path.resolve(
+							fixture2,
+							`node_modules${obps}exports-field${obps}lib${obps}browser.js?foo`
+						)
 					)
 				);
 				done();
@@ -2340,15 +2370,17 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve(
 			{},
 			fixture2,
-			"exports-field/dist/browser.js#foo",
+			`exports-field${obps}dist${obps}browser.js#foo`,
 			{},
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
-					path.resolve(
-						fixture2,
-						"node_modules/exports-field/lib/browser.js#foo"
+					transferPathToPosix(
+						path.resolve(
+							fixture2,
+							`node_modules${obps}exports-field${obps}lib${obps}browser.js#foo`
+						)
 					)
 				);
 				done();
@@ -2369,13 +2401,18 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve(
 			{},
 			fixture,
-			"./node_modules/exports-field/lib/main.js",
+			`.${obps}node_modules${obps}exports-field${obps}lib${obps}main.js`,
 			{},
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
-					path.resolve(fixture, "node_modules/exports-field/lib/main.js")
+					transferPathToPosix(
+						path.resolve(
+							fixture,
+							`node_modules${obps}exports-field${obps}lib${obps}main.js`
+						)
+					)
 				);
 				done();
 			}
@@ -2386,7 +2423,7 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve(
 			{},
 			fixture,
-			"./node_modules/exports-field/dist/main.js",
+			`.${obps}node_modules${obps}exports-field${obps}dist${obps}main.js`,
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
@@ -2401,7 +2438,7 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve(
 			{},
 			fixture,
-			"exports-field/dist/../../../a.js",
+			`exports-field${obps}dist${obps}..${obps}..${obps}..${obps}a.js`,
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
@@ -2418,7 +2455,7 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve(
 			{},
 			fixture,
-			"exports-field/dist/a.js",
+			`exports-field${obps}dist${obps}a.js`,
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
@@ -2432,19 +2469,27 @@ describe("ExportsFieldPlugin", () => {
 	});
 
 	it("self-resolving root", done => {
-		resolver.resolve({}, fixture, "@exports-field/core", {}, (err, result) => {
-			if (err) return done(err);
-			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(path.resolve(fixture, "./a.js"));
-			done();
-		});
+		resolver.resolve(
+			{},
+			fixture,
+			`@exports-field${obps}core`,
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(
+					transferPathToPosix(path.resolve(fixture, `.${obps}a.js`))
+				);
+				done();
+			}
+		);
 	});
 
 	it("not exported error", done => {
 		resolver.resolve(
 			{},
 			fixture,
-			"exports-field/anything/else",
+			`exports-field${obps}anything${obps}else`,
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
@@ -2467,7 +2512,12 @@ describe("ExportsFieldPlugin", () => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(
-				path.resolve(fixture3, "node_modules/exports-field/main.js")
+				transferPathToPosix(
+					path.resolve(
+						fixture3,
+						`node_modules${obps}exports-field${obps}main.js`
+					)
+				)
 			);
 			done();
 		});
@@ -2485,7 +2535,12 @@ describe("ExportsFieldPlugin", () => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(
-				path.resolve(fixture3, "node_modules/exports-field/main.js")
+				transferPathToPosix(
+					path.resolve(
+						fixture3,
+						`node_modules${obps}exports-field${obps}main.js`
+					)
+				)
 			);
 			done();
 		});
@@ -2503,7 +2558,12 @@ describe("ExportsFieldPlugin", () => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(
-				path.resolve(fixture3, "node_modules/exports-field/main.js")
+				transferPathToPosix(
+					path.resolve(
+						fixture3,
+						`node_modules${obps}exports-field${obps}main.js`
+					)
+				)
 			);
 			done();
 		});
@@ -2521,7 +2581,12 @@ describe("ExportsFieldPlugin", () => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(
-				path.resolve(fixture2, "node_modules/exports-field/index.js")
+				transferPathToPosix(
+					path.resolve(
+						fixture2,
+						`node_modules${obps}exports-field${obps}index.js`
+					)
+				)
 			);
 			done();
 		});
@@ -2539,14 +2604,16 @@ describe("ExportsFieldPlugin", () => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(
-				path.resolve(fixture3, "node_modules/exports-field/index")
+				transferPathToPosix(
+					path.resolve(fixture3, `node_modules${obps}exports-field${obps}index`)
+				)
 			);
 			done();
 		});
 	});
 
 	it("request ending with slash #1", done => {
-		resolver.resolve({}, fixture, "exports-field/", {}, (err, result) => {
+		resolver.resolve({}, fixture, `exports-field${obps}`, {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
 			expect(err.message).toMatch(/Resolving to directories is not possible/);
@@ -2555,21 +2622,33 @@ describe("ExportsFieldPlugin", () => {
 	});
 
 	it("request ending with slash #2", done => {
-		resolver.resolve({}, fixture, "exports-field/dist/", {}, (err, result) => {
-			if (!err) return done(new Error(`expect error, got ${result}`));
-			expect(err).toBeInstanceOf(Error);
-			expect(err.message).toMatch(/Resolving to directories is not possible/);
-			done();
-		});
+		resolver.resolve(
+			{},
+			fixture,
+			`exports-field${obps}dist${obps}`,
+			{},
+			(err, result) => {
+				if (!err) return done(new Error(`expect error, got ${result}`));
+				expect(err).toBeInstanceOf(Error);
+				expect(err.message).toMatch(/Resolving to directories is not possible/);
+				done();
+			}
+		);
 	});
 
 	it("request ending with slash #3", done => {
-		resolver.resolve({}, fixture, "exports-field/lib/", {}, (err, result) => {
-			if (!err) return done(new Error(`expect error, got ${result}`));
-			expect(err).toBeInstanceOf(Error);
-			expect(err.message).toMatch(/Resolving to directories is not possible/);
-			done();
-		});
+		resolver.resolve(
+			{},
+			fixture,
+			`exports-field${obps}lib${obps}`,
+			{},
+			(err, result) => {
+				if (!err) return done(new Error(`expect error, got ${result}`));
+				expect(err).toBeInstanceOf(Error);
+				expect(err.message).toMatch(/Resolving to directories is not possible/);
+				done();
+			}
+		);
 	});
 
 	it("should throw error if target is invalid", done => {
@@ -2604,16 +2683,25 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve(
 			{},
 			fixture,
-			"exports-field/dist/browser.js",
+			`exports-field${obps}dist${obps}browser.js`,
 			{ log: v => log.push(v) },
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
-					path.resolve(fixture, "node_modules/exports-field/lib/browser.js")
+					transferPathToPosix(
+						path.resolve(
+							fixture,
+							`node_modules${obps}exports-field${obps}lib${obps}browser.js`
+						)
+					)
 				);
 				expect(
-					log.map(line => line.replace(fixture, "...").replace(/\\/g, "/"))
+					log.map(line =>
+						line
+							.replace(transferPathToPosix(fixture), "...")
+							.replace(/\\/g, `${obps}`)
+					)
 				).toMatchSnapshot();
 				done();
 			}
@@ -2623,67 +2711,105 @@ describe("ExportsFieldPlugin", () => {
 	it("should resolve with wildcard pattern #1", done => {
 		const fixture = path.resolve(
 			__dirname,
-			"./fixtures/imports-exports-wildcard/"
-		);
-
-		resolver.resolve({}, fixture, "m/features/f.js", {}, (err, result) => {
-			if (err) return done(err);
-			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(
-				path.resolve(fixture, "./node_modules/m/src/features/f.js")
-			);
-			done();
-		});
-	});
-
-	it("should resolve with wildcard pattern #2", done => {
-		const fixture = path.resolve(
-			__dirname,
-			"./fixtures/imports-exports-wildcard/"
-		);
-
-		resolver.resolve({}, fixture, "m/features/y/y.js", {}, (err, result) => {
-			if (err) return done(err);
-			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(
-				path.resolve(fixture, "./node_modules/m/src/features/y/y.js")
-			);
-			done();
-		});
-	});
-
-	it("should resolve with wildcard pattern #2", done => {
-		const fixture = path.resolve(
-			__dirname,
-			"./fixtures/imports-exports-wildcard/"
-		);
-
-		resolver.resolve({}, fixture, "m/features/y/y.js", {}, (err, result) => {
-			if (err) return done(err);
-			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(
-				path.resolve(fixture, "./node_modules/m/src/features/y/y.js")
-			);
-			done();
-		});
-	});
-
-	it("should resolve with wildcard pattern #3", done => {
-		const fixture = path.resolve(
-			__dirname,
-			"./fixtures/imports-exports-wildcard/"
+			`.${obps}fixtures${obps}imports-exports-wildcard${obps}`
 		);
 
 		resolver.resolve(
 			{},
 			fixture,
-			"m/features-no-ext/y/y.js",
+			`m${obps}features${obps}f.js`,
 			{},
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
-					path.resolve(fixture, "./node_modules/m/src/features/y/y.js")
+					transferPathToPosix(
+						path.resolve(
+							fixture,
+							`.${obps}node_modules${obps}m${obps}src${obps}features${obps}f.js`
+						)
+					)
+				);
+				done();
+			}
+		);
+	});
+
+	it("should resolve with wildcard pattern #2", done => {
+		const fixture = path.resolve(
+			__dirname,
+			`.${obps}fixtures${obps}imports-exports-wildcard${obps}`
+		);
+
+		resolver.resolve(
+			{},
+			fixture,
+			`m${obps}features${obps}y${obps}y.js`,
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(
+					transferPathToPosix(
+						path.resolve(
+							fixture,
+							`.${obps}node_modules${obps}m${obps}src${obps}features${obps}y${obps}y.js`
+						)
+					)
+				);
+				done();
+			}
+		);
+	});
+
+	it("should resolve with wildcard pattern #2", done => {
+		const fixture = path.resolve(
+			__dirname,
+			`.${obps}fixtures${obps}imports-exports-wildcard${obps}`
+		);
+
+		resolver.resolve(
+			{},
+			fixture,
+			`m${obps}features${obps}y${obps}y.js`,
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(
+					transferPathToPosix(
+						path.resolve(
+							fixture,
+							`.${obps}node_modules${obps}m${obps}src${obps}features${obps}y${obps}y.js`
+						)
+					)
+				);
+				done();
+			}
+		);
+	});
+
+	it("should resolve with wildcard pattern #3", done => {
+		const fixture = path.resolve(
+			__dirname,
+			`.${obps}fixtures${obps}imports-exports-wildcard${obps}`
+		);
+
+		resolver.resolve(
+			{},
+			fixture,
+			`m${obps}features-no-ext${obps}y${obps}y.js`,
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(
+					transferPathToPosix(
+						path.resolve(
+							fixture,
+							`.${obps}node_modules${obps}m${obps}src${obps}features${obps}y${obps}y.js`
+						)
+					)
 				);
 				done();
 			}
@@ -2693,35 +2819,51 @@ describe("ExportsFieldPlugin", () => {
 	it("should resolve with wildcard pattern #4", done => {
 		const fixture = path.resolve(
 			__dirname,
-			"./fixtures/imports-exports-wildcard/"
-		);
-
-		resolver.resolve({}, fixture, "m/middle/nested/f.js", {}, (err, result) => {
-			if (err) return done(err);
-			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(
-				path.resolve(fixture, "./node_modules/m/src/middle/nested/f.js")
-			);
-			done();
-		});
-	});
-
-	it("should resolve with wildcard pattern #5", done => {
-		const fixture = path.resolve(
-			__dirname,
-			"./fixtures/imports-exports-wildcard/"
+			`.${obps}fixtures${obps}imports-exports-wildcard${obps}`
 		);
 
 		resolver.resolve(
 			{},
 			fixture,
-			"m/middle-1/nested/f.js",
+			`m${obps}middle${obps}nested${obps}f.js`,
 			{},
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
-					path.resolve(fixture, "./node_modules/m/src/middle-1/nested/f.js")
+					transferPathToPosix(
+						path.resolve(
+							fixture,
+							`.${obps}node_modules${obps}m${obps}src${obps}middle${obps}nested${obps}f.js`
+						)
+					)
+				);
+				done();
+			}
+		);
+	});
+
+	it("should resolve with wildcard pattern #5", done => {
+		const fixture = path.resolve(
+			__dirname,
+			`.${obps}fixtures${obps}imports-exports-wildcard${obps}`
+		);
+
+		resolver.resolve(
+			{},
+			fixture,
+			`m${obps}middle-1${obps}nested${obps}f.js`,
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(
+					transferPathToPosix(
+						path.resolve(
+							fixture,
+							`.${obps}node_modules${obps}m${obps}src${obps}middle-1${obps}nested${obps}f.js`
+						)
+					)
 				);
 				done();
 			}
@@ -2731,19 +2873,24 @@ describe("ExportsFieldPlugin", () => {
 	it("should resolve with wildcard pattern #6", done => {
 		const fixture = path.resolve(
 			__dirname,
-			"./fixtures/imports-exports-wildcard/"
+			`.${obps}fixtures${obps}imports-exports-wildcard${obps}`
 		);
 
 		resolver.resolve(
 			{},
 			fixture,
-			"m/middle-2/nested/f.js",
+			`m${obps}middle-2${obps}nested${obps}f.js`,
 			{},
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
-					path.resolve(fixture, "./node_modules/m/src/middle-2/nested/f.js")
+					transferPathToPosix(
+						path.resolve(
+							fixture,
+							`.${obps}node_modules${obps}m${obps}src${obps}middle-2${obps}nested${obps}f.js`
+						)
+					)
 				);
 				done();
 			}
@@ -2753,64 +2900,94 @@ describe("ExportsFieldPlugin", () => {
 	it("should resolve with wildcard pattern #7", done => {
 		const fixture = path.resolve(
 			__dirname,
-			"./fixtures/imports-exports-wildcard/"
-		);
-
-		resolver.resolve({}, fixture, "m/middle-3/nested/f", {}, (err, result) => {
-			if (err) return done(err);
-			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(
-				path.resolve(
-					fixture,
-					"./node_modules/m/src/middle-3/nested/f/nested/f.js"
-				)
-			);
-			done();
-		});
-	});
-
-	it("should resolve with wildcard pattern #8", done => {
-		const fixture = path.resolve(
-			__dirname,
-			"./fixtures/imports-exports-wildcard/"
-		);
-
-		resolver.resolve({}, fixture, "m/middle-4/f/nested", {}, (err, result) => {
-			if (err) return done(err);
-			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(
-				path.resolve(fixture, "./node_modules/m/src/middle-4/f/f.js")
-			);
-			done();
-		});
-	});
-
-	it("should resolve with wildcard pattern #9", done => {
-		const fixture = path.resolve(
-			__dirname,
-			"./fixtures/imports-exports-wildcard/"
-		);
-
-		resolver.resolve({}, fixture, "m/middle-5/f$/$", {}, (err, result) => {
-			if (err) return done(err);
-			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(
-				path.resolve(fixture, "./node_modules/m/src/middle-5/f$/$.js")
-			);
-			done();
-		});
-	});
-
-	it("should throw error if target is 'null'", done => {
-		const fixture = path.resolve(
-			__dirname,
-			"./fixtures/imports-exports-wildcard/"
+			`.${obps}fixtures${obps}imports-exports-wildcard${obps}`
 		);
 
 		resolver.resolve(
 			{},
 			fixture,
-			"m/features/internal/file.js",
+			`m${obps}middle-3${obps}nested${obps}f`,
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(
+					transferPathToPosix(
+						path.resolve(
+							fixture,
+							`.${obps}node_modules${obps}m${obps}src${obps}middle-3${obps}nested${obps}f${obps}nested${obps}f.js`
+						)
+					)
+				);
+				done();
+			}
+		);
+	});
+
+	it("should resolve with wildcard pattern #8", done => {
+		const fixture = path.resolve(
+			__dirname,
+			`.${obps}fixtures${obps}imports-exports-wildcard${obps}`
+		);
+
+		resolver.resolve(
+			{},
+			fixture,
+			`m${obps}middle-4${obps}f${obps}nested`,
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(
+					transferPathToPosix(
+						path.resolve(
+							fixture,
+							`.${obps}node_modules${obps}m${obps}src${obps}middle-4${obps}f${obps}f.js`
+						)
+					)
+				);
+				done();
+			}
+		);
+	});
+
+	it("should resolve with wildcard pattern #9", done => {
+		const fixture = path.resolve(
+			__dirname,
+			`.${obps}fixtures${obps}imports-exports-wildcard${obps}`
+		);
+
+		resolver.resolve(
+			{},
+			fixture,
+			`m${obps}middle-5${obps}f$${obps}$`,
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(
+					transferPathToPosix(
+						path.resolve(
+							fixture,
+							`.${obps}node_modules${obps}m${obps}src${obps}middle-5${obps}f$${obps}$.js`
+						)
+					)
+				);
+				done();
+			}
+		);
+	});
+
+	it("should throw error if target is 'null'", done => {
+		const fixture = path.resolve(
+			__dirname,
+			`.${obps}fixtures${obps}imports-exports-wildcard${obps}`
+		);
+
+		resolver.resolve(
+			{},
+			fixture,
+			`m${obps}features${obps}internal${obps}file.js`,
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
@@ -2835,17 +3012,28 @@ describe("ExportsFieldPlugin", () => {
 		});
 		const fixture = path.resolve(
 			__dirname,
-			"./fixtures/exports-field-and-extension-alias/"
+			`.${obps}fixtures${obps}exports-field-and-extension-alias${obps}`
 		);
 
-		resolver.resolve({}, fixture, "@org/pkg/string.js", {}, (err, result) => {
-			if (err) return done(err);
-			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(
-				path.resolve(fixture, "./node_modules/@org/pkg/dist/string.js")
-			);
-			done();
-		});
+		resolver.resolve(
+			{},
+			fixture,
+			`@org${obps}pkg${obps}string.js`,
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(
+					transferPathToPosix(
+						path.resolve(
+							fixture,
+							`.${obps}node_modules${obps}@org${obps}pkg${obps}dist${obps}string.js`
+						)
+					)
+				);
+				done();
+			}
+		);
 	});
 
 	it("should resolve with the `extensionAlias` option #2", done => {
@@ -2860,14 +3048,19 @@ describe("ExportsFieldPlugin", () => {
 		});
 		const fixture = path.resolve(
 			__dirname,
-			"./fixtures/exports-field-and-extension-alias/"
+			`.${obps}fixtures${obps}exports-field-and-extension-alias${obps}`
 		);
 
-		resolver.resolve({}, fixture, "pkg/string.js", {}, (err, result) => {
+		resolver.resolve({}, fixture, `pkg${obps}string.js`, {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(
-				path.resolve(fixture, "./node_modules/pkg/dist/string.js")
+				transferPathToPosix(
+					path.resolve(
+						fixture,
+						`.${obps}node_modules${obps}pkg${obps}dist${obps}string.js`
+					)
+				)
 			);
 			done();
 		});
@@ -2885,14 +3078,19 @@ describe("ExportsFieldPlugin", () => {
 		});
 		const fixture = path.resolve(
 			__dirname,
-			"./fixtures/exports-field-and-extension-alias/"
+			`.${obps}fixtures${obps}exports-field-and-extension-alias${obps}`
 		);
 
-		resolver.resolve({}, fixture, "pkg/string.js", {}, (err, result) => {
+		resolver.resolve({}, fixture, `pkg${obps}string.js`, {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(
-				path.resolve(fixture, "./node_modules/pkg/dist/string.js")
+				transferPathToPosix(
+					path.resolve(
+						fixture,
+						`.${obps}node_modules${obps}pkg${obps}dist${obps}string.js`
+					)
+				)
 			);
 			done();
 		});
@@ -2910,10 +3108,10 @@ describe("ExportsFieldPlugin", () => {
 		});
 		const fixture = path.resolve(
 			__dirname,
-			"./fixtures/exports-field-and-extension-alias/"
+			`.${obps}fixtures${obps}exports-field-and-extension-alias${obps}`
 		);
 
-		resolver.resolve({}, fixture, "pkg/string.js", {}, (err, result) => {
+		resolver.resolve({}, fixture, `pkg${obps}string.js`, {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
 			expect(err.message).toMatch(
@@ -2935,10 +3133,10 @@ describe("ExportsFieldPlugin", () => {
 		});
 		const fixture = path.resolve(
 			__dirname,
-			"./fixtures/exports-field-and-extension-alias/"
+			`.${obps}fixtures${obps}exports-field-and-extension-alias${obps}`
 		);
 
-		resolver.resolve({}, fixture, "pkg/string.js", {}, (err, result) => {
+		resolver.resolve({}, fixture, `pkg${obps}string.js`, {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
 			expect(err.message).toMatch(
@@ -2952,12 +3150,16 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve(
 			{},
 			fixture5,
-			"@exports-field/bad-specifier",
+			`@exports-field${obps}bad-specifier`,
 			{},
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(path.resolve(fixture5, "./a.js") + "?foo=../");
+				expect(result).toEqual(
+					transferPathToPosix(
+						path.resolve(fixture5, `.${obps}a.js`) + `?foo=..${obps}`
+					)
+				);
 				done();
 			}
 		);
@@ -2967,13 +3169,15 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve(
 			{},
 			fixture5,
-			"@exports-field/bad-specifier/foo/file.js",
+			`@exports-field${obps}bad-specifier${obps}foo${obps}file.js`,
 			{},
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
-					path.resolve(fixture5, "./a.js") + "?foo=../#../"
+					transferPathToPosix(
+						path.resolve(fixture5, `.${obps}a.js`) + `?foo=..${obps}#..${obps}`
+					)
 				);
 				done();
 			}
@@ -2984,7 +3188,7 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve(
 			{},
 			fixture5,
-			"@exports-field/bad-specifier/bar",
+			`@exports-field${obps}bad-specifier${obps}bar`,
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
@@ -3001,7 +3205,7 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve(
 			{},
 			fixture5,
-			"@exports-field/bad-specifier/baz-multi",
+			`@exports-field${obps}bad-specifier${obps}baz-multi`,
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
@@ -3018,12 +3222,14 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve(
 			{},
 			fixture5,
-			"@exports-field/bad-specifier/pattern/a.js",
+			`@exports-field${obps}bad-specifier${obps}pattern${obps}a.js`,
 			{},
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(path.resolve(fixture5, "./a.js"));
+				expect(result).toEqual(
+					transferPathToPosix(path.resolve(fixture5, `.${obps}a.js`))
+				);
 				done();
 			}
 		);
@@ -3033,12 +3239,14 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve(
 			{},
 			fixture5,
-			"@exports-field/bad-specifier/slash",
+			`@exports-field${obps}bad-specifier${obps}slash`,
 			{},
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(path.resolve(fixture5, "./a.js"));
+				expect(result).toEqual(
+					transferPathToPosix(path.resolve(fixture5, `.${obps}a.js`))
+				);
 				done();
 			}
 		);
@@ -3048,12 +3256,14 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve(
 			{},
 			fixture5,
-			"@exports-field/bad-specifier/no-slash",
+			`@exports-field${obps}bad-specifier${obps}no-slash`,
 			{},
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(path.resolve(fixture5, "./a.js"));
+				expect(result).toEqual(
+					transferPathToPosix(path.resolve(fixture5, `.${obps}a.js`))
+				);
 				done();
 			}
 		);
@@ -3063,7 +3273,7 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve(
 			{},
 			fixture5,
-			"@exports-field/bad-specifier/utils/index.mjs",
+			`@exports-field${obps}bad-specifier${obps}utils${obps}index.mjs`,
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
@@ -3080,7 +3290,7 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve(
 			{},
 			fixture5,
-			"@exports-field/bad-specifier/utils1/index.mjs",
+			`@exports-field${obps}bad-specifier${obps}utils1${obps}index.mjs`,
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
@@ -3097,7 +3307,7 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve(
 			{},
 			fixture5,
-			"@exports-field/bad-specifier/utils2/index",
+			`@exports-field${obps}bad-specifier${obps}utils2${obps}index`,
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
@@ -3114,7 +3324,7 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve(
 			{},
 			fixture5,
-			"@exports-field/bad-specifier/utils3/index",
+			`@exports-field${obps}bad-specifier${obps}utils3${obps}index`,
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
@@ -3131,7 +3341,7 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve(
 			{},
 			fixture5,
-			"@exports-field/bad-specifier/utils4/index",
+			`@exports-field${obps}bad-specifier${obps}utils4${obps}index`,
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
@@ -3148,7 +3358,7 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve(
 			{},
 			fixture5,
-			"@exports-field/bad-specifier/utils5/index",
+			`@exports-field${obps}bad-specifier${obps}utils5${obps}index`,
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
@@ -3165,7 +3375,7 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve(
 			{},
 			fixture5,
-			"@exports-field/bad-specifier/timezones/pdt.mjs",
+			`@exports-field${obps}bad-specifier${obps}timezones${obps}pdt.mjs`,
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
@@ -3182,7 +3392,7 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve(
 			{},
 			fixture5,
-			"@exports-field/bad-specifier/non-existent.js",
+			`@exports-field${obps}bad-specifier${obps}non-existent.js`,
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
@@ -3199,7 +3409,7 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve(
 			{},
 			fixture5,
-			"@exports-field/bad-specifier/dep/multi1",
+			`@exports-field${obps}bad-specifier${obps}dep${obps}multi1`,
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
@@ -3216,7 +3426,7 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve(
 			{},
 			fixture5,
-			"@exports-field/bad-specifier/dep/multi2",
+			`@exports-field${obps}bad-specifier${obps}dep${obps}multi2`,
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
@@ -3233,7 +3443,7 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve(
 			{},
 			fixture5,
-			"@exports-field/bad-specifier/dep/multi4",
+			`@exports-field${obps}bad-specifier${obps}dep${obps}multi4`,
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
@@ -3250,7 +3460,7 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve(
 			{},
 			fixture5,
-			"@exports-field/bad-specifier/dep/multi5",
+			`@exports-field${obps}bad-specifier${obps}dep${obps}multi5`,
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
@@ -3267,12 +3477,14 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve(
 			{},
 			fixture5,
-			"@exports-field/bad-specifier/bad-specifier.js",
+			`@exports-field${obps}bad-specifier${obps}bad-specifier.js`,
 			{},
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(path.resolve(fixture5, "./a.js"));
+				expect(result).toEqual(
+					transferPathToPosix(path.resolve(fixture5, `.${obps}a.js`))
+				);
 				done();
 			}
 		);
@@ -3282,12 +3494,14 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve(
 			{},
 			fixture5,
-			"@exports-field/bad-specifier/bad-specifier1.js",
+			`@exports-field${obps}bad-specifier${obps}bad-specifier1.js`,
 			{},
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(path.resolve(fixture5, "./a.js"));
+				expect(result).toEqual(
+					transferPathToPosix(path.resolve(fixture5, `.${obps}a.js`))
+				);
 				done();
 			}
 		);
@@ -3297,12 +3511,14 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve(
 			{},
 			fixture5,
-			"@exports-field/bad-specifier/dep/multi",
+			`@exports-field${obps}bad-specifier${obps}dep${obps}multi`,
 			{},
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(path.resolve(fixture5, "./a.js"));
+				expect(result).toEqual(
+					transferPathToPosix(path.resolve(fixture5, `.${obps}a.js`))
+				);
 				done();
 			}
 		);
@@ -3312,12 +3528,14 @@ describe("ExportsFieldPlugin", () => {
 		resolver.resolve(
 			{},
 			fixture5,
-			"@exports-field/bad-specifier/dep/multi3",
+			`@exports-field${obps}bad-specifier${obps}dep${obps}multi3`,
 			{},
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(path.resolve(fixture5, "./a.js"));
+				expect(result).toEqual(
+					transferPathToPosix(path.resolve(fixture5, `.${obps}a.js`))
+				);
 				done();
 			}
 		);
