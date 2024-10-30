@@ -1,14 +1,15 @@
 const path = require("path");
 const resolve = require("../");
+const { transferPathToPosix, obps } = require("./util/path-separator");
 
 describe("simple", () => {
 	const pathsToIt = [
-		[__dirname, "../lib/index", "direct"],
+		[__dirname, `..${obps}lib${obps}index`, "direct"],
 		[__dirname, "..", "as directory"],
-		[path.join(__dirname, "..", ".."), "./enhanced-resolve", "as module"],
+		[path.join(__dirname, "..", ".."), `.${obps}enhanced-resolve`, "as module"],
 		[
 			path.join(__dirname, "..", ".."),
-			"./enhanced-resolve/lib/index",
+			`.${obps}enhanced-resolve${obps}lib${obps}index`,
 			"in module"
 		]
 	];
@@ -22,7 +23,9 @@ describe("simple", () => {
 
 				expect(filename).toBeDefined();
 				expect(typeof filename).toEqual("string");
-				expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+				expect(filename).toEqual(
+					transferPathToPosix(path.join(__dirname, "..", "lib", "index.js"))
+				);
 				done();
 			});
 		});
@@ -31,7 +34,9 @@ describe("simple", () => {
 
 			expect(filename).toBeDefined();
 			expect(typeof filename).toEqual("string");
-			expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+			expect(filename).toEqual(
+				transferPathToPosix(path.join(__dirname, "..", "lib", "index.js"))
+			);
 		});
 	});
 });

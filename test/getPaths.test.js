@@ -1,17 +1,41 @@
 const getPaths = require("../lib/getPaths");
+const { posixSep } = require("./util/path-separator");
 
 /**
  * @type {[string,{paths: string[], segments: string[]}][]}
  */
 const cases = [
-	["/a", { paths: ["/a", "/"], segments: ["a", "/"] }],
-	["/a/", { paths: ["/a/", "/a", "/"], segments: ["", "a", "/"] }],
-	["/a/b", { paths: ["/a/b", "/a", "/"], segments: ["b", "a", "/"] }],
 	[
-		"/a/b/",
-		{ paths: ["/a/b/", "/a/b", "/a", "/"], segments: ["", "b", "a", "/"] }
+		`${posixSep}a`,
+		{ paths: [`${posixSep}a`, `${posixSep}`], segments: ["a", `${posixSep}`] }
 	],
-	["/", { paths: ["/"], segments: [""] }]
+	[
+		`${posixSep}a${posixSep}`,
+		{
+			paths: [`${posixSep}a${posixSep}`, `${posixSep}a`, `${posixSep}`],
+			segments: ["", "a", `${posixSep}`]
+		}
+	],
+	[
+		`${posixSep}a${posixSep}b`,
+		{
+			paths: [`${posixSep}a${posixSep}b`, `${posixSep}a`, `${posixSep}`],
+			segments: ["b", "a", `${posixSep}`]
+		}
+	],
+	[
+		`${posixSep}a${posixSep}b${posixSep}`,
+		{
+			paths: [
+				`${posixSep}a${posixSep}b${posixSep}`,
+				`${posixSep}a${posixSep}b`,
+				`${posixSep}a`,
+				`${posixSep}`
+			],
+			segments: ["", "b", "a", `${posixSep}`]
+		}
+	],
+	[`${posixSep}`, { paths: [`${posixSep}`], segments: [""] }]
 ];
 
 cases.forEach(case_ => {

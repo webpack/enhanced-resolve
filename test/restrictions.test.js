@@ -2,6 +2,11 @@ const path = require("path");
 const fs = require("fs");
 const ResolverFactory = require("../lib/ResolverFactory");
 const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
+const {
+	posixSep,
+	transferPathToPosix,
+	obps
+} = require("./util/path-separator");
 
 const fixture = path.resolve(__dirname, "fixtures", "restrictions");
 const nodeFileSystem = new CachedInputFileSystem(fs, 4000);
@@ -33,7 +38,9 @@ describe("restrictions", () => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(
-				path.resolve(fixture, "node_modules/pck1/index.css")
+				transferPathToPosix(
+					path.resolve(fixture, `node_modules${obps}pck1${obps}index.css`)
+				)
 			);
 			done();
 		});
@@ -65,7 +72,9 @@ describe("restrictions", () => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(
-				path.resolve(fixture, "node_modules/pck2/index.css")
+				transferPathToPosix(
+					path.resolve(fixture, `node_modules${obps}pck2${obps}index.css`)
+				)
 			);
 			done();
 		});
@@ -90,14 +99,22 @@ describe("restrictions", () => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
-					path.resolve(fixture, "node_modules/pck2/index.css")
+					transferPathToPosix(
+						path.resolve(fixture, `node_modules${obps}pck2${obps}index.css`)
+					)
 				);
 				expect(
 					log.map(line =>
 						line
-							.replace(path.resolve(__dirname, ".."), "...")
-							.replace(path.resolve(__dirname, ".."), "...")
-							.replace(/\\/g, "/")
+							.replace(
+								transferPathToPosix(path.resolve(__dirname, "..")),
+								"..."
+							)
+							.replace(
+								transferPathToPosix(path.resolve(__dirname, "..")),
+								"..."
+							)
+							.replace(/\\/g, `${posixSep}`)
 					)
 				).toMatchSnapshot();
 				done();

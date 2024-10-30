@@ -3,6 +3,11 @@ const fs = require("fs");
 const { processImportsField } = require("../lib/util/entrypoints");
 const ResolverFactory = require("../lib/ResolverFactory");
 const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
+const {
+	posixSep,
+	transferPathToPosix,
+	obps
+} = require("./util/path-separator");
 
 /** @typedef {import("../lib/util/entrypoints").ImportsField} ImportsField */
 
@@ -1153,7 +1158,6 @@ describe("Process imports field", function exportsField() {
 		});
 	});
 });
-
 describe("ImportsFieldPlugin", () => {
 	const nodeFileSystem = new CachedInputFileSystem(fs, 4000);
 
@@ -1168,7 +1172,9 @@ describe("ImportsFieldPlugin", () => {
 		resolver.resolve({}, fixture, "#imports-field", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(path.resolve(fixture, "b.js"));
+			expect(result).toEqual(
+				transferPathToPosix(path.resolve(fixture, "b.js"))
+			);
 			done();
 		});
 	});
@@ -1182,7 +1188,9 @@ describe("ImportsFieldPlugin", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(path.resolve(fixture, "b.js"));
+				expect(result).toEqual(
+					transferPathToPosix(path.resolve(fixture, "b.js"))
+				);
 				done();
 			}
 		);
@@ -1211,7 +1219,9 @@ describe("ImportsFieldPlugin", () => {
 		resolver.resolve({}, fixture, "#imports-field", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(path.resolve(fixture, "b.js"));
+			expect(result).toEqual(
+				transferPathToPosix(path.resolve(fixture, "b.js"))
+			);
 			done();
 		});
 	});
@@ -1228,20 +1238,33 @@ describe("ImportsFieldPlugin", () => {
 		resolver.resolve({}, fixture, "#b", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(path.resolve(fixture, "a.js"));
+			expect(result).toEqual(
+				transferPathToPosix(path.resolve(fixture, "a.js"))
+			);
 			done();
 		});
 	});
 
 	it("should resolve package #1", done => {
-		resolver.resolve({}, fixture, "#a/dist/main.js", {}, (err, result) => {
-			if (err) return done(err);
-			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(
-				path.resolve(fixture, "node_modules/a/lib/main.js")
-			);
-			done();
-		});
+		resolver.resolve(
+			{},
+			fixture,
+			`#a${obps}dist${obps}main.js`,
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(
+					transferPathToPosix(
+						path.resolve(
+							fixture,
+							`node_modules${posixSep}a${posixSep}lib${posixSep}main.js`
+						)
+					)
+				);
+				done();
+			}
+		);
 	});
 
 	it("should resolve package #2", done => {
@@ -1254,10 +1277,14 @@ describe("ImportsFieldPlugin", () => {
 	});
 
 	it("should resolve package #3", done => {
-		resolver.resolve({}, fixture, "#ccc/index.js", {}, (err, result) => {
+		resolver.resolve({}, fixture, `#ccc${obps}index.js`, {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(path.resolve(fixture, "node_modules/c/index.js"));
+			expect(result).toEqual(
+				transferPathToPosix(
+					path.resolve(fixture, `node_modules${posixSep}c${posixSep}index.js`)
+				)
+			);
 			done();
 		});
 	});
@@ -1266,18 +1293,22 @@ describe("ImportsFieldPlugin", () => {
 		resolver.resolve({}, fixture, "#c", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(path.resolve(fixture, "node_modules/c/index.js"));
+			expect(result).toEqual(
+				transferPathToPosix(
+					path.resolve(fixture, `node_modules${posixSep}c${posixSep}index.js`)
+				)
+			);
 			done();
 		});
 	});
 
 	it("should resolve absolute path as an imports field target", done => {
-		const tmpdirPrefix = path.join(fixture, "node_modules/absolute-tmp-");
+		const tmpdirPrefix = path.join(fixture, `node_modules${obps}absolute-tmp-`);
 		fs.mkdtemp(tmpdirPrefix, (err, dir) => {
 			if (err) done(err);
 
-			const pjson = path.resolve(dir, "./package.json");
-			const file = path.resolve(dir, "./index");
+			const pjson = path.resolve(dir, `.${obps}package.json`);
+			const file = path.resolve(dir, `.${posixSep}index`); // PosixSep because we use it inside package.json (package.json handles only posix separators)
 			fs.writeFileSync(file, "");
 			fs.writeFileSync(pjson, JSON.stringify({ imports: { "#a": file } }));
 
@@ -1298,16 +1329,25 @@ describe("ImportsFieldPlugin", () => {
 		resolver.resolve(
 			{},
 			fixture,
-			"#a/dist/index.js",
+			`#a${obps}dist${obps}index.js`,
 			{ log: v => log.push(v) },
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
-					path.join(fixture, "node_modules/a/lib/index.js")
+					transferPathToPosix(
+						path.join(
+							fixture,
+							`node_modules${posixSep}a${posixSep}lib${posixSep}index.js`
+						)
+					)
 				);
 				expect(
-					log.map(line => line.replace(fixture, "...").replace(/\\/g, "/"))
+					log.map(line =>
+						line
+							.replace(transferPathToPosix(fixture), "...")
+							.replace(/\\/g, `${posixSep}`)
+					)
 				).toMatchSnapshot();
 				done();
 			}
@@ -1317,18 +1357,25 @@ describe("ImportsFieldPlugin", () => {
 	it("should resolve with wildcard pattern", done => {
 		const fixture = path.resolve(
 			__dirname,
-			"./fixtures/imports-exports-wildcard/node_modules/m/"
+			`.${obps}fixtures${obps}imports-exports-wildcard${obps}node_modules${obps}m${obps}`
 		);
-		resolver.resolve({}, fixture, "#internal/i.js", {}, (err, result) => {
+		resolver.resolve({}, fixture, `#internal${obps}i.js`, {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(path.resolve(fixture, "./src/internal/i.js"));
+			expect(result).toEqual(
+				transferPathToPosix(
+					path.resolve(
+						fixture,
+						`.${posixSep}src${posixSep}internal${posixSep}i.js`
+					)
+				)
+			);
 			done();
 		});
 	});
 
 	it("should work and throw an error on invalid imports #1", done => {
-		resolver.resolve({}, fixture, "#/dep", {}, (err, result) => {
+		resolver.resolve({}, fixture, `#${obps}dep`, {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
 			expect(err.message).toMatch(/Request should not start with "#\/"/);
@@ -1337,7 +1384,7 @@ describe("ImportsFieldPlugin", () => {
 	});
 
 	it("should work and throw an error on invalid imports #2", done => {
-		resolver.resolve({}, fixture, "#dep/", {}, (err, result) => {
+		resolver.resolve({}, fixture, `#dep${obps}`, {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
 			expect(err.message).toMatch(
@@ -1351,22 +1398,37 @@ describe("ImportsFieldPlugin", () => {
 		resolver.resolve({}, fixture1, "#dep", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(path.resolve(fixture1, "./a.js") + "?foo=../");
+			expect(result).toEqual(
+				transferPathToPosix(
+					path.resolve(fixture1, `.${posixSep}a.js`) + `?foo=..${posixSep}`
+				)
+			);
 			done();
 		});
 	});
 
 	it("should work with invalid imports #2", done => {
-		resolver.resolve({}, fixture1, "#dep/foo/a.js", {}, (err, result) => {
-			if (err) return done(err);
-			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(path.resolve(fixture1, "./a.js") + "?foo=../#../");
-			done();
-		});
+		resolver.resolve(
+			{},
+			fixture1,
+			`#dep${obps}foo${obps}a.js`,
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(
+					transferPathToPosix(
+						path.resolve(fixture1, `.${posixSep}a.js`) +
+							`?foo=..${posixSep}#..${posixSep}`
+					)
+				);
+				done();
+			}
+		);
 	});
 
 	it("should work with invalid imports #3", done => {
-		resolver.resolve({}, fixture1, "#dep/bar", {}, (err, result) => {
+		resolver.resolve({}, fixture1, `#dep${obps}bar`, {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
 			expect(err.message).toMatch(/Can't resolve '#dep\/bar' in/);
@@ -1375,7 +1437,7 @@ describe("ImportsFieldPlugin", () => {
 	});
 
 	it("should work with invalid imports #3", done => {
-		resolver.resolve({}, fixture1, "#dep/baz", {}, (err, result) => {
+		resolver.resolve({}, fixture1, `#dep${obps}baz`, {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
 			expect(err.message).toMatch(/Can't resolve '#dep\/baz' in/);
@@ -1384,43 +1446,63 @@ describe("ImportsFieldPlugin", () => {
 	});
 
 	it("should work with invalid imports #4", done => {
-		resolver.resolve({}, fixture1, "#dep/baz-multi", {}, (err, result) => {
-			if (!err) return done(new Error(`expect error, got ${result}`));
-			expect(err).toBeInstanceOf(Error);
-			expect(err.message).toMatch(/Can't resolve '#dep\/baz-multi' in/);
-			done();
-		});
+		resolver.resolve(
+			{},
+			fixture1,
+			`#dep${obps}baz-multi`,
+			{},
+			(err, result) => {
+				if (!err) return done(new Error(`expect error, got ${result}`));
+				expect(err).toBeInstanceOf(Error);
+				expect(err.message).toMatch(/Can't resolve '#dep\/baz-multi' in/);
+				done();
+			}
+		);
 	});
 
 	it("should work with invalid imports #5", done => {
-		resolver.resolve({}, fixture1, "#dep/baz-multi", {}, (err, result) => {
-			if (!err) return done(new Error(`expect error, got ${result}`));
-			expect(err).toBeInstanceOf(Error);
-			expect(err.message).toMatch(/Can't resolve '#dep\/baz-multi' in/);
-			done();
-		});
+		resolver.resolve(
+			{},
+			fixture1,
+			`#dep${obps}baz-multi`,
+			{},
+			(err, result) => {
+				if (!err) return done(new Error(`expect error, got ${result}`));
+				expect(err).toBeInstanceOf(Error);
+				expect(err.message).toMatch(/Can't resolve '#dep\/baz-multi' in/);
+				done();
+			}
+		);
 	});
 
 	it("should work with invalid imports #6", done => {
-		resolver.resolve({}, fixture1, "#dep/pattern/a.js", {}, (err, result) => {
-			if (!err) return done(new Error(`expect error, got ${result}`));
-			expect(err).toBeInstanceOf(Error);
-			expect(err.message).toMatch(/Can't resolve '#dep\/pattern\/a.js' in/);
-			done();
-		});
+		resolver.resolve(
+			{},
+			fixture1,
+			`#dep${obps}pattern${obps}a.js`,
+			{},
+			(err, result) => {
+				if (!err) return done(new Error(`expect error, got ${result}`));
+				expect(err).toBeInstanceOf(Error);
+				expect(err.message).toMatch(/Can't resolve '#dep\/pattern\/a.js' in/);
+				done();
+			}
+		);
 	});
 
 	it("should work with invalid imports #7", done => {
-		resolver.resolve({}, fixture1, "#dep/array", {}, (err, result) => {
+		resolver.resolve({}, fixture1, `#dep${obps}array`, {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(path.resolve(fixture1, "./a.js"));
+			expect(result).toEqual(
+				transferPathToPosix(path.resolve(fixture1, `.${posixSep}a.js`))
+			);
 			done();
 		});
 	});
 
 	it("should work with invalid imports #8", done => {
-		resolver.resolve({}, fixture1, "#dep/array2", {}, (err, result) => {
+		resolver.resolve({}, fixture1, `#dep${obps}array2`, {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
 			expect(err.message).toMatch(/Can't resolve '#dep\/array2' in/);
@@ -1429,16 +1511,18 @@ describe("ImportsFieldPlugin", () => {
 	});
 
 	it("should work with invalid imports #9", done => {
-		resolver.resolve({}, fixture1, "#dep/array3", {}, (err, result) => {
+		resolver.resolve({}, fixture1, `#dep${obps}array3`, {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(path.resolve(fixture1, "./a.js"));
+			expect(result).toEqual(
+				transferPathToPosix(path.resolve(fixture1, `.${posixSep}a.js`))
+			);
 			done();
 		});
 	});
 
 	it("should work with invalid imports #10", done => {
-		resolver.resolve({}, fixture1, "#dep/empty", {}, (err, result) => {
+		resolver.resolve({}, fixture1, `#dep${obps}empty`, {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
 			expect(err.message).toMatch(/Can't resolve '#dep\/empty' in/);
@@ -1447,34 +1531,50 @@ describe("ImportsFieldPlugin", () => {
 	});
 
 	it("should work with invalid imports #10", done => {
-		resolver.resolve({}, fixture1, "#dep/with-bad", {}, (err, result) => {
+		resolver.resolve({}, fixture1, `#dep${obps}with-bad`, {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(path.resolve(fixture1, "./a.js"));
+			expect(result).toEqual(
+				transferPathToPosix(path.resolve(fixture1, `.${posixSep}a.js`))
+			);
 			done();
 		});
 	});
 
 	it("should work with invalid imports #10", done => {
-		resolver.resolve({}, fixture1, "#dep/with-bad2", {}, (err, result) => {
-			if (err) return done(err);
-			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(path.resolve(fixture1, "./a.js"));
-			done();
-		});
+		resolver.resolve(
+			{},
+			fixture1,
+			`#dep${obps}with-bad2`,
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(
+					transferPathToPosix(path.resolve(fixture1, `.${posixSep}a.js`))
+				);
+				done();
+			}
+		);
 	});
 
 	it("should work with invalid imports #11", done => {
-		resolver.resolve({}, fixture1, "#timezones/pdt.mjs", {}, (err, result) => {
-			if (!err) return done(new Error(`expect error, got ${result}`));
-			expect(err).toBeInstanceOf(Error);
-			expect(err.message).toMatch(/Expecting folder to folder mapping/);
-			done();
-		});
+		resolver.resolve(
+			{},
+			fixture1,
+			`#timezones${obps}pdt.mjs`,
+			{},
+			(err, result) => {
+				if (!err) return done(new Error(`expect error, got ${result}`));
+				expect(err).toBeInstanceOf(Error);
+				expect(err.message).toMatch(/Expecting folder to folder mapping/);
+				done();
+			}
+		);
 	});
 
 	it("should work with invalid imports #12", done => {
-		resolver.resolve({}, fixture1, "#dep/multi1", {}, (err, result) => {
+		resolver.resolve({}, fixture1, `#dep${obps}multi1`, {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
 			expect(err.message).toMatch(
@@ -1485,7 +1585,7 @@ describe("ImportsFieldPlugin", () => {
 	});
 
 	it("should work with invalid imports #13", done => {
-		resolver.resolve({}, fixture1, "#dep/multi2", {}, (err, result) => {
+		resolver.resolve({}, fixture1, `#dep${obps}multi2`, {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
 			expect(err.message).toMatch(
@@ -1496,7 +1596,7 @@ describe("ImportsFieldPlugin", () => {
 	});
 
 	it("should work with invalid imports #13", done => {
-		resolver.resolve({}, fixture1, "#dep/multi1", {}, (err, result) => {
+		resolver.resolve({}, fixture1, `#dep${obps}multi1`, {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
 			expect(err.message).toMatch(
@@ -1507,7 +1607,7 @@ describe("ImportsFieldPlugin", () => {
 	});
 
 	it("should work with invalid imports #14", done => {
-		resolver.resolve({}, fixture1, "#dep/multi2", {}, (err, result) => {
+		resolver.resolve({}, fixture1, `#dep${obps}multi2`, {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
 			expect(err.message).toMatch(
@@ -1518,10 +1618,12 @@ describe("ImportsFieldPlugin", () => {
 	});
 
 	it("should work and resolve with array imports", done => {
-		resolver.resolve({}, fixture1, "#dep/multi", {}, (err, result) => {
+		resolver.resolve({}, fixture1, `#dep${obps}multi`, {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(path.resolve(fixture1, "./a.js"));
+			expect(result).toEqual(
+				transferPathToPosix(path.resolve(fixture1, `.${posixSep}a.js`))
+			);
 			done();
 		});
 	});

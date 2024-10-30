@@ -2,6 +2,7 @@ const path = require("path");
 const fs = require("fs");
 const { platform } = require("os");
 const resolve = require("../");
+const { obps } = require("./util/path-separator");
 
 const tempPath = path.join(__dirname, "temp");
 
@@ -108,103 +109,115 @@ describe("symlink", () => {
 		});
 
 		[
-			[tempPath, "./index.js", "with a symlink to a file"],
-			[tempPath, "./node.relative.js", "with a relative symlink to a file"],
+			[tempPath, `.${obps}index.js`, "with a symlink to a file"],
 			[
 				tempPath,
-				"./node.relative.sym.js",
+				`.${obps}node.relative.js`,
+				"with a relative symlink to a file"
+			],
+			[
+				tempPath,
+				`.${obps}node.relative.sym.js`,
 				"with a relative symlink to a symlink to a file"
 			],
-			[tempPath, "./lib/index.js", "with a symlink to a directory 1"],
-			[tempPath, "./this/lib/index.js", "with a symlink to a directory 2"],
 			[
 				tempPath,
-				"./this/test/temp/index.js",
+				`.${obps}lib${obps}index.js`,
+				"with a symlink to a directory 1"
+			],
+			[
+				tempPath,
+				`.${obps}this${obps}lib${obps}index.js`,
+				"with a symlink to a directory 2"
+			],
+			[
+				tempPath,
+				`.${obps}this${obps}test${obps}temp${obps}index.js`,
 				"with multiple symlinks in the path 1"
 			],
 			[
 				tempPath,
-				"./this/test/temp/lib/index.js",
+				`.${obps}this${obps}test${obps}temp${obps}lib${obps}index.js`,
 				"with multiple symlinks in the path 2"
 			],
 			[
 				tempPath,
-				"./this/test/temp/this/lib/index.js",
+				`.${obps}this${obps}test${obps}temp${obps}this${obps}lib${obps}index.js`,
 				"with multiple symlinks in the path 3"
 			],
 			[
 				tempPath,
-				"./that/lib/index.js",
+				`.${obps}that${obps}lib${obps}index.js`,
 				"with a symlink to a directory 2 (chained)"
 			],
 			[
 				tempPath,
-				"./that/test/temp/index.js",
+				`.${obps}that${obps}test${obps}temp${obps}index.js`,
 				"with multiple symlinks in the path 1 (chained)"
 			],
 			[
 				tempPath,
-				"./that/test/temp/lib/index.js",
+				`.${obps}that${obps}test${obps}temp${obps}lib${obps}index.js`,
 				"with multiple symlinks in the path 2 (chained)"
 			],
 			[
 				tempPath,
-				"./that/test/temp/that/lib/index.js",
+				`.${obps}that${obps}test${obps}temp${obps}that${obps}lib${obps}index.js`,
 				"with multiple symlinks in the path 3 (chained)"
 			],
 			[
 				path.join(tempPath, "lib"),
-				"./index.js",
+				`.${obps}index.js`,
 				"with symlinked directory as context 1"
 			],
 			[
 				path.join(tempPath, "this"),
-				"./lib/index.js",
+				`.${obps}lib${obps}index.js`,
 				"with symlinked directory as context 2"
 			],
 			[
 				path.join(tempPath, "this"),
-				"./test/temp/lib/index.js",
+				`.${obps}test${obps}temp${obps}lib${obps}index.js`,
 				"with symlinked directory as context and in path"
 			],
 			[
 				path.join(tempPath, "this", "lib"),
-				"./index.js",
+				`.${obps}index.js`,
 				"with symlinked directory in context path"
 			],
 			[
 				path.join(tempPath, "this", "test"),
-				"./temp/index.js",
+				`.${obps}temp${obps}index.js`,
 				"with symlinked directory in context path and symlinked file"
 			],
 			[
 				path.join(tempPath, "this", "test"),
-				"./temp/lib/index.js",
+				`.${obps}temp${obps}lib${obps}index.js`,
 				"with symlinked directory in context path and symlinked directory"
 			],
 			[
 				path.join(tempPath, "that"),
-				"./lib/index.js",
+				`.${obps}lib${obps}index.js`,
 				"with symlinked directory as context 2 (chained)"
 			],
 			[
 				path.join(tempPath, "that"),
-				"./test/temp/lib/index.js",
+				`.${obps}test${obps}temp${obps}lib${obps}index.js`,
 				"with symlinked directory as context and in path (chained)"
 			],
 			[
 				path.join(tempPath, "that", "lib"),
-				"./index.js",
+				`.${obps}index.js`,
 				"with symlinked directory in context path (chained)"
 			],
 			[
 				path.join(tempPath, "that", "test"),
-				"./temp/index.js",
+				`.${obps}temp${obps}index.js`,
 				"with symlinked directory in context path and symlinked file (chained)"
 			],
 			[
 				path.join(tempPath, "that", "test"),
-				"./temp/lib/index.js",
+				`.${obps}temp${obps}lib${obps}index.js`,
 				"with symlinked directory in context path and symlinked directory (chained)"
 			]
 		].forEach(function (pathToIt) {
@@ -242,6 +255,6 @@ describe("symlink", () => {
 			});
 		});
 	} else {
-		it("cannot test symlinks because we have no permission to create them");
+		it("cannot test symlinks because we have no permission to create them", () => {});
 	}
 });

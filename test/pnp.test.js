@@ -1,6 +1,11 @@
 const path = require("path");
 const fs = require("fs");
 const { ResolverFactory, CachedInputFileSystem } = require("../");
+const {
+	posixSep,
+	transferPathToPosix,
+	obps
+} = require("./util/path-separator");
 
 const nodeFileSystem = new CachedInputFileSystem(fs, 4000);
 const fixture = path.resolve(__dirname, "fixtures", "pnp");
@@ -8,13 +13,13 @@ const fixture = path.resolve(__dirname, "fixtures", "pnp");
 let isAdmin = false;
 
 try {
-	fs.symlinkSync("dir", path.resolve(fixture, "pkg/symlink"), "dir");
+	fs.symlinkSync("dir", path.resolve(fixture, `pkg${obps}symlink`), "dir");
 	isAdmin = true;
 } catch (e) {
 	// ignore
 }
 try {
-	fs.unlinkSync(path.resolve(fixture, "pkg/symlink"));
+	fs.unlinkSync(path.resolve(fixture, `pkg${obps}symlink`));
 } catch (e) {
 	isAdmin = false;
 	// ignore
@@ -26,10 +31,10 @@ describe("pnp", () => {
 	let resolver;
 	if (isAdmin) {
 		beforeAll(() => {
-			fs.symlinkSync("dir", path.resolve(fixture, "pkg/symlink"), "dir");
+			fs.symlinkSync("dir", path.resolve(fixture, `pkg${obps}symlink`), "dir");
 		});
 		afterAll(() => {
-			fs.unlinkSync(path.resolve(fixture, "pkg/symlink"));
+			fs.unlinkSync(path.resolve(fixture, `pkg${obps}symlink`));
 		});
 	}
 	beforeEach(() => {
@@ -57,7 +62,7 @@ describe("pnp", () => {
 				alias: path.resolve(fixture, "pkg")
 			},
 			pnpApi,
-			modules: ["node_modules", path.resolve(fixture, "../pnp-a")]
+			modules: ["node_modules", path.resolve(fixture, `..${obps}pnp-a`)]
 		});
 		resolver = ResolverFactory.createResolver({
 			aliasFields: ["browser"],
@@ -70,24 +75,41 @@ describe("pnp", () => {
 			modules: [
 				"alternative-modules",
 				"node_modules",
-				path.resolve(fixture, "../pnp-a")
+				path.resolve(fixture, `..${obps}pnp-a`)
 			]
 		});
 	});
 	it("should resolve by going through the pnp api", done => {
+		// TODO: find a solution how to work with pnp cause it causes some problems
 		pnpApi.mocks.set("pkg", path.resolve(fixture, "pkg"));
-		resolver.resolve({}, __dirname, "pkg/dir/index.js", {}, (err, result) => {
-			if (err) return done(err);
-			expect(result).toEqual(path.resolve(fixture, "pkg/dir/index.js"));
-			done();
-		});
+		resolver.resolve(
+			{},
+			__dirname,
+			`pkg${obps}dir${obps}index.js`,
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				expect(result).toEqual(
+					transferPathToPosix(
+						path.resolve(fixture, `pkg${obps}dir${obps}index.js`)
+					)
+				);
+				done();
+			}
+		);
 	});
 	it("should not resolve a not fully specified request when fullySpecified is set", done => {
 		pnpApi.mocks.set("pkg", path.resolve(fixture, "pkg"));
-		resolver.resolve({}, __dirname, "pkg/dir/index", {}, (err, result) => {
-			expect(err).toBeInstanceOf(Error);
-			done();
-		});
+		resolver.resolve(
+			{},
+			__dirname,
+			`pkg${obps}dir${obps}index`,
+			{},
+			(err, result) => {
+				expect(err).toBeInstanceOf(Error);
+				done();
+			}
+		);
 	});
 	it("should track dependency to the pnp api", done => {
 		pnpApi.mocks.set("pkg", path.resolve(fixture, "pkg"));
@@ -96,13 +118,17 @@ describe("pnp", () => {
 		resolver.resolve(
 			{},
 			__dirname,
-			"pkg/dir/index.js",
+			`pkg${obps}dir${obps}index.js`,
 			{ fileDependencies },
 			(err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(path.resolve(fixture, "pkg/dir/index.js"));
+				expect(result).toEqual(
+					transferPathToPosix(
+						path.resolve(fixture, `pkg${obps}dir${obps}index.js`)
+					)
+				);
 				expect(Array.from(fileDependencies)).toContainEqual(
-					path.resolve(fixture, ".pnp.js")
+					transferPathToPosix(path.resolve(fixture, ".pnp.js"))
 				);
 				done();
 			}
@@ -112,15 +138,19 @@ describe("pnp", () => {
 		pnpApi.mocks.set("pkg", path.resolve(fixture, "pkg"));
 		resolver.resolve({}, __dirname, "pkg", {}, (err, result) => {
 			if (err) return done(err);
-			expect(result).toEqual(path.resolve(fixture, "pkg/main.js"));
+			expect(result).toEqual(
+				transferPathToPosix(path.resolve(fixture, `pkg${obps}main.js`))
+			);
 			done();
 		});
 	});
 	it("should resolve namespaced module names", done => {
-		pnpApi.mocks.set("@user/pkg", path.resolve(fixture, "pkg"));
-		resolver.resolve({}, __dirname, "@user/pkg", {}, (err, result) => {
+		pnpApi.mocks.set(`@user${posixSep}pkg`, path.resolve(fixture, "pkg"));
+		resolver.resolve({}, __dirname, `@user${obps}pkg`, {}, (err, result) => {
 			if (err) return done(err);
-			expect(result).toEqual(path.resolve(fixture, "pkg/main.js"));
+			expect(result).toEqual(
+				transferPathToPosix(path.resolve(fixture, `pkg${obps}main.js`))
+			);
 			done();
 		});
 	});
@@ -132,30 +162,34 @@ describe("pnp", () => {
 					resolverFuzzy.resolve(
 						{},
 						__dirname,
-						"pkg/symlink",
+						`pkg${obps}symlink`,
 						{},
 						(err, result) => {
 							if (err) return done(err);
 							expect(result).toEqual(
-								path.resolve(fixture, "pkg/symlink/index.js")
+								transferPathToPosix(
+									path.resolve(fixture, `pkg${obps}symlink${obps}index.js`)
+								)
 							);
 							done();
 						}
 					);
 			  }
-			: undefined
+			: () => {}
 	);
 	it("should properly deal with other extensions", done => {
-		pnpApi.mocks.set("@user/pkg", path.resolve(fixture, "pkg"));
+		pnpApi.mocks.set(`@user${posixSep}pkg`, path.resolve(fixture, "pkg"));
 		resolverFuzzy.resolve(
 			{},
 			__dirname,
-			"@user/pkg/typescript",
+			`@user${obps}pkg${obps}typescript`,
 			{},
 			(err, result) => {
 				if (err) return done(err);
 				expect(result).toEqual(
-					path.resolve(fixture, "pkg/typescript/index.ts")
+					transferPathToPosix(
+						path.resolve(fixture, `pkg${obps}typescript${obps}index.ts`)
+					)
 				);
 				done();
 			}
@@ -166,46 +200,58 @@ describe("pnp", () => {
 		resolverFuzzy.resolve(
 			{},
 			__dirname,
-			"pkg/package-alias",
+			`pkg${obps}package-alias`,
 			{},
 			(err, result) => {
 				if (err) return done(err);
 				expect(result).toEqual(
-					path.resolve(fixture, "pkg/package-alias/browser.js")
+					transferPathToPosix(
+						path.resolve(fixture, `pkg${obps}package-alias${obps}browser.js`)
+					)
 				);
 				done();
 			}
 		);
 	});
 	it("should prefer pnp resolves over normal modules", done => {
-		pnpApi.mocks.set("m1", path.resolve(fixture, "../node_modules/m2"));
+		pnpApi.mocks.set(
+			"m1",
+			path.resolve(fixture, `..${obps}node_modules${obps}m2`)
+		);
 		resolver.resolve(
 			{},
 			path.resolve(__dirname, "fixtures"),
-			"m1/b.js",
+			`m1${obps}b.js`,
 			{},
 			(err, result) => {
 				if (err) return done(err);
 				expect(result).toEqual(
-					path.resolve(fixture, "../node_modules/m2/b.js")
+					transferPathToPosix(
+						path.resolve(fixture, `..${obps}node_modules${obps}m2${obps}b.js`)
+					)
 				);
 				done();
 			}
 		);
 	});
 	it("should prefer alternative module directories over pnp", done => {
-		pnpApi.mocks.set("m1", path.resolve(fixture, "../node_modules/m2"));
+		pnpApi.mocks.set(
+			"m1",
+			path.resolve(fixture, `..${obps}node_modules${obps}m2`)
+		);
 		resolver.resolve(
 			{},
-			path.resolve(__dirname, "fixtures/prefer-pnp"),
-			"m1/b.js",
+			path.resolve(__dirname, `fixtures${obps}prefer-pnp`),
+			`m1${obps}b.js`,
 			{},
 			(err, result) => {
 				if (err) return done(err);
 				expect(result).toEqual(
-					path.resolve(
-						__dirname,
-						"fixtures/prefer-pnp/alternative-modules/m1/b.js"
+					transferPathToPosix(
+						path.resolve(
+							__dirname,
+							`fixtures${obps}prefer-pnp${obps}alternative-modules${obps}m1${obps}b.js`
+						)
 					)
 				);
 				done();
@@ -213,15 +259,17 @@ describe("pnp", () => {
 		);
 	});
 	it("should prefer alias over pnp resolves", done => {
-		pnpApi.mocks.set("alias", path.resolve(fixture, "pkg/dir"));
+		pnpApi.mocks.set("alias", path.resolve(fixture, `pkg${obps}dir`));
 		resolver.resolve(
 			{},
 			path.resolve(__dirname, "fixtures"),
-			"alias/index.js",
+			`alias${obps}index.js`,
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(path.resolve(fixture, "pkg/index.js"));
+				expect(result).toEqual(
+					transferPathToPosix(path.resolve(fixture, `pkg${obps}index.js`))
+				);
 				done();
 			}
 		);
@@ -231,11 +279,13 @@ describe("pnp", () => {
 		resolver.resolve(
 			{},
 			path.resolve(__dirname, "fixtures"),
-			"m2/index.js",
+			`m2${obps}index.js`,
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(path.resolve(fixture, "pkg/index.js"));
+				expect(result).toEqual(
+					transferPathToPosix(path.resolve(fixture, `pkg${obps}index.js`))
+				);
 				done();
 			}
 		);
@@ -244,28 +294,39 @@ describe("pnp", () => {
 		resolver.resolve(
 			{},
 			path.resolve(__dirname, "fixtures"),
-			"m2/a.js",
+			`m2${obps}a.js`,
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(path.resolve(fixture, "../pnp-a/m2/a.js"));
+				expect(result).toEqual(
+					transferPathToPosix(
+						path.resolve(fixture, `..${obps}pnp-a${obps}m2${obps}a.js`)
+					)
+				);
 				done();
 			}
 		);
 	});
 	it("should fallback to alternatives when pnp doesn't manage the issuer", done => {
-		pnpApi.ignoredIssuers.add(path.resolve(__dirname, "fixtures") + "/");
+		pnpApi.ignoredIssuers.add(
+			transferPathToPosix(path.resolve(__dirname, "fixtures") + `${posixSep}`)
+		);
 		// Add the wrong path on purpose to make sure the issuer is ignored
 		pnpApi.mocks.set("m2", path.resolve(fixture, "pkg"));
 		resolver.resolve(
 			{},
 			path.resolve(__dirname, "fixtures"),
-			"m2/b.js",
+			`m2${obps}b.js`,
 			{},
 			(err, result) => {
 				if (err) return done(err);
 				expect(result).toEqual(
-					path.resolve(__dirname, "fixtures/node_modules/m2/b.js")
+					transferPathToPosix(
+						path.resolve(
+							__dirname,
+							`fixtures${obps}node_modules${obps}m2${obps}b.js`
+						)
+					)
 				);
 				done();
 			}
@@ -280,21 +341,25 @@ describe("pnp", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(path.resolve(fixture, "pkg3/a.js"));
+				expect(result).toEqual(
+					transferPathToPosix(path.resolve(fixture, `pkg3${obps}a.js`))
+				);
 				done();
 			}
 		);
 	});
 	it("should handle the exports field when using PnP (with sub path)", done => {
-		pnpApi.mocks.set("@user/m1", path.resolve(fixture, "pkg3"));
+		pnpApi.mocks.set(`@user${posixSep}m1`, path.resolve(fixture, "pkg3"));
 		resolver.resolve(
 			{},
 			path.resolve(__dirname, "fixtures"),
-			"@user/m1/x",
+			`@user${obps}m1${obps}x`,
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(path.resolve(fixture, "pkg3/a.js"));
+				expect(result).toEqual(
+					transferPathToPosix(path.resolve(fixture, `pkg3${obps}a.js`))
+				);
 				done();
 			}
 		);

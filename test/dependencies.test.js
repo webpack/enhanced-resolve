@@ -1,5 +1,11 @@
 const { Volume } = require("memfs");
 const resolve = require("../");
+const {
+	posixSep,
+	obps,
+	absoluteOsBasedPath,
+	absoluteOsBasedResolvedPath
+} = require("./util/path-separator");
 
 describe("dependencies", function () {
 	let resolver;
@@ -7,18 +13,21 @@ describe("dependencies", function () {
 	beforeEach(function () {
 		const fileSystem = Volume.fromJSON(
 			{
-				"/a/b/node_modules/some-module/index.js": "",
-				"/a/node_modules/module/package.json": JSON.stringify({
-					main: "entry.js"
-				}),
-				"/a/node_modules/module/file.js": JSON.stringify({ main: "entry.js" }),
-				"/modules/other-module/file.js": ""
+				[`${absoluteOsBasedPath}a${obps}b${obps}node_modules${obps}some-module${obps}index.js`]:
+					"",
+				[`${absoluteOsBasedPath}a${obps}node_modules${obps}module${obps}package.json`]:
+					JSON.stringify({
+						main: "entry.js"
+					}),
+				[`${absoluteOsBasedPath}a${obps}node_modules${obps}module${obps}file.js`]:
+					JSON.stringify({ main: "entry.js" }),
+				[`${absoluteOsBasedPath}modules${obps}other-module${obps}file.js`]: ""
 			},
-			"/"
+			`${absoluteOsBasedPath}`
 		);
 		resolver = resolve.create({
 			extensions: [".json", ".js"],
-			modules: ["/modules", "node_modules"],
+			modules: [`${absoluteOsBasedPath}modules`, "node_modules"],
 			// @ts-ignore
 			fileSystem: fileSystem
 		});
@@ -27,55 +36,47 @@ describe("dependencies", function () {
 	const testCases = [
 		{
 			name: "middle module request",
-			context: "/a/b/c",
-			request: "module/file",
-			result: "/a/node_modules/module/file.js",
+			context: `${absoluteOsBasedPath}a${obps}b${obps}c`,
+			request: `module${obps}file`,
+			result: `${absoluteOsBasedResolvedPath}a${posixSep}node_modules${posixSep}module${posixSep}file.js`,
 			fileDependencies: [
-				// found package.json
-				"/a/node_modules/module/package.json",
-				// symlink checks
-				"/a/node_modules/module/file.js",
-				"/a/node_modules/module",
-				"/a/node_modules",
-				"/a",
-				"/"
+				`${absoluteOsBasedResolvedPath}a${posixSep}node_modules${posixSep}module${posixSep}package.json`,
+				`${absoluteOsBasedResolvedPath}a${posixSep}node_modules${posixSep}module${posixSep}file.js`,
+				`${absoluteOsBasedResolvedPath}a${posixSep}node_modules${posixSep}module`,
+				`${absoluteOsBasedResolvedPath}a${posixSep}node_modules`,
+				`${absoluteOsBasedResolvedPath}a`,
+				`${absoluteOsBasedResolvedPath}`
 			],
 			missingDependencies: [
-				// missing package.jsons
-				"/a/b/c/package.json",
-				"/a/b/package.json",
-				"/a/package.json",
-				"/package.json",
-				// missing modules directories
-				"/a/b/c/node_modules",
-				// missing single file modules
-				"/modules/module",
-				"/a/b/node_modules/module",
-				// missing files with alterative extensions
-				"/a/node_modules/module/file",
-				"/a/node_modules/module/file.json"
+				`${absoluteOsBasedResolvedPath}a${posixSep}b${posixSep}c${posixSep}package.json`,
+				`${absoluteOsBasedResolvedPath}a${posixSep}b${posixSep}package.json`,
+				`${absoluteOsBasedResolvedPath}a${posixSep}package.json`,
+				`${absoluteOsBasedResolvedPath}package.json`,
+				`${absoluteOsBasedResolvedPath}a${posixSep}b${posixSep}c${posixSep}node_modules`,
+				`${absoluteOsBasedResolvedPath}modules${posixSep}module`,
+				`${absoluteOsBasedResolvedPath}a${posixSep}b${posixSep}node_modules${posixSep}module`,
+				`${absoluteOsBasedResolvedPath}a${posixSep}node_modules${posixSep}module${posixSep}file`,
+				`${absoluteOsBasedResolvedPath}a${posixSep}node_modules${posixSep}module${posixSep}file.json`
 			]
 		},
 		{
 			name: "fast found module request",
-			context: "/a/b/c",
-			request: "other-module/file.js",
-			result: "/modules/other-module/file.js",
+			context: `${absoluteOsBasedPath}a${obps}b${obps}c`,
+			request: `other-module${obps}file.js`,
+			result: `${absoluteOsBasedResolvedPath}modules${posixSep}other-module${posixSep}file.js`,
 			fileDependencies: [
-				// symlink checks
-				"/modules/other-module/file.js",
-				"/modules/other-module",
-				"/modules",
-				"/"
+				`${absoluteOsBasedResolvedPath}modules${posixSep}other-module${posixSep}file.js`,
+				`${absoluteOsBasedResolvedPath}modules${posixSep}other-module`,
+				`${absoluteOsBasedResolvedPath}modules`,
+				`${absoluteOsBasedResolvedPath}`
 			],
 			missingDependencies: [
-				// missing package.jsons
-				"/a/b/c/package.json",
-				"/a/b/package.json",
-				"/a/package.json",
-				"/package.json",
-				"/modules/other-module/package.json",
-				"/modules/package.json"
+				`${absoluteOsBasedResolvedPath}a${posixSep}b${posixSep}c${posixSep}package.json`,
+				`${absoluteOsBasedResolvedPath}a${posixSep}b${posixSep}package.json`,
+				`${absoluteOsBasedResolvedPath}a${posixSep}package.json`,
+				`${absoluteOsBasedResolvedPath}package.json`,
+				`${absoluteOsBasedResolvedPath}modules${posixSep}other-module${posixSep}package.json`,
+				`${absoluteOsBasedResolvedPath}modules${posixSep}package.json`
 			]
 		}
 	];

@@ -1,13 +1,16 @@
 const path = require("path");
 const fs = require("fs");
 const { ResolverFactory } = require("../");
+const { obps, transferPathToPosix } = require("./util/path-separator");
 
 const browserModule = path.join(__dirname, "fixtures", "browser-module");
 
 function p() {
-	return path.join.apply(
-		path,
-		[browserModule].concat(Array.prototype.slice.call(arguments))
+	return transferPathToPosix(
+		path.join.apply(
+			path,
+			[browserModule].concat(Array.prototype.slice.call(arguments))
+		)
 	);
 }
 
@@ -28,31 +31,43 @@ describe("browserField", () => {
 	});
 
 	it("should ignore", function (done) {
-		resolver.resolve({}, p(), "./lib/ignore", {}, function (err, result) {
-			if (err) throw err;
-			expect(result).toEqual(false);
-			done();
-		});
+		resolver.resolve(
+			{},
+			p(),
+			`.${obps}lib${obps}ignore`,
+			{},
+			function (err, result) {
+				if (err) throw err;
+				expect(result).toEqual(false);
+				done();
+			}
+		);
 	});
 
-	it("should ignore", () => {
-		expect(resolver.resolveSync({}, p(), "./lib/ignore")).toEqual(false);
-		expect(resolver.resolveSync({}, p(), "./lib/ignore.js")).toEqual(false);
-		expect(resolver.resolveSync({}, p("lib"), "./ignore")).toEqual(false);
-		expect(resolver.resolveSync({}, p("lib"), "./ignore.js")).toEqual(false);
+	it("should ignore with file-check", () => {
+		expect(resolver.resolveSync({}, p(), `.${obps}lib${obps}ignore`)).toEqual(
+			false
+		);
+		expect(
+			resolver.resolveSync({}, p(), `.${obps}lib${obps}ignore.js`)
+		).toEqual(false);
+		expect(resolver.resolveSync({}, p("lib"), `.${obps}ignore`)).toEqual(false);
+		expect(resolver.resolveSync({}, p("lib"), `.${obps}ignore.js`)).toEqual(
+			false
+		);
 	});
 
 	it("should replace a file", () => {
-		expect(resolver.resolveSync({}, p(), "./lib/replaced")).toEqual(
+		expect(resolver.resolveSync({}, p(), `.${obps}lib${obps}replaced`)).toEqual(
 			p("lib", "browser.js")
 		);
-		expect(resolver.resolveSync({}, p(), "./lib/replaced.js")).toEqual(
+		expect(
+			resolver.resolveSync({}, p(), `.${obps}lib${obps}replaced.js`)
+		).toEqual(p("lib", "browser.js"));
+		expect(resolver.resolveSync({}, p("lib"), `.${obps}replaced`)).toEqual(
 			p("lib", "browser.js")
 		);
-		expect(resolver.resolveSync({}, p("lib"), "./replaced")).toEqual(
-			p("lib", "browser.js")
-		);
-		expect(resolver.resolveSync({}, p("lib"), "./replaced.js")).toEqual(
+		expect(resolver.resolveSync({}, p("lib"), `.${obps}replaced.js`)).toEqual(
 			p("lib", "browser.js")
 		);
 	});
@@ -76,16 +91,16 @@ describe("browserField", () => {
 	});
 
 	it("should resolve in nested property", () => {
-		expect(resolver.resolveSync({}, p(), "./lib/main1.js")).toEqual(
+		expect(resolver.resolveSync({}, p(), `.${obps}lib${obps}main1.js`)).toEqual(
 			p("lib", "main.js")
 		);
-		expect(resolver.resolveSync({}, p(), "./lib/main2.js")).toEqual(
+		expect(resolver.resolveSync({}, p(), `.${obps}lib${obps}main2.js`)).toEqual(
 			p("lib", "browser.js")
 		);
 	});
 
 	it("should check only alias field properties", () => {
-		expect(resolver.resolveSync({}, p(), "./toString")).toEqual(
+		expect(resolver.resolveSync({}, p(), `.${obps}toString`)).toEqual(
 			p("lib", "toString.js")
 		);
 	});
