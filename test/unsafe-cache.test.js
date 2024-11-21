@@ -1,5 +1,6 @@
 const path = require("path");
 const resolve = require("../");
+const { obps } = require("./util/path-separator");
 
 describe("unsafe-cache", () => {
 	let cache;
@@ -26,7 +27,7 @@ describe("unsafe-cache", () => {
 		it("should cache request", done => {
 			cachedResolve(
 				path.join(__dirname, "fixtures"),
-				"m2/b",
+				`m2${obps}b`,
 				function (err, result) {
 					if (err) return done(err);
 					expect(Object.keys(cache)).toHaveLength(1);
@@ -37,7 +38,7 @@ describe("unsafe-cache", () => {
 					});
 					cachedResolve(
 						path.join(__dirname, "fixtures"),
-						"m2/b",
+						`m2${obps}b`,
 						function (err, result) {
 							if (err) return done(err);
 							expect(result).toEqual("yep");
@@ -51,7 +52,7 @@ describe("unsafe-cache", () => {
 			cachedResolve(
 				context,
 				path.join(__dirname, "fixtures"),
-				"m2/b",
+				`m2${obps}b`,
 				function (err, result) {
 					if (err) return done(err);
 					expect(Object.keys(cache)).toHaveLength(1);
@@ -63,7 +64,7 @@ describe("unsafe-cache", () => {
 					cachedResolve(
 						otherContext,
 						path.join(__dirname, "fixtures"),
-						"m2/b",
+						`m2${obps}b`,
 						function (err, result) {
 							if (err) return done(err);
 							expect(result).not.toEqual("yep");
@@ -76,7 +77,7 @@ describe("unsafe-cache", () => {
 		it("should not return from cache if query does not match", done => {
 			cachedResolve(
 				path.join(__dirname, "fixtures"),
-				"m2/b?query",
+				`m2${obps}b?query`,
 				function (err, result) {
 					if (err) return done(err);
 					expect(Object.keys(cache)).toHaveLength(1);
@@ -87,7 +88,7 @@ describe("unsafe-cache", () => {
 					});
 					cachedResolve(
 						path.join(__dirname, "fixtures"),
-						"m2/b?query2",
+						`m2${obps}b?query2`,
 						function (err, result) {
 							if (err) return done(err);
 							expect(result).not.toEqual("yep");
@@ -111,7 +112,7 @@ describe("unsafe-cache", () => {
 			cachedResolve(
 				context,
 				path.join(__dirname, "fixtures"),
-				"m2/b",
+				`m2${obps}b`,
 				function (err, result) {
 					if (err) return done(err);
 					expect(Object.keys(cache)).toHaveLength(1);
@@ -123,7 +124,7 @@ describe("unsafe-cache", () => {
 					cachedResolve(
 						context,
 						path.join(__dirname, "fixtures"),
-						"m2/b",
+						`m2${obps}b`,
 						function (err, result) {
 							if (err) return done(err);
 							expect(result).toEqual("yep");
@@ -137,7 +138,7 @@ describe("unsafe-cache", () => {
 			cachedResolve(
 				context,
 				path.join(__dirname, "fixtures"),
-				"m2/b",
+				`m2${obps}b`,
 				function (err, result) {
 					if (err) return done(err);
 					expect(Object.keys(cache)).toHaveLength(1);
@@ -149,7 +150,7 @@ describe("unsafe-cache", () => {
 					cachedResolve(
 						otherContext,
 						path.join(__dirname, "fixtures"),
-						"m2/b",
+						`m2${obps}b`,
 						function (err, result) {
 							if (err) return done(err);
 							expect(result).toEqual("yep");

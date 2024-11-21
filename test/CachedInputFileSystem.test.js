@@ -1,6 +1,7 @@
 const { CachedInputFileSystem } = require("../");
 const path = require("path");
 const url = require("url");
+const { obps, absoluteOsBasedPath } = require("./util/path-separator");
 
 describe("CachedInputFileSystem OperationMergerBackend ('stat' and 'statSync')", () => {
 	let fs;
@@ -423,28 +424,35 @@ describe("CachedInputFileSystem CacheBackend", () => {
 	});
 
 	it("should purge readdir correctly", function (done) {
-		fs.readdir("/test/path", (err, r) => {
+		fs.readdir(`${absoluteOsBasedPath}test${obps}path`, (err, r) => {
 			expect(r[0]).toEqual("0");
-			fs.purge(["/test/path/sub/path"]);
-			fs.readdir("/test/path", (err, r) => {
+			fs.purge([`${absoluteOsBasedPath}test${obps}path${obps}sub${obps}path`]);
+			fs.readdir(`${absoluteOsBasedPath}test${obps}path`, (err, r) => {
 				expect(r[0]).toEqual("0");
-				fs.purge(["/test/path/sub"]);
-				fs.readdir("/test/path", (err, r) => {
+				fs.purge([`${absoluteOsBasedPath}test${obps}path${obps}sub`]);
+				fs.readdir(`${absoluteOsBasedPath}test${obps}path`, (err, r) => {
 					expect(r[0]).toEqual("1");
-					fs.purge(["/test/path"]);
-					fs.readdir("/test/path", (err, r) => {
+					fs.purge([`${absoluteOsBasedPath}test${obps}path`]);
+					fs.readdir(`${absoluteOsBasedPath}test${obps}path`, (err, r) => {
 						expect(r[0]).toEqual("2");
-						fs.purge([url.pathToFileURL("/test/path")]);
-						fs.readdir("/test/path", (err, r) => {
+						fs.purge([
+							url.pathToFileURL(`${absoluteOsBasedPath}test${obps}path`)
+						]);
+						fs.readdir(`${absoluteOsBasedPath}test${obps}path`, (err, r) => {
 							expect(r[0]).toEqual("2");
-							fs.purge(Buffer.from("/test/path"));
-							fs.readdir("/test/path", (err, r) => {
+							fs.purge(Buffer.from(`${absoluteOsBasedPath}test${obps}path`));
+							fs.readdir(`${absoluteOsBasedPath}test${obps}path`, (err, r) => {
 								expect(r[0]).toEqual("3");
-								fs.purge([Buffer.from("/test/path")]);
-								fs.readdir("/test/path", (err, r) => {
-									expect(r[0]).toEqual("4");
-									done();
-								});
+								fs.purge([
+									Buffer.from(`${absoluteOsBasedPath}test${obps}path`)
+								]);
+								fs.readdir(
+									`${absoluteOsBasedPath}test${obps}path`,
+									(err, r) => {
+										expect(r[0]).toEqual("4");
+										done();
+									}
+								);
 							});
 						});
 					});
@@ -475,7 +483,7 @@ describe("CachedInputFileSystem CacheBackend and Node.JS filesystem", () => {
 		fs = new CachedInputFileSystem(require("fs"), 1);
 	});
 
-	const file = path.resolve(__dirname, "./fixtures/abc.txt");
+	const file = path.resolve(__dirname, `.${obps}fixtures${obps}abc.txt`);
 
 	it("should work with string async", function (done) {
 		fs.readFile(file, (err, r) => {
@@ -533,7 +541,7 @@ describe("CachedInputFileSystem OperationMergerBackend and Node.JS filesystem", 
 		fs = new CachedInputFileSystem(require("fs"), 0);
 	});
 
-	const file = path.resolve(__dirname, "./fixtures/abc.txt");
+	const file = path.resolve(__dirname, `.${obps}fixtures${obps}abc.txt`);
 
 	it("should work with string async", function (done) {
 		fs.readFile(file, (err, r) => {
