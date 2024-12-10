@@ -8,7 +8,8 @@ describe("fallback", function () {
 		const fileSystem = Volume.fromJSON(
 			{
 				"/a/index": "",
-				"/a/dir/index": "",
+			  "/a/dir/index": "",
+			  "/a/second/index": "",
 				"/recursive/index": "",
 				"/recursive/dir/index": "",
 				"/recursive/dir/file": "",
@@ -94,6 +95,11 @@ describe("fallback", function () {
 		expect(resolver.resolveSync({}, "/", "multiAlias/anotherDir")).toBe(
 			"/e/anotherDir/index"
 		);
+		// The multiAlias works as expected when the matching alias is the last one
+		expect(resolver.resolveSync({}, "/", "multiAlias/second")).toBe(
+			"/a/second/index"
+		);
+
 	});
 	it("should log the correct info", done => {
 		const log = [];
