@@ -19,6 +19,8 @@ declare interface AliasOption {
 	alias: Alias;
 	name: string;
 	onlyModule?: boolean;
+	nameWithSlash?: string;
+	absolutePath?: string;
 }
 type AliasOptionNewRequest = string | false | string[];
 declare interface AliasOptions {
