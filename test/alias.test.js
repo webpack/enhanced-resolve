@@ -40,6 +40,9 @@ describe("alias", () => {
 				// alias configuration should work
 				"#": "/c/dir",
 				"@": "/c/dir",
+				"@*": "/*",
+				"@e*": "/e/*",
+				"@e*file": "/e*file",
 				ignored: false
 			},
 			modules: "/",
@@ -72,6 +75,16 @@ describe("alias", () => {
 	it('should resolve "@" alias', () => {
 		expect(resolver.resolveSync({}, "/", "@")).toEqual("/c/dir/index");
 		expect(resolver.resolveSync({}, "/", "@/index")).toEqual("/c/dir/index");
+	});
+
+	it("should resolve wildcard alias", () => {
+		expect(resolver.resolveSync({}, "/", "@a")).toEqual("/a/index");
+		expect(resolver.resolveSync({}, "/", "@a/dir")).toEqual("/a/dir/index");
+		expect(resolver.resolveSync({}, "/", "@e/dir/file")).toEqual("/e/dir/file");
+		expect(resolver.resolveSync({}, "/", "@e/anotherDir")).toEqual(
+			"/e/anotherDir/index"
+		);
+		expect(resolver.resolveSync({}, "/", "@e/dir/file")).toEqual("/e/dir/file");
 	});
 	it("should resolve an ignore module", () => {
 		expect(resolver.resolveSync({}, "/", "ignored")).toEqual(false);
