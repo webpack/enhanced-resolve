@@ -173,7 +173,7 @@ MIT (http://www.opensource.org/licenses/mit-license.php)
 
 [npm]: https://img.shields.io/npm/v/enhanced-resolve.svg
 [npm-url]: https://www.npmjs.com/package/enhanced-resolve
-[build-status]: https://github.com/webpack/enhanced-resolve/actions/workflows/test.yml/badge.svg?branch=master
+[build-status]: https://github.com/webpack/enhanced-resolve/actions/workflows/test.yml/badge.svg
 [build-status-url]: https://github.com/webpack/enhanced-resolve/actions
 [codecov-badge]: https://codecov.io/gh/webpack/enhanced-resolve/branch/main/graph/badge.svg?token=6B6NxtsZc3
 [codecov-url]: https://codecov.io/gh/webpack/enhanced-resolve
