@@ -53,6 +53,10 @@ describe("parse identifier. edge cases", () => {
 		{
 			input: "path/#/not/a/hash?not-a-query",
 			expected: ["path/", "", "#/not/a/hash?not-a-query"]
+		},
+		{
+			input: "#\0?\0#ab\0\0c?\0#\0\0query#?#\0fragment",
+			expected: ["#?#ab\0c", "?#\0query", "#?#\0fragment"]
 		}
 	];
 
