@@ -1123,6 +1123,8 @@ declare namespace exports {
 		PnpApi,
 		Resolver,
 		FileSystem,
+		SyncFileSystem,
+		BaseFileSystem,
 		ResolveContext,
 		ResolveRequest,
 		Plugin,
