@@ -72,7 +72,7 @@ describe("missing", function () {
 	testCases.forEach(function (testCase) {
 		it(
 			"should tell about missing file when trying to resolve " + testCase[1],
-			done => {
+			(done) => {
 				const callback = function (err, filename) {
 					expect(Array.from(missingDependencies).sort()).toEqual(
 						expect.arrayContaining(testCase[2].sort())
@@ -86,7 +86,7 @@ describe("missing", function () {
 		it(
 			"should report error details exactly once when trying to resolve " +
 				testCase[1],
-			done => {
+			(done) => {
 				const callback = function (err, filename) {
 					if (err) {
 						const details = err.details.split("\n");

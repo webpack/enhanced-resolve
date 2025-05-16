@@ -137,13 +137,13 @@ describe("alias", () => {
 			"/e/anotherDir/index"
 		);
 	});
-	it("should log the correct info", done => {
+	it("should log the correct info", (done) => {
 		const log = [];
 		resolver.resolve(
 			{},
 			"/",
 			"aliasA/dir",
-			{ log: v => log.push(v) },
+			{ log: (v) => log.push(v) },
 			(err, result) => {
 				if (err) return done(err);
 
@@ -155,7 +155,7 @@ describe("alias", () => {
 		);
 	});
 
-	it("should work with absolute paths", done => {
+	it("should work with absolute paths", (done) => {
 		const resolver = ResolverFactory.createResolver({
 			alias: {
 				[path.resolve(__dirname, "fixtures", "foo")]: false

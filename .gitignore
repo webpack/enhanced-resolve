@@ -3,7 +3,10 @@
 /.nyc_output
 *.log
 .eslintcache
+
+# IDE
 .idea
 .vscode
+
 .DS_Store
 package-lock.json

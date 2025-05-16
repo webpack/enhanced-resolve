@@ -74,7 +74,7 @@ describe("pnp", () => {
 			]
 		});
 	});
-	it("should resolve by going through the pnp api", done => {
+	it("should resolve by going through the pnp api", (done) => {
 		pnpApi.mocks.set("pkg", path.resolve(fixture, "pkg"));
 		resolver.resolve({}, __dirname, "pkg/dir/index.js", {}, (err, result) => {
 			if (err) return done(err);
@@ -82,14 +82,14 @@ describe("pnp", () => {
 			done();
 		});
 	});
-	it("should not resolve a not fully specified request when fullySpecified is set", done => {
+	it("should not resolve a not fully specified request when fullySpecified is set", (done) => {
 		pnpApi.mocks.set("pkg", path.resolve(fixture, "pkg"));
 		resolver.resolve({}, __dirname, "pkg/dir/index", {}, (err, result) => {
 			expect(err).toBeInstanceOf(Error);
 			done();
 		});
 	});
-	it("should track dependency to the pnp api", done => {
+	it("should track dependency to the pnp api", (done) => {
 		pnpApi.mocks.set("pkg", path.resolve(fixture, "pkg"));
 		pnpApi.mocks.set("pnpapi", path.resolve(fixture, ".pnp.js"));
 		const fileDependencies = new Set();
@@ -108,7 +108,7 @@ describe("pnp", () => {
 			}
 		);
 	});
-	it("should resolve module names with package.json", done => {
+	it("should resolve module names with package.json", (done) => {
 		pnpApi.mocks.set("pkg", path.resolve(fixture, "pkg"));
 		resolver.resolve({}, __dirname, "pkg", {}, (err, result) => {
 			if (err) return done(err);
@@ -116,7 +116,7 @@ describe("pnp", () => {
 			done();
 		});
 	});
-	it("should resolve namespaced module names", done => {
+	it("should resolve namespaced module names", (done) => {
 		pnpApi.mocks.set("@user/pkg", path.resolve(fixture, "pkg"));
 		resolver.resolve({}, __dirname, "@user/pkg", {}, (err, result) => {
 			if (err) return done(err);
@@ -127,7 +127,7 @@ describe("pnp", () => {
 	it(
 		"should not resolve symlinks",
 		isAdmin
-			? done => {
+			? (done) => {
 					pnpApi.mocks.set("pkg", path.resolve(fixture, "pkg"));
 					resolverFuzzy.resolve(
 						{},
@@ -145,7 +145,7 @@ describe("pnp", () => {
 			  }
 			: undefined
 	);
-	it("should properly deal with other extensions", done => {
+	it("should properly deal with other extensions", (done) => {
 		pnpApi.mocks.set("@user/pkg", path.resolve(fixture, "pkg"));
 		resolverFuzzy.resolve(
 			{},
@@ -161,7 +161,7 @@ describe("pnp", () => {
 			}
 		);
 	});
-	it("should properly deal package.json alias", done => {
+	it("should properly deal package.json alias", (done) => {
 		pnpApi.mocks.set("pkg", path.resolve(fixture, "pkg"));
 		resolverFuzzy.resolve(
 			{},
@@ -177,7 +177,7 @@ describe("pnp", () => {
 			}
 		);
 	});
-	it("should prefer pnp resolves over normal modules", done => {
+	it("should prefer pnp resolves over normal modules", (done) => {
 		pnpApi.mocks.set("m1", path.resolve(fixture, "../node_modules/m2"));
 		resolver.resolve(
 			{},
@@ -193,7 +193,7 @@ describe("pnp", () => {
 			}
 		);
 	});
-	it("should prefer alternative module directories over pnp", done => {
+	it("should prefer alternative module directories over pnp", (done) => {
 		pnpApi.mocks.set("m1", path.resolve(fixture, "../node_modules/m2"));
 		resolver.resolve(
 			{},
@@ -212,7 +212,7 @@ describe("pnp", () => {
 			}
 		);
 	});
-	it("should prefer alias over pnp resolves", done => {
+	it("should prefer alias over pnp resolves", (done) => {
 		pnpApi.mocks.set("alias", path.resolve(fixture, "pkg/dir"));
 		resolver.resolve(
 			{},
@@ -226,7 +226,7 @@ describe("pnp", () => {
 			}
 		);
 	});
-	it("should prefer pnp over modules after node_modules", done => {
+	it("should prefer pnp over modules after node_modules", (done) => {
 		pnpApi.mocks.set("m2", path.resolve(fixture, "pkg"));
 		resolver.resolve(
 			{},
@@ -240,7 +240,7 @@ describe("pnp", () => {
 			}
 		);
 	});
-	it("should fallback to alternatives when pnp resolving fails", done => {
+	it("should fallback to alternatives when pnp resolving fails", (done) => {
 		resolver.resolve(
 			{},
 			path.resolve(__dirname, "fixtures"),
@@ -253,7 +253,7 @@ describe("pnp", () => {
 			}
 		);
 	});
-	it("should fallback to alternatives when pnp doesn't manage the issuer", done => {
+	it("should fallback to alternatives when pnp doesn't manage the issuer", (done) => {
 		pnpApi.ignoredIssuers.add(path.resolve(__dirname, "fixtures") + "/");
 		// Add the wrong path on purpose to make sure the issuer is ignored
 		pnpApi.mocks.set("m2", path.resolve(fixture, "pkg"));
@@ -271,7 +271,7 @@ describe("pnp", () => {
 			}
 		);
 	});
-	it("should handle the exports field when using PnP", done => {
+	it("should handle the exports field when using PnP", (done) => {
 		pnpApi.mocks.set("m1", path.resolve(fixture, "pkg3"));
 		resolver.resolve(
 			{},
@@ -285,7 +285,7 @@ describe("pnp", () => {
 			}
 		);
 	});
-	it("should handle the exports field when using PnP (with sub path)", done => {
+	it("should handle the exports field when using PnP (with sub path)", (done) => {
 		pnpApi.mocks.set("@user/m1", path.resolve(fixture, "pkg3"));
 		resolver.resolve(
 			{},

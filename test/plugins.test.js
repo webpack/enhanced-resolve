@@ -4,7 +4,7 @@ const path = require("path");
 const { ResolverFactory, CloneBasenamePlugin } = require("../");
 
 describe("plugins", function () {
-	it("should resolve with the CloneBasenamePlugin", done => {
+	it("should resolve with the CloneBasenamePlugin", (done) => {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem: require("fs"),
 			plugins: [
@@ -34,7 +34,7 @@ describe("plugins", function () {
 		);
 	});
 
-	it("should ignore 'false'/'null'/'undefined' plugins", done => {
+	it("should ignore 'false'/'null'/'undefined' plugins", (done) => {
 		const FailedPlugin = class {
 			apply() {
 				throw new Error("FailedPlugin");

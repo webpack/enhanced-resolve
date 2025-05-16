@@ -3,7 +3,6 @@ module.exports = {
 	useTabs: true,
 	tabWidth: 2,
 	trailingComma: "none",
-	arrowParens: "avoid",
 	overrides: [
 		{
 			files: "*.json",
@@ -13,7 +12,7 @@ module.exports = {
 			}
 		},
 		{
-			files: "*.ts",
+			files: "*.{cts,mts,ts}",
 			options: {
 				parser: "typescript"
 			}

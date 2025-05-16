@@ -1,3 +1,3 @@
 module.exports = {
-    moduleFileExtensions: ["js", "mjs", "cjs", "ts"]
+	moduleFileExtensions: ["js", "mjs", "cjs", "ts"]
 };

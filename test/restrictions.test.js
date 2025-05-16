@@ -7,7 +7,7 @@ const fixture = path.resolve(__dirname, "fixtures", "restrictions");
 const nodeFileSystem = new CachedInputFileSystem(fs, 4000);
 
 describe("restrictions", () => {
-	it("should respect RegExp restriction", done => {
+	it("should respect RegExp restriction", (done) => {
 		const resolver = ResolverFactory.createResolver({
 			extensions: [".js"],
 			fileSystem: nodeFileSystem,
@@ -21,7 +21,7 @@ describe("restrictions", () => {
 		});
 	});
 
-	it("should try to find alternative #1", done => {
+	it("should try to find alternative #1", (done) => {
 		const resolver = ResolverFactory.createResolver({
 			extensions: [".js", ".css"],
 			fileSystem: nodeFileSystem,
@@ -39,7 +39,7 @@ describe("restrictions", () => {
 		});
 	});
 
-	it("should respect string restriction", done => {
+	it("should respect string restriction", (done) => {
 		const resolver = ResolverFactory.createResolver({
 			extensions: [".js"],
 			fileSystem: nodeFileSystem,
@@ -53,7 +53,7 @@ describe("restrictions", () => {
 		});
 	});
 
-	it("should try to find alternative #2", done => {
+	it("should try to find alternative #2", (done) => {
 		const resolver = ResolverFactory.createResolver({
 			extensions: [".js"],
 			fileSystem: nodeFileSystem,
@@ -71,7 +71,7 @@ describe("restrictions", () => {
 		});
 	});
 
-	it("should try to find alternative #3", done => {
+	it("should try to find alternative #3", (done) => {
 		const resolver = ResolverFactory.createResolver({
 			extensions: [".js"],
 			fileSystem: nodeFileSystem,
@@ -93,7 +93,7 @@ describe("restrictions", () => {
 					path.resolve(fixture, "node_modules/pck2/index.css")
 				);
 				expect(
-					log.map(line =>
+					log.map((line) =>
 						line
 							.replace(path.resolve(__dirname, ".."), "...")
 							.replace(path.resolve(__dirname, ".."), "...")

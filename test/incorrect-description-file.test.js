@@ -18,7 +18,7 @@ describe("incorrect description file", () => {
 		fileSystem: nodeFileSystem
 	});
 
-	it("should not resolve main in incorrect description file #1", done => {
+	it("should not resolve main in incorrect description file #1", (done) => {
 		let called = false;
 		const ctx = {
 			fileDependencies: new Set(),
@@ -37,7 +37,7 @@ describe("incorrect description file", () => {
 		});
 	});
 
-	it("should not resolve main in incorrect description file #2", done => {
+	it("should not resolve main in incorrect description file #2", (done) => {
 		let called = false;
 		const ctx = {
 			fileDependencies: new Set(),
@@ -55,7 +55,7 @@ describe("incorrect description file", () => {
 		});
 	});
 
-	it("should not resolve main in incorrect description file #3", done => {
+	it("should not resolve main in incorrect description file #3", (done) => {
 		resolver.resolve({}, p("pack2"), ".", {}, function (err, result) {
 			if (!err) return done(new Error("No error"));
 			expect(err).toBeInstanceOf(Error);

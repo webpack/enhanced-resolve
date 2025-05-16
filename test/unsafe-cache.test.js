@@ -23,7 +23,7 @@ describe("unsafe-cache", () => {
 				unsafeCache: cache
 			});
 		});
-		it("should cache request", done => {
+		it("should cache request", (done) => {
 			cachedResolve(
 				path.join(__dirname, "fixtures"),
 				"m2/b",
@@ -47,7 +47,7 @@ describe("unsafe-cache", () => {
 				}
 			);
 		});
-		it("should not return from cache if context does not match", done => {
+		it("should not return from cache if context does not match", (done) => {
 			cachedResolve(
 				context,
 				path.join(__dirname, "fixtures"),
@@ -73,7 +73,7 @@ describe("unsafe-cache", () => {
 				}
 			);
 		});
-		it("should not return from cache if query does not match", done => {
+		it("should not return from cache if query does not match", (done) => {
 			cachedResolve(
 				path.join(__dirname, "fixtures"),
 				"m2/b?query",
@@ -107,7 +107,7 @@ describe("unsafe-cache", () => {
 				cacheWithContext: false
 			});
 		});
-		it("should cache request", done => {
+		it("should cache request", (done) => {
 			cachedResolve(
 				context,
 				path.join(__dirname, "fixtures"),
@@ -133,7 +133,7 @@ describe("unsafe-cache", () => {
 				}
 			);
 		});
-		it("should return from cache even if context does not match", done => {
+		it("should return from cache even if context does not match", (done) => {
 			cachedResolve(
 				context,
 				path.join(__dirname, "fixtures"),

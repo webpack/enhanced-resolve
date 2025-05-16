@@ -1133,7 +1133,7 @@ describe("Process imports field", function exportsField() {
 		//#endregion
 	];
 
-	testCases.forEach(testCase => {
+	testCases.forEach((testCase) => {
 		it(testCase.name, () => {
 			if (testCase.expect instanceof Error) {
 				expect(() =>
@@ -1164,7 +1164,7 @@ describe("ImportsFieldPlugin", () => {
 		conditionNames: ["webpack"]
 	});
 
-	it("should resolve using imports field instead of self-referencing", done => {
+	it("should resolve using imports field instead of self-referencing", (done) => {
 		resolver.resolve({}, fixture, "#imports-field", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
@@ -1173,7 +1173,7 @@ describe("ImportsFieldPlugin", () => {
 		});
 	});
 
-	it("should resolve using imports field instead of self-referencing for a subpath", done => {
+	it("should resolve using imports field instead of self-referencing for a subpath", (done) => {
 		resolver.resolve(
 			{},
 			path.resolve(fixture, "dir"),
@@ -1188,7 +1188,7 @@ describe("ImportsFieldPlugin", () => {
 		);
 	});
 
-	it("should disallow resolve out of package scope", done => {
+	it("should disallow resolve out of package scope", (done) => {
 		resolver.resolve({}, fixture, "#b", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
@@ -1199,7 +1199,7 @@ describe("ImportsFieldPlugin", () => {
 		});
 	});
 
-	it("field name #1", done => {
+	it("field name #1", (done) => {
 		const resolver = ResolverFactory.createResolver({
 			extensions: [".js"],
 			fileSystem: nodeFileSystem,
@@ -1216,7 +1216,7 @@ describe("ImportsFieldPlugin", () => {
 		});
 	});
 
-	it("field name #2", done => {
+	it("field name #2", (done) => {
 		const resolver = ResolverFactory.createResolver({
 			extensions: [".js"],
 			fileSystem: nodeFileSystem,
@@ -1233,7 +1233,7 @@ describe("ImportsFieldPlugin", () => {
 		});
 	});
 
-	it("should resolve package #1", done => {
+	it("should resolve package #1", (done) => {
 		resolver.resolve({}, fixture, "#a/dist/main.js", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
@@ -1244,7 +1244,7 @@ describe("ImportsFieldPlugin", () => {
 		});
 	});
 
-	it("should resolve package #2", done => {
+	it("should resolve package #2", (done) => {
 		resolver.resolve({}, fixture, "#a", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
@@ -1253,7 +1253,7 @@ describe("ImportsFieldPlugin", () => {
 		});
 	});
 
-	it("should resolve package #3", done => {
+	it("should resolve package #3", (done) => {
 		resolver.resolve({}, fixture, "#ccc/index.js", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
@@ -1262,7 +1262,7 @@ describe("ImportsFieldPlugin", () => {
 		});
 	});
 
-	it("should resolve package #4", done => {
+	it("should resolve package #4", (done) => {
 		resolver.resolve({}, fixture, "#c", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
@@ -1271,7 +1271,7 @@ describe("ImportsFieldPlugin", () => {
 		});
 	});
 
-	it("should resolve absolute path as an imports field target", done => {
+	it("should resolve absolute path as an imports field target", (done) => {
 		const tmpdirPrefix = path.join(fixture, "node_modules/absolute-tmp-");
 		fs.mkdtemp(tmpdirPrefix, (err, dir) => {
 			if (err) done(err);
@@ -1293,13 +1293,13 @@ describe("ImportsFieldPlugin", () => {
 		});
 	});
 
-	it("should log the correct info", done => {
+	it("should log the correct info", (done) => {
 		const log = [];
 		resolver.resolve(
 			{},
 			fixture,
 			"#a/dist/index.js",
-			{ log: v => log.push(v) },
+			{ log: (v) => log.push(v) },
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
@@ -1307,14 +1307,14 @@ describe("ImportsFieldPlugin", () => {
 					path.join(fixture, "node_modules/a/lib/index.js")
 				);
 				expect(
-					log.map(line => line.replace(fixture, "...").replace(/\\/g, "/"))
+					log.map((line) => line.replace(fixture, "...").replace(/\\/g, "/"))
 				).toMatchSnapshot();
 				done();
 			}
 		);
 	});
 
-	it("should resolve with wildcard pattern", done => {
+	it("should resolve with wildcard pattern", (done) => {
 		const fixture = path.resolve(
 			__dirname,
 			"./fixtures/imports-exports-wildcard/node_modules/m/"
@@ -1327,7 +1327,7 @@ describe("ImportsFieldPlugin", () => {
 		});
 	});
 
-	it("should work and throw an error on invalid imports #1", done => {
+	it("should work and throw an error on invalid imports #1", (done) => {
 		resolver.resolve({}, fixture, "#/dep", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
@@ -1336,7 +1336,7 @@ describe("ImportsFieldPlugin", () => {
 		});
 	});
 
-	it("should work and throw an error on invalid imports #2", done => {
+	it("should work and throw an error on invalid imports #2", (done) => {
 		resolver.resolve({}, fixture, "#dep/", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
@@ -1347,7 +1347,7 @@ describe("ImportsFieldPlugin", () => {
 		});
 	});
 
-	it("should work with invalid imports #1", done => {
+	it("should work with invalid imports #1", (done) => {
 		resolver.resolve({}, fixture1, "#dep", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
@@ -1356,7 +1356,7 @@ describe("ImportsFieldPlugin", () => {
 		});
 	});
 
-	it("should work with invalid imports #2", done => {
+	it("should work with invalid imports #2", (done) => {
 		resolver.resolve({}, fixture1, "#dep/foo/a.js", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
@@ -1365,7 +1365,7 @@ describe("ImportsFieldPlugin", () => {
 		});
 	});
 
-	it("should work with invalid imports #3", done => {
+	it("should work with invalid imports #3", (done) => {
 		resolver.resolve({}, fixture1, "#dep/bar", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
@@ -1374,7 +1374,7 @@ describe("ImportsFieldPlugin", () => {
 		});
 	});
 
-	it("should work with invalid imports #3", done => {
+	it("should work with invalid imports #3", (done) => {
 		resolver.resolve({}, fixture1, "#dep/baz", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
@@ -1383,7 +1383,7 @@ describe("ImportsFieldPlugin", () => {
 		});
 	});
 
-	it("should work with invalid imports #4", done => {
+	it("should work with invalid imports #4", (done) => {
 		resolver.resolve({}, fixture1, "#dep/baz-multi", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
@@ -1392,7 +1392,7 @@ describe("ImportsFieldPlugin", () => {
 		});
 	});
 
-	it("should work with invalid imports #5", done => {
+	it("should work with invalid imports #5", (done) => {
 		resolver.resolve({}, fixture1, "#dep/baz-multi", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
@@ -1401,7 +1401,7 @@ describe("ImportsFieldPlugin", () => {
 		});
 	});
 
-	it("should work with invalid imports #6", done => {
+	it("should work with invalid imports #6", (done) => {
 		resolver.resolve({}, fixture1, "#dep/pattern/a.js", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
@@ -1410,7 +1410,7 @@ describe("ImportsFieldPlugin", () => {
 		});
 	});
 
-	it("should work with invalid imports #7", done => {
+	it("should work with invalid imports #7", (done) => {
 		resolver.resolve({}, fixture1, "#dep/array", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
@@ -1419,7 +1419,7 @@ describe("ImportsFieldPlugin", () => {
 		});
 	});
 
-	it("should work with invalid imports #8", done => {
+	it("should work with invalid imports #8", (done) => {
 		resolver.resolve({}, fixture1, "#dep/array2", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
@@ -1428,7 +1428,7 @@ describe("ImportsFieldPlugin", () => {
 		});
 	});
 
-	it("should work with invalid imports #9", done => {
+	it("should work with invalid imports #9", (done) => {
 		resolver.resolve({}, fixture1, "#dep/array3", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
@@ -1437,7 +1437,7 @@ describe("ImportsFieldPlugin", () => {
 		});
 	});
 
-	it("should work with invalid imports #10", done => {
+	it("should work with invalid imports #10", (done) => {
 		resolver.resolve({}, fixture1, "#dep/empty", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
@@ -1446,7 +1446,7 @@ describe("ImportsFieldPlugin", () => {
 		});
 	});
 
-	it("should work with invalid imports #10", done => {
+	it("should work with invalid imports #10", (done) => {
 		resolver.resolve({}, fixture1, "#dep/with-bad", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
@@ -1455,7 +1455,7 @@ describe("ImportsFieldPlugin", () => {
 		});
 	});
 
-	it("should work with invalid imports #10", done => {
+	it("should work with invalid imports #10", (done) => {
 		resolver.resolve({}, fixture1, "#dep/with-bad2", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
@@ -1464,7 +1464,7 @@ describe("ImportsFieldPlugin", () => {
 		});
 	});
 
-	it("should work with invalid imports #11", done => {
+	it("should work with invalid imports #11", (done) => {
 		resolver.resolve({}, fixture1, "#timezones/pdt.mjs", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
@@ -1473,7 +1473,7 @@ describe("ImportsFieldPlugin", () => {
 		});
 	});
 
-	it("should work with invalid imports #12", done => {
+	it("should work with invalid imports #12", (done) => {
 		resolver.resolve({}, fixture1, "#dep/multi1", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
@@ -1484,7 +1484,7 @@ describe("ImportsFieldPlugin", () => {
 		});
 	});
 
-	it("should work with invalid imports #13", done => {
+	it("should work with invalid imports #13", (done) => {
 		resolver.resolve({}, fixture1, "#dep/multi2", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
@@ -1495,7 +1495,7 @@ describe("ImportsFieldPlugin", () => {
 		});
 	});
 
-	it("should work with invalid imports #13", done => {
+	it("should work with invalid imports #13", (done) => {
 		resolver.resolve({}, fixture1, "#dep/multi1", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
@@ -1506,7 +1506,7 @@ describe("ImportsFieldPlugin", () => {
 		});
 	});
 
-	it("should work with invalid imports #14", done => {
+	it("should work with invalid imports #14", (done) => {
 		resolver.resolve({}, fixture1, "#dep/multi2", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
@@ -1517,7 +1517,7 @@ describe("ImportsFieldPlugin", () => {
 		});
 	});
 
-	it("should work and resolve with array imports", done => {
+	it("should work and resolve with array imports", (done) => {
 		resolver.resolve({}, fixture1, "#dep/multi", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
