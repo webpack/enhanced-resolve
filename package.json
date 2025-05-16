@@ -44,7 +44,7 @@
   "scripts": {
     "prepare": "husky install",
     "lint": "yarn lint:code && yarn lint:types && yarn lint:types-test && yarn lint:special && yarn lint:spellcheck",
-    "lint:code": "node eslint --cache .",
+    "lint:code": "eslint --cache .",
     "lint:special": "node node_modules/tooling/lockfile-lint && node node_modules/tooling/inherit-types && node node_modules/tooling/format-file-header && node node_modules/tooling/generate-types",
     "lint:types": "tsc",
     "lint:types-test": "tsc -p tsconfig.types.test.json",
