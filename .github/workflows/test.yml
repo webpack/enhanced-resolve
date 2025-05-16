@@ -56,5 +56,7 @@ jobs:
         if: matrix.node-version != '10.x'
       - name: Run tests with coverage
         run: npm run test:coverage -- --ci
-      - if: ${{ matrix.os != 'windows-latest' }}
-        uses: codecov/codecov-action@v5
+      - uses: codecov/codecov-action@v5
+        with:
+          flags: integration
+          token: ${{ secrets.CODECOV_TOKEN }}
