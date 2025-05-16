@@ -295,25 +295,25 @@ describe("resolve", () => {
 		});
 	});
 
-	it("should not crash when passing undefined as path", done => {
+	it("should not crash when passing undefined as path", (done) => {
 		// @ts-expect-error testing invalid arguments
-		resolve(fixtures, undefined, err => {
+		resolve(fixtures, undefined, (err) => {
 			expect(err).toBeInstanceOf(Error);
 			done();
 		});
 	});
 
-	it("should not crash when passing undefined as context", done => {
+	it("should not crash when passing undefined as context", (done) => {
 		// @ts-expect-error testing invalid arguments
-		resolve({}, undefined, "./test/resolve.js", err => {
+		resolve({}, undefined, "./test/resolve.js", (err) => {
 			expect(err).toBeInstanceOf(Error);
 			done();
 		});
 	});
 
-	it("should not crash when passing undefined everywhere", done => {
+	it("should not crash when passing undefined everywhere", (done) => {
 		// @ts-expect-error testing invalid arguments
-		resolve(undefined, undefined, undefined, undefined, err => {
+		resolve(undefined, undefined, undefined, undefined, (err) => {
 			expect(err).toBeInstanceOf(Error);
 			done();
 		});

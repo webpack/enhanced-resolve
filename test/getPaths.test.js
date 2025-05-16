@@ -14,7 +14,7 @@ const cases = [
 	["/", { paths: ["/"], segments: [""] }]
 ];
 
-cases.forEach(case_ => {
+cases.forEach((case_) => {
 	it(case_[0], () => {
 		const { paths, segments } = getPaths(case_[0]);
 		expect(paths).toEqual(case_[1].paths);

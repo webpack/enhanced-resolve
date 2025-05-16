@@ -6,7 +6,7 @@ const fs = require("fs");
 const doWrite = process.argv.includes("--write");
 
 const allFiles = new Set();
-const findFiles = p => {
+const findFiles = (p) => {
 	const s = fs.statSync(p);
 	if (s.isDirectory()) {
 		for (const name of fs.readdirSync(p)) {
@@ -45,7 +45,8 @@ const execToArray = (content, regexp) => {
 const schema = [
 	{
 		title: "license comment",
-		regexp: /\/\*\n\s*MIT License http:\/\/www\.opensource\.org\/licenses\/mit-license\.php\n\s*(?:(Authors? .+)\n)?\s*\*\/\n/g,
+		regexp:
+			/\/\*\n\s*MIT License http:\/\/www\.opensource\.org\/licenses\/mit-license\.php\n\s*(?:(Authors? .+)\n)?\s*\*\/\n/g,
 		updateMessage: "update the license comment",
 		update(content, author) {
 			return (
@@ -82,7 +83,8 @@ const schema = [
 	},
 	{
 		title: "imports",
-		regexp: /(const (\{\s+\w+(?::\s+\w+)?(,\s+\w+(?::\s+\w+)?)*\s+\}|\w+) = (\/\*\* @type \{TODO\} \*\/\s\()?require\("[^"]+"\)\)?(\.\w+)*;\n)+\n/g,
+		regexp:
+			/(const (\{\s+\w+(?::\s+\w+)?(,\s+\w+(?::\s+\w+)?)*\s+\}|\w+) = (\/\*\* @type \{TODO\} \*\/\s\()?require\("[^"]+"\)\)?(\.\w+)*;\n)+\n/g,
 		updateMessage: "sort imports alphabetically",
 		update(content) {
 			const items = execToArray(
@@ -90,14 +92,15 @@ const schema = [
 				/const (?:\{\s+\w+(?::\s+\w+)?(?:,\s+\w+(?::\s+\w+)?)*\s+\}|\w+) = (?:\/\*\* @type \{TODO\} \*\/\s\()?require\("([^"]+)"\)\)?((?:\.\w+)*);\n/g
 			);
 			items.sort(sortImport);
-			return items.map(item => item.content).join("") + "\n";
+			return items.map((item) => item.content).join("") + "\n";
 		},
 		optional: true,
 		repeat: true
 	},
 	{
 		title: "type imports",
-		regexp: /(\/\*\* (?:@template \w+ )*@typedef \{import\("[^"]+"\)(\.\w+)*(?:<(?:(?:\w\.)*\w+, )*(?:\w\.)*\w+>)?\} \w+(?:<(?:(?:\w\.)*\w+, )*(?:\w\.)*\w+>)? \*\/\n)+\n/g,
+		regexp:
+			/(\/\*\* (?:@template \w+ )*@typedef \{import\("[^"]+"\)(\.\w+)*(?:<(?:(?:\w\.)*\w+, )*(?:\w\.)*\w+>)?\} \w+(?:<(?:(?:\w\.)*\w+, )*(?:\w\.)*\w+>)? \*\/\n)+\n/g,
 		updateMessage: "sort type imports alphabetically",
 		update(content) {
 			const items = execToArray(
@@ -105,7 +108,7 @@ const schema = [
 				/\/\*\* (?:@template \w+ )*@typedef \{import\("([^"]+)"\)((?:\.\w+)*(?:<(?:(?:\w\.)*\w+, )*(?:\w\.)*\w+>)?)\} \w+(?:<(?:(?:\w\.)*\w+, )*(?:\w\.)*\w+>)? \*\/\n/g
 			);
 			items.sort(sortImport);
-			return items.map(item => item.content).join("") + "\n";
+			return items.map((item) => item.content).join("") + "\n";
 		},
 		optional: true,
 		repeat: true

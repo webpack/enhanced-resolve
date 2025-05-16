@@ -453,7 +453,7 @@ describe("CachedInputFileSystem CacheBackend", () => {
 		});
 	});
 
-	it("should not stack overflow when resolving in an async loop", done => {
+	it("should not stack overflow when resolving in an async loop", (done) => {
 		let i = 10000;
 		const next = () => {
 			fs.stat(__dirname, (err, result) => {

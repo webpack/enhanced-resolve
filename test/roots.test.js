@@ -26,7 +26,7 @@ describe("roots", () => {
 		plugins: [
 			{
 				apply(resolver) {
-					resolver.hooks.file.tap("Test", request => {
+					resolver.hooks.file.tap("Test", (request) => {
 						if (/test.fixtures.*test.fixtures/.test(request.path))
 							throw new Error("Simulate a fatal error in root path");
 					});
@@ -41,7 +41,7 @@ describe("roots", () => {
 		resolveToContext: true
 	});
 
-	it("should respect roots option", done => {
+	it("should respect roots option", (done) => {
 		resolver.resolve({}, fixtures, "/fixtures/b.js", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
@@ -50,7 +50,7 @@ describe("roots", () => {
 		});
 	});
 
-	it("should try another root option, if it exists", done => {
+	it("should try another root option, if it exists", (done) => {
 		resolver.resolve({}, fixtures, "/b.js", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
@@ -59,7 +59,7 @@ describe("roots", () => {
 		});
 	});
 
-	it("should respect extension", done => {
+	it("should respect extension", (done) => {
 		resolver.resolve({}, fixtures, "/fixtures/b", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
@@ -68,7 +68,7 @@ describe("roots", () => {
 		});
 	});
 
-	it("should resolve in directory", done => {
+	it("should resolve in directory", (done) => {
 		resolver.resolve(
 			{},
 			fixtures,
@@ -85,7 +85,7 @@ describe("roots", () => {
 		);
 	});
 
-	it("should respect aliases", done => {
+	it("should respect aliases", (done) => {
 		resolver.resolve({}, fixtures, "foo/b", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
@@ -94,7 +94,7 @@ describe("roots", () => {
 		});
 	});
 
-	it("should support roots options with resolveToContext", done => {
+	it("should support roots options with resolveToContext", (done) => {
 		contextResolver.resolve(
 			{},
 			fixtures,
@@ -109,7 +109,7 @@ describe("roots", () => {
 		);
 	});
 
-	it("should not work with relative path", done => {
+	it("should not work with relative path", (done) => {
 		resolver.resolve({}, fixtures, "fixtures/b.js", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
@@ -117,7 +117,7 @@ describe("roots", () => {
 		});
 	});
 
-	it("should resolve an absolute path (prefer absolute)", done => {
+	it("should resolve an absolute path (prefer absolute)", (done) => {
 		resolverPreferAbsolute.resolve(
 			{},
 			fixtures,

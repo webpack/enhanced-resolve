@@ -12,7 +12,7 @@ const resolver = ResolverFactory.createResolver({
 });
 
 describe("scoped-packages", () => {
-	it("main field should work", done => {
+	it("main field should work", (done) => {
 		resolver.resolve({}, fixture, "@scope/pack1", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
@@ -23,7 +23,7 @@ describe("scoped-packages", () => {
 		});
 	});
 
-	it("browser field should work", done => {
+	it("browser field should work", (done) => {
 		resolver.resolve({}, fixture, "@scope/pack2", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
@@ -34,7 +34,7 @@ describe("scoped-packages", () => {
 		});
 	});
 
-	it("folder request should work", done => {
+	it("folder request should work", (done) => {
 		resolver.resolve({}, fixture, "@scope/pack2/lib", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
