@@ -685,7 +685,7 @@ declare interface ResolveContext {
 	/**
 	 * set of hooks' calls. For instance, `resolve → parsedResolve → describedResolve`,
 	 */
-	stack?: Set<string>;
+	stack?: StackEntry;
 
 	/**
 	 * log function
@@ -981,6 +981,16 @@ declare abstract class Resolver {
 	isDirectory(path: string): boolean;
 	join(path: string, request: string): string;
 	normalize(path: string): string;
+}
+declare interface StackEntry {
+	name?: string;
+	path: string | false;
+	request: string;
+	query: string;
+	fragment: string;
+	directory: boolean;
+	module: boolean;
+	parent?: StackEntry;
 }
 declare interface Stat {
 	(
