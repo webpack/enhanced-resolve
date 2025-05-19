@@ -72,18 +72,21 @@ const context = {};
 const lookupStartPath = "/Users/webpack/some/root/dir";
 const request = "./path/to-look-up.js";
 const resolveContext = {};
-myResolver.resolve(context, lookupStartPath, request, resolveContext, (
-	err /*Error*/,
-	filepath /*string*/
-) => {
-	// Do something with the path
-});
+myResolver.resolve(
+	context,
+	lookupStartPath,
+	request,
+	resolveContext,
+	(err /*Error*/, filepath /*string*/) => {
+		// Do something with the path
+	}
+);
 ```
 
 #### Resolver Options
 
 | Field            | Default                     | Description                                                                                                                                               |
-|------------------|-----------------------------| --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ---------------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | alias            | []                          | A list of module alias configurations or an object which maps key to value                                                                                |
 | aliasFields      | []                          | A list of alias fields in description files                                                                                                               |
 | extensionAlias   | {}                          | An object which maps extension to extension aliases                                                                                                       |
@@ -94,7 +97,7 @@ myResolver.resolve(context, lookupStartPath, request, resolveContext, (
 | enforceExtension | false                       | Enforce that a extension from extensions must be used                                                                                                     |
 | exportsFields    | ["exports"]                 | A list of exports fields in description files                                                                                                             |
 | extensions       | [".js", ".json", ".node"]   | A list of extensions which should be tried for files                                                                                                      |
-| fallback         | []                          | Same as `alias`, but only used if default resolving fails                                                                                                |                                                                                                                                                                                         
+| fallback         | []                          | Same as `alias`, but only used if default resolving fails                                                                                                 |
 | fileSystem       |                             | The file system which should be used                                                                                                                      |
 | fullySpecified   | false                       | Request passed to resolve is already fully specified and extensions or main files are not resolved for it (they are still resolved for internal requests) |
 | mainFields       | ["main"]                    | A list of main fields in description files                                                                                                                |

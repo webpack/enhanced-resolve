@@ -1,7 +1,7 @@
 const { forEachBail } = require("../");
 
 describe("forEachBail", () => {
-	it("should iterate correctly", done => {
+	it("should iterate correctly", (done) => {
 		const log = [];
 		forEachBail(
 			[0, 1, 2, 3, 4, 5, 6],
@@ -21,7 +21,7 @@ describe("forEachBail", () => {
 			}
 		);
 	});
-	it("should handle empty array", done => {
+	it("should handle empty array", (done) => {
 		forEachBail(
 			[],
 			() => {
@@ -34,7 +34,7 @@ describe("forEachBail", () => {
 			}
 		);
 	});
-	it("should sync finish with undefined", done => {
+	it("should sync finish with undefined", (done) => {
 		forEachBail(
 			[2, 3, 4, 5, 6],
 			(value, callback) => {
@@ -47,7 +47,7 @@ describe("forEachBail", () => {
 			}
 		);
 	});
-	it("should async finish with undefined", done => {
+	it("should async finish with undefined", (done) => {
 		forEachBail(
 			[2, 3, 4, 5, 6],
 			(value, callback) => {

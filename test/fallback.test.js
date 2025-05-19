@@ -95,13 +95,13 @@ describe("fallback", function () {
 			"/e/anotherDir/index"
 		);
 	});
-	it("should log the correct info", done => {
+	it("should log the correct info", (done) => {
 		const log = [];
 		resolver.resolve(
 			{},
 			"/",
 			"aliasA/dir",
-			{ log: v => log.push(v) },
+			{ log: (v) => log.push(v) },
 			(err, result) => {
 				if (err) return done(err);
 				expect(result).toBe("/a/dir/index");

@@ -1,3 +1,6 @@
 package.json
 test/**/*.*
 !test/*.js
+
+# Generated files
+types.d.ts

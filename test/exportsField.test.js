@@ -2130,7 +2130,7 @@ describe("Process exports field", function exportsField() {
 		}
 	];
 
-	testCases.forEach(testCase => {
+	testCases.forEach((testCase) => {
 		it(testCase.name, () => {
 			if (testCase.expect instanceof Error) {
 				expect(() => {
@@ -2167,7 +2167,7 @@ describe("ExportsFieldPlugin", () => {
 		conditionNames: ["webpack"]
 	});
 
-	it("resolve root using exports field, not a main field", done => {
+	it("resolve root using exports field, not a main field", (done) => {
 		resolver.resolve({}, fixture, "exports-field", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
@@ -2178,7 +2178,7 @@ describe("ExportsFieldPlugin", () => {
 		});
 	});
 
-	it("resolve using exports field, not a browser field #1", done => {
+	it("resolve using exports field, not a browser field #1", (done) => {
 		const resolver = ResolverFactory.createResolver({
 			aliasFields: ["browser"],
 			conditionNames: ["custom"],
@@ -2202,7 +2202,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("resolve using exports field and a browser alias field #2", done => {
+	it("resolve using exports field and a browser alias field #2", (done) => {
 		const resolver = ResolverFactory.createResolver({
 			aliasFields: ["browser"],
 			conditionNames: ["node"],
@@ -2226,7 +2226,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("throw error if extension not provided", done => {
+	it("throw error if extension not provided", (done) => {
 		resolver.resolve(
 			{},
 			fixture2,
@@ -2241,7 +2241,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("throw error if extension not provided", done => {
+	it("throw error if extension not provided", (done) => {
 		resolver.resolve(
 			{},
 			fixture2,
@@ -2256,7 +2256,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("should resolve extension without fullySpecified", done => {
+	it("should resolve extension without fullySpecified", (done) => {
 		commonjsResolver.resolve(
 			{},
 			fixture2,
@@ -2273,7 +2273,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("resolver should respect condition names", done => {
+	it("resolver should respect condition names", (done) => {
 		resolver.resolve(
 			{},
 			fixture,
@@ -2290,7 +2290,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("resolver should respect fallback", done => {
+	it("resolver should respect fallback", (done) => {
 		resolver.resolve(
 			{},
 			fixture2,
@@ -2307,7 +2307,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("resolver should respect query parameters #1", done => {
+	it("resolver should respect query parameters #1", (done) => {
 		resolver.resolve(
 			{},
 			fixture2,
@@ -2327,7 +2327,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("resolver should respect query parameters #2. Direct matching", done => {
+	it("resolver should respect query parameters #2. Direct matching", (done) => {
 		resolver.resolve({}, fixture2, "exports-field?foo", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
@@ -2336,7 +2336,7 @@ describe("ExportsFieldPlugin", () => {
 		});
 	});
 
-	it("resolver should respect fragment parameters #1", done => {
+	it("resolver should respect fragment parameters #1", (done) => {
 		resolver.resolve(
 			{},
 			fixture2,
@@ -2356,7 +2356,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("resolver should respect fragment parameters #2. Direct matching", done => {
+	it("resolver should respect fragment parameters #2. Direct matching", (done) => {
 		resolver.resolve({}, fixture2, "exports-field#foo", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
@@ -2365,7 +2365,7 @@ describe("ExportsFieldPlugin", () => {
 		});
 	});
 
-	it("relative path should work, if relative path as request is used", done => {
+	it("relative path should work, if relative path as request is used", (done) => {
 		resolver.resolve(
 			{},
 			fixture,
@@ -2382,7 +2382,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("relative path should not work with exports field", done => {
+	it("relative path should not work with exports field", (done) => {
 		resolver.resolve(
 			{},
 			fixture,
@@ -2397,7 +2397,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("backtracking should not work for request", done => {
+	it("backtracking should not work for request", (done) => {
 		resolver.resolve(
 			{},
 			fixture,
@@ -2414,7 +2414,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("backtracking should not work for exports field target", done => {
+	it("backtracking should not work for exports field target", (done) => {
 		resolver.resolve(
 			{},
 			fixture,
@@ -2431,7 +2431,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("self-resolving root", done => {
+	it("self-resolving root", (done) => {
 		resolver.resolve({}, fixture, "@exports-field/core", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
@@ -2440,7 +2440,7 @@ describe("ExportsFieldPlugin", () => {
 		});
 	});
 
-	it("not exported error", done => {
+	it("not exported error", (done) => {
 		resolver.resolve(
 			{},
 			fixture,
@@ -2455,7 +2455,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("field name path #1", done => {
+	it("field name path #1", (done) => {
 		const resolver = ResolverFactory.createResolver({
 			aliasFields: ["browser"],
 			exportsFields: [["exportsField", "exports"]],
@@ -2473,7 +2473,7 @@ describe("ExportsFieldPlugin", () => {
 		});
 	});
 
-	it("field name path #2", done => {
+	it("field name path #2", (done) => {
 		const resolver = ResolverFactory.createResolver({
 			aliasFields: ["browser"],
 			exportsFields: [["exportsField", "exports"], "exports"],
@@ -2491,7 +2491,7 @@ describe("ExportsFieldPlugin", () => {
 		});
 	});
 
-	it("field name path #3", done => {
+	it("field name path #3", (done) => {
 		const resolver = ResolverFactory.createResolver({
 			aliasFields: ["browser"],
 			exportsFields: ["exports", ["exportsField", "exports"]],
@@ -2509,7 +2509,7 @@ describe("ExportsFieldPlugin", () => {
 		});
 	});
 
-	it("field name path #4", done => {
+	it("field name path #4", (done) => {
 		const resolver = ResolverFactory.createResolver({
 			aliasFields: ["browser"],
 			exportsFields: [["exports"]],
@@ -2527,7 +2527,7 @@ describe("ExportsFieldPlugin", () => {
 		});
 	});
 
-	it("field name path #5", done => {
+	it("field name path #5", (done) => {
 		const resolver = ResolverFactory.createResolver({
 			aliasFields: ["browser"],
 			exportsFields: ["ex", ["exportsField", "exports"]],
@@ -2545,7 +2545,7 @@ describe("ExportsFieldPlugin", () => {
 		});
 	});
 
-	it("request ending with slash #1", done => {
+	it("request ending with slash #1", (done) => {
 		resolver.resolve({}, fixture, "exports-field/", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
@@ -2554,7 +2554,7 @@ describe("ExportsFieldPlugin", () => {
 		});
 	});
 
-	it("request ending with slash #2", done => {
+	it("request ending with slash #2", (done) => {
 		resolver.resolve({}, fixture, "exports-field/dist/", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
@@ -2563,7 +2563,7 @@ describe("ExportsFieldPlugin", () => {
 		});
 	});
 
-	it("request ending with slash #3", done => {
+	it("request ending with slash #3", (done) => {
 		resolver.resolve({}, fixture, "exports-field/lib/", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
@@ -2572,7 +2572,7 @@ describe("ExportsFieldPlugin", () => {
 		});
 	});
 
-	it("should throw error if target is invalid", done => {
+	it("should throw error if target is invalid", (done) => {
 		resolver.resolve({}, fixture4, "exports-field", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
@@ -2583,7 +2583,7 @@ describe("ExportsFieldPlugin", () => {
 		});
 	});
 
-	it("throw error if exports field is invalid", done => {
+	it("throw error if exports field is invalid", (done) => {
 		resolver.resolve(
 			{},
 			fixture,
@@ -2599,13 +2599,13 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("should log the correct info", done => {
+	it("should log the correct info", (done) => {
 		const log = [];
 		resolver.resolve(
 			{},
 			fixture,
 			"exports-field/dist/browser.js",
-			{ log: v => log.push(v) },
+			{ log: (v) => log.push(v) },
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
@@ -2613,14 +2613,14 @@ describe("ExportsFieldPlugin", () => {
 					path.resolve(fixture, "node_modules/exports-field/lib/browser.js")
 				);
 				expect(
-					log.map(line => line.replace(fixture, "...").replace(/\\/g, "/"))
+					log.map((line) => line.replace(fixture, "...").replace(/\\/g, "/"))
 				).toMatchSnapshot();
 				done();
 			}
 		);
 	});
 
-	it("should resolve with wildcard pattern #1", done => {
+	it("should resolve with wildcard pattern #1", (done) => {
 		const fixture = path.resolve(
 			__dirname,
 			"./fixtures/imports-exports-wildcard/"
@@ -2636,7 +2636,7 @@ describe("ExportsFieldPlugin", () => {
 		});
 	});
 
-	it("should resolve with wildcard pattern #2", done => {
+	it("should resolve with wildcard pattern #2", (done) => {
 		const fixture = path.resolve(
 			__dirname,
 			"./fixtures/imports-exports-wildcard/"
@@ -2652,7 +2652,7 @@ describe("ExportsFieldPlugin", () => {
 		});
 	});
 
-	it("should resolve with wildcard pattern #2", done => {
+	it("should resolve with wildcard pattern #2", (done) => {
 		const fixture = path.resolve(
 			__dirname,
 			"./fixtures/imports-exports-wildcard/"
@@ -2668,7 +2668,7 @@ describe("ExportsFieldPlugin", () => {
 		});
 	});
 
-	it("should resolve with wildcard pattern #3", done => {
+	it("should resolve with wildcard pattern #3", (done) => {
 		const fixture = path.resolve(
 			__dirname,
 			"./fixtures/imports-exports-wildcard/"
@@ -2690,7 +2690,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("should resolve with wildcard pattern #4", done => {
+	it("should resolve with wildcard pattern #4", (done) => {
 		const fixture = path.resolve(
 			__dirname,
 			"./fixtures/imports-exports-wildcard/"
@@ -2706,7 +2706,7 @@ describe("ExportsFieldPlugin", () => {
 		});
 	});
 
-	it("should resolve with wildcard pattern #5", done => {
+	it("should resolve with wildcard pattern #5", (done) => {
 		const fixture = path.resolve(
 			__dirname,
 			"./fixtures/imports-exports-wildcard/"
@@ -2728,7 +2728,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("should resolve with wildcard pattern #6", done => {
+	it("should resolve with wildcard pattern #6", (done) => {
 		const fixture = path.resolve(
 			__dirname,
 			"./fixtures/imports-exports-wildcard/"
@@ -2750,7 +2750,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("should resolve with wildcard pattern #7", done => {
+	it("should resolve with wildcard pattern #7", (done) => {
 		const fixture = path.resolve(
 			__dirname,
 			"./fixtures/imports-exports-wildcard/"
@@ -2769,7 +2769,7 @@ describe("ExportsFieldPlugin", () => {
 		});
 	});
 
-	it("should resolve with wildcard pattern #8", done => {
+	it("should resolve with wildcard pattern #8", (done) => {
 		const fixture = path.resolve(
 			__dirname,
 			"./fixtures/imports-exports-wildcard/"
@@ -2785,7 +2785,7 @@ describe("ExportsFieldPlugin", () => {
 		});
 	});
 
-	it("should resolve with wildcard pattern #9", done => {
+	it("should resolve with wildcard pattern #9", (done) => {
 		const fixture = path.resolve(
 			__dirname,
 			"./fixtures/imports-exports-wildcard/"
@@ -2801,7 +2801,7 @@ describe("ExportsFieldPlugin", () => {
 		});
 	});
 
-	it("should throw error if target is 'null'", done => {
+	it("should throw error if target is 'null'", (done) => {
 		const fixture = path.resolve(
 			__dirname,
 			"./fixtures/imports-exports-wildcard/"
@@ -2823,7 +2823,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("should resolve with the `extensionAlias` option", done => {
+	it("should resolve with the `extensionAlias` option", (done) => {
 		const resolver = ResolverFactory.createResolver({
 			extensions: [".js"],
 			extensionAlias: {
@@ -2848,7 +2848,7 @@ describe("ExportsFieldPlugin", () => {
 		});
 	});
 
-	it("should resolve with the `extensionAlias` option #2", done => {
+	it("should resolve with the `extensionAlias` option #2", (done) => {
 		const resolver = ResolverFactory.createResolver({
 			extensions: [".js"],
 			extensionAlias: {
@@ -2873,7 +2873,7 @@ describe("ExportsFieldPlugin", () => {
 		});
 	});
 
-	it("should resolve with the `extensionAlias` option #3", done => {
+	it("should resolve with the `extensionAlias` option #3", (done) => {
 		const resolver = ResolverFactory.createResolver({
 			extensions: [".js"],
 			extensionAlias: {
@@ -2898,7 +2898,7 @@ describe("ExportsFieldPlugin", () => {
 		});
 	});
 
-	it("should throw error with the `extensionAlias` option", done => {
+	it("should throw error with the `extensionAlias` option", (done) => {
 		const resolver = ResolverFactory.createResolver({
 			extensions: [".js"],
 			extensionAlias: {
@@ -2923,7 +2923,7 @@ describe("ExportsFieldPlugin", () => {
 		});
 	});
 
-	it("should throw error with the `extensionAlias` option #2", done => {
+	it("should throw error with the `extensionAlias` option #2", (done) => {
 		const resolver = ResolverFactory.createResolver({
 			extensions: [".js"],
 			extensionAlias: {
@@ -2948,7 +2948,7 @@ describe("ExportsFieldPlugin", () => {
 		});
 	});
 
-	it("invalid package target #1", done => {
+	it("invalid package target #1", (done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -2963,7 +2963,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("invalid package target #2", done => {
+	it("invalid package target #2", (done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -2980,7 +2980,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("invalid package target #3", done => {
+	it("invalid package target #3", (done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -2997,7 +2997,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("invalid package target #4", done => {
+	it("invalid package target #4", (done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3014,7 +3014,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("invalid package target #5", done => {
+	it("invalid package target #5", (done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3029,7 +3029,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("invalid package target #6", done => {
+	it("invalid package target #6", (done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3044,7 +3044,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("invalid package target #7", done => {
+	it("invalid package target #7", (done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3059,7 +3059,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("invalid package target #8", done => {
+	it("invalid package target #8", (done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3076,7 +3076,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("invalid package target #9", done => {
+	it("invalid package target #9", (done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3093,7 +3093,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("invalid package target #10", done => {
+	it("invalid package target #10", (done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3110,7 +3110,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("invalid package target #11", done => {
+	it("invalid package target #11", (done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3127,7 +3127,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("invalid package target #12", done => {
+	it("invalid package target #12", (done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3144,7 +3144,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("invalid package target #13", done => {
+	it("invalid package target #13", (done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3161,7 +3161,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("invalid package target #14", done => {
+	it("invalid package target #14", (done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3178,7 +3178,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("invalid package target #15", done => {
+	it("invalid package target #15", (done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3195,7 +3195,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("invalid package target #16", done => {
+	it("invalid package target #16", (done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3212,7 +3212,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("invalid package target #17", done => {
+	it("invalid package target #17", (done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3229,7 +3229,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("invalid package target #18", done => {
+	it("invalid package target #18", (done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3246,7 +3246,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("invalid package target #19", done => {
+	it("invalid package target #19", (done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3263,7 +3263,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("should resolve the valid thing in array of export #1", done => {
+	it("should resolve the valid thing in array of export #1", (done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3278,7 +3278,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("should resolve the valid thing in array of export #2", done => {
+	it("should resolve the valid thing in array of export #2", (done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3293,7 +3293,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("should resolve the valid thing in array of export #3", done => {
+	it("should resolve the valid thing in array of export #3", (done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3308,7 +3308,7 @@ describe("ExportsFieldPlugin", () => {
 		);
 	});
 
-	it("should resolve the valid thing in array of export #4", done => {
+	it("should resolve the valid thing in array of export #4", (done) => {
 		resolver.resolve(
 			{},
 			fixture5,

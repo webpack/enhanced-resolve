@@ -55,6 +55,8 @@ jobs:
         run: yarn --frozen-lockfile
         if: matrix.node-version != '10.x'
       - name: Run tests with coverage
-        run: npm run test:coverage -- --ci
-      - if: ${{ matrix.os != 'windows-latest' }}
-        uses: codecov/codecov-action@v5
+        run: yarn test:coverage -- --ci
+      - uses: codecov/codecov-action@v5
+        with:
+          flags: integration
+          token: ${{ secrets.CODECOV_TOKEN }}

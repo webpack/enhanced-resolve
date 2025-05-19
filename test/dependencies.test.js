@@ -82,7 +82,7 @@ describe("dependencies", function () {
 
 	for (const testCase of testCases) {
 		// eslint-disable-next-line no-loop-func
-		it(`should report correct dependencies for ${testCase.name}`, done => {
+		it(`should report correct dependencies for ${testCase.name}`, (done) => {
 			const fileDependencies = new Set();
 			const missingDependencies = new Set();
 			resolver(

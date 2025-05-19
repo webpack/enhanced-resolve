@@ -32,7 +32,7 @@
     "lint-staged": "^10.4.0",
     "memfs": "^3.2.0",
     "prettier": "^2.1.2",
-    "tooling": "webpack/tooling#v1.23.1",
+    "tooling": "webpack/tooling#v1.23.9",
     "typescript": "^5.3.3"
   },
   "engines": {
@@ -42,28 +42,34 @@
   "types": "types.d.ts",
   "homepage": "http://github.com/webpack/enhanced-resolve",
   "scripts": {
-    "lint": "yarn run code-lint && yarn run type-lint && yarn typings-test && yarn run special-lint && yarn run spelling",
-    "fix": "yarn run code-lint-fix && yarn run special-lint-fix",
-    "code-lint": "eslint --cache lib test",
-    "code-lint-fix": "eslint --cache lib test --fix",
-    "type-lint": "tsc",
-    "typings-test": "tsc -p tsconfig.types.test.json",
+    "prepare": "husky install",
+    "lint": "yarn lint:code && yarn lint:types && yarn lint:types-test && yarn lint:special && yarn lint:spellcheck",
+    "lint:code": "eslint --cache .",
+    "lint:special": "node node_modules/tooling/lockfile-lint && node node_modules/tooling/inherit-types && node node_modules/tooling/format-file-header && node node_modules/tooling/generate-types",
+    "lint:types": "tsc",
+    "lint:types-test": "tsc -p tsconfig.types.test.json",
+    "lint:spellcheck": "cspell --no-must-find-files \"**/*.*\"",
+    "fmt": "yarn fmt:base --loglevel warn --write",
+    "fmt:check": "yarn fmt:base --check",
+    "fmt:base": "prettier --cache --ignore-unknown .",
+    "fix": "yarn fix:code && yarn fix:special",
+    "fix:code": "yarn lint:code --fix",
+    "fix:special": "node node_modules/tooling/inherit-types --write && node node_modules/tooling/format-file-header --write && node node_modules/tooling/generate-types --write",
     "type-report": "rimraf coverage && yarn cover:types && yarn cover:report && open-cli coverage/lcov-report/index.html",
-    "special-lint": "node node_modules/tooling/lockfile-lint && node node_modules/tooling/inherit-types && node node_modules/tooling/format-file-header && node node_modules/tooling/generate-types",
-    "special-lint-fix": "node node_modules/tooling/inherit-types --write && node node_modules/tooling/format-file-header --write && node node_modules/tooling/generate-types --write",
-    "pretty": "prettier --loglevel warn --write \"lib/**/*.{js,json}\" \"test/*.js\"",
-    "pretest": "yarn lint",
-    "spelling": "cspell \"**\"",
-    "test:only": "node_modules/.bin/jest",
-    "test:watch": "yarn test:only -- --watch",
-    "test:coverage": "yarn test:only -- --collectCoverageFrom=\"lib/**/*.js\" --coverage",
+    "pretest": "yarn lintqqq",
     "test": "yarn test:coverage",
-    "precover": "yarn lint",
-    "prepare": "husky install"
+    "test:only": "jest",
+    "test:watch": "yarn test:only --watch",
+    "test:coverage": "yarn test:only --collectCoverageFrom=\"lib/**/*.js\" --coverage"
   },
   "lint-staged": {
-    "*": "cspell --no-must-find-files",
-    "*.js": "eslint --cache"
+    "*.{js,cjs,mjs}": [
+      "eslint --cache --fix"
+    ],
+    "*": [
+      "prettier --cache --write --ignore-unknown",
+      "cspell --cache --no-must-find-files"
+    ]
   },
   "repository": {
     "type": "git",
