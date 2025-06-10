@@ -3,16 +3,16 @@
 const path = require("path");
 const { ResolverFactory, CloneBasenamePlugin } = require("../");
 
-describe("plugins", function () {
+describe("plugins", () => {
 	it("should resolve with the CloneBasenamePlugin", (done) => {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem: require("fs"),
 			plugins: [
 				new CloneBasenamePlugin(
 					"after-existing-directory",
-					"undescribed-raw-file"
-				)
-			]
+					"undescribed-raw-file",
+				),
+			],
 		});
 
 		resolver.resolve(
@@ -20,17 +20,17 @@ describe("plugins", function () {
 			__dirname,
 			"./fixtures/directory-default",
 			{},
-			function (err, result) {
+			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
 					path.resolve(
 						__dirname,
-						"fixtures/directory-default/directory-default.js"
-					)
+						"fixtures/directory-default/directory-default.js",
+					),
 				);
 				done();
-			}
+			},
 		);
 	});
 
@@ -52,9 +52,9 @@ describe("plugins", function () {
 				falsy && new FailedPlugin(),
 				new CloneBasenamePlugin(
 					"after-existing-directory",
-					"undescribed-raw-file"
-				)
-			]
+					"undescribed-raw-file",
+				),
+			],
 		});
 
 		resolver.resolve(
@@ -62,17 +62,17 @@ describe("plugins", function () {
 			__dirname,
 			"./fixtures/directory-default",
 			{},
-			function (err, result) {
+			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
 					path.resolve(
 						__dirname,
-						"fixtures/directory-default/directory-default.js"
-					)
+						"fixtures/directory-default/directory-default.js",
+					),
 				);
 				done();
-			}
+			},
 		);
 	});
 });

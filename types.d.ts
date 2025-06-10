@@ -26,16 +26,59 @@ declare interface AliasOptions {
 }
 type BaseFileSystem = FileSystem & SyncFileSystem;
 declare interface BaseResolveRequest {
+	/**
+	 * path
+	 */
 	path: string | false;
+
+	/**
+	 * content
+	 */
 	context?: object;
+
+	/**
+	 * description file path
+	 */
 	descriptionFilePath?: string;
+
+	/**
+	 * description file root
+	 */
 	descriptionFileRoot?: string;
+
+	/**
+	 * description file data
+	 */
 	descriptionFileData?: JsonObject;
+
+	/**
+	 * relative path
+	 */
 	relativePath?: string;
+
+	/**
+	 * true when need to ignore symlinks, otherwise false
+	 */
 	ignoreSymlinks?: boolean;
+
+	/**
+	 * true when full specified, otherwise false
+	 */
 	fullySpecified?: boolean;
+
+	/**
+	 * inner request for internal usage
+	 */
 	__innerRequest?: string;
+
+	/**
+	 * inner request for internal usage
+	 */
 	__innerRequest_request?: string;
+
+	/**
+	 * inner relative path for internal usage
+	 */
 	__innerRequest_relativePath?: string;
 }
 type BufferEncoding =
@@ -52,6 +95,9 @@ type BufferEncoding =
 	| "binary"
 	| "hex";
 type BufferEncodingOption = "buffer" | { encoding: "buffer" };
+declare interface Cache {
+	[index: string]: undefined | ResolveRequest | ResolveRequest[];
+}
 declare class CachedInputFileSystem {
 	constructor(fileSystem: BaseFileSystem, duration: number);
 	fileSystem: BaseFileSystem;
@@ -64,13 +110,13 @@ declare class CachedInputFileSystem {
 	readFile: ReadFile;
 	readFileSync: ReadFileSync;
 	readJson?: (
-		arg0: PathOrFileDescriptor,
-		arg1: (
-			arg0: null | Error | NodeJS.ErrnoException,
-			arg1?: JsonObject
-		) => void
+		pathOrFileDescription: PathOrFileDescriptor,
+		callback: (
+			err: null | Error | NodeJS.ErrnoException,
+			result?: JsonObject,
+		) => void,
 	) => void;
-	readJsonSync?: (arg0: PathOrFileDescriptor) => JsonObject;
+	readJsonSync?: (pathOrFileDescription: PathOrFileDescriptor) => JsonObject;
 	readlink: Readlink;
 	readlinkSync: ReadlinkSync;
 	realpath?: RealPath;
@@ -82,7 +128,7 @@ declare class CachedInputFileSystem {
 			| Buffer
 			| URL_url
 			| (string | number | Buffer | URL_url)[]
-			| Set<string | number | Buffer | URL_url>
+			| Set<string | number | Buffer | URL_url>,
 	): void;
 }
 declare class CloneBasenamePlugin {
@@ -98,7 +144,7 @@ declare class CloneBasenamePlugin {
 			| AsyncSeriesBailHook<
 					[ResolveRequest, ResolveContext],
 					null | ResolveRequest
-			  >
+			  >,
 	);
 	source:
 		| string
@@ -115,14 +161,49 @@ declare class CloneBasenamePlugin {
 	apply(resolver: Resolver): void;
 }
 declare interface Dirent {
+	/**
+	 * true when is file, otherwise false
+	 */
 	isFile: () => boolean;
+
+	/**
+	 * true when is directory, otherwise false
+	 */
 	isDirectory: () => boolean;
+
+	/**
+	 * true when is block device, otherwise false
+	 */
 	isBlockDevice: () => boolean;
+
+	/**
+	 * true when is character device, otherwise false
+	 */
 	isCharacterDevice: () => boolean;
+
+	/**
+	 * true when is symbolic link, otherwise false
+	 */
 	isSymbolicLink: () => boolean;
+
+	/**
+	 * true when is FIFO, otherwise false
+	 */
 	isFIFO: () => boolean;
+
+	/**
+	 * true when is socket, otherwise false
+	 */
 	isSocket: () => boolean;
+
+	/**
+	 * name
+	 */
 	name: string;
+
+	/**
+	 * path
+	 */
 	path: string;
 }
 type EncodingOption =
@@ -150,18 +231,45 @@ declare interface ExtensionAliasOptions {
 	[index: string]: string | string[];
 }
 declare interface FileSystem {
+	/**
+	 * read file method
+	 */
 	readFile: ReadFile;
+
+	/**
+	 * readdir method
+	 */
 	readdir: Readdir;
+
+	/**
+	 * read json method
+	 */
 	readJson?: (
-		arg0: PathOrFileDescriptor,
-		arg1: (
-			arg0: null | Error | NodeJS.ErrnoException,
-			arg1?: JsonObject
-		) => void
+		pathOrFileDescription: PathOrFileDescriptor,
+		callback: (
+			err: null | Error | NodeJS.ErrnoException,
+			result?: JsonObject,
+		) => void,
 	) => void;
+
+	/**
+	 * read link method
+	 */
 	readlink: Readlink;
+
+	/**
+	 * lstat method
+	 */
 	lstat?: LStat;
+
+	/**
+	 * stat method
+	 */
 	stat: Stat;
+
+	/**
+	 * realpath method
+	 */
 	realpath?: RealPath;
 }
 type IBigIntStats = IStatsBase<bigint> & {
@@ -171,64 +279,262 @@ type IBigIntStats = IStatsBase<bigint> & {
 	birthtimeNs: bigint;
 };
 declare interface IStats {
+	/**
+	 * is file
+	 */
 	isFile: () => boolean;
+
+	/**
+	 * is directory
+	 */
 	isDirectory: () => boolean;
+
+	/**
+	 * is block device
+	 */
 	isBlockDevice: () => boolean;
+
+	/**
+	 * is character device
+	 */
 	isCharacterDevice: () => boolean;
+
+	/**
+	 * is symbolic link
+	 */
 	isSymbolicLink: () => boolean;
+
+	/**
+	 * is FIFO
+	 */
 	isFIFO: () => boolean;
+
+	/**
+	 * is socket
+	 */
 	isSocket: () => boolean;
+
+	/**
+	 * dev
+	 */
 	dev: number;
+
+	/**
+	 * ino
+	 */
 	ino: number;
+
+	/**
+	 * mode
+	 */
 	mode: number;
+
+	/**
+	 * nlink
+	 */
 	nlink: number;
+
+	/**
+	 * uid
+	 */
 	uid: number;
+
+	/**
+	 * gid
+	 */
 	gid: number;
+
+	/**
+	 * rdev
+	 */
 	rdev: number;
+
+	/**
+	 * size
+	 */
 	size: number;
+
+	/**
+	 * blksize
+	 */
 	blksize: number;
+
+	/**
+	 * blocks
+	 */
 	blocks: number;
+
+	/**
+	 * atime ms
+	 */
 	atimeMs: number;
+
+	/**
+	 * mtime ms
+	 */
 	mtimeMs: number;
+
+	/**
+	 * ctime ms
+	 */
 	ctimeMs: number;
+
+	/**
+	 * birthtime ms
+	 */
 	birthtimeMs: number;
+
+	/**
+	 * atime
+	 */
 	atime: Date;
+
+	/**
+	 * mtime
+	 */
 	mtime: Date;
+
+	/**
+	 * ctime
+	 */
 	ctime: Date;
+
+	/**
+	 * birthtime
+	 */
 	birthtime: Date;
 }
 declare interface IStatsBase<T> {
+	/**
+	 * is file
+	 */
 	isFile: () => boolean;
+
+	/**
+	 * is directory
+	 */
 	isDirectory: () => boolean;
+
+	/**
+	 * is block device
+	 */
 	isBlockDevice: () => boolean;
+
+	/**
+	 * is character device
+	 */
 	isCharacterDevice: () => boolean;
+
+	/**
+	 * is symbolic link
+	 */
 	isSymbolicLink: () => boolean;
+
+	/**
+	 * is FIFO
+	 */
 	isFIFO: () => boolean;
+
+	/**
+	 * is socket
+	 */
 	isSocket: () => boolean;
+
+	/**
+	 * dev
+	 */
 	dev: T;
+
+	/**
+	 * ino
+	 */
 	ino: T;
+
+	/**
+	 * mode
+	 */
 	mode: T;
+
+	/**
+	 * nlink
+	 */
 	nlink: T;
+
+	/**
+	 * uid
+	 */
 	uid: T;
+
+	/**
+	 * gid
+	 */
 	gid: T;
+
+	/**
+	 * rdev
+	 */
 	rdev: T;
+
+	/**
+	 * size
+	 */
 	size: T;
+
+	/**
+	 * blksize
+	 */
 	blksize: T;
+
+	/**
+	 * blocks
+	 */
 	blocks: T;
+
+	/**
+	 * atime ms
+	 */
 	atimeMs: T;
+
+	/**
+	 * mtime ms
+	 */
 	mtimeMs: T;
+
+	/**
+	 * ctime ms
+	 */
 	ctimeMs: T;
+
+	/**
+	 * birthtime ms
+	 */
 	birthtimeMs: T;
+
+	/**
+	 * atime
+	 */
 	atime: Date;
+
+	/**
+	 * mtime
+	 */
 	mtime: Date;
+
+	/**
+	 * ctime
+	 */
 	ctime: Date;
+
+	/**
+	 * birthtime
+	 */
 	birthtime: Date;
 }
 declare interface Iterator<T, Z> {
 	(
 		item: T,
 		callback: (err?: null | Error, result?: null | Z) => void,
-		i: number
+		i: number,
 	): void;
 }
 type JsonObject = { [index: string]: JsonValue } & {
@@ -243,66 +549,84 @@ type JsonObject = { [index: string]: JsonValue } & {
 };
 type JsonValue = null | string | number | boolean | JsonObject | JsonValue[];
 declare interface KnownHooks {
+	/**
+	 * resolve step hook
+	 */
 	resolveStep: SyncHook<
 		[
 			AsyncSeriesBailHook<
 				[ResolveRequest, ResolveContext],
 				null | ResolveRequest
 			>,
-			ResolveRequest
+			ResolveRequest,
 		]
 	>;
+
+	/**
+	 * no resolve hook
+	 */
 	noResolve: SyncHook<[ResolveRequest, Error]>;
+
+	/**
+	 * resolve hook
+	 */
 	resolve: AsyncSeriesBailHook<
 		[ResolveRequest, ResolveContext],
 		null | ResolveRequest
 	>;
+
+	/**
+	 * result hook
+	 */
 	result: AsyncSeriesHook<[ResolveRequest, ResolveContext]>;
 }
 declare interface LStat {
 	(
 		path: PathLike,
-		callback: (arg0: null | NodeJS.ErrnoException, arg1?: IStats) => void
+		callback: (err: null | NodeJS.ErrnoException, result?: IStats) => void,
 	): void;
 	(
 		path: PathLike,
 		options: undefined | (StatOptions & { bigint?: false }),
-		callback: (arg0: null | NodeJS.ErrnoException, arg1?: IStats) => void
+		callback: (err: null | NodeJS.ErrnoException, result?: IStats) => void,
 	): void;
 	(
 		path: PathLike,
 		options: StatOptions & { bigint: true },
-		callback: (arg0: null | NodeJS.ErrnoException, arg1?: IBigIntStats) => void
+		callback: (
+			err: null | NodeJS.ErrnoException,
+			result?: IBigIntStats,
+		) => void,
 	): void;
 	(
 		path: PathLike,
 		options: undefined | StatOptions,
 		callback: (
-			arg0: null | NodeJS.ErrnoException,
-			arg1?: IStats | IBigIntStats
-		) => void
+			err: null | NodeJS.ErrnoException,
+			result?: IStats | IBigIntStats,
+		) => void,
 	): void;
 }
 declare interface LStatSync {
 	(path: PathLike, options?: undefined): IStats;
 	(
 		path: PathLike,
-		options?: StatSyncOptions & { bigint?: false; throwIfNoEntry: false }
+		options?: StatSyncOptions & { bigint?: false; throwIfNoEntry: false },
 	): undefined | IStats;
 	(
 		path: PathLike,
-		options: StatSyncOptions & { bigint: true; throwIfNoEntry: false }
+		options: StatSyncOptions & { bigint: true; throwIfNoEntry: false },
 	): undefined | IBigIntStats;
 	(path: PathLike, options?: StatSyncOptions & { bigint?: false }): IStats;
 	(path: PathLike, options: StatSyncOptions & { bigint: true }): IBigIntStats;
 	(
 		path: PathLike,
-		options: StatSyncOptions & { bigint: boolean; throwIfNoEntry?: false }
+		options: StatSyncOptions & { bigint: boolean; throwIfNoEntry?: false },
 	): IStats | IBigIntStats;
-	(path: PathLike, options?: StatSyncOptions):
-		| undefined
-		| IStats
-		| IBigIntStats;
+	(
+		path: PathLike,
+		options?: StatSyncOptions,
+	): undefined | IStats | IBigIntStats;
 }
 declare class LogInfoPlugin {
 	constructor(
@@ -311,7 +635,7 @@ declare class LogInfoPlugin {
 			| AsyncSeriesBailHook<
 					[ResolveRequest, ResolveContext],
 					null | ResolveRequest
-			  >
+			  >,
 	);
 	source:
 		| string
@@ -322,6 +646,9 @@ declare class LogInfoPlugin {
 	apply(resolver: Resolver): void;
 }
 declare interface ObjectEncodingOptions {
+	/**
+	 * encoding
+	 */
 	encoding?:
 		| null
 		| "ascii"
@@ -338,12 +665,39 @@ declare interface ObjectEncodingOptions {
 		| "hex";
 }
 declare interface ParsedIdentifier {
+	/**
+	 * request
+	 */
 	request: string;
+
+	/**
+	 * query
+	 */
 	query: string;
+
+	/**
+	 * fragment
+	 */
 	fragment: string;
+
+	/**
+	 * is directory
+	 */
 	directory: boolean;
+
+	/**
+	 * is module
+	 */
 	module: boolean;
+
+	/**
+	 * is file
+	 */
 	file: boolean;
+
+	/**
+	 * is internal
+	 */
 	internal: boolean;
 }
 type PathLike = string | Buffer | URL_url;
@@ -354,13 +708,16 @@ type Plugin =
 	| false
 	| ""
 	| 0
-	| { apply: (arg0: Resolver) => void }
-	| ((this: Resolver, arg1: Resolver) => void);
+	| { apply: (this: Resolver, resolver: Resolver) => void }
+	| ((this: Resolver, resolver: Resolver) => void);
 declare interface PnpApi {
+	/**
+	 * resolve to unqualified
+	 */
 	resolveToUnqualified: (
-		arg0: string,
-		arg1: string,
-		arg2: object
+		packageName: string,
+		issuer: string,
+		options: { considerBuiltins: boolean },
 	) => null | string;
 }
 declare interface ReadFile {
@@ -370,7 +727,7 @@ declare interface ReadFile {
 			| undefined
 			| null
 			| ({ encoding?: null; flag?: string } & Abortable),
-		callback: (arg0: null | NodeJS.ErrnoException, arg1?: Buffer) => void
+		callback: (err: null | NodeJS.ErrnoException, result?: Buffer) => void,
 	): void;
 	(
 		path: PathOrFileDescriptor,
@@ -388,7 +745,7 @@ declare interface ReadFile {
 			| "latin1"
 			| "binary"
 			| "hex",
-		callback: (arg0: null | NodeJS.ErrnoException, arg1?: string) => void
+		callback: (err: null | NodeJS.ErrnoException, result?: string) => void,
 	): void;
 	(
 		path: PathOrFileDescriptor,
@@ -409,19 +766,19 @@ declare interface ReadFile {
 			| "hex"
 			| (ObjectEncodingOptions & { flag?: string } & Abortable),
 		callback: (
-			arg0: null | NodeJS.ErrnoException,
-			arg1?: string | Buffer
-		) => void
+			err: null | NodeJS.ErrnoException,
+			result?: string | Buffer,
+		) => void,
 	): void;
 	(
 		path: PathOrFileDescriptor,
-		callback: (arg0: null | NodeJS.ErrnoException, arg1?: Buffer) => void
+		callback: (err: null | NodeJS.ErrnoException, result?: Buffer) => void,
 	): void;
 }
 declare interface ReadFileSync {
 	(
 		path: PathOrFileDescriptor,
-		options?: null | { encoding?: null; flag?: string }
+		options?: null | { encoding?: null; flag?: string },
 	): Buffer;
 	(
 		path: PathOrFileDescriptor,
@@ -438,7 +795,7 @@ declare interface ReadFileSync {
 			| "latin1"
 			| "binary"
 			| "hex"
-			| { encoding: BufferEncoding; flag?: string }
+			| { encoding: BufferEncoding; flag?: string },
 	): string;
 	(
 		path: PathOrFileDescriptor,
@@ -456,7 +813,7 @@ declare interface ReadFileSync {
 			| "latin1"
 			| "binary"
 			| "hex"
-			| (ObjectEncodingOptions & { flag?: string })
+			| (ObjectEncodingOptions & { flag?: string }),
 	): string | Buffer;
 }
 declare interface Readdir {
@@ -495,18 +852,18 @@ declare interface Readdir {
 					withFileTypes?: false;
 					recursive?: boolean;
 			  },
-		callback: (arg0: null | NodeJS.ErrnoException, arg1?: string[]) => void
+		callback: (err: null | NodeJS.ErrnoException, result?: string[]) => void,
 	): void;
 	(
 		path: PathLike,
 		options:
 			| { encoding: "buffer"; withFileTypes?: false; recursive?: boolean }
 			| "buffer",
-		callback: (arg0: null | NodeJS.ErrnoException, arg1?: Buffer[]) => void
+		callback: (err: null | NodeJS.ErrnoException, result?: Buffer[]) => void,
 	): void;
 	(
 		path: PathLike,
-		callback: (arg0: null | NodeJS.ErrnoException, arg1?: string[]) => void
+		callback: (err: null | NodeJS.ErrnoException, result?: string[]) => void,
 	): void;
 	(
 		path: PathLike,
@@ -530,9 +887,9 @@ declare interface Readdir {
 					recursive?: boolean;
 			  }),
 		callback: (
-			arg0: null | NodeJS.ErrnoException,
-			arg1?: string[] | Buffer[]
-		) => void
+			err: null | NodeJS.ErrnoException,
+			result?: string[] | Buffer[],
+		) => void,
 	): void;
 	(
 		path: PathLike,
@@ -540,7 +897,7 @@ declare interface Readdir {
 			withFileTypes: true;
 			recursive?: boolean;
 		},
-		callback: (arg0: null | NodeJS.ErrnoException, arg1?: Dirent[]) => void
+		callback: (err: null | NodeJS.ErrnoException, result?: Dirent[]) => void,
 	): void;
 }
 declare interface ReaddirSync {
@@ -577,13 +934,13 @@ declare interface ReaddirSync {
 						| "hex";
 					withFileTypes?: false;
 					recursive?: boolean;
-			  }
+			  },
 	): string[];
 	(
 		path: PathLike,
 		options:
 			| "buffer"
-			| { encoding: "buffer"; withFileTypes?: false; recursive?: boolean }
+			| { encoding: "buffer"; withFileTypes?: false; recursive?: boolean },
 	): Buffer[];
 	(
 		path: PathLike,
@@ -601,38 +958,41 @@ declare interface ReaddirSync {
 			| "latin1"
 			| "binary"
 			| "hex"
-			| (ObjectEncodingOptions & { withFileTypes?: false; recursive?: boolean })
+			| (ObjectEncodingOptions & {
+					withFileTypes?: false;
+					recursive?: boolean;
+			  }),
 	): string[] | Buffer[];
 	(
 		path: PathLike,
 		options: ObjectEncodingOptions & {
 			withFileTypes: true;
 			recursive?: boolean;
-		}
+		},
 	): Dirent[];
 }
 declare interface Readlink {
 	(
 		path: PathLike,
 		options: EncodingOption,
-		callback: (arg0: null | NodeJS.ErrnoException, arg1?: string) => void
+		callback: (err: null | NodeJS.ErrnoException, result?: string) => void,
 	): void;
 	(
 		path: PathLike,
 		options: BufferEncodingOption,
-		callback: (arg0: null | NodeJS.ErrnoException, arg1?: Buffer) => void
+		callback: (err: null | NodeJS.ErrnoException, result?: Buffer) => void,
 	): void;
 	(
 		path: PathLike,
 		options: EncodingOption,
 		callback: (
-			arg0: null | NodeJS.ErrnoException,
-			arg1?: string | Buffer
-		) => void
+			err: null | NodeJS.ErrnoException,
+			result?: string | Buffer,
+		) => void,
 	): void;
 	(
 		path: PathLike,
-		callback: (arg0: null | NodeJS.ErrnoException, arg1?: string) => void
+		callback: (err: null | NodeJS.ErrnoException, result?: string) => void,
 	): void;
 }
 declare interface ReadlinkSync {
@@ -644,24 +1004,24 @@ declare interface RealPath {
 	(
 		path: PathLike,
 		options: EncodingOption,
-		callback: (arg0: null | NodeJS.ErrnoException, arg1?: string) => void
+		callback: (err: null | NodeJS.ErrnoException, result?: string) => void,
 	): void;
 	(
 		path: PathLike,
 		options: BufferEncodingOption,
-		callback: (arg0: null | NodeJS.ErrnoException, arg1?: Buffer) => void
+		callback: (err: null | NodeJS.ErrnoException, result?: Buffer) => void,
 	): void;
 	(
 		path: PathLike,
 		options: EncodingOption,
 		callback: (
-			arg0: null | NodeJS.ErrnoException,
-			arg1?: string | Buffer
-		) => void
+			err: null | NodeJS.ErrnoException,
+			result?: string | Buffer,
+		) => void,
 	): void;
 	(
 		path: PathLike,
-		callback: (arg0: null | NodeJS.ErrnoException, arg1?: string) => void
+		callback: (err: null | NodeJS.ErrnoException, result?: string) => void,
 	): void;
 }
 declare interface RealPathSync {
@@ -670,6 +1030,9 @@ declare interface RealPathSync {
 	(path: PathLike, options?: EncodingOption): string | Buffer;
 }
 declare interface ResolveContext {
+	/**
+	 * directories that was found on file system
+	 */
 	contextDependencies?: WriteOnlySet<string>;
 
 	/**
@@ -690,12 +1053,12 @@ declare interface ResolveContext {
 	/**
 	 * log function
 	 */
-	log?: (arg0: string) => void;
+	log?: (str: string) => void;
 
 	/**
 	 * yield result, if provided plugins can return several results
 	 */
-	yield?: (arg0: ResolveRequest) => void;
+	yield?: (request: ResolveRequest) => void;
 }
 declare interface ResolveFunction {
 	(context: object, path: string, request: string): string | false;
@@ -710,8 +1073,8 @@ declare interface ResolveFunctionAsync {
 		callback: (
 			err: null | ErrorWithDetail,
 			res?: string | false,
-			req?: ResolveRequest
-		) => void
+			req?: ResolveRequest,
+		) => void,
 	): void;
 	(
 		context: object,
@@ -720,8 +1083,8 @@ declare interface ResolveFunctionAsync {
 		callback: (
 			err: null | ErrorWithDetail,
 			res?: string | false,
-			req?: ResolveRequest
-		) => void
+			req?: ResolveRequest,
+		) => void,
 	): void;
 	(
 		path: string,
@@ -730,8 +1093,8 @@ declare interface ResolveFunctionAsync {
 		callback: (
 			err: null | ErrorWithDetail,
 			res?: string | false,
-			req?: ResolveRequest
-		) => void
+			req?: ResolveRequest,
+		) => void,
 	): void;
 	(
 		path: string,
@@ -739,8 +1102,8 @@ declare interface ResolveFunctionAsync {
 		callback: (
 			err: null | ErrorWithDetail,
 			res?: string | false,
-			req?: ResolveRequest
-		) => void
+			req?: ResolveRequest,
+		) => void,
 	): void;
 }
 type ResolveOptionsOptionalFS = Omit<
@@ -749,36 +1112,139 @@ type ResolveOptionsOptionalFS = Omit<
 > &
 	Partial<Pick<ResolveOptionsResolverFactoryObject_2, "fileSystem">>;
 declare interface ResolveOptionsResolverFactoryObject_1 {
+	/**
+	 * alias
+	 */
 	alias: AliasOption[];
+
+	/**
+	 * fallback
+	 */
 	fallback: AliasOption[];
+
+	/**
+	 * alias fields
+	 */
 	aliasFields: Set<string | string[]>;
+
+	/**
+	 * extension alias
+	 */
 	extensionAlias: ExtensionAliasOption[];
-	cachePredicate: (arg0: ResolveRequest) => boolean;
+
+	/**
+	 * cache predicate
+	 */
+	cachePredicate: (predicate: ResolveRequest) => boolean;
+
+	/**
+	 * cache with context
+	 */
 	cacheWithContext: boolean;
 
 	/**
 	 * A list of exports field condition names.
 	 */
 	conditionNames: Set<string>;
+
+	/**
+	 * description files
+	 */
 	descriptionFiles: string[];
+
+	/**
+	 * enforce extension
+	 */
 	enforceExtension: boolean;
+
+	/**
+	 * exports fields
+	 */
 	exportsFields: Set<string | string[]>;
+
+	/**
+	 * imports fields
+	 */
 	importsFields: Set<string | string[]>;
+
+	/**
+	 * extensions
+	 */
 	extensions: Set<string>;
+
+	/**
+	 * fileSystem
+	 */
 	fileSystem: FileSystem;
-	unsafeCache: false | object;
+
+	/**
+	 * unsafe cache
+	 */
+	unsafeCache: false | Cache;
+
+	/**
+	 * symlinks
+	 */
 	symlinks: boolean;
+
+	/**
+	 * resolver
+	 */
 	resolver?: Resolver;
+
+	/**
+	 * modules
+	 */
 	modules: (string | string[])[];
+
+	/**
+	 * main fields
+	 */
 	mainFields: { name: string[]; forceRelative: boolean }[];
+
+	/**
+	 * main files
+	 */
 	mainFiles: Set<string>;
+
+	/**
+	 * plugins
+	 */
 	plugins: Plugin[];
+
+	/**
+	 * pnp API
+	 */
 	pnpApi: null | PnpApi;
+
+	/**
+	 * roots
+	 */
 	roots: Set<string>;
+
+	/**
+	 * fully specified
+	 */
 	fullySpecified: boolean;
+
+	/**
+	 * resolve to context
+	 */
 	resolveToContext: boolean;
+
+	/**
+	 * restrictions
+	 */
 	restrictions: Set<string | RegExp>;
+
+	/**
+	 * prefer relative
+	 */
 	preferRelative: boolean;
+
+	/**
+	 * prefer absolute
+	 */
 	preferAbsolute: boolean;
 }
 declare interface ResolveOptionsResolverFactoryObject_2 {
@@ -805,7 +1271,7 @@ declare interface ResolveOptionsResolverFactoryObject_2 {
 	/**
 	 * A function which decides whether a request should be cached or not. An object is passed with at least `path` and `request` properties.
 	 */
-	cachePredicate?: (arg0: ResolveRequest) => boolean;
+	cachePredicate?: (predicate: ResolveRequest) => boolean;
 
 	/**
 	 * Whether or not the unsafeCache should include request context as part of the cache key.
@@ -850,7 +1316,7 @@ declare interface ResolveOptionsResolverFactoryObject_2 {
 	/**
 	 * Use this cache object to unsafely cache the successful requests
 	 */
-	unsafeCache?: boolean | object;
+	unsafeCache?: boolean | Cache;
 
 	/**
 	 * Resolve symlinks to their symlinked location
@@ -937,7 +1403,7 @@ declare abstract class Resolver {
 			| AsyncSeriesBailHook<
 					[ResolveRequest, ResolveContext],
 					null | ResolveRequest
-			  >
+			  >,
 	): AsyncSeriesBailHook<
 		[ResolveRequest, ResolveContext],
 		null | ResolveRequest
@@ -948,7 +1414,7 @@ declare abstract class Resolver {
 			| AsyncSeriesBailHook<
 					[ResolveRequest, ResolveContext],
 					null | ResolveRequest
-			  >
+			  >,
 	): AsyncSeriesBailHook<
 		[ResolveRequest, ResolveContext],
 		null | ResolveRequest
@@ -962,8 +1428,8 @@ declare abstract class Resolver {
 		callback: (
 			err: null | ErrorWithDetail,
 			res?: string | false,
-			req?: ResolveRequest
-		) => void
+			req?: ResolveRequest,
+		) => void,
 	): void;
 	doResolve(
 		hook: AsyncSeriesBailHook<
@@ -973,7 +1439,7 @@ declare abstract class Resolver {
 		request: ResolveRequest,
 		message: null | string,
 		resolveContext: ResolveContext,
-		callback: (err?: null | Error, result?: ResolveRequest) => void
+		callback: (err?: null | Error, result?: ResolveRequest) => void,
 	): void;
 	parse(identifier: string): ParsedIdentifier;
 	isModule(path: string): boolean;
@@ -985,62 +1451,102 @@ declare abstract class Resolver {
 declare interface Stat {
 	(
 		path: PathLike,
-		callback: (arg0: null | NodeJS.ErrnoException, arg1?: IStats) => void
+		callback: (err: null | NodeJS.ErrnoException, result?: IStats) => void,
 	): void;
 	(
 		path: PathLike,
 		options: undefined | (StatOptions & { bigint?: false }),
-		callback: (arg0: null | NodeJS.ErrnoException, arg1?: IStats) => void
+		callback: (err: null | NodeJS.ErrnoException, result?: IStats) => void,
 	): void;
 	(
 		path: PathLike,
 		options: StatOptions & { bigint: true },
-		callback: (arg0: null | NodeJS.ErrnoException, arg1?: IBigIntStats) => void
+		callback: (
+			err: null | NodeJS.ErrnoException,
+			result?: IBigIntStats,
+		) => void,
 	): void;
 	(
 		path: PathLike,
 		options: undefined | StatOptions,
 		callback: (
-			arg0: null | NodeJS.ErrnoException,
-			arg1?: IStats | IBigIntStats
-		) => void
+			err: null | NodeJS.ErrnoException,
+			result?: IStats | IBigIntStats,
+		) => void,
 	): void;
 }
 declare interface StatOptions {
+	/**
+	 * need bigint values
+	 */
 	bigint?: boolean;
 }
 declare interface StatSync {
 	(path: PathLike, options?: undefined): IStats;
 	(
 		path: PathLike,
-		options?: StatSyncOptions & { bigint?: false; throwIfNoEntry: false }
+		options?: StatSyncOptions & { bigint?: false; throwIfNoEntry: false },
 	): undefined | IStats;
 	(
 		path: PathLike,
-		options: StatSyncOptions & { bigint: true; throwIfNoEntry: false }
+		options: StatSyncOptions & { bigint: true; throwIfNoEntry: false },
 	): undefined | IBigIntStats;
 	(path: PathLike, options?: StatSyncOptions & { bigint?: false }): IStats;
 	(path: PathLike, options: StatSyncOptions & { bigint: true }): IBigIntStats;
 	(
 		path: PathLike,
-		options: StatSyncOptions & { bigint: boolean; throwIfNoEntry?: false }
+		options: StatSyncOptions & { bigint: boolean; throwIfNoEntry?: false },
 	): IStats | IBigIntStats;
-	(path: PathLike, options?: StatSyncOptions):
-		| undefined
-		| IStats
-		| IBigIntStats;
+	(
+		path: PathLike,
+		options?: StatSyncOptions,
+	): undefined | IStats | IBigIntStats;
 }
 declare interface StatSyncOptions {
+	/**
+	 * need bigint values
+	 */
 	bigint?: boolean;
+
+	/**
+	 * throw if no entry
+	 */
 	throwIfNoEntry?: boolean;
 }
 declare interface SyncFileSystem {
+	/**
+	 * read file sync method
+	 */
 	readFileSync: ReadFileSync;
+
+	/**
+	 * read dir sync method
+	 */
 	readdirSync: ReaddirSync;
-	readJsonSync?: (arg0: PathOrFileDescriptor) => JsonObject;
+
+	/**
+	 * read json sync method
+	 */
+	readJsonSync?: (pathOrFileDescription: PathOrFileDescriptor) => JsonObject;
+
+	/**
+	 * read link sync method
+	 */
 	readlinkSync: ReadlinkSync;
+
+	/**
+	 * lstat sync method
+	 */
 	lstatSync?: LStatSync;
+
+	/**
+	 * stat sync method
+	 */
 	statSync: StatSync;
+
+	/**
+	 * real path sync method
+	 */
 	realpathSync?: RealPathSync;
 }
 
@@ -1060,8 +1566,8 @@ declare function exports(
 	callback: (
 		err: null | ErrorWithDetail,
 		res?: string | false,
-		req?: ResolveRequest
-	) => void
+		req?: ResolveRequest,
+	) => void,
 ): void;
 declare function exports(
 	context: object,
@@ -1070,8 +1576,8 @@ declare function exports(
 	callback: (
 		err: null | ErrorWithDetail,
 		res?: string | false,
-		req?: ResolveRequest
-	) => void
+		req?: ResolveRequest,
+	) => void,
 ): void;
 declare function exports(
 	path: string,
@@ -1080,8 +1586,8 @@ declare function exports(
 	callback: (
 		err: null | ErrorWithDetail,
 		res?: string | false,
-		req?: ResolveRequest
-	) => void
+		req?: ResolveRequest,
+	) => void,
 ): void;
 declare function exports(
 	path: string,
@@ -1089,31 +1595,31 @@ declare function exports(
 	callback: (
 		err: null | ErrorWithDetail,
 		res?: string | false,
-		req?: ResolveRequest
-	) => void
+		req?: ResolveRequest,
+	) => void,
 ): void;
 declare namespace exports {
 	export const sync: ResolveFunction;
 	export function create(
-		options: ResolveOptionsOptionalFS
+		options: ResolveOptionsOptionalFS,
 	): ResolveFunctionAsync;
 	export namespace create {
 		export const sync: (options: ResolveOptionsOptionalFS) => ResolveFunction;
 	}
 	export namespace ResolverFactory {
 		export let createResolver: (
-			options: ResolveOptionsResolverFactoryObject_2
+			options: ResolveOptionsResolverFactoryObject_2,
 		) => Resolver;
 	}
 	export const forEachBail: <T, Z>(
 		array: T[],
 		iterator: Iterator<T, Z>,
-		callback: (err?: null | Error, result?: null | Z, i?: number) => void
+		callback: (err?: null | Error, result?: null | Z, i?: number) => void,
 	) => void;
 	export type ResolveCallback = (
 		err: null | ErrorWithDetail,
 		res?: string | false,
-		req?: ResolveRequest
+		req?: ResolveRequest,
 	) => void;
 	export {
 		CachedInputFileSystem,
@@ -1130,7 +1636,7 @@ declare namespace exports {
 		Plugin,
 		ResolveOptionsResolverFactoryObject_2 as ResolveOptions,
 		ResolveFunctionAsync,
-		ResolveFunction
+		ResolveFunction,
 	};
 }
 

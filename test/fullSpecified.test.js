@@ -1,54 +1,56 @@
+"use strict";
+
 const { Volume } = require("memfs");
 const { ResolverFactory } = require("../");
 
-describe("fullSpecified", function () {
+describe("fullSpecified", () => {
 	const fileSystem = Volume.fromJSON(
 		{
 			"/a/node_modules/package1/index.js": "",
 			"/a/node_modules/package1/file.js": "",
 			"/a/node_modules/package2/package.json": JSON.stringify({
-				main: "a"
+				main: "a",
 			}),
 			"/a/node_modules/package2/a.js": "",
 			"/a/node_modules/package3/package.json": JSON.stringify({
-				main: "dir"
+				main: "dir",
 			}),
 			"/a/node_modules/package3/dir/index.js": "",
 			"/a/node_modules/package4/package.json": JSON.stringify({
 				browser: {
-					"./a.js": "./b"
-				}
+					"./a.js": "./b",
+				},
 			}),
 			"/a/node_modules/package4/a.js": "",
 			"/a/node_modules/package4/b.js": "",
 			"/a/abc.js": "",
 			"/a/dir/index.js": "",
-			"/a/index.js": ""
+			"/a/index.js": "",
 		},
-		"/"
+		"/",
 	);
 	const resolver = ResolverFactory.createResolver({
 		alias: {
 			alias1: "/a/abc",
-			alias2: "/a/"
+			alias2: "/a/",
 		},
 		aliasFields: ["browser"],
 		fullySpecified: true,
 		useSyncFileSystemCalls: true,
-		// @ts-ignore
-		fileSystem: fileSystem
+		// @ts-expect-error for test
+		fileSystem,
 	});
 	const contextResolver = ResolverFactory.createResolver({
 		alias: {
 			alias1: "/a/abc",
-			alias2: "/a/"
+			alias2: "/a/",
 		},
 		aliasFields: ["browser"],
 		fullySpecified: true,
 		resolveToContext: true,
 		useSyncFileSystemCalls: true,
-		// @ts-ignore
-		fileSystem: fileSystem
+		// @ts-expect-error for test
+		fileSystem,
 	});
 
 	const failingResolves = {
@@ -58,7 +60,7 @@ describe("fullSpecified", function () {
 		"no directories": ".",
 		"no directories 2": "./",
 		"no directories in packages": "package3/dir",
-		"no extensions in packages 2": "package3/a"
+		"no extensions in packages 2": "package3/a",
 	};
 
 	const pkg = "/a/node_modules/package";
@@ -68,29 +70,31 @@ describe("fullSpecified", function () {
 		"fully relative in package": ["package1/file.js", `${pkg}1/file.js`],
 		"extensions in mainFiles": ["package1", `${pkg}1/index.js`],
 		"extensions in mainFields": ["package2", `${pkg}2/a.js`],
-		"extensions in alias": ["alias1", `/a/abc.js`],
-		"directories in alias": ["alias2", `/a/index.js`],
+		"extensions in alias": ["alias1", "/a/abc.js"],
+		"directories in alias": ["alias2", "/a/index.js"],
 		"directories in packages": ["package3", `${pkg}3/dir/index.js`],
-		"extensions in aliasFields": ["package4/a.js", `${pkg}4/b.js`]
+		"extensions in aliasFields": ["package4/a.js", `${pkg}4/b.js`],
 	};
 
 	for (const key of Object.keys(failingResolves)) {
 		const request = failingResolves[key];
+
 		it(`should fail resolving ${key}`, () => {
 			expect(() => {
 				resolver.resolveSync({}, "/a", request);
-			}).toThrowError();
+			}).toThrow(/Can't resolve/);
 		});
 	}
 
 	for (const key of Object.keys(successfulResolves)) {
 		const [request, expected] = successfulResolves[key];
+
 		it(`should resolve ${key} successfully`, () => {
 			try {
 				expect(resolver.resolveSync({}, "/a", request)).toEqual(expected);
-			} catch (e) {
-				e.message += `\n${e.details}`;
-				throw e;
+			} catch (err) {
+				err.message += `\n${err.details}`;
+				throw err;
 			}
 		});
 	}
@@ -102,26 +106,27 @@ describe("fullSpecified", function () {
 		"relative directory 2": ["./dir/", "/a/dir"],
 		"relative directory with query and fragment": [
 			"./dir?123#456",
-			"/a/dir?123#456"
+			"/a/dir?123#456",
 		],
 		"relative directory with query and fragment 2": [
 			"./dir/?123#456",
-			"/a/dir?123#456"
+			"/a/dir?123#456",
 		],
 		"absolute directory": ["/a/dir", "/a/dir"],
-		"directory in package": ["package3/dir", `${pkg}3/dir`]
+		"directory in package": ["package3/dir", `${pkg}3/dir`],
 	};
 
 	for (const key of Object.keys(successfulContextResolves)) {
 		const [request, expected] = successfulContextResolves[key];
+
 		it(`should resolve ${key} successfully to an context`, () => {
 			try {
 				expect(contextResolver.resolveSync({}, "/a", request)).toEqual(
-					expected
+					expected,
 				);
-			} catch (e) {
-				e.message += `\n${e.details}`;
-				throw e;
+			} catch (err) {
+				err.message += `\n${err.details}`;
+				throw err;
 			}
 		});
 	}

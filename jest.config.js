@@ -1,3 +1,6 @@
+"use strict";
+
 module.exports = {
-	moduleFileExtensions: ["js", "mjs", "cjs", "ts"]
+	prettierPath: require.resolve("prettier-2"),
+	moduleFileExtensions: ["js", "mjs", "cjs", "ts"],
 };

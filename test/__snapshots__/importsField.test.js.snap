@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ImportsFieldPlugin should log the correct info 1`] = `
+exports[`importsFieldPlugin should log the correct info 1`] = `
 Array [
   "resolve '#a/dist/index.js' in '...'",
   "  using description file: .../package.json (relative path: .)",

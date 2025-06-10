@@ -77,7 +77,7 @@ myResolver.resolve(
 	lookupStartPath,
 	request,
 	resolveContext,
-	(err /*Error*/, filepath /*string*/) => {
+	(err /* Error */, filepath /* string */) => {
 		// Do something with the path
 	}
 );
@@ -151,7 +151,7 @@ enhanced-resolve will try to resolve requests containing `#` as path and as frag
 
 ## Tests
 
-```javascript
+```sh
 yarn test
 ```
 

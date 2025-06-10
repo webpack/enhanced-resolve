@@ -1,10 +1,12 @@
+"use strict";
+
 const { Volume } = require("memfs");
 const { ResolverFactory } = require("../");
 
-describe("fallback", function () {
+describe("fallback", () => {
 	let resolver;
 
-	beforeEach(function () {
+	beforeEach(() => {
 		const fileSystem = Volume.fromJSON(
 			{
 				"/a/index": "",
@@ -21,9 +23,9 @@ describe("fallback", function () {
 				"/d/dir/.empty": "",
 				"/e/index": "",
 				"/e/anotherDir/index": "",
-				"/e/dir/file": ""
+				"/e/dir/file": "",
 			},
-			"/"
+			"/",
 		);
 		resolver = ResolverFactory.createResolver({
 			fallback: {
@@ -34,52 +36,57 @@ describe("fallback", function () {
 				recursive: "recursive/dir",
 				"/d/dir": "/c/dir",
 				"/d/index.js": "/c/index",
-				ignored: false
+				ignored: false,
 			},
 			modules: "/",
 			useSyncFileSystemCalls: true,
-			//@ts-ignore
-			fileSystem: fileSystem
+			// @ts-expect-error for test
+			fileSystem,
 		});
 	});
 
-	it("should resolve a not aliased module", function () {
+	it("should resolve a not aliased module", () => {
 		expect(resolver.resolveSync({}, "/", "a")).toBe("/a/index");
 		expect(resolver.resolveSync({}, "/", "a/index")).toBe("/a/index");
 		expect(resolver.resolveSync({}, "/", "a/dir")).toBe("/a/dir/index");
 		expect(resolver.resolveSync({}, "/", "a/dir/index")).toBe("/a/dir/index");
 	});
-	it("should resolve an fallback module", function () {
+
+	it("should resolve an fallback module", () => {
 		expect(resolver.resolveSync({}, "/", "aliasA")).toBe("/a/index");
 		expect(resolver.resolveSync({}, "/", "aliasA/index")).toBe("/a/index");
 		expect(resolver.resolveSync({}, "/", "aliasA/dir")).toBe("/a/dir/index");
 		expect(resolver.resolveSync({}, "/", "aliasA/dir/index")).toBe(
-			"/a/dir/index"
+			"/a/dir/index",
 		);
 	});
+
 	it("should resolve an ignore module", () => {
 		expect(resolver.resolveSync({}, "/", "ignored")).toBe(false);
 	});
-	it("should resolve a recursive aliased module", function () {
+
+	it("should resolve a recursive aliased module", () => {
 		expect(resolver.resolveSync({}, "/", "recursive")).toBe("/recursive/index");
 		expect(resolver.resolveSync({}, "/", "recursive/index")).toBe(
-			"/recursive/index"
+			"/recursive/index",
 		);
 		expect(resolver.resolveSync({}, "/", "recursive/dir")).toBe(
-			"/recursive/dir/index"
+			"/recursive/dir/index",
 		);
 		expect(resolver.resolveSync({}, "/", "recursive/dir/index")).toBe(
-			"/recursive/dir/index"
+			"/recursive/dir/index",
 		);
 		expect(resolver.resolveSync({}, "/", "recursive/file")).toBe(
-			"/recursive/dir/file"
+			"/recursive/dir/file",
 		);
 	});
-	it("should resolve a file aliased module with a query", function () {
+
+	it("should resolve a file aliased module with a query", () => {
 		expect(resolver.resolveSync({}, "/", "b?query")).toBe("/b/index?query");
 		expect(resolver.resolveSync({}, "/", "c?query")).toBe("/c/index?query");
 	});
-	it("should resolve a path in a file aliased module", function () {
+
+	it("should resolve a path in a file aliased module", () => {
 		expect(resolver.resolveSync({}, "/", "b/index")).toBe("/b/index");
 		expect(resolver.resolveSync({}, "/", "b/dir")).toBe("/b/dir/index");
 		expect(resolver.resolveSync({}, "/", "b/dir/index")).toBe("/b/dir/index");
@@ -87,14 +94,16 @@ describe("fallback", function () {
 		expect(resolver.resolveSync({}, "/", "c/dir")).toBe("/c/dir/index");
 		expect(resolver.resolveSync({}, "/", "c/dir/index")).toBe("/c/dir/index");
 	});
-	it("should resolve a file in multiple aliased dirs", function () {
+
+	it("should resolve a file in multiple aliased dirs", () => {
 		expect(resolver.resolveSync({}, "/", "multiAlias/dir/file")).toBe(
-			"/e/dir/file"
+			"/e/dir/file",
 		);
 		expect(resolver.resolveSync({}, "/", "multiAlias/anotherDir")).toBe(
-			"/e/anotherDir/index"
+			"/e/anotherDir/index",
 		);
 	});
+
 	it("should log the correct info", (done) => {
 		const log = [];
 		resolver.resolve(
@@ -107,7 +116,7 @@ describe("fallback", function () {
 				expect(result).toBe("/a/dir/index");
 				expect(log).toMatchSnapshot();
 				done();
-			}
+			},
 		);
 	});
 });

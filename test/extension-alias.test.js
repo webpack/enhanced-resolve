@@ -1,3 +1,5 @@
+"use strict";
+
 const path = require("path");
 const fs = require("fs");
 
@@ -16,8 +18,8 @@ describe("extension-alias", () => {
 		mainFiles: ["index.js"],
 		extensionAlias: {
 			".js": [".ts", ".js"],
-			".mjs": ".mts"
-		}
+			".mjs": ".mts",
+		},
 	});
 
 	it("should alias fully specified file", (done) => {
@@ -53,7 +55,7 @@ describe("extension-alias", () => {
 	});
 
 	it("should not allow to fallback to the original extension or add extensions", (done) => {
-		resolver.resolve({}, fixture, "./index.mjs", {}, (err, result) => {
+		resolver.resolve({}, fixture, "./index.mjs", {}, (err, _result) => {
 			expect(err).toBeInstanceOf(Error);
 			done();
 		});
@@ -65,8 +67,8 @@ describe("extension-alias", () => {
 			fileSystem: nodeFileSystem,
 			mainFiles: ["index.js"],
 			extensionAlias: {
-				".js": []
-			}
+				".js": [],
+			},
 		});
 
 		it("directory", (done) => {
