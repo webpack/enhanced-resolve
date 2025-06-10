@@ -1,10 +1,14 @@
+"use strict";
+
 const path = require("path");
 const fs = require("fs");
 
 const { ResolverFactory } = require("../");
 const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
 
+/** @typedef {import("../lib/Resolver").ResolveRequest} ResolveRequest */
 /** @typedef {import("../lib/Resolver").ResolveContext} ResolveContext */
+/** @typedef {import("../lib/UnsafeCachePlugin").Cache} Cache */
 /** @typedef {ResolveContext & Required<Pick<ResolveContext, 'yield' | 'fileDependencies' | 'contextDependencies' | 'missingDependencies'>>} StrictResolveContext */
 
 const nodeFileSystem = new CachedInputFileSystem(fs, 4000);
@@ -12,14 +16,14 @@ const fixtures = path.resolve(__dirname, "fixtures", "yield");
 const makeFixturePaths = (paths) =>
 	paths.map((pth) => (pth ? path.join(fixtures, pth) : pth));
 const contextifyDependencies = (paths) =>
-	Array.from(paths)
+	[...paths]
 		.filter((pth) => pth.startsWith(fixtures))
 		.map((pth) => pth.slice(fixtures.length).split(path.sep).join("/"))
 		.sort();
 const beatifyLogs = (logs) =>
 	logs.map((l) => {
 		const match = /^(\s+)using description file.+(\(relative path:.+\))$/.exec(
-			l
+			l,
 		);
 		if (match) return `${match[1]}using description file ${match[2]}`;
 		while (l.includes(fixtures)) l = l.replace(fixtures, "fixtures");
@@ -31,15 +35,15 @@ describe("should resolve all aliases", () => {
 		extensions: [".js"],
 		alias: {
 			index: makeFixturePaths(["/a/foo", "/a/foo-2"]),
-			foo: false
+			foo: false,
 		},
 		aliasFields: ["browser"],
-		fileSystem: nodeFileSystem
+		fileSystem: nodeFileSystem,
 	});
 	const modulesResolver = ResolverFactory.createResolver({
 		extensions: [".js"],
 		modules: makeFixturePaths(["a", "b"]),
-		fileSystem: nodeFileSystem
+		fileSystem: nodeFileSystem,
 	});
 
 	it("should yield all b files", (done) => {
@@ -53,11 +57,11 @@ describe("should resolve all aliases", () => {
 			yield: yield_,
 			fileDependencies,
 			contextDependencies,
-			missingDependencies
+			missingDependencies,
 		};
 
 		resolver.resolve({}, fixtures, "index/b", context, (err, result) => {
-			expect(err).toEqual(null);
+			expect(err).toBeNull();
 			expect(result).toBeUndefined();
 			expect(paths).toEqual(makeFixturePaths(["/a/foo/b", "/a/foo-2/b"]));
 			expect(contextifyDependencies(fileDependencies)).toEqual([
@@ -66,7 +70,7 @@ describe("should resolve all aliases", () => {
 				"/a/foo",
 				"/a/foo-2",
 				"/a/foo-2/b",
-				"/a/foo/b"
+				"/a/foo/b",
 			]);
 			expect(contextifyDependencies(missingDependencies)).toEqual([
 				"/a/foo-2/b",
@@ -76,9 +80,9 @@ describe("should resolve all aliases", () => {
 				"/a/foo/b.js",
 				"/a/foo/package.json",
 				"/a/package.json",
-				"/package.json"
+				"/package.json",
 			]);
-			expect(Array.from(contextDependencies).sort()).toEqual([]);
+			expect([...contextDependencies].sort()).toEqual([]);
 			done();
 		});
 	});
@@ -94,11 +98,11 @@ describe("should resolve all aliases", () => {
 			yield: yield_,
 			fileDependencies,
 			contextDependencies,
-			missingDependencies
+			missingDependencies,
 		};
 
 		modulesResolver.resolve({}, fixtures, "foo/a", context, (err, result) => {
-			expect(err).toEqual(null);
+			expect(err).toBeNull();
 			expect(result).toBeUndefined();
 			expect(paths).toEqual(makeFixturePaths(["/a/foo/a", "/b/foo/a"]));
 			expect(contextifyDependencies(fileDependencies)).toEqual([
@@ -108,7 +112,7 @@ describe("should resolve all aliases", () => {
 				"/a/foo/a",
 				"/b",
 				"/b/foo",
-				"/b/foo/a"
+				"/b/foo/a",
 			]);
 			expect(contextifyDependencies(missingDependencies)).toEqual([
 				"/a/foo/a",
@@ -119,9 +123,9 @@ describe("should resolve all aliases", () => {
 				"/b/foo/a.js",
 				"/b/foo/package.json",
 				"/b/package.json",
-				"/package.json"
+				"/package.json",
 			]);
-			expect(Array.from(contextDependencies).sort()).toEqual([]);
+			expect([...contextDependencies].sort()).toEqual([]);
 			done();
 		});
 	});
@@ -131,11 +135,11 @@ describe("should resolve all aliases", () => {
 		const yield_ = ({ path }) => paths.push(path);
 		/** @type {ResolveContext} */
 		const context = {
-			yield: yield_
+			yield: yield_,
 		};
 
 		resolver.resolve({}, fixtures, "index/c", context, (err, result) => {
-			expect(err).toEqual(null);
+			expect(err).toBeNull();
 			expect(result).toBeUndefined();
 			expect(paths).toEqual(makeFixturePaths(["/a/foo-2/c"]));
 			done();
@@ -153,19 +157,19 @@ describe("should resolve all aliases", () => {
 			yield: yield_,
 			fileDependencies,
 			contextDependencies,
-			missingDependencies
+			missingDependencies,
 		};
 
 		resolver.resolve({}, fixtures, "foo", context, (err, result) => {
-			expect(err).toEqual(null);
+			expect(err).toBeNull();
 			expect(result).toBeUndefined();
 			expect(paths).toEqual([false]);
 			expect(contextifyDependencies(fileDependencies)).toEqual([]);
 			expect(contextifyDependencies(missingDependencies)).toEqual([
 				"/node_modules",
-				"/package.json"
+				"/package.json",
 			]);
-			expect(Array.from(contextDependencies).sort()).toEqual([]);
+			expect([...contextDependencies].sort()).toEqual([]);
 			done();
 		});
 	});
@@ -181,12 +185,12 @@ describe("should resolve all aliases", () => {
 			yield: yield_,
 			fileDependencies,
 			contextDependencies,
-			missingDependencies
+			missingDependencies,
 		};
 
 		resolver.resolve({}, fixtures, "index/unknown", context, (err, result) => {
-			expect(err).not.toEqual(null);
-			expect(err).not.toBeUndefined();
+			expect(err).not.toBeNull();
+			expect(err).toBeDefined();
 			expect(result).toBeUndefined();
 			expect(paths).toEqual([]);
 			expect(contextifyDependencies(fileDependencies)).toEqual([]);
@@ -198,9 +202,9 @@ describe("should resolve all aliases", () => {
 				"/a/foo/unknown",
 				"/a/foo/unknown.js",
 				"/a/package.json",
-				"/package.json"
+				"/package.json",
 			]);
-			expect(Array.from(contextDependencies).sort()).toEqual([]);
+			expect([...contextDependencies].sort()).toEqual([]);
 			done();
 		});
 	});
@@ -210,10 +214,10 @@ describe("should resolve all aliases", () => {
 			const resolver = ResolverFactory.createResolver({
 				extensions: [".js"],
 				alias: {
-					index: makeFixturePaths(["/c/foo"])
+					index: makeFixturePaths(["/c/foo"]),
 				},
 				aliasFields: ["browser"],
-				fileSystem: nodeFileSystem
+				fileSystem: nodeFileSystem,
 			});
 			let calls = 0;
 			const paths = [];
@@ -230,42 +234,42 @@ describe("should resolve all aliases", () => {
 				fileDependencies,
 				contextDependencies,
 				missingDependencies,
-				log: (l) => logs.push(l)
+				log: (l) => logs.push(l),
 			};
 
 			resolver.resolve({}, fixtures, "index/a", context, (err, result) => {
 				calls++;
-				expect(calls).toEqual(1);
-				expect(err).toEqual(null);
+				expect(calls).toBe(1);
+				expect(err).toBeNull();
 				expect(result).toBeUndefined();
 				expect(paths).toEqual([false]);
 				expect(contextifyDependencies(fileDependencies)).toEqual([
-					"/c/foo/package.json"
+					"/c/foo/package.json",
 				]);
 				expect(contextifyDependencies(missingDependencies)).toEqual([
 					"/c/foo/a",
 					"/c/foo/a.js",
-					"/package.json"
+					"/package.json",
 				]);
-				expect(Array.from(contextDependencies).sort()).toEqual([]);
+				expect([...contextDependencies].sort()).toEqual([]);
 
 				expect(beatifyLogs(logs)).toEqual([
 					"resolve 'index/a' in 'fixtures'",
 					"  Parsed request is a module",
 					"  using description file (relative path: ./test/fixtures/yield)",
 					`    aliased with mapping 'index': '${["fixtures", "c", "foo"].join(
-						path.sep
+						path.sep,
 					)}' to '${["fixtures", "c", "foo"].join(path.sep)}/a'`,
 					"      using description file (relative path: ./test/fixtures/yield)",
 					"        using description file (relative path: ./a)",
 					"          .js",
 					`            ${["fixtures", "c", "foo", "a.js"].join(
-						path.sep
+						path.sep,
 					)} doesn't exist`,
 					"          as directory",
 					`            ${["fixtures", "c", "foo", "a"].join(
-						path.sep
-					)} is not a directory`
+						path.sep,
+					)} is not a directory`,
 				]);
 
 				done();
@@ -277,80 +281,55 @@ describe("should resolve all aliases", () => {
 				ResolverFactory.createResolver({
 					extensions: [".js"],
 					alias: {
-						index: makeFixturePaths(aliases)
+						index: makeFixturePaths(aliases),
 					},
 					aliasFields: ["browser"],
-					fileSystem: nodeFileSystem
+					fileSystem: nodeFileSystem,
 				});
 			const cLog = [
 				`    aliased with mapping 'index': '${["fixtures", "c", "foo"].join(
-					path.sep
+					path.sep,
 				)}' to '${["fixtures", "c", "foo"].join(path.sep)}/a'`,
 				"      using description file (relative path: ./test/fixtures/yield)",
 				"        using description file (relative path: ./a)",
 				"          .js",
 				`            ${["fixtures", "c", "foo", "a.js"].join(
-					path.sep
+					path.sep,
 				)} doesn't exist`,
 				"          as directory",
 				`            ${["fixtures", "c", "foo", "a"].join(
-					path.sep
-				)} is not a directory`
+					path.sep,
+				)} is not a directory`,
 			];
 			const aLog = [
 				`    aliased with mapping 'index': '${["fixtures", "a", "foo"].join(
-					path.sep
+					path.sep,
 				)}' to '${["fixtures", "a", "foo"].join(path.sep)}/a'`,
 				"      using description file (relative path: ./test/fixtures/yield)",
 				"        using description file (relative path: ./test/fixtures/yield/a/foo/a)",
 				"          no extension",
 				`            existing file: ${["fixtures", "a", "foo", "a"].join(
-					path.sep
+					path.sep,
 				)}`,
 				`              reporting result ${["fixtures", "a", "foo", "a"].join(
-					path.sep
+					path.sep,
 				)}`,
 				"          .js",
 				`            ${["fixtures", "a", "foo", "a.js"].join(
-					path.sep
+					path.sep,
 				)} doesn't exist`,
 				"          as directory",
 				`            ${["fixtures", "a", "foo", "a"].join(
-					path.sep
-				)} is not a directory`
+					path.sep,
+				)} is not a directory`,
 			];
 			let resolver;
 
-			it("default order", (done) => {
-				resolver = createResolver(["/c/foo", "/a/foo"]);
-				run(
-					done,
-					[false, "/a/foo/a"],
-					[
-						"resolve 'index/a' in 'fixtures'",
-						"  Parsed request is a module",
-						"  using description file (relative path: ./test/fixtures/yield)",
-						...cLog,
-						...aLog
-					]
-				);
-			});
-
-			it("reverse order", (done) => {
-				resolver = createResolver(["/a/foo", "/c/foo"]);
-				run(
-					done,
-					["/a/foo/a", false],
-					[
-						"resolve 'index/a' in 'fixtures'",
-						"  Parsed request is a module",
-						"  using description file (relative path: ./test/fixtures/yield)",
-						...aLog,
-						...cLog
-					]
-				);
-			});
-
+			/**
+			 * @param {(err?: null) => void} done done
+			 * @param {(string | false)[]} expectedResult expected result
+			 * @param {string[]} expectedLogs expected logs
+			 */
 			function run(done, expectedResult, expectedLogs) {
 				let calls = 0;
 				const paths = [];
@@ -365,13 +344,13 @@ describe("should resolve all aliases", () => {
 					fileDependencies,
 					contextDependencies,
 					missingDependencies,
-					log: (l) => logs.push(l)
+					log: (l) => logs.push(l),
 				};
 
 				resolver.resolve({}, fixtures, "index/a", context, (err, result) => {
 					calls++;
-					expect(calls).toEqual(1);
-					expect(err).toEqual(null);
+					expect(calls).toBe(1);
+					expect(err).toBeNull();
 					expect(result).toBeUndefined();
 					expect(paths).toEqual(makeFixturePaths(expectedResult));
 					expect(contextifyDependencies(fileDependencies)).toEqual([
@@ -379,7 +358,7 @@ describe("should resolve all aliases", () => {
 						"/a",
 						"/a/foo",
 						"/a/foo/a",
-						"/c/foo/package.json"
+						"/c/foo/package.json",
 					]);
 					expect(contextifyDependencies(missingDependencies)).toEqual([
 						"/a/foo/a",
@@ -388,14 +367,46 @@ describe("should resolve all aliases", () => {
 						"/a/package.json",
 						"/c/foo/a",
 						"/c/foo/a.js",
-						"/package.json"
+						"/package.json",
 					]);
-					expect(Array.from(contextDependencies).sort()).toEqual([]);
+					expect([...contextDependencies].sort()).toEqual([]);
 					expect(beatifyLogs(logs)).toEqual(expectedLogs);
 
 					done();
 				});
 			}
+
+			// eslint-disable-next-line jest/expect-expect
+			it("default order", (done) => {
+				resolver = createResolver(["/c/foo", "/a/foo"]);
+				run(
+					done,
+					[false, "/a/foo/a"],
+					[
+						"resolve 'index/a' in 'fixtures'",
+						"  Parsed request is a module",
+						"  using description file (relative path: ./test/fixtures/yield)",
+						...cLog,
+						...aLog,
+					],
+				);
+			});
+
+			// eslint-disable-next-line jest/expect-expect
+			it("reverse order", (done) => {
+				resolver = createResolver(["/a/foo", "/c/foo"]);
+				run(
+					done,
+					["/a/foo/a", false],
+					[
+						"resolve 'index/a' in 'fixtures'",
+						"  Parsed request is a module",
+						"  using description file (relative path: ./test/fixtures/yield)",
+						...aLog,
+						...cLog,
+					],
+				);
+			});
 		});
 
 		describe("custom plugins", () => {
@@ -403,7 +414,7 @@ describe("should resolve all aliases", () => {
 				ResolverFactory.createResolver({
 					extensions: [".js"],
 					plugins: [plugin],
-					fileSystem: nodeFileSystem
+					fileSystem: nodeFileSystem,
 				});
 
 			it("should correctly handle resolve in callback", (done) => {
@@ -416,13 +427,13 @@ describe("should resolve all aliases", () => {
 								"MyResolverPlugin",
 								(request, resolveContext, callback) => {
 									callback(null, getResult(request));
-								}
+								},
 							);
-					}
+					},
 				});
 				const paths = [];
 				const context = {
-					yield: (obj) => paths.push(obj.path)
+					yield: (obj) => paths.push(obj.path),
 				};
 				resolver.resolve({}, fixtures, "unknown", context, (err, result) => {
 					if (err) done(err);
@@ -439,17 +450,17 @@ describe("should resolve all aliases", () => {
 						resolver
 							.getHook("described-resolve")
 							.tapAsync("MyResolverPlugin", (_, __, callback) =>
-								callback(new Error("error"))
+								callback(new Error("error")),
 							);
-					}
+					},
 				});
 				const paths = [];
 				const context = {
-					yield: (obj) => paths.push(obj.path)
+					yield: (obj) => paths.push(obj.path),
 				};
 				resolver.resolve({}, fixtures, "unknown", context, (err, result) => {
 					if (!err) return done(new Error("error expected"));
-					expect(err).not.toBe(null);
+					expect(err).not.toBeNull();
 					expect(err.message).toBe("error");
 					expect(result).toBeUndefined();
 					expect(paths).toEqual([]);
@@ -461,14 +472,14 @@ describe("should resolve all aliases", () => {
 		describe("unsafe cache", () => {
 			// same case as in "should yield all b files"
 			it("should return result from cache", (done) => {
-				const cache = {};
+				const cache = /** @type {Cache} */ ({});
 				const resolver = ResolverFactory.createResolver({
 					extensions: [".js"],
 					alias: {
-						index: makeFixturePaths(["/a/foo", "/a/foo-2"])
+						index: makeFixturePaths(["/a/foo", "/a/foo-2"]),
 					},
 					unsafeCache: cache,
-					fileSystem: nodeFileSystem
+					fileSystem: nodeFileSystem,
 				});
 				resolver.resolve(
 					{},
@@ -485,40 +496,45 @@ describe("should resolve all aliases", () => {
 							"index/b",
 							{ yield: (obj) => paths.push(obj.path) },
 							(err, result) => {
-								expect(err).toBe(null);
+								expect(err).toBeNull();
 								expect(result).toBeUndefined();
 								expect(paths).toEqual(
-									makeFixturePaths(["/a/foo/b", "/a/foo-2/b"])
+									makeFixturePaths(["/a/foo/b", "/a/foo-2/b"]),
 								);
 								// original + 2 aliases
 								expect(Object.keys(cache)).toHaveLength(3);
 
-								const cacheId = Object.keys(cache).find((id) => {
-									const { request } = JSON.parse(id);
-									return request === "index/b";
-								});
-								expect(cacheId).not.toBeUndefined();
+								const cacheId =
+									/** @type {string} */
+									(
+										Object.keys(cache).find((id) => {
+											const { request } = JSON.parse(id);
+											return request === "index/b";
+										})
+									);
+								expect(cacheId).toBeDefined();
 								expect(Array.isArray(cache[cacheId])).toBe(true);
-								expect(cache[cacheId].map((o) => o.path)).toEqual(
-									makeFixturePaths(["/a/foo/b", "/a/foo-2/b"])
-								);
+								expect(
+									/** @type {ResolveRequest[]} */
+									(cache[cacheId]).map((o) => o.path),
+								).toEqual(makeFixturePaths(["/a/foo/b", "/a/foo-2/b"]));
 								done();
-							}
+							},
 						);
-					}
+					},
 				);
 			});
 
 			// same as "should handle false in alias field"
 			it("should return ignore result from cache", (done) => {
-				const cache = {};
+				const cache = /** @type {Cache} */ ({});
 				const resolver = ResolverFactory.createResolver({
 					extensions: [".js"],
 					alias: {
-						foo: false
+						foo: false,
 					},
 					unsafeCache: cache,
-					fileSystem: nodeFileSystem
+					fileSystem: nodeFileSystem,
 				});
 				resolver.resolve({}, fixtures, "foo", { yield: () => {} }, (err) => {
 					if (err) done(err);
@@ -530,19 +546,22 @@ describe("should resolve all aliases", () => {
 						"foo",
 						{ yield: (obj) => paths.push(obj.path) },
 						(err, result) => {
-							expect(err).toBe(null);
+							expect(err).toBeNull();
 							expect(result).toBeUndefined();
 							expect(paths).toEqual([false]);
 
 							// original + 0 aliases
 							expect(Object.keys(cache)).toHaveLength(1);
 
-							const cacheId = Object.keys(cache)[0];
-							expect(cacheId).not.toBeUndefined();
+							const [cacheId] = Object.keys(cache);
+							expect(cacheId).toBeDefined();
 							expect(Array.isArray(cache[cacheId])).toBe(true);
-							expect(cache[cacheId].map((o) => o.path)).toEqual([false]);
+							expect(
+								/** @type {ResolveRequest[]} */
+								(cache[cacheId]).map((o) => o.path),
+							).toEqual([false]);
 							done();
-						}
+						},
 					);
 				});
 			});

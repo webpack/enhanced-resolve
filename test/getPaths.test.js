@@ -1,3 +1,5 @@
+"use strict";
+
 const getPaths = require("../lib/getPaths");
 
 /**
@@ -9,15 +11,17 @@ const cases = [
 	["/a/b", { paths: ["/a/b", "/a", "/"], segments: ["b", "a", "/"] }],
 	[
 		"/a/b/",
-		{ paths: ["/a/b/", "/a/b", "/a", "/"], segments: ["", "b", "a", "/"] }
+		{ paths: ["/a/b/", "/a/b", "/a", "/"], segments: ["", "b", "a", "/"] },
 	],
-	["/", { paths: ["/"], segments: [""] }]
+	["/", { paths: ["/"], segments: [""] }],
 ];
 
-cases.forEach((case_) => {
-	it(case_[0], () => {
-		const { paths, segments } = getPaths(case_[0]);
-		expect(paths).toEqual(case_[1].paths);
-		expect(segments).toEqual(case_[1].segments);
-	});
+describe("get paths", () => {
+	for (const case_ of cases) {
+		it(case_[0], () => {
+			const { paths, segments } = getPaths(case_[0]);
+			expect(paths).toEqual(case_[1].paths);
+			expect(segments).toEqual(case_[1].segments);
+		});
+	}
 });

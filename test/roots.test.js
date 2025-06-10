@@ -1,3 +1,5 @@
+"use strict";
+
 const path = require("path");
 const fs = require("fs");
 const ResolverFactory = require("../lib/ResolverFactory");
@@ -9,16 +11,16 @@ describe("roots", () => {
 	const resolver = ResolverFactory.createResolver({
 		extensions: [".js"],
 		alias: {
-			foo: "/fixtures"
+			foo: "/fixtures",
 		},
 		roots: [__dirname, fixtures],
-		fileSystem
+		fileSystem,
 	});
 
 	const resolverPreferAbsolute = ResolverFactory.createResolver({
 		extensions: [".js"],
 		alias: {
-			foo: "/fixtures"
+			foo: "/fixtures",
 		},
 		roots: [__dirname, fixtures],
 		fileSystem,
@@ -27,18 +29,19 @@ describe("roots", () => {
 			{
 				apply(resolver) {
 					resolver.hooks.file.tap("Test", (request) => {
-						if (/test.fixtures.*test.fixtures/.test(request.path))
+						if (/test.fixtures.*test.fixtures/.test(request.path)) {
 							throw new Error("Simulate a fatal error in root path");
+						}
 					});
-				}
-			}
-		]
+				},
+			},
+		],
 	});
 
 	const contextResolver = ResolverFactory.createResolver({
 		roots: [__dirname],
 		fileSystem,
-		resolveToContext: true
+		resolveToContext: true,
 	});
 
 	it("should respect roots option", (done) => {
@@ -78,10 +81,10 @@ describe("roots", () => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
-					path.resolve(fixtures, "extensions/dir/index.js")
+					path.resolve(fixtures, "extensions/dir/index.js"),
 				);
 				done();
-			}
+			},
 		);
 	});
 
@@ -105,7 +108,7 @@ describe("roots", () => {
 				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(path.resolve(fixtures, "lib"));
 				done();
-			}
+			},
 		);
 	});
 
@@ -128,7 +131,7 @@ describe("roots", () => {
 				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(path.resolve(fixtures, "b.js"));
 				done();
-			}
+			},
 		);
 	});
 });

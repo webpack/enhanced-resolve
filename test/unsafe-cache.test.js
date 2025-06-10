@@ -1,3 +1,5 @@
+"use strict";
+
 const path = require("path");
 const resolve = require("../");
 
@@ -9,10 +11,10 @@ describe("unsafe-cache", () => {
 
 	beforeEach(() => {
 		context = {
-			some: "context"
+			some: "context",
 		};
 		otherContext = {
-			someOther: "context"
+			someOther: "context",
 		};
 	});
 
@@ -20,81 +22,84 @@ describe("unsafe-cache", () => {
 		beforeEach(() => {
 			cache = {};
 			cachedResolve = resolve.create({
-				unsafeCache: cache
+				unsafeCache: cache,
 			});
 		});
+
 		it("should cache request", (done) => {
 			cachedResolve(
 				path.join(__dirname, "fixtures"),
 				"m2/b",
-				function (err, result) {
+				(err, _result) => {
 					if (err) return done(err);
 					expect(Object.keys(cache)).toHaveLength(1);
-					Object.keys(cache).forEach(function (key) {
+					for (const key of Object.keys(cache)) {
 						cache[key] = {
-							path: "yep"
+							path: "yep",
 						};
-					});
+					}
 					cachedResolve(
 						path.join(__dirname, "fixtures"),
 						"m2/b",
-						function (err, result) {
+						(err, result) => {
 							if (err) return done(err);
-							expect(result).toEqual("yep");
+							expect(result).toBe("yep");
 							done();
-						}
+						},
 					);
-				}
+				},
 			);
 		});
+
 		it("should not return from cache if context does not match", (done) => {
 			cachedResolve(
 				context,
 				path.join(__dirname, "fixtures"),
 				"m2/b",
-				function (err, result) {
+				(err, _result) => {
 					if (err) return done(err);
 					expect(Object.keys(cache)).toHaveLength(1);
-					Object.keys(cache).forEach(function (key) {
+					for (const key of Object.keys(cache)) {
 						cache[key] = {
-							path: "yep"
+							path: "yep",
 						};
-					});
+					}
 					cachedResolve(
 						otherContext,
 						path.join(__dirname, "fixtures"),
 						"m2/b",
-						function (err, result) {
+						(err, result) => {
 							if (err) return done(err);
-							expect(result).not.toEqual("yep");
+							expect(result).not.toBe("yep");
 							done();
-						}
+						},
 					);
-				}
+				},
 			);
 		});
+
 		it("should not return from cache if query does not match", (done) => {
 			cachedResolve(
 				path.join(__dirname, "fixtures"),
 				"m2/b?query",
-				function (err, result) {
+				(err, _result) => {
 					if (err) return done(err);
 					expect(Object.keys(cache)).toHaveLength(1);
-					Object.keys(cache).forEach(function (key) {
+					for (const key of Object.keys(cache)) {
 						cache[key] = {
-							path: "yep"
+							path: "yep",
 						};
-					});
+					}
 					cachedResolve(
 						path.join(__dirname, "fixtures"),
 						"m2/b?query2",
-						function (err, result) {
+						(err, result) => {
 							if (err) return done(err);
-							expect(result).not.toEqual("yep");
+							expect(result).not.toBe("yep");
 							done();
-						}
+						},
 					);
-				}
+				},
 			);
 		});
 	});
@@ -104,59 +109,61 @@ describe("unsafe-cache", () => {
 			cache = {};
 			cachedResolve = resolve.create({
 				unsafeCache: cache,
-				cacheWithContext: false
+				cacheWithContext: false,
 			});
 		});
+
 		it("should cache request", (done) => {
 			cachedResolve(
 				context,
 				path.join(__dirname, "fixtures"),
 				"m2/b",
-				function (err, result) {
+				(err, _result) => {
 					if (err) return done(err);
 					expect(Object.keys(cache)).toHaveLength(1);
-					Object.keys(cache).forEach(function (key) {
+					for (const key of Object.keys(cache)) {
 						cache[key] = {
-							path: "yep"
+							path: "yep",
 						};
-					});
+					}
 					cachedResolve(
 						context,
 						path.join(__dirname, "fixtures"),
 						"m2/b",
-						function (err, result) {
+						(err, result) => {
 							if (err) return done(err);
-							expect(result).toEqual("yep");
+							expect(result).toBe("yep");
 							done();
-						}
+						},
 					);
-				}
+				},
 			);
 		});
+
 		it("should return from cache even if context does not match", (done) => {
 			cachedResolve(
 				context,
 				path.join(__dirname, "fixtures"),
 				"m2/b",
-				function (err, result) {
+				(err, _result) => {
 					if (err) return done(err);
 					expect(Object.keys(cache)).toHaveLength(1);
-					Object.keys(cache).forEach(function (key) {
+					for (const key of Object.keys(cache)) {
 						cache[key] = {
-							path: "yep"
+							path: "yep",
 						};
-					});
+					}
 					cachedResolve(
 						otherContext,
 						path.join(__dirname, "fixtures"),
 						"m2/b",
-						function (err, result) {
+						(err, result) => {
 							if (err) return done(err);
-							expect(result).toEqual("yep");
+							expect(result).toBe("yep");
 							done();
-						}
+						},
 					);
-				}
+				},
 			);
 		});
 	});

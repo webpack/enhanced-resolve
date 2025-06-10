@@ -1,3 +1,5 @@
+"use strict";
+
 const { forEachBail } = require("../");
 
 describe("forEachBail", () => {
@@ -18,9 +20,10 @@ describe("forEachBail", () => {
 				expect(result).toEqual({ path: "test" });
 				expect(log).toEqual([0, 1, 2, 3, 4, 5]);
 				done();
-			}
+			},
 		);
 	});
+
 	it("should handle empty array", (done) => {
 		forEachBail(
 			[],
@@ -31,22 +34,22 @@ describe("forEachBail", () => {
 				expect(err).toBeUndefined();
 				expect(result).toBeUndefined();
 				done();
-			}
+			},
 		);
 	});
+
 	it("should sync finish with undefined", (done) => {
 		forEachBail(
 			[2, 3, 4, 5, 6],
-			(value, callback) => {
-				return callback();
-			},
+			(value, callback) => callback(),
 			(err, result) => {
 				expect(err).toBeUndefined();
 				expect(result).toBeUndefined();
 				done();
-			}
+			},
 		);
 	});
+
 	it("should async finish with undefined", (done) => {
 		forEachBail(
 			[2, 3, 4, 5, 6],
@@ -57,7 +60,7 @@ describe("forEachBail", () => {
 				expect(err).toBeUndefined();
 				expect(result).toBeUndefined();
 				done();
-			}
+			},
 		);
 	});
 });

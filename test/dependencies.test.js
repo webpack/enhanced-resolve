@@ -1,26 +1,28 @@
+"use strict";
+
 const { Volume } = require("memfs");
 const resolve = require("../");
 
-describe("dependencies", function () {
+describe("dependencies", () => {
 	let resolver;
 
-	beforeEach(function () {
+	beforeEach(() => {
 		const fileSystem = Volume.fromJSON(
 			{
 				"/a/b/node_modules/some-module/index.js": "",
 				"/a/node_modules/module/package.json": JSON.stringify({
-					main: "entry.js"
+					main: "entry.js",
 				}),
 				"/a/node_modules/module/file.js": JSON.stringify({ main: "entry.js" }),
-				"/modules/other-module/file.js": ""
+				"/modules/other-module/file.js": "",
 			},
-			"/"
+			"/",
 		);
 		resolver = resolve.create({
 			extensions: [".json", ".js"],
 			modules: ["/modules", "node_modules"],
-			// @ts-ignore
-			fileSystem: fileSystem
+			// @ts-expect-error for tests
+			fileSystem,
 		});
 	});
 
@@ -38,7 +40,7 @@ describe("dependencies", function () {
 				"/a/node_modules/module",
 				"/a/node_modules",
 				"/a",
-				"/"
+				"/",
 			],
 			missingDependencies: [
 				// missing package.jsons
@@ -53,8 +55,8 @@ describe("dependencies", function () {
 				"/a/b/node_modules/module",
 				// missing files with alterative extensions
 				"/a/node_modules/module/file",
-				"/a/node_modules/module/file.json"
-			]
+				"/a/node_modules/module/file.json",
+			],
 		},
 		{
 			name: "fast found module request",
@@ -66,7 +68,7 @@ describe("dependencies", function () {
 				"/modules/other-module/file.js",
 				"/modules/other-module",
 				"/modules",
-				"/"
+				"/",
 			],
 			missingDependencies: [
 				// missing package.jsons
@@ -75,9 +77,9 @@ describe("dependencies", function () {
 				"/a/package.json",
 				"/package.json",
 				"/modules/other-module/package.json",
-				"/modules/package.json"
-			]
-		}
+				"/modules/package.json",
+			],
+		},
 	];
 
 	for (const testCase of testCases) {
@@ -90,20 +92,20 @@ describe("dependencies", function () {
 				testCase.request,
 				{
 					fileDependencies,
-					missingDependencies
+					missingDependencies,
 				},
 				(err, result) => {
 					if (err) return done(err);
 
 					expect(result).toEqual(testCase.result);
-					expect(Array.from(fileDependencies).sort()).toEqual(
-						testCase.fileDependencies.sort()
+					expect([...fileDependencies].sort()).toEqual(
+						testCase.fileDependencies.sort(),
 					);
-					expect(Array.from(missingDependencies).sort()).toEqual(
-						testCase.missingDependencies.sort()
+					expect([...missingDependencies].sort()).toEqual(
+						testCase.missingDependencies.sort(),
 					);
 					done();
-				}
+				},
 			);
 		});
 	}

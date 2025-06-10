@@ -1,3 +1,5 @@
+"use strict";
+
 const path = require("path");
 const fs = require("fs");
 const ResolverFactory = require("../lib/ResolverFactory");
@@ -11,7 +13,7 @@ describe("restrictions", () => {
 		const resolver = ResolverFactory.createResolver({
 			extensions: [".js"],
 			fileSystem: nodeFileSystem,
-			restrictions: [/\.(sass|scss|css)$/]
+			restrictions: [/\.(sass|scss|css)$/],
 		});
 
 		resolver.resolve({}, fixture, "pck1", {}, (err, result) => {
@@ -26,14 +28,14 @@ describe("restrictions", () => {
 			extensions: [".js", ".css"],
 			fileSystem: nodeFileSystem,
 			mainFiles: ["index"],
-			restrictions: [/\.(sass|scss|css)$/]
+			restrictions: [/\.(sass|scss|css)$/],
 		});
 
 		resolver.resolve({}, fixture, "pck1", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(
-				path.resolve(fixture, "node_modules/pck1/index.css")
+				path.resolve(fixture, "node_modules/pck1/index.css"),
 			);
 			done();
 		});
@@ -43,7 +45,7 @@ describe("restrictions", () => {
 		const resolver = ResolverFactory.createResolver({
 			extensions: [".js"],
 			fileSystem: nodeFileSystem,
-			restrictions: [fixture]
+			restrictions: [fixture],
 		});
 
 		resolver.resolve({}, fixture, "pck2", {}, (err, result) => {
@@ -58,14 +60,14 @@ describe("restrictions", () => {
 			extensions: [".js"],
 			fileSystem: nodeFileSystem,
 			mainFields: ["main", "style"],
-			restrictions: [fixture, /\.(sass|scss|css)$/]
+			restrictions: [fixture, /\.(sass|scss|css)$/],
 		});
 
 		resolver.resolve({}, fixture, "pck2", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(
-				path.resolve(fixture, "node_modules/pck2/index.css")
+				path.resolve(fixture, "node_modules/pck2/index.css"),
 			);
 			done();
 		});
@@ -76,7 +78,7 @@ describe("restrictions", () => {
 			extensions: [".js"],
 			fileSystem: nodeFileSystem,
 			mainFields: ["main", "module", "style"],
-			restrictions: [fixture, /\.(sass|scss|css)$/]
+			restrictions: [fixture, /\.(sass|scss|css)$/],
 		});
 
 		const log = [];
@@ -90,18 +92,18 @@ describe("restrictions", () => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(
-					path.resolve(fixture, "node_modules/pck2/index.css")
+					path.resolve(fixture, "node_modules/pck2/index.css"),
 				);
 				expect(
 					log.map((line) =>
 						line
 							.replace(path.resolve(__dirname, ".."), "...")
 							.replace(path.resolve(__dirname, ".."), "...")
-							.replace(/\\/g, "/")
-					)
+							.replace(/\\/g, "/"),
+					),
 				).toMatchSnapshot();
 				done();
-			}
+			},
 		);
 	});
 });

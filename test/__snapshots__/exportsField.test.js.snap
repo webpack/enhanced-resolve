@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ExportsFieldPlugin should log the correct info 1`] = `
+exports[`exportsFieldPlugin should log the correct info 1`] = `
 Array [
   "resolve 'exports-field/dist/browser.js' in '...'",
   "  Parsed request is a module",

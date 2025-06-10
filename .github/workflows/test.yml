@@ -50,7 +50,7 @@ jobs:
         run: |
           yarn upgrade typescript@^4 --ignore-engines
           yarn --frozen-lockfile
-        if: matrix.node-version == '10.x' || matrix.node-version == '12.x'
+        if: matrix.node-version == '10.x' || matrix.node-version == '12.x' || matrix.node-version == '14.x' || matrix.node-version == '16.x' || matrix.node-version == '18.x'
       - name: Install dependencies
         run: yarn --frozen-lockfile
         if: matrix.node-version != '10.x'

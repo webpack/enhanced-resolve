@@ -1,3 +1,5 @@
+"use strict";
+
 const path = require("path");
 const fs = require("fs");
 const { CachedInputFileSystem, ResolverFactory } = require("../");
@@ -8,7 +10,7 @@ const nodeFileSystem = new CachedInputFileSystem(fs, 4000);
 
 const resolver = ResolverFactory.createResolver({
 	aliasFields: ["browser"],
-	fileSystem: nodeFileSystem
+	fileSystem: nodeFileSystem,
 });
 
 describe("scoped-packages", () => {
@@ -17,7 +19,7 @@ describe("scoped-packages", () => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(
-				path.resolve(fixture, "./node_modules/@scope/pack1/main.js")
+				path.resolve(fixture, "./node_modules/@scope/pack1/main.js"),
 			);
 			done();
 		});
@@ -28,7 +30,7 @@ describe("scoped-packages", () => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(
-				path.resolve(fixture, "./node_modules/@scope/pack2/main.js")
+				path.resolve(fixture, "./node_modules/@scope/pack2/main.js"),
 			);
 			done();
 		});
@@ -39,7 +41,7 @@ describe("scoped-packages", () => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(
-				path.resolve(fixture, "./node_modules/@scope/pack2/lib/index.js")
+				path.resolve(fixture, "./node_modules/@scope/pack2/lib/index.js"),
 			);
 			done();
 		});
