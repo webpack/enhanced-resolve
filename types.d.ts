@@ -160,7 +160,7 @@ declare class CloneBasenamePlugin {
 		  >;
 	apply(resolver: Resolver): void;
 }
-declare interface Dirent {
+declare interface Dirent<T extends string | Buffer = string> {
 	/**
 	 * true when is file, otherwise false
 	 */
@@ -199,12 +199,17 @@ declare interface Dirent {
 	/**
 	 * name
 	 */
-	name: string;
+	name: T;
 
 	/**
 	 * path
 	 */
-	path: string;
+	parentPath: string;
+
+	/**
+	 * path
+	 */
+	path?: string;
 }
 type EncodingOption =
 	| undefined
@@ -852,18 +857,14 @@ declare interface Readdir {
 					withFileTypes?: false;
 					recursive?: boolean;
 			  },
-		callback: (err: null | NodeJS.ErrnoException, result?: string[]) => void,
+		callback: (err: null | NodeJS.ErrnoException, files?: string[]) => void,
 	): void;
 	(
 		path: PathLike,
 		options:
 			| { encoding: "buffer"; withFileTypes?: false; recursive?: boolean }
 			| "buffer",
-		callback: (err: null | NodeJS.ErrnoException, result?: Buffer[]) => void,
-	): void;
-	(
-		path: PathLike,
-		callback: (err: null | NodeJS.ErrnoException, result?: string[]) => void,
+		callback: (err: null | NodeJS.ErrnoException, files?: Buffer[]) => void,
 	): void;
 	(
 		path: PathLike,
@@ -888,8 +889,12 @@ declare interface Readdir {
 			  }),
 		callback: (
 			err: null | NodeJS.ErrnoException,
-			result?: string[] | Buffer[],
+			files?: string[] | Buffer[],
 		) => void,
+	): void;
+	(
+		path: PathLike,
+		callback: (err: null | NodeJS.ErrnoException, files?: string[]) => void,
 	): void;
 	(
 		path: PathLike,
@@ -897,7 +902,18 @@ declare interface Readdir {
 			withFileTypes: true;
 			recursive?: boolean;
 		},
-		callback: (err: null | NodeJS.ErrnoException, result?: Dirent[]) => void,
+		callback: (
+			err: null | NodeJS.ErrnoException,
+			files?: Dirent<string>[],
+		) => void,
+	): void;
+	(
+		path: PathLike,
+		options: { encoding: "buffer"; withFileTypes: true; recursive?: boolean },
+		callback: (
+			err: null | NodeJS.ErrnoException,
+			files: Dirent<Buffer>[],
+		) => void,
 	): void;
 }
 declare interface ReaddirSync {
@@ -969,7 +985,11 @@ declare interface ReaddirSync {
 			withFileTypes: true;
 			recursive?: boolean;
 		},
-	): Dirent[];
+	): Dirent<string>[];
+	(
+		path: PathLike,
+		options: { encoding: "buffer"; withFileTypes: true; recursive?: boolean },
+	): Dirent<Buffer>[];
 }
 declare interface Readlink {
 	(
@@ -1626,13 +1646,13 @@ declare namespace exports {
 		CloneBasenamePlugin,
 		LogInfoPlugin,
 		ResolveOptionsOptionalFS,
+		BaseFileSystem,
 		PnpApi,
 		Resolver,
 		FileSystem,
-		SyncFileSystem,
-		BaseFileSystem,
 		ResolveContext,
 		ResolveRequest,
+		SyncFileSystem,
 		Plugin,
 		ResolveOptionsResolverFactoryObject_2 as ResolveOptions,
 		ResolveFunctionAsync,
