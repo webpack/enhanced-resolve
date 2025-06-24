@@ -1569,11 +1569,6 @@ declare interface SyncFileSystem {
 	 */
 	realpathSync?: RealPathSync;
 }
-
-/**
- * `URL` class is a global reference for `require('url').URL`
- * https://nodejs.org/api/url.html#the-whatwg-url-api
- */
 declare interface URL_url extends URL_Import {}
 declare interface WriteOnlySet<T> {
 	add: (item: T) => void;
