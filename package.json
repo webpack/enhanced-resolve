@@ -22,15 +22,15 @@
     "@eslint/markdown": ">= 6.5.0",
     "@types/graceful-fs": "^4.1.6",
     "@types/jest": "^27.5.1",
-    "@types/node": "20.9.5",
+    "@types/node": "^24.0.3",
     "@stylistic/eslint-plugin": ">= 4.4.1",
     "cspell": "4.2.8",
     "eslint": "^9.28.0",
     "eslint-config-prettier": "^10.1.5",
-    "eslint-config-webpack": "^4.0.2",
+    "eslint-config-webpack": "^4.1.2",
     "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-jest": "^28.13.0",
-    "eslint-plugin-jsdoc": "^50.7.1",
+    "eslint-plugin-jest": "^29.0.1",
+    "eslint-plugin-jsdoc": "^51.2.2",
     "eslint-plugin-n": "^17.19.0",
     "eslint-plugin-prettier": "^5.4.1",
     "eslint-plugin-unicorn": "^59.0.1",
@@ -41,8 +41,8 @@
     "memfs": "^3.2.0",
     "prettier": "^3.5.3",
     "prettier-2": "npm:prettier@^2",
-    "tooling": "webpack/tooling#v1.23.10",
-    "typescript": "^5.3.3"
+    "tooling": "webpack/tooling#v1.24.0",
+    "typescript": "^5.8.3"
   },
   "engines": {
     "node": ">=10.13.0"

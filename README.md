@@ -42,7 +42,7 @@ resolve.sync("/some/path/to/folder", "../../dir");
 
 const myResolve = resolve.create({
 	// or resolve.create.sync
-	extensions: [".ts", ".js"]
+	extensions: [".ts", ".js"],
 	// see more options below
 });
 
@@ -63,7 +63,7 @@ const { CachedInputFileSystem, ResolverFactory } = require("enhanced-resolve");
 const myResolver = ResolverFactory.createResolver({
 	// Typical usage will consume the `fs` + `CachedInputFileSystem`, which wraps Node.js `fs` to add caching.
 	fileSystem: new CachedInputFileSystem(fs, 4000),
-	extensions: [".js", ".json"]
+	extensions: [".js", ".json"],
 	/* any other resolver options here. Options/defaults can be seen below */
 });
 
@@ -79,7 +79,7 @@ myResolver.resolve(
 	resolveContext,
 	(err /* Error */, filepath /* string */) => {
 		// Do something with the path
-	}
+	},
 );
 ```
 
