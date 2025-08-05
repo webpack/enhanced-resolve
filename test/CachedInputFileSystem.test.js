@@ -1,8 +1,8 @@
 "use strict";
 
-const { CachedInputFileSystem } = require("../");
 const path = require("path");
 const url = require("url");
+const { CachedInputFileSystem } = require("../");
 
 describe("cachedInputFileSystem OperationMergerBackend ('stat' and 'statSync')", () => {
 	let fs;

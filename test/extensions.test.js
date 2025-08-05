@@ -1,8 +1,8 @@
 "use strict";
 
-const path = require("path");
 const fs = require("fs");
-const { ResolverFactory, CachedInputFileSystem } = require("../");
+const path = require("path");
+const { CachedInputFileSystem, ResolverFactory } = require("../");
 
 const nodeFileSystem = new CachedInputFileSystem(fs, 4000);
 
