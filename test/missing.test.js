@@ -87,9 +87,7 @@ describe("missing", () => {
 			resolve(testCase[0], testCase[1], { missingDependencies }, callback);
 		});
 
-		it(`should report error details exactly once when trying to resolve ${
-			testCase[1]
-		}`, (done) => {
+		it(`should report error details exactly once when trying to resolve ${testCase[1]}`, (done) => {
 			/**
 			 * @param {Error & { details: string } | null} err err
 			 * @param {string} _filename _filename
