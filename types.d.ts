@@ -542,7 +542,7 @@ declare interface Iterator<T, Z> {
 		i: number,
 	): void;
 }
-type JsonObject = { [index: string]: JsonValue } & {
+declare interface JsonObject {
 	[index: string]:
 		| undefined
 		| null
@@ -551,7 +551,7 @@ type JsonObject = { [index: string]: JsonValue } & {
 		| boolean
 		| JsonObject
 		| JsonValue[];
-};
+}
 type JsonValue = null | string | number | boolean | JsonObject | JsonValue[];
 declare interface KnownHooks {
 	/**
