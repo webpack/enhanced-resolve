@@ -1,10 +1,10 @@
 "use strict";
 
-const path = require("path");
 const fs = require("fs");
-const { processExportsField } = require("../lib/util/entrypoints");
-const ResolverFactory = require("../lib/ResolverFactory");
+const path = require("path");
 const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
+const ResolverFactory = require("../lib/ResolverFactory");
+const { processExportsField } = require("../lib/util/entrypoints");
 
 /** @typedef {import("../lib/util/entrypoints").ExportsField} ExportsField */
 

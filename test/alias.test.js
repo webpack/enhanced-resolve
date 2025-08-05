@@ -1,10 +1,10 @@
 "use strict";
 
+const fs = require("fs");
 const path = require("path");
 const { Volume } = require("memfs");
 const { ResolverFactory } = require("../");
 const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
-const fs = require("fs");
 
 const nodeFileSystem = new CachedInputFileSystem(fs, 4000);
 

@@ -1,8 +1,8 @@
 "use strict";
 
-const path = require("path");
 const fs = require("fs");
 const { platform } = require("os");
+const path = require("path");
 const resolve = require("../");
 
 const tempPath = path.join(__dirname, "temp");

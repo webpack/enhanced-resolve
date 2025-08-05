@@ -1,9 +1,9 @@
 "use strict";
 
-const path = require("path");
 const fs = require("fs");
-const ResolverFactory = require("../lib/ResolverFactory");
+const path = require("path");
 const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
+const ResolverFactory = require("../lib/ResolverFactory");
 
 describe("roots", () => {
 	const fixtures = path.resolve(__dirname, "fixtures");

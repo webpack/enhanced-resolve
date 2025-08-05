@@ -1,7 +1,7 @@
 "use strict";
 
-const path = require("path");
 const fs = require("fs");
+const path = require("path");
 const { ResolverFactory } = require("../");
 
 const browserModule = path.join(__dirname, "fixtures", "browser-module");

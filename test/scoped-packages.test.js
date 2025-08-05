@@ -1,7 +1,7 @@
 "use strict";
 
-const path = require("path");
 const fs = require("fs");
+const path = require("path");
 const { CachedInputFileSystem, ResolverFactory } = require("../");
 
 const fixture = path.join(__dirname, "fixtures", "scoped");
