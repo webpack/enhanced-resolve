@@ -33,7 +33,7 @@
     "fmt:base": "node_modules/prettier/bin/prettier.cjs --cache --ignore-unknown .",
     "fix": "yarn fix:code && yarn fix:special",
     "fix:code": "yarn lint:code --fix",
-    "fix:special": "node node_modules/tooling/inherit-types --write && node node_modules/tooling/format-file-header --write && node node_modules/tooling/generate-types --write",
+    "fix:special": "node node_modules/tooling/inherit-types --write && node node_modules/tooling/generate-types --write",
     "type-report": "rimraf coverage && yarn cover:types && yarn cover:report && open-cli coverage/lcov-report/index.html",
     "pretest": "yarn lint",
     "test": "yarn test:coverage",
