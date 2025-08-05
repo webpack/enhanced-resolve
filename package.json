@@ -60,7 +60,7 @@
     "lint:spellcheck": "cspell --no-must-find-files \"**/*.*\"",
     "fmt": "yarn fmt:base --loglevel warn --write",
     "fmt:check": "yarn fmt:base --check",
-    "fmt:base": "prettier --cache --ignore-unknown .",
+    "fmt:base": "node_modules/prettier/bin/prettier.cjs --cache --ignore-unknown .",
     "fix": "yarn fix:code && yarn fix:special",
     "fix:code": "yarn lint:code --fix",
     "fix:special": "node node_modules/tooling/inherit-types --write && node node_modules/tooling/format-file-header --write && node node_modules/tooling/generate-types --write",
