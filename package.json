@@ -11,6 +11,7 @@
   "author": "Tobias Koppers @sokra",
   "main": "lib/index.js",
   "browser": {
+    "path": "./lib/util/path-browser.js",
     "process": "./lib/util/process-browser.js",
     "module": "./lib/util/module-browser.js"
   },
@@ -57,10 +58,10 @@
   "devDependencies": {
     "@eslint/js": "^9.28.0",
     "@eslint/markdown": "^7.1.0",
+    "@stylistic/eslint-plugin": "^5.2.2",
     "@types/graceful-fs": "^4.1.6",
     "@types/jest": "^27.5.1",
     "@types/node": "^24.0.3",
-    "@stylistic/eslint-plugin": "^5.2.2",
     "cspell": "4.2.8",
     "eslint": "^9.28.0",
     "eslint-config-prettier": "^10.1.5",
@@ -78,8 +79,9 @@
     "memfs": "^3.2.0",
     "prettier": "^3.5.3",
     "prettier-2": "npm:prettier@^2",
-    "tooling": "webpack/tooling#v1.24.0",
-    "typescript": "^5.8.3"
+    "tooling": "webpack/tooling#v1.24.3",
+    "typescript": "^5.8.3",
+    "webpack": "^5.101.0"
   },
   "engines": {
     "node": ">=10.13.0"

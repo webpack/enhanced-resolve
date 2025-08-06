@@ -3,6 +3,7 @@
 /.nyc_output
 *.log
 .eslintcache
+test/outputs
 
 # IDE
 .idea
