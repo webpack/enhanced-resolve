@@ -2470,7 +2470,9 @@ describe("exportsFieldPlugin", () => {
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
 				expect(err).toBeInstanceOf(Error);
-				expect(err.message).toMatch(/not exported from package/);
+				expect(err.message).toMatch(
+					/not exported under the condition "webpack" from package/,
+				);
 				done();
 			},
 		);
