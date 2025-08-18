@@ -2352,7 +2352,7 @@ describe("exportsFieldPlugin", () => {
 		resolver.resolve({}, fixture2, "exports-field?foo", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
-			expect(err.message).toMatch(/Package path \.\/\?foo is not exported/);
+			expect(err.message).toMatch(/"\.\/\?foo" is not exported/);
 			done();
 		});
 	});
@@ -2381,7 +2381,7 @@ describe("exportsFieldPlugin", () => {
 		resolver.resolve({}, fixture2, "exports-field#foo", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
-			expect(err.message).toMatch(/Package path \.\/#foo is not exported/);
+			expect(err.message).toMatch(/"\.\/#foo" is not exported/);
 			done();
 		});
 	});
@@ -2837,7 +2837,7 @@ describe("exportsFieldPlugin", () => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
 				expect(err).toBeInstanceOf(Error);
 				expect(err.message).toMatch(
-					/Package path \.\/features\/internal\/file\.js is not exported/,
+					/"\.\/features\/internal\/file\.js" is not exported/,
 				);
 				done();
 			},
@@ -2938,7 +2938,7 @@ describe("exportsFieldPlugin", () => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
 			expect(err.message).toMatch(
-				/Package path \.\/string\.ts is not exported/,
+				/"\.\/string\.ts" is not exported/,
 			);
 			done();
 		});
@@ -2963,7 +2963,7 @@ describe("exportsFieldPlugin", () => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
 			expect(err.message).toMatch(
-				/Package path \.\/string\.ts is not exported/,
+				/"\.\/string\.ts" is not exported/,
 			);
 			done();
 		});
