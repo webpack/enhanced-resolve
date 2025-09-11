@@ -1594,14 +1594,17 @@ declare class TsconfigPathsPlugin {
 	/**
 	 * Load tsconfig.json (and referenced tsconfigs) and convert paths to AliasPlugin format
 	 */
-	loadAndConvertPaths(): AliasOptionTsconfigPathsPlugin[];
+	loadAndConvertPaths(
+		fs: FileSystem,
+	): Promise<AliasOptionTsconfigPathsPlugin[]>;
 
 	/**
 	 * Read tsconfig.json and return normalized compiler options
 	 */
 	readTsconfigCompilerOptions(
+		fs: FileSystem,
 		absTsconfigPath: string,
-	): null | { baseUrl: string; paths: { [index: string]: string[] } };
+	): Promise<null | { baseUrl: string; paths: { [index: string]: string[] } }>;
 
 	/**
 	 * Convert TypeScript paths configuration to AliasPlugin aliases
