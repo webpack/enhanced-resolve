@@ -1,0 +1,11 @@
+{
+	"compilerOptions": {
+		"baseUrl": "./src",
+		"paths": {
+			"@utils/*": ["./core/*"]
+		},
+		"composite": true,
+		"outDir": "./dist"
+	}
+}
+
