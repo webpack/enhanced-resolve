@@ -1,0 +1,13 @@
+{
+	"compilerOptions": {
+		"baseUrl": ".",
+		"paths": {
+			"@root/*": ["./src/*"]
+		}
+	},
+	"references": [
+		{ "path": "./packages/shared" },
+		{ "path": "./packages/app" }
+	]
+}
+

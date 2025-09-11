@@ -1,0 +1,12 @@
+{
+	"compilerOptions": {
+		"baseUrl": "./src",
+		"paths": {
+			"@shared/*": ["./utils/*"]
+		},
+		"composite": true,
+		"outDir": "./dist"
+	},
+	"references": [{ "path": "../utils" }]
+}
+
