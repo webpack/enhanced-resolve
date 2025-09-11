@@ -37,7 +37,7 @@
     "type-report": "rimraf coverage && yarn cover:types && yarn cover:report && open-cli coverage/lcov-report/index.html",
     "pretest": "yarn lint",
     "test": "yarn test:coverage",
-    "test:only": "jest",
+    "test:only": "jest --testMatch \"/Users/user/work/github/enhanced-resolve/test/tsconfig-paths.test.js\" --maxWorkers=1",
     "test:watch": "yarn test:only --watch",
     "test:coverage": "yarn test:only --collectCoverageFrom=\"lib/**/*.js\" --coverage"
   },

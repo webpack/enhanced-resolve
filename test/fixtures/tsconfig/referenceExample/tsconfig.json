@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es5",
+    "outDir": "./js_out",
+    "baseUrl": ".",
+    "paths": {
+      "foo": ["src/mapped/bar"],
+      "bar/*": ["src/mapped/foo/*"],
+      "*": ["./src/mapped/star/*"]
+    }
+  },
+  "references": [
+    {
+      "path": "../example/tsconfig.json"
+    }
+  ]
+}

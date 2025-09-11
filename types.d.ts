@@ -15,12 +15,17 @@ declare interface Abortable {
 	signal?: AbortSignal;
 }
 type Alias = string | false | string[];
-declare interface AliasOption {
+declare interface AliasOptionAliasPlugin {
 	alias: Alias;
 	name: string;
 	onlyModule?: boolean;
 }
 type AliasOptionNewRequest = string | false | string[];
+declare interface AliasOptionTsconfigPathsPlugin {
+	alias: string | false | string[];
+	name: string;
+	onlyModule?: boolean;
+}
 declare interface AliasOptions {
 	[index: string]: AliasOptionNewRequest;
 }
@@ -1135,12 +1140,12 @@ declare interface ResolveOptionsResolverFactoryObject_1 {
 	/**
 	 * alias
 	 */
-	alias: AliasOption[];
+	alias: AliasOptionAliasPlugin[];
 
 	/**
 	 * fallback
 	 */
-	fallback: AliasOption[];
+	fallback: AliasOptionAliasPlugin[];
 
 	/**
 	 * alias fields
@@ -1266,17 +1271,22 @@ declare interface ResolveOptionsResolverFactoryObject_1 {
 	 * prefer absolute
 	 */
 	preferAbsolute: boolean;
+
+	/**
+	 * tsconfig file path
+	 */
+	tsconfig: string;
 }
 declare interface ResolveOptionsResolverFactoryObject_2 {
 	/**
 	 * A list of module alias configurations or an object which maps key to value
 	 */
-	alias?: AliasOptions | AliasOption[];
+	alias?: AliasOptions | AliasOptionAliasPlugin[];
 
 	/**
 	 * A list of module alias configurations or an object which maps key to value, applied only after modules option
 	 */
-	fallback?: AliasOptions | AliasOption[];
+	fallback?: AliasOptions | AliasOptionAliasPlugin[];
 
 	/**
 	 * An object which maps extension to extension aliases
@@ -1411,6 +1421,11 @@ declare interface ResolveOptionsResolverFactoryObject_2 {
 	 * Prefer to resolve server-relative urls as absolute paths before falling back to resolve in roots
 	 */
 	preferAbsolute?: boolean;
+
+	/**
+	 * tsconfig file path
+	 */
+	tsconfig?: string;
 }
 type ResolveRequest = BaseResolveRequest & Partial<ParsedIdentifier>;
 declare abstract class Resolver {
@@ -1569,6 +1584,33 @@ declare interface SyncFileSystem {
 	 */
 	realpathSync?: RealPathSync;
 }
+declare class TsconfigPathsPlugin {
+	constructor(source: string, configFile: string, target: string);
+	configFile: string;
+	source: string;
+	target: string;
+	apply(resolver: Resolver): void;
+
+	/**
+	 * Load tsconfig.json (and referenced tsconfigs) and convert paths to AliasPlugin format
+	 */
+	loadAndConvertPaths(): AliasOptionTsconfigPathsPlugin[];
+
+	/**
+	 * Read tsconfig.json and return normalized compiler options
+	 */
+	readTsconfigCompilerOptions(
+		absTsconfigPath: string,
+	): null | { baseUrl: string; paths: { [index: string]: string[] } };
+
+	/**
+	 * Convert TypeScript paths configuration to AliasPlugin aliases
+	 */
+	convertPathsToAliases(
+		paths: { [index: string]: string[] },
+		baseUrl: string,
+	): AliasOptionTsconfigPathsPlugin[];
+}
 declare interface URL_url extends URL_Import {}
 declare interface WriteOnlySet<T> {
 	add: (item: T) => void;
@@ -1640,6 +1682,7 @@ declare namespace exports {
 		CachedInputFileSystem,
 		CloneBasenamePlugin,
 		LogInfoPlugin,
+		TsconfigPathsPlugin,
 		ResolveOptionsOptionalFS,
 		BaseFileSystem,
 		PnpApi,

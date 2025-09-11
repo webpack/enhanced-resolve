@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es5",
+    "outDir": "./js_out",
+    "baseUrl": ".",
+    "paths": {
+      "foo": ["./src/mapped/foo"],
+      "bar/*": ["./src/mapped/bar/*"],
+      "*": ["./src/mapped/star/*"]
+    },
+    "composite": true
+  }
+}
