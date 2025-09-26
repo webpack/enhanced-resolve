@@ -27,6 +27,8 @@ describe("alias", () => {
 				"/e/index": "",
 				"/e/anotherDir/index": "",
 				"/e/dir/file": "",
+				"/src/utils/a": "",
+				"/src/components/b": "",
 			},
 			"/",
 		);
@@ -45,6 +47,7 @@ describe("alias", () => {
 				"@*": "/*",
 				"@e*": "/e/*",
 				"@e*file": "/e*file",
+				"@shared/*": ["/src/utils/*", "/src/components/*"],
 				ignored: false,
 			},
 			modules: "/",
@@ -174,5 +177,11 @@ describe("alias", () => {
 			expect(result).toBe(false);
 			done();
 		});
+	});
+
+	it("should resolve a wildcard alias with multiple targets correctly", () => {
+		expect(resolver.resolveSync({}, "/", "@shared/b")).toBe(
+			"/src/components/b",
+		);
 	});
 });
