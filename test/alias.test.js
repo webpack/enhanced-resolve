@@ -47,7 +47,7 @@ describe("alias", () => {
 				"@*": "/*",
 				"@e*": "/e/*",
 				"@e*file": "/e*file",
-				"@shared/*": ["/src/utils/*", "/src/components/*"],
+				"shared/*": ["/src/utils/*", "/src/components/*"],
 				ignored: false,
 			},
 			modules: "/",
@@ -180,8 +180,6 @@ describe("alias", () => {
 	});
 
 	it("should resolve a wildcard alias with multiple targets correctly", () => {
-		expect(resolver.resolveSync({}, "/", "@shared/b")).toBe(
-			"/src/components/b",
-		);
+		expect(resolver.resolveSync({}, "/", "shared/b")).toBe("/src/components/b");
 	});
 });
