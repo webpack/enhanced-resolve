@@ -1,6 +1,7 @@
 "use strict";
 
 const path = require("path");
+const url = require("url");
 const resolve = require("../");
 
 const fixtures = path.join(__dirname, "fixtures");
@@ -275,6 +276,40 @@ describe("resolve", () => {
 		fixtures,
 		"./no\0#fragment/\0#/\0##fragment",
 		`${path.join(fixtures, "no\0#fragment/\0#", "\0#.js")}#fragment`,
+	);
+
+	testResolve(
+		"handle file URL",
+		fixtures,
+		url.pathToFileURL(path.resolve(fixtures, "./main1.js")).toString(),
+		path.join(fixtures, "main1.js"),
+	);
+
+	testResolve(
+		"handle file URL with query",
+		fixtures,
+		`${url
+			.pathToFileURL(path.resolve(fixtures, "./main1.js"))
+			.toString()}?query`,
+		path.join(fixtures, "main1.js"),
+	);
+
+	testResolve(
+		"handle file URL with fragment",
+		fixtures,
+		`${url
+			.pathToFileURL(path.resolve(fixtures, "./main1.js"))
+			.toString()}#fragment`,
+		path.join(fixtures, "main1.js"),
+	);
+
+	testResolve(
+		"handle file URL with query and fragment",
+		fixtures,
+		`${url
+			.pathToFileURL(path.resolve(fixtures, "./main1.js"))
+			.toString()}?query#fragment`,
+		path.join(fixtures, "main1.js"),
 	);
 
 	it("should correctly resolve", (done) => {
