@@ -2,11 +2,11 @@
 	"compilerOptions": {
 		"baseUrl": "./src",
 		"paths": {
-			"@shared/*": ["./utils/*"]
+			"@shared/*": ["${configDir}/src/utils/*"]
 		},
 		"composite": true,
 		"outDir": "./dist"
 	},
-	"references": [{ "path": "../utils" }]
+	"references": [{ "path": "${configDir}/../utils" }]
 }
 
