@@ -438,6 +438,141 @@ describe("TsconfigPathsPlugin", () => {
 		);
 	});
 
+	// eslint-disable-next-line no-template-curly-in-string
+	describe("${configDir} template variable support", () => {
+		// eslint-disable-next-line no-template-curly-in-string
+		it("should substitute ${configDir} in path mappings", (done) => {
+			const resolver = ResolverFactory.createResolver({
+				fileSystem,
+				extensions: [".ts", ".tsx"],
+				mainFields: ["browser", "main"],
+				mainFiles: ["index"],
+				tsconfig: path.join(baseExampleDir, "tsconfig.json"),
+			});
+
+			// The base tsconfig.json now uses ${configDir}/src/components/*
+			resolver.resolve(
+				{},
+				baseExampleDir,
+				"@components/button",
+				{},
+				(err, result) => {
+					if (err) return done(err);
+					if (!result) return done(new Error("No result"));
+					expect(result).toEqual(
+						path.join(baseExampleDir, "src", "components", "button.ts"),
+					);
+					done();
+				},
+			);
+		});
+
+		// eslint-disable-next-line no-template-curly-in-string
+		it("should substitute ${configDir} in multiple path patterns", (done) => {
+			const resolver = ResolverFactory.createResolver({
+				fileSystem,
+				extensions: [".ts", ".tsx"],
+				mainFields: ["browser", "main"],
+				mainFiles: ["index"],
+				tsconfig: path.join(baseExampleDir, "tsconfig.json"),
+			});
+
+			// Test @utils/* pattern
+			resolver.resolve({}, baseExampleDir, "@utils/date", {}, (err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(
+					path.join(baseExampleDir, "src", "utils", "date.ts"),
+				);
+
+				// Test exact pattern 'foo'
+				resolver.resolve({}, baseExampleDir, "foo", {}, (err2, result2) => {
+					if (err2) return done(err2);
+					if (!result2) return done(new Error("No result for foo"));
+					expect(result2).toEqual(
+						path.join(baseExampleDir, "src", "mapped", "foo", "index.ts"),
+					);
+					done();
+				});
+			});
+		});
+
+		// eslint-disable-next-line no-template-curly-in-string
+		it("should substitute ${configDir} in referenced projects", (done) => {
+			const appDir = path.join(referencesProjectDir, "packages", "app");
+			const resolver = ResolverFactory.createResolver({
+				fileSystem,
+				extensions: [".ts", ".tsx"],
+				mainFields: ["browser", "main"],
+				mainFiles: ["index"],
+				tsconfig: {
+					configFile: path.join(appDir, "tsconfig.json"),
+					references: "auto",
+				},
+			});
+
+			// app's tsconfig uses ${configDir}/src/*
+			resolver.resolve({}, appDir, "@app/index", {}, (err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(path.join(appDir, "src", "index.ts"));
+				done();
+			});
+		});
+
+		// eslint-disable-next-line no-template-curly-in-string
+		it("should substitute ${configDir} in extends field", (done) => {
+			const resolver = ResolverFactory.createResolver({
+				fileSystem,
+				extensions: [".ts", ".tsx"],
+				mainFields: ["browser", "main"],
+				mainFiles: ["index"],
+				tsconfig: path.join(extendsExampleDir, "tsconfig.json"),
+			});
+
+			// extendsExampleDir uses ${configDir}/../base/tsconfig in extends
+			resolver.resolve(
+				{},
+				extendsExampleDir,
+				"@components/button",
+				{},
+				(err, result) => {
+					if (err) return done(err);
+					if (!result) return done(new Error("No result"));
+					expect(result).toEqual(
+						path.join(extendsExampleDir, "src", "components", "button.ts"),
+					);
+					done();
+				},
+			);
+		});
+
+		// eslint-disable-next-line no-template-curly-in-string
+		it("should substitute ${configDir} in references field", (done) => {
+			const sharedDir = path.join(referencesProjectDir, "packages", "shared");
+			const resolver = ResolverFactory.createResolver({
+				fileSystem,
+				extensions: [".ts", ".tsx"],
+				mainFields: ["browser", "main"],
+				mainFiles: ["index"],
+				tsconfig: {
+					configFile: path.join(referencesProjectDir, "tsconfig.json"),
+					references: "auto",
+				},
+			});
+
+			// root tsconfig uses ${configDir}/packages/shared in references
+			resolver.resolve({}, sharedDir, "@shared/helper", {}, (err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(
+					path.join(sharedDir, "src", "utils", "helper.ts"),
+				);
+				done();
+			});
+		});
+	});
+
 	describe("TypeScript Project References", () => {
 		it("should support tsconfig object format with configFile", (done) => {
 			const resolver = ResolverFactory.createResolver({

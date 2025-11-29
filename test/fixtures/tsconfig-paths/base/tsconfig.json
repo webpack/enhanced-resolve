@@ -5,16 +5,16 @@
     "outDir": "./js_out",
     "baseUrl": ".",
     "paths": {
-      "@components/*": ["./src/utils/*", "./src/components/*"],
+      "@components/*": ["${configDir}/src/utils/*", "${configDir}/src/components/*"],
       "@utils/*": ["./src/utils/*"],
-      "foo": ["./src/mapped/foo"],
-      "foo/*": ["./src/mapped/bar/*"],
+      "foo": ["${configDir}/src/mapped/foo"],
+      "foo/*": ["${configDir}/src/mapped/bar/*"],
       "bar/*": ["./src/mapped/bar/*"],
-      "refs/*": ["./src/refs/*"],
-      "*/old-file": ["./src/components/new-file"],
-      "longest/*": ["./src/mapped/longest/four.ts", "./src/mapped/longest/two.ts"],
-      "longest/bar": ["./src/mapped/longest/three.ts"],
-      "*": ["./src/mapped/star/*"]
+      "refs/*": ["${configDir}/src/refs/*"],
+      "*/old-file": ["${configDir}/src/components/new-file"],
+      "longest/*": ["${configDir}/src/mapped/longest/four.ts", "${configDir}/src/mapped/longest/two.ts"],
+      "longest/bar": ["${configDir}/src/mapped/longest/three.ts"],
+      "*": ["${configDir}/src/mapped/star/*"]
     },
     "composite": true
   }
