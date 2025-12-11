@@ -891,7 +891,9 @@ describe("process imports field", () => {
 		},
 		{
 			name: "incorrect request #4",
-			expect: new Error('Request should not start with "#/"'),
+			// Note: #/ patterns are now allowed per Node.js PR #60864
+			// but #/ alone still fails because it ends with "/" (requesting directory)
+			expect: new Error("Only requesting file allowed"),
 			suite: [
 				{
 					"#a/": {
@@ -915,6 +917,86 @@ describe("process imports field", () => {
 				},
 				"#a/",
 				["browser"],
+			],
+		},
+		// #endregion
+
+		// #region #/ slash pattern (node.js PR #60864)
+		// These tests cover the new Node.js behavior that allows #/ patterns
+		// See: https://github.com/nodejs/node/pull/60864
+		{
+			name: "#/ slash pattern #1",
+			// #/* pattern should map #/utils.js to ./src/utils.js
+			expect: ["./src/utils.js"],
+			suite: [
+				{
+					"#/*": "./src/*",
+				},
+				"#/utils.js",
+				[],
+			],
+		},
+		{
+			name: "#/ slash pattern #2",
+			// #/* pattern should map #/nested/deep.js to ./src/nested/deep.js
+			expect: ["./src/nested/deep.js"],
+			suite: [
+				{
+					"#/*": "./src/*",
+				},
+				"#/nested/deep.js",
+				[],
+			],
+		},
+		{
+			name: "#/ slash pattern #3",
+			// #/main direct mapping (starts with #/ but is not a wildcard)
+			expect: ["./main.js"],
+			suite: [
+				{
+					"#/main": "./main.js",
+				},
+				"#/main",
+				[],
+			],
+		},
+		{
+			name: "#/ slash pattern #4",
+			// Conditional mapping with #/* pattern
+			expect: ["./browser/utils.js"],
+			suite: [
+				{
+					"#/*": {
+						browser: "./browser/*",
+						default: "./src/*",
+					},
+				},
+				"#/utils.js",
+				["browser"],
+			],
+		},
+		{
+			name: "#/ slash pattern #5",
+			// #/lib/ subpath folder mapping (legacy syntax with #/ prefix)
+			expect: ["./lib/utils.js"],
+			suite: [
+				{
+					"#/lib/": "./lib/",
+				},
+				"#/lib/utils.js",
+				[],
+			],
+		},
+		{
+			name: "#/ slash pattern #6",
+			// Symmetric exports/imports pattern as shown in Node.js PR
+			expect: ["./src/index.js"],
+			suite: [
+				{
+					"#/*": "./src/*",
+				},
+				"#/index.js",
+				[],
 			],
 		},
 		// #endregion
@@ -1334,10 +1416,12 @@ describe("importsFieldPlugin", () => {
 	});
 
 	it("should work and throw an error on invalid imports #1", (done) => {
+		// Note: #/ patterns are now allowed per Node.js PR #60864
+		// #/dep will now try to resolve but fail because there's no mapping
 		resolver.resolve({}, fixture, "#/dep", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			expect(err).toBeInstanceOf(Error);
-			expect(err.message).toMatch(/Request should not start with "#\/"/);
+			expect(err.message).toMatch(/is not imported from package/);
 			done();
 		});
 	});
@@ -1529,6 +1613,51 @@ describe("importsFieldPlugin", () => {
 			if (!result) return done(new Error("No result"));
 			expect(result).toEqual(path.resolve(fixture1, "./a.js"));
 			done();
+		});
+	});
+
+	// Tests for #/ slash pattern support (node.js PR #60864)
+	// These tests cover the new Node.js behavior that allows #/ patterns
+	// See: https://github.com/nodejs/node/pull/60864
+	describe("#/ slash pattern (node.js PR #60864)", () => {
+		const slashPatternFixture = path.resolve(
+			__dirname,
+			"fixtures",
+			"imports-slash-pattern",
+		);
+
+		it("should resolve #/utils.js using #/* pattern", (done) => {
+			resolver.resolve(
+				{},
+				slashPatternFixture,
+				"#/utils.js",
+				{},
+				(err, result) => {
+					if (err) return done(err);
+					if (!result) return done(new Error("No result"));
+					expect(result).toEqual(
+						path.resolve(slashPatternFixture, "src/utils.js"),
+					);
+					done();
+				},
+			);
+		});
+
+		it("should resolve #/nested/deep.js using #/* pattern", (done) => {
+			resolver.resolve(
+				{},
+				slashPatternFixture,
+				"#/nested/deep.js",
+				{},
+				(err, result) => {
+					if (err) return done(err);
+					if (!result) return done(new Error("No result"));
+					expect(result).toEqual(
+						path.resolve(slashPatternFixture, "src/nested/deep.js"),
+					);
+					done();
+				},
+			);
 		});
 	});
 });
