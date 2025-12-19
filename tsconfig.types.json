@@ -1,15 +1,3 @@
 {
-  "compilerOptions": {
-    "target": "ES2017",
-    "module": "commonjs",
-    "lib": ["es2017"],
-    "allowJs": true,
-    "checkJs": true,
-    "noEmit": true,
-    "strict": true,
-    "alwaysStrict": true,
-    "types": ["node"],
-    "esModuleInterop": true
-  },
-  "include": ["lib/**/*.js"]
+  "extends": "./tsconfig"
 }
