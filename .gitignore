@@ -3,10 +3,11 @@
 /.nyc_output
 *.log
 .eslintcache
+.cspellcache
 
 # IDE
 .idea
 .vscode
 
 .DS_Store
-package-lock.json
+yarn.lock
