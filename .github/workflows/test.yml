@@ -49,7 +49,7 @@ jobs:
       - name: Install dependencies
         run: |
           npm install -D typescript@^4
-          npm run install
+          npm install
         if: matrix.node-version == '10.x' || matrix.node-version == '12.x' || matrix.node-version == '14.x'
       - name: Install dependencies
         run: npm ci
