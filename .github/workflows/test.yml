@@ -48,8 +48,8 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: |
-          npm install -D typescript@^4
-          npm install
+          npm install -D typescript@^4 --ignore-scripts
+          npm install --ignore-scripts
         if: matrix.node-version == '10.x' || matrix.node-version == '12.x' || matrix.node-version == '14.x'
       - name: Install dependencies
         run: npm ci
