@@ -48,7 +48,7 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: |
-          npm upgrade typescript@^4
+          npm install -D typescript@^4
           npm run install
         if: matrix.node-version == '10.x' || matrix.node-version == '12.x' || matrix.node-version == '14.x'
       - name: Install dependencies

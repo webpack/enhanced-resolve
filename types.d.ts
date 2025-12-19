@@ -34,7 +34,7 @@ declare interface BaseResolveRequest {
 	/**
 	 * content
 	 */
-	context?: object;
+	context?: Context;
 
 	/**
 	 * description file path
@@ -160,6 +160,7 @@ declare class CloneBasenamePlugin {
 		  >;
 	apply(resolver: Resolver): void;
 }
+type Context = KnownContext & Record<any, any>;
 declare interface Dirent<T extends string | Buffer = string> {
 	/**
 	 * true when is file, otherwise false
@@ -553,6 +554,12 @@ declare interface JsonObject {
 		| JsonValue[];
 }
 type JsonValue = null | string | number | boolean | JsonObject | JsonValue[];
+declare interface KnownContext {
+	/**
+	 * environments
+	 */
+	environments?: string[];
+}
 declare interface KnownHooks {
 	/**
 	 * resolve step hook
@@ -1081,12 +1088,12 @@ declare interface ResolveContext {
 	yield?: (request: ResolveRequest) => void;
 }
 declare interface ResolveFunction {
-	(context: object, path: string, request: string): string | false;
+	(context: Context, path: string, request: string): string | false;
 	(path: string, request: string): string | false;
 }
 declare interface ResolveFunctionAsync {
 	(
-		context: object,
+		context: Context,
 		path: string,
 		request: string,
 		resolveContext: ResolveContext,
@@ -1097,7 +1104,7 @@ declare interface ResolveFunctionAsync {
 		) => void,
 	): void;
 	(
-		context: object,
+		context: Context,
 		path: string,
 		request: string,
 		callback: (
@@ -1439,9 +1446,9 @@ declare abstract class Resolver {
 		[ResolveRequest, ResolveContext],
 		null | ResolveRequest
 	>;
-	resolveSync(context: object, path: string, request: string): string | false;
+	resolveSync(context: Context, path: string, request: string): string | false;
 	resolve(
-		context: object,
+		context: Context,
 		path: string,
 		request: string,
 		resolveContext: ResolveContext,
@@ -1574,7 +1581,7 @@ declare interface WriteOnlySet<T> {
 	add: (item: T) => void;
 }
 declare function exports(
-	context: object,
+	context: Context,
 	path: string,
 	request: string,
 	resolveContext: ResolveContext,
@@ -1585,7 +1592,7 @@ declare function exports(
 	) => void,
 ): void;
 declare function exports(
-	context: object,
+	context: Context,
 	path: string,
 	request: string,
 	callback: (
@@ -1644,6 +1651,7 @@ declare namespace exports {
 		BaseFileSystem,
 		PnpApi,
 		Resolver,
+		Context,
 		FileSystem,
 		ResolveContext,
 		ResolveRequest,
