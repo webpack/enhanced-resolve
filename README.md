@@ -152,7 +152,7 @@ enhanced-resolve will try to resolve requests containing `#` as path and as frag
 ## Tests
 
 ```sh
-yarn test
+npm run test
 ```
 
 ## Passing options from webpack

@@ -34,7 +34,7 @@ describe("pnp", () => {
 	}
 
 	beforeEach(() => {
-		// eslint-disable-next-line jsdoc/no-restricted-syntax
+		// eslint-disable-next-line jsdoc/reject-any-type
 		pnpApi = /** @type {any} */ ({
 			mocks: new Map(),
 			ignoredIssuers: new Set(),

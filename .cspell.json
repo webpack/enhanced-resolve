@@ -36,5 +36,11 @@
     "zizizi",
     "codecov"
   ],
-  "ignorePaths": ["package.json", "yarn.lock", "coverage", "*.log"]
+  "ignorePaths": [
+    "package.json",
+    "yarn.lock",
+    "coverage",
+    "*.log",
+    ".gitignore"
+  ]
 }
