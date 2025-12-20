@@ -34,7 +34,12 @@
     "zipp",
     "zippi",
     "zizizi",
-    "codecov"
+    "codecov",
+    "xiaoxiaojx",
+    "Natsu",
+    "tsconfigs",
+    "preact",
+    "compat"
   ],
   "ignorePaths": [
     "package.json",
