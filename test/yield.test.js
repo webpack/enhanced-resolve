@@ -9,7 +9,7 @@ const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
 /** @typedef {import("../lib/Resolver").ResolveRequest} ResolveRequest */
 /** @typedef {import("../lib/Resolver").ResolveContext} ResolveContext */
 /** @typedef {import("../lib/UnsafeCachePlugin").Cache} Cache */
-/** @typedef {ResolveContext & Required<Pick<ResolveContext, 'yield' | 'fileDependencies' | 'contextDependencies' | 'missingDependencies'>>} StrictResolveContext */
+/** @typedef {ResolveContext & Required<Pick<ResolveContext, "yield" | "fileDependencies" | "contextDependencies" | "missingDependencies">>} StrictResolveContext */
 
 const nodeFileSystem = new CachedInputFileSystem(fs, 4000);
 const fixtures = path.resolve(__dirname, "fixtures", "yield");

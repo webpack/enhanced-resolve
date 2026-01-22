@@ -19,7 +19,7 @@ const fixture5 = path.resolve(
 );
 
 describe("process exports field", () => {
-	/** @type {Array<{name: string, expect: string[]|Error, suite: [ExportsField, string, string[]]}>} */
+	/** @type {{ name: string, expect: string[] | Error, suite: [ExportsField, string, string[]] }[]} */
 	const testCases = [
 		// #region Samples
 		{

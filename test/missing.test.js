@@ -5,7 +5,7 @@ const resolve = require("../");
 
 describe("missing", () => {
 	/**
-	 * @type {Array<[string, string, Array<string>]>}
+	 * @type {Array<[string, string, string[]>}
 	 */
 	const testCases = [
 		[
