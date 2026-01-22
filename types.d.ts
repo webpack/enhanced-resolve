@@ -52,6 +52,11 @@ declare interface BaseResolveRequest {
 	descriptionFileData?: JsonObject;
 
 	/**
+	 * tsconfig paths map
+	 */
+	tsconfigPathsMap?: null | TsconfigPathsMap;
+
+	/**
 	 * relative path
 	 */
 	relativePath?: string;
@@ -1273,6 +1278,11 @@ declare interface ResolveOptionsResolverFactoryObject_1 {
 	 * prefer absolute
 	 */
 	preferAbsolute: boolean;
+
+	/**
+	 * tsconfig file path or config object
+	 */
+	tsconfig: string | boolean | TsconfigOptions;
 }
 declare interface ResolveOptionsResolverFactoryObject_2 {
 	/**
@@ -1418,6 +1428,11 @@ declare interface ResolveOptionsResolverFactoryObject_2 {
 	 * Prefer to resolve server-relative urls as absolute paths before falling back to resolve in roots
 	 */
 	preferAbsolute?: boolean;
+
+	/**
+	 * TypeScript config file path or config object with configFile and references
+	 */
+	tsconfig?: string | boolean | TsconfigOptions;
 }
 type ResolveRequest = BaseResolveRequest & Partial<ParsedIdentifier>;
 declare abstract class Resolver {
@@ -1576,6 +1591,61 @@ declare interface SyncFileSystem {
 	 */
 	realpathSync?: RealPathSync;
 }
+declare interface TsconfigOptions {
+	/**
+	 * A relative path to the tsconfig file based on cwd, or an absolute path of tsconfig file
+	 */
+	configFile?: string;
+
+	/**
+	 * References to other tsconfig files. 'auto' inherits from TypeScript config, or an array of relative/absolute paths
+	 */
+	references?: string[] | "auto";
+}
+declare interface TsconfigPathsData {
+	/**
+	 * tsconfig file data
+	 */
+	alias: AliasOption[];
+
+	/**
+	 * tsconfig file data
+	 */
+	modules: string[];
+}
+declare interface TsconfigPathsMap {
+	/**
+	 * main tsconfig paths data
+	 */
+	main: TsconfigPathsData;
+
+	/**
+	 * main tsconfig base URL (absolute path)
+	 */
+	mainContext: string;
+
+	/**
+	 * referenced tsconfig paths data mapped by baseUrl
+	 */
+	refs: { [index: string]: TsconfigPathsData };
+
+	/**
+	 * file dependencies
+	 */
+	fileDependencies: Set<string>;
+}
+declare class TsconfigPathsPlugin {
+	constructor(configFileOrOptions: string | true | TsconfigOptions);
+	configFile: string;
+	references: "auto" | TsconfigReference[];
+	apply(resolver: Resolver): void;
+}
+declare interface TsconfigReference {
+	/**
+	 * Path to the referenced project
+	 */
+	path: string;
+}
 declare interface URL_url extends URL_Import {}
 declare interface WriteOnlySet<T> {
 	add: (item: T) => void;
@@ -1647,6 +1717,7 @@ declare namespace exports {
 		CachedInputFileSystem,
 		CloneBasenamePlugin,
 		LogInfoPlugin,
+		TsconfigPathsPlugin,
 		ResolveOptionsOptionalFS,
 		BaseFileSystem,
 		PnpApi,
