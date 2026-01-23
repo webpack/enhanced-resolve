@@ -3,7 +3,7 @@
 const getPaths = require("../lib/getPaths");
 
 /**
- * @type {[string,{paths: string[], segments: string[]}][]}
+ * @type {[string, { paths: string[], segments: string[] }][]}
  */
 const cases = [
 	["/a", { paths: ["/a", "/"], segments: ["a", "/"] }],

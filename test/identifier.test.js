@@ -3,7 +3,7 @@
 const { parseIdentifier } = require("../lib/util/identifier");
 
 /**
- * @typedef {{input: string, expected: [string, string, string]}} TestSuite
+ * @typedef {{ input: string, expected: [string, string, string] }} TestSuite
  */
 
 describe("identifier", () => {

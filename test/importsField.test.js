@@ -12,7 +12,7 @@ const fixture = path.resolve(__dirname, "fixtures", "imports-field");
 const fixture1 = path.resolve(__dirname, "fixtures", "imports-field-different");
 
 describe("process imports field", () => {
-	/** @type {Array<{name: string, expect: string[]|Error, suite: [ImportsField, string, string[]]}>} */
+	/** @type {{ name: string, expect: string[] | Error, suite: [ImportsField, string, string[]] }[]} */
 	const testCases = [
 		// #region Samples
 		{
