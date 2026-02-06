@@ -573,6 +573,63 @@ describe("TsconfigPathsPlugin", () => {
 		});
 	});
 
+	it("should override baseUrl from tsconfig with option", (done) => {
+		const resolver = ResolverFactory.createResolver({
+			fileSystem,
+			extensions: [".ts", ".tsx"],
+			mainFields: ["browser", "main"],
+			mainFiles: ["index"],
+			tsconfig: {
+				configFile: path.join(baseExampleDir, "tsconfig.json"),
+				baseUrl: "./src", // Override baseUrl from tsconfig (which is ".")
+			},
+		});
+
+		resolver.resolve(
+			{},
+			baseExampleDir,
+			"utils/date", // This should resolve relative to baseExampleDir/src (the overridden baseUrl)
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(
+					path.join(baseExampleDir, "src", "utils", "date.ts"),
+				);
+				done();
+			},
+		);
+	});
+
+	it("should use baseUrl from tsconfig when not overridden", (done) => {
+		const resolver = ResolverFactory.createResolver({
+			fileSystem,
+			extensions: [".ts", ".tsx"],
+			mainFields: ["browser", "main"],
+			mainFiles: ["index"],
+			tsconfig: {
+				configFile: path.join(baseExampleDir, "tsconfig.json"),
+				// baseUrl not specified, should use from tsconfig (which is ".")
+			},
+		});
+
+		// With baseUrl from tsconfig (.), modules should resolve relative to baseExampleDir
+		resolver.resolve(
+			{},
+			baseExampleDir,
+			"src/utils/date", // This should resolve relative to baseExampleDir (the tsconfig baseUrl)
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(
+					path.join(baseExampleDir, "src", "utils", "date.ts"),
+				);
+				done();
+			},
+		);
+	});
+
 	describe("TypeScript Project References", () => {
 		it("should support tsconfig object format with configFile", (done) => {
 			const resolver = ResolverFactory.createResolver({
