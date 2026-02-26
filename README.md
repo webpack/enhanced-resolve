@@ -47,7 +47,7 @@ const myResolve = resolve.create({
 });
 
 myResolve("/some/path/to/folder", "ts-module", (err, result) => {
-	result; // === "/some/node_modules/ts-module/index.ts"
+	result; // === "/some/path/node_modules/ts-module/index.ts"
 });
 ```
 
