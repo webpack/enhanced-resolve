@@ -1004,4 +1004,79 @@ describe("TsconfigPathsPlugin", () => {
 			});
 		});
 	});
+
+	describe("JSONC support (comments in tsconfig.json)", () => {
+		const jsoncExampleDir = path.resolve(
+			__dirname,
+			"fixtures",
+			"tsconfig-paths",
+			"jsonc-comments",
+		);
+
+		it("should parse tsconfig.json with line comments (//)", (done) => {
+			const resolver = ResolverFactory.createResolver({
+				fileSystem,
+				extensions: [".ts", ".tsx"],
+				mainFields: ["browser", "main"],
+				mainFiles: ["index"],
+				tsconfig: path.join(jsoncExampleDir, "tsconfig.json"),
+				useSyncFileSystemCalls: true,
+			});
+
+			resolver.resolve(
+				{},
+				jsoncExampleDir,
+				"@components/button",
+				{},
+				(err, result) => {
+					if (err) return done(err);
+					if (!result) return done(new Error("No result"));
+					expect(result).toEqual(
+						path.join(jsoncExampleDir, "src", "components", "button.ts"),
+					);
+					done();
+				},
+			);
+		});
+
+		it("should parse tsconfig.json with block comments (/* */)", (done) => {
+			const resolver = ResolverFactory.createResolver({
+				fileSystem,
+				extensions: [".ts", ".tsx"],
+				mainFields: ["browser", "main"],
+				mainFiles: ["index"],
+				tsconfig: path.join(jsoncExampleDir, "tsconfig.json"),
+				useSyncFileSystemCalls: true,
+			});
+
+			resolver.resolve({}, jsoncExampleDir, "bar/index", {}, (err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(
+					path.join(jsoncExampleDir, "src", "mapped", "bar", "index.ts"),
+				);
+				done();
+			});
+		});
+
+		it("should parse tsconfig.json with mixed comments", (done) => {
+			const resolver = ResolverFactory.createResolver({
+				fileSystem,
+				extensions: [".ts", ".tsx"],
+				mainFields: ["browser", "main"],
+				mainFiles: ["index"],
+				tsconfig: path.join(jsoncExampleDir, "tsconfig.json"),
+				useSyncFileSystemCalls: true,
+			});
+
+			resolver.resolve({}, jsoncExampleDir, "foo", {}, (err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(
+					path.join(jsoncExampleDir, "src", "mapped", "foo", "index.ts"),
+				);
+				done();
+			});
+		});
+	});
 });
