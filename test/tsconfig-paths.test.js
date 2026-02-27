@@ -26,6 +26,12 @@ const extendsNpmDir = path.resolve(
 	"tsconfig-paths",
 	"extends-npm",
 );
+const extendsCircularDir = path.resolve(
+	__dirname,
+	"fixtures",
+	"tsconfig-paths",
+	"extends-circular",
+);
 const referencesProjectDir = path.resolve(
 	__dirname,
 	"fixtures",
@@ -545,6 +551,25 @@ describe("TsconfigPathsPlugin", () => {
 					done();
 				},
 			);
+		});
+
+		it("should handle circular extends without hanging", (done) => {
+			const aDir = path.join(extendsCircularDir, "a");
+			const resolver = ResolverFactory.createResolver({
+				fileSystem,
+				extensions: [".ts", ".tsx"],
+				mainFields: ["browser", "main"],
+				mainFiles: ["index"],
+				tsconfig: path.join(aDir, "tsconfig.json"),
+			});
+
+			// a extends b, b extends a - circular. Should break cycle and resolve.
+			resolver.resolve({}, aDir, "@lib/foo", {}, (err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(path.join(aDir, "src", "lib", "foo.ts"));
+				done();
+			});
 		});
 
 		// eslint-disable-next-line no-template-curly-in-string
