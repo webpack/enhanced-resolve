@@ -39,7 +39,9 @@
     "Natsu",
     "tsconfigs",
     "preact",
-    "compat"
+    "compat",
+    "Sindre",
+    "Sorhus"
   ],
   "ignorePaths": [
     "package.json",
