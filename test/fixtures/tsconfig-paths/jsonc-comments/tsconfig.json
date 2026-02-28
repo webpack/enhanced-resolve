@@ -8,7 +8,7 @@
 			"@components/*": ["${configDir}/src/components/*"],
 			"foo": ["${configDir}/src/mapped/foo"],
 			/* Block comment in paths */
-			"bar/*": ["${configDir}/src/mapped/bar/*"]
+			"bar/*": ["${configDir}/src/mapped/bar/*"],
 		}
 	}
 }
