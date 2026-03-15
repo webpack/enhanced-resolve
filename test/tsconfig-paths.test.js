@@ -1005,6 +1005,76 @@ describe("TsconfigPathsPlugin", () => {
 		});
 	});
 
+	describe("bug: baseUrl from deep extends chain (non-sibling directories)", () => {
+		const deepBaseUrlDir = path.resolve(
+			__dirname,
+			"fixtures",
+			"tsconfig-paths",
+			"extends-deep-baseurl",
+		);
+
+		it("should resolve paths whose baseUrl comes from a grandparent extends in a non-sibling directory", (done) => {
+			const appDir = path.join(deepBaseUrlDir, "packages", "app");
+			const resolver = ResolverFactory.createResolver({
+				fileSystem,
+				extensions: [".ts", ".tsx"],
+				mainFields: ["browser", "main"],
+				mainFiles: ["index"],
+				tsconfig: path.join(appDir, "tsconfig.json"),
+			});
+
+			resolver.resolve({}, appDir, "@base/utils/format", {}, (err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(
+					path.join(
+						deepBaseUrlDir,
+						"tsconfig-base",
+						"src",
+						"utils",
+						"format.ts",
+					),
+				);
+				done();
+			});
+		});
+	});
+
+	describe("bug: scoped npm package in extends field (@scope/name)", () => {
+		const pkgEntryDir = path.resolve(
+			__dirname,
+			"fixtures",
+			"tsconfig-paths",
+			"extends-pkg-entry",
+		);
+
+		it("should resolve paths inherited from a scoped npm package tsconfig (extends '@my-tsconfig/base')", (done) => {
+			const resolver = ResolverFactory.createResolver({
+				fileSystem,
+				extensions: [".ts", ".tsx"],
+				mainFields: ["browser", "main"],
+				mainFiles: ["index"],
+				tsconfig: path.join(pkgEntryDir, "tsconfig.json"),
+			});
+
+			resolver.resolve({}, pkgEntryDir, "@pkg/util", {}, (err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(
+					path.join(
+						pkgEntryDir,
+						"node_modules",
+						"@my-tsconfig",
+						"base",
+						"src",
+						"util.ts",
+					),
+				);
+				done();
+			});
+		});
+	});
+
 	describe("JSONC support (comments in tsconfig.json)", () => {
 		const jsoncExampleDir = path.resolve(
 			__dirname,

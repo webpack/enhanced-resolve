@@ -1635,6 +1635,11 @@ declare interface TsconfigPathsMap {
 	refs: { [index: string]: TsconfigPathsData };
 
 	/**
+	 * all contexts (main + refs) for quick lookup
+	 */
+	allContexts: { [index: string]: TsconfigPathsData };
+
+	/**
 	 * file dependencies
 	 */
 	fileDependencies: Set<string>;
