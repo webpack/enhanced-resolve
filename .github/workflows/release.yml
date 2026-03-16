@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   release:
-    if: github.repository == 'webpack/webpack-cli'
+    if: github.repository == 'webpack/enhanced-resolve'
     name: Release
     runs-on: ubuntu-latest
     outputs:
