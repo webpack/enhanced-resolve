@@ -45,9 +45,10 @@
   ],
   "ignorePaths": [
     "package.json",
-    "yarn.lock",
+    "package-lock.json",
     "coverage",
     "*.log",
-    ".gitignore"
+    ".gitignore",
+    "CHANGELOG.md"
   ]
 }
