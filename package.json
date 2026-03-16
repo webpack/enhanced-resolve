@@ -57,7 +57,7 @@
   "devDependencies": {
     "@types/graceful-fs": "^4.1.6",
     "@types/jest": "^30.0.0",
-    "@types/node": "^24.10.4",
+    "@types/node": "^25.5.0",
     "cspell": "^9.4.0",
     "eslint": "^9.39.2",
     "eslint-config-webpack": "^4.9.0",
