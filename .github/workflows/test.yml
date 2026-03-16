@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: read #  to fetch code (actions/checkout)
+  contents: read
 
 jobs:
   lint:
@@ -48,7 +48,7 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: |
-          npm install -D typescript@^4 jest@^27 --ignore-scripts
+          npm install -D typescript@^4 jest@^27 memfs@^3 --ignore-scripts
           npm install --ignore-scripts
         if: matrix.node-version == '10.x' || matrix.node-version == '12.x' || matrix.node-version == '14.x' || matrix.node-version == '16.x'
       - name: Install dependencies
