@@ -17,6 +17,11 @@ const fixture5 = path.resolve(
 	"fixtures",
 	"exports-field-invalid-package-target",
 );
+const fixture6 = path.resolve(
+	__dirname,
+	"fixtures",
+	"exports-field-nested-version",
+);
 
 describe("process exports field", () => {
 	/** @type {{ name: string, expect: string[] | Error, suite: [ExportsField, string, string[]] }[]} */
@@ -2256,7 +2261,10 @@ describe("exportsFieldPlugin", () => {
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
 				expect(err).toBeInstanceOf(Error);
-				expect(err.message).toMatch(/Can't resolve/);
+				// exports field maps ./dist/main -> ./lib/main, but ./lib/main (no ext) doesn't exist.
+				// Resolution stops at the exports field level with a "Package path" error
+				// (no fallback to parent node_modules per issue #399 fix).
+				expect(err.message).toMatch(/Package path/);
 				done();
 			},
 		);
@@ -2271,7 +2279,7 @@ describe("exportsFieldPlugin", () => {
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
 				expect(err).toBeInstanceOf(Error);
-				expect(err.message).toMatch(/Can't resolve/);
+				expect(err.message).toMatch(/Package path/);
 				done();
 			},
 		);
@@ -3204,8 +3212,12 @@ describe("exportsFieldPlugin", () => {
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
 				expect(err).toBeInstanceOf(Error);
+				// exports maps ./non-existent.js -> ["-bad-specifier-", "./non-existent.js", "./a.js"]
+				// The first valid target (./non-existent.js) doesn't exist, so the paths array is
+				// abandoned (issue #400) and resolution fails with a "Package path" error
+				// (no fallback to parent node_modules per issue #399 fix).
 				expect(err.message).toMatch(
-					/Can't resolve '@exports-field\/bad-specifier\/non-existent\.js'/,
+					/Package path \.\/non-existent\.js.*no valid target file was found/,
 				);
 				done();
 			},
@@ -3335,6 +3347,37 @@ describe("exportsFieldPlugin", () => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
 				expect(result).toEqual(path.resolve(fixture5, "./a.js"));
+				done();
+			},
+		);
+	});
+
+	// issue #399: nested same package with different versions
+	// When workspace/node_modules/pkg has an exports field mapping ./src/index.js -> ./dist/index.js
+	// but ./dist/index.js does NOT exist, resolution should fail with an error
+	// and must NOT fall back to the root node_modules/pkg version.
+	it("should not fall back to parent node_modules when exports field maps to a missing file (issue #399)", (done) => {
+		const nestedResolver = ResolverFactory.createResolver({
+			extensions: [".js"],
+			fileSystem: new CachedInputFileSystem(fs, 4000),
+			conditionNames: ["node"],
+			fullySpecified: true,
+		});
+		nestedResolver.resolve(
+			{},
+			path.resolve(fixture6, "workspace"),
+			"pkg/src/index.js",
+			{},
+			(err, result) => {
+				if (!err) {
+					return done(
+						new Error(
+							`Expected resolution to fail, but got: ${result}. ` +
+								"Should not fall back to root node_modules when workspace's exports field maps to a missing file.",
+						),
+					);
+				}
+				expect(err).toBeInstanceOf(Error);
 				done();
 			},
 		);
