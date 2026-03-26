@@ -1646,7 +1646,7 @@ declare interface TsconfigPathsMap {
 }
 declare class TsconfigPathsPlugin {
 	constructor(configFileOrOptions: string | true | TsconfigOptions);
-	configFileMode: "auto" | "explicit" | "disabled";
+	isAutoConfigFile: boolean;
 	configFile: string;
 	references: "auto" | TsconfigReference[];
 	baseUrl?: string;

@@ -1119,7 +1119,7 @@ describe("TsconfigPathsPlugin", () => {
 		resolver.resolve({}, noTsconfigDir, "./src/index", {}, (err, result) => {
 			try {
 				expect(err).toBeTruthy();
-				expect(err.code).toBe("ENOENT");
+				expect(/** @type {NodeJS.ErrnoException} */ (err).code).toBe("ENOENT");
 				expect(result).toBeUndefined();
 				done();
 			} catch (err_) {
