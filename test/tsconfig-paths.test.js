@@ -1075,6 +1075,59 @@ describe("TsconfigPathsPlugin", () => {
 		});
 	});
 
+	it("should not error when tsconfig is true but tsconfig.json does not exist", (done) => {
+		const noTsconfigDir = path.resolve(
+			__dirname,
+			"fixtures",
+			"tsconfig-paths",
+			"no-tsconfig",
+		);
+
+		const resolver = ResolverFactory.createResolver({
+			fileSystem,
+			extensions: [".ts", ".tsx"],
+			mainFields: ["browser", "main"],
+			mainFiles: ["index"],
+			tsconfig: true,
+		});
+
+		// Should resolve normally via standard resolution (no tsconfig paths applied)
+		resolver.resolve({}, noTsconfigDir, "./src/index", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) return done(new Error("No result"));
+			expect(result).toEqual(path.join(noTsconfigDir, "src", "index.ts"));
+			done();
+		});
+	});
+
+	it("should error when tsconfig is an explicit path but the file does not exist", (done) => {
+		const noTsconfigDir = path.resolve(
+			__dirname,
+			"fixtures",
+			"tsconfig-paths",
+			"no-tsconfig",
+		);
+
+		const resolver = ResolverFactory.createResolver({
+			fileSystem,
+			extensions: [".ts", ".tsx"],
+			mainFields: ["browser", "main"],
+			mainFiles: ["index"],
+			tsconfig: path.join(noTsconfigDir, "tsconfig.json"),
+		});
+
+		resolver.resolve({}, noTsconfigDir, "./src/index", {}, (err, result) => {
+			try {
+				expect(err).toBeTruthy();
+				expect(/** @type {NodeJS.ErrnoException} */ (err).code).toBe("ENOENT");
+				expect(result).toBeUndefined();
+				done();
+			} catch (err_) {
+				done(err_);
+			}
+		});
+	});
+
 	describe("JSONC support (comments in tsconfig.json)", () => {
 		const jsoncExampleDir = path.resolve(
 			__dirname,
