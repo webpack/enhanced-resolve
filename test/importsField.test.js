@@ -1616,6 +1616,39 @@ describe("importsFieldPlugin", () => {
 		});
 	});
 
+	// Test for spec compliance: non-relative imports targets should not
+	// re-enter imports resolution (Node.js uses PACKAGE_RESOLVE for these,
+	// which only does node_modules lookup).
+	// See: https://github.com/orgs/webpack/discussions/20684
+	describe("should not chain imports resolution for non-relative targets", () => {
+		const chainedFixture = path.resolve(
+			__dirname,
+			"fixtures",
+			"imports-field-chained",
+		);
+
+		it("should fail to resolve #a when it maps to #b (another import specifier)", (done) => {
+			resolver.resolve({}, chainedFixture, "#a", {}, (err, result) => {
+				if (!err) {
+					return done(
+						new Error(`expected error for chained imports, got ${result}`),
+					);
+				}
+				expect(err).toBeInstanceOf(Error);
+				done();
+			});
+		});
+
+		it("should still resolve #b to ./the.js directly", (done) => {
+			resolver.resolve({}, chainedFixture, "#b", {}, (err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(path.resolve(chainedFixture, "the.js"));
+				done();
+			});
+		});
+	});
+
 	// Tests for #/ slash pattern support (node.js PR #60864)
 	// These tests cover the new Node.js behavior that allows #/ patterns
 	// See: https://github.com/nodejs/node/pull/60864

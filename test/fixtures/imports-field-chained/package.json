@@ -1,0 +1,8 @@
+{
+  "name": "imports-field-chained",
+  "version": "1.0.0",
+  "imports": {
+    "#a": "#b",
+    "#b": "./the.js"
+  }
+}
