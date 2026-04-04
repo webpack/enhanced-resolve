@@ -103,6 +103,17 @@ type BufferEncodingOption = "buffer" | { encoding: "buffer" };
 declare interface Cache {
 	[index: string]: undefined | ResolveRequest | ResolveRequest[];
 }
+declare interface CacheOptions {
+	/**
+	 * Maximum number of entries in join/dirname caches before clearing (0 = unlimited)
+	 */
+	maxSize?: number;
+
+	/**
+	 * An object (e.g. webpack compiler) whose lifetime controls the unsafeCache. When the owner is garbage collected, the associated unsafeCache is also released.
+	 */
+	owner?: Record<string, unknown>;
+}
 declare class CachedInputFileSystem {
 	constructor(fileSystem: BaseFileSystem, duration: number);
 	fileSystem: BaseFileSystem;
@@ -1283,6 +1294,11 @@ declare interface ResolveOptionsResolverFactoryObject_1 {
 	 * tsconfig file path or config object
 	 */
 	tsconfig: string | boolean | TsconfigOptions;
+
+	/**
+	 * cache configuration
+	 */
+	cache: CacheOptions;
 }
 declare interface ResolveOptionsResolverFactoryObject_2 {
 	/**
@@ -1433,11 +1449,18 @@ declare interface ResolveOptionsResolverFactoryObject_2 {
 	 * TypeScript config file path or config object with configFile and references
 	 */
 	tsconfig?: string | boolean | TsconfigOptions;
+
+	/**
+	 * Cache configuration options
+	 */
+	cache?: CacheOptions;
 }
 type ResolveRequest = BaseResolveRequest & Partial<ParsedIdentifier>;
 declare abstract class Resolver {
 	fileSystem: FileSystem;
 	options: ResolveOptionsResolverFactoryObject_1;
+	join: (rootPath: string, request: string) => string;
+	dirname: (maybePath: string) => string;
 	hooks: KnownHooks;
 	ensureHook(
 		name:
@@ -1487,7 +1510,6 @@ declare abstract class Resolver {
 	isModule(path: string): boolean;
 	isPrivate(path: string): boolean;
 	isDirectory(path: string): boolean;
-	join(path: string, request: string): string;
 	normalize(path: string): string;
 }
 declare interface Stat {
@@ -1710,6 +1732,7 @@ declare namespace exports {
 	export namespace create {
 		export const sync: (options: ResolveOptionsOptionalFS) => ResolveFunction;
 	}
+	export const configure: (options: { maxCacheSize?: number }) => void;
 	export namespace ResolverFactory {
 		export let createResolver: (
 			options: ResolveOptionsResolverFactoryObject_2,
