@@ -100,19 +100,28 @@ type BufferEncoding =
 	| "binary"
 	| "hex";
 type BufferEncodingOption = "buffer" | { encoding: "buffer" };
-declare interface Cache {
+declare class CacheClass {
+	constructor(__0?: CacheOptions);
+	maxSize: number;
+	data: CacheData;
+	static createCache: (options?: CacheOptions) => CacheClass;
+}
+declare interface CacheData {
 	[index: string]: undefined | ResolveRequest | ResolveRequest[];
 }
 declare interface CacheOptions {
 	/**
-	 * Maximum number of entries in join/dirname caches before clearing (0 = unlimited)
+	 * Maximum number of entries in path caches (join/dirname) before clearing (0 = unlimited)
 	 */
 	maxSize?: number;
 
 	/**
-	 * An object (e.g. webpack compiler) whose lifetime controls the unsafeCache. When the owner is garbage collected, the associated unsafeCache is also released.
+	 * An object whose lifetime controls the cache. When the owner is garbage collected, the cache is also released.
 	 */
 	owner?: Record<string, unknown>;
+}
+declare interface CacheUnsafeCachePlugin {
+	[index: string]: undefined | ResolveRequest | ResolveRequest[];
 }
 declare class CachedInputFileSystem {
 	constructor(fileSystem: BaseFileSystem, duration: number);
@@ -1223,7 +1232,7 @@ declare interface ResolveOptionsResolverFactoryObject_1 {
 	/**
 	 * unsafe cache
 	 */
-	unsafeCache: false | Cache;
+	unsafeCache: false | CacheClass | CacheUnsafeCachePlugin;
 
 	/**
 	 * symlinks
@@ -1294,11 +1303,6 @@ declare interface ResolveOptionsResolverFactoryObject_1 {
 	 * tsconfig file path or config object
 	 */
 	tsconfig: string | boolean | TsconfigOptions;
-
-	/**
-	 * cache configuration
-	 */
-	cache: CacheOptions;
 }
 declare interface ResolveOptionsResolverFactoryObject_2 {
 	/**
@@ -1367,9 +1371,9 @@ declare interface ResolveOptionsResolverFactoryObject_2 {
 	fileSystem: FileSystem;
 
 	/**
-	 * Use this cache object to unsafely cache the successful requests
+	 * Use this cache object to unsafely cache the successful requests, or a Cache instance created by createCache()
 	 */
-	unsafeCache?: boolean | Cache;
+	unsafeCache?: boolean | CacheClass | CacheUnsafeCachePlugin;
 
 	/**
 	 * Resolve symlinks to their symlinked location
@@ -1449,11 +1453,6 @@ declare interface ResolveOptionsResolverFactoryObject_2 {
 	 * TypeScript config file path or config object with configFile and references
 	 */
 	tsconfig?: string | boolean | TsconfigOptions;
-
-	/**
-	 * Cache configuration options
-	 */
-	cache?: CacheOptions;
 }
 type ResolveRequest = BaseResolveRequest & Partial<ParsedIdentifier>;
 declare abstract class Resolver {
@@ -1732,6 +1731,7 @@ declare namespace exports {
 	export namespace create {
 		export const sync: (options: ResolveOptionsOptionalFS) => ResolveFunction;
 	}
+	export const createCache: (options?: CacheOptions) => CacheClass;
 	export const configure: (options: { maxCacheSize?: number }) => void;
 	export namespace ResolverFactory {
 		export let createResolver: (
@@ -1749,6 +1749,7 @@ declare namespace exports {
 		req?: ResolveRequest,
 	) => void;
 	export {
+		CacheClass as Cache,
 		CachedInputFileSystem,
 		CloneBasenamePlugin,
 		LogInfoPlugin,

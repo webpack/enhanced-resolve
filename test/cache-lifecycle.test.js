@@ -1,7 +1,12 @@
 "use strict";
 
 const fs = require("fs");
-const { CachedInputFileSystem, ResolverFactory } = require("../");
+const {
+	Cache,
+	CachedInputFileSystem,
+	ResolverFactory,
+	createCache,
+} = require("../");
 const {
 	configure,
 	createCachedDirname,
@@ -98,6 +103,46 @@ describe("configure", () => {
 	});
 });
 
+describe("Cache", () => {
+	it("should create a Cache instance with default maxSize", () => {
+		const cache = createCache();
+
+		expect(cache).toBeInstanceOf(Cache);
+		expect(cache.maxSize).toBe(0);
+		expect(cache.data).toBeDefined();
+	});
+
+	it("should create a Cache instance with custom maxSize", () => {
+		const cache = createCache({ maxSize: 5000 });
+
+		expect(cache.maxSize).toBe(5000);
+	});
+
+	it("should return the same Cache for the same owner", () => {
+		const owner = { name: "compiler" };
+		const cache1 = createCache({ owner });
+		const cache2 = createCache({ owner });
+
+		expect(cache1).toBe(cache2);
+	});
+
+	it("should return different Caches for different owners", () => {
+		const owner1 = { name: "compiler-1" };
+		const owner2 = { name: "compiler-2" };
+		const cache1 = createCache({ owner: owner1 });
+		const cache2 = createCache({ owner: owner2 });
+
+		expect(cache1).not.toBe(cache2);
+	});
+
+	it("should return a new Cache each time without owner", () => {
+		const cache1 = createCache();
+		const cache2 = createCache();
+
+		expect(cache1).not.toBe(cache2);
+	});
+});
+
 describe("Resolver instance cache", () => {
 	it("should have independent join/dirname per instance", () => {
 		const fileSystem = new CachedInputFileSystem(fs, 0);
@@ -126,102 +171,106 @@ describe("Resolver instance cache", () => {
 		expect(resolver.join("/a/b", "c")).toBe(join("/a/b", "c"));
 		expect(resolver.dirname("/a/b/c")).toBe(dirname("/a/b/c"));
 	});
-});
 
-describe("owner-scoped cache", () => {
-	it("should share join/dirname caches across resolvers with same owner", () => {
+	it("should use maxSize from Cache instance", () => {
 		const fileSystem = new CachedInputFileSystem(fs, 0);
-		const owner = { name: "test-compiler" };
-
-		const resolver1 = ResolverFactory.createResolver({
-			fileSystem,
-			extensions: [".js"],
-			cache: { owner },
-		});
-		const resolver2 = ResolverFactory.createResolver({
-			fileSystem,
-			extensions: [".js"],
-			cache: { owner },
-		});
-
-		expect(resolver1.join).toBe(resolver2.join);
-		expect(resolver1.dirname).toBe(resolver2.dirname);
-	});
-
-	it("should not share caches across different owners", () => {
-		const fileSystem = new CachedInputFileSystem(fs, 0);
-		const owner1 = { name: "compiler-1" };
-		const owner2 = { name: "compiler-2" };
-
-		const resolver1 = ResolverFactory.createResolver({
-			fileSystem,
-			extensions: [".js"],
-			cache: { owner: owner1 },
-		});
-		const resolver2 = ResolverFactory.createResolver({
-			fileSystem,
-			extensions: [".js"],
-			cache: { owner: owner2 },
-		});
-
-		expect(resolver1.join).not.toBe(resolver2.join);
-		expect(resolver1.dirname).not.toBe(resolver2.dirname);
-	});
-
-	it("should share unsafeCache across resolvers with same owner", () => {
-		const fileSystem = new CachedInputFileSystem(fs, 4000);
-		const owner = { name: "test-compiler" };
-
-		const resolver1 = ResolverFactory.createResolver({
-			fileSystem,
-			extensions: [".js"],
-			unsafeCache: true,
-			cache: { owner },
-		});
-		const resolver2 = ResolverFactory.createResolver({
-			fileSystem,
-			extensions: [".js"],
-			unsafeCache: true,
-			cache: { owner },
-		});
-
-		expect(resolver1.options.unsafeCache).toBe(resolver2.options.unsafeCache);
-	});
-
-	it("should not share unsafeCache without owner", () => {
-		const fileSystem = new CachedInputFileSystem(fs, 0);
-
-		const resolver1 = ResolverFactory.createResolver({
-			fileSystem,
-			extensions: [".js"],
-			unsafeCache: true,
-		});
-		const resolver2 = ResolverFactory.createResolver({
-			fileSystem,
-			extensions: [".js"],
-			unsafeCache: true,
-		});
-
-		expect(resolver1.options.unsafeCache).not.toBe(
-			resolver2.options.unsafeCache,
-		);
-	});
-
-	it("should respect maxSize with owner", () => {
-		const fileSystem = new CachedInputFileSystem(fs, 0);
-		const owner = { name: "test-compiler" };
+		const cache = createCache({ maxSize: 2 });
 
 		const resolver = ResolverFactory.createResolver({
 			fileSystem,
 			extensions: [".js"],
-			cache: { owner, maxSize: 2 },
+			unsafeCache: cache,
 		});
 
-		// Fill cache, then exceed maxSize — should still return correct results
+		// Fill and exceed maxSize — should still return correct results
 		resolver.join("/root1", "a");
 		resolver.join("/root2", "b");
 		resolver.join("/root3", "c");
 
 		expect(resolver.join("/root1", "a")).toBe(join("/root1", "a"));
+	});
+});
+
+describe("unsafeCache with Cache instance", () => {
+	it("should share unsafeCache data across resolvers via same Cache", (done) => {
+		const fileSystem = new CachedInputFileSystem(fs, 4000);
+		const cache = createCache();
+
+		const resolver1 = ResolverFactory.createResolver({
+			fileSystem,
+			extensions: [".js"],
+			unsafeCache: cache,
+		});
+		const resolver2 = ResolverFactory.createResolver({
+			fileSystem,
+			extensions: [".js"],
+			unsafeCache: cache,
+		});
+
+		const fixturePath = require("path").join(__dirname, "fixtures");
+
+		// Resolve with resolver1 to populate cache.data
+		resolver1.resolve({}, fixturePath, "m2/b", {}, (err, _result) => {
+			if (err) return done(err);
+			expect(Object.keys(cache.data).length).toBeGreaterThan(0);
+
+			// Poison cache to verify resolver2 reads from same data
+			for (const key of Object.keys(cache.data)) {
+				cache.data[key] = { path: "poisoned" };
+			}
+
+			resolver2.resolve({}, fixturePath, "m2/b", {}, (err, result) => {
+				if (err) return done(err);
+				expect(result).toBe("poisoned");
+				done();
+			});
+		});
+	});
+
+	it("should not share data between different Cache instances", () => {
+		const cache1 = createCache();
+		const cache2 = createCache();
+
+		expect(cache1.data).not.toBe(cache2.data);
+	});
+
+	it("should share Cache via same owner across resolvers", (done) => {
+		const fileSystem = new CachedInputFileSystem(fs, 4000);
+		const owner = { name: "compiler" };
+		const cache = createCache({ owner });
+
+		const resolver1 = ResolverFactory.createResolver({
+			fileSystem,
+			extensions: [".js"],
+			unsafeCache: cache,
+		});
+
+		// Create a second resolver with same owner's cache
+		const cache2 = createCache({ owner });
+
+		expect(cache).toBe(cache2);
+
+		const resolver2 = ResolverFactory.createResolver({
+			fileSystem,
+			extensions: [".js"],
+			unsafeCache: cache2,
+		});
+
+		const fixturePath = require("path").join(__dirname, "fixtures");
+
+		resolver1.resolve({}, fixturePath, "m2/b", {}, (err, _result) => {
+			if (err) return done(err);
+
+			// Poison to verify sharing
+			for (const key of Object.keys(cache.data)) {
+				cache.data[key] = { path: "owner-shared" };
+			}
+
+			resolver2.resolve({}, fixturePath, "m2/b", {}, (err, result) => {
+				if (err) return done(err);
+				expect(result).toBe("owner-shared");
+				done();
+			});
+		});
 	});
 });
