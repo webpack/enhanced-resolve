@@ -1438,6 +1438,8 @@ type ResolveRequest = BaseResolveRequest & Partial<ParsedIdentifier>;
 declare abstract class Resolver {
 	fileSystem: FileSystem;
 	options: ResolveOptionsResolverFactoryObject_1;
+	join: (rootPath: string, request: string) => string;
+	dirname: (maybePath: string) => string;
 	hooks: KnownHooks;
 	ensureHook(
 		name:
@@ -1487,7 +1489,6 @@ declare abstract class Resolver {
 	isModule(path: string): boolean;
 	isPrivate(path: string): boolean;
 	isDirectory(path: string): boolean;
-	join(path: string, request: string): string;
 	normalize(path: string): string;
 }
 declare interface Stat {
