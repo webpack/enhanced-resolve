@@ -71,7 +71,7 @@
     "memfs": "^4.56.11",
     "prettier": "^3.7.4",
     "prettier-2": "npm:prettier@^2",
-    "tooling": "webpack/tooling#v1.25.0",
+    "tooling": "webpack/tooling#v1.26.0",
     "typescript": "^6.0.2"
   },
   "engines": {
