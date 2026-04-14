@@ -20,12 +20,24 @@ import enhanced from "../../../lib/index.js";
 
 const { ResolverFactory, CachedInputFileSystem } = enhanced;
 
+// Long enough that cache entries never expire mid-run: tinybench's warmup +
+// measurement loop for this task runs for a couple of seconds at most, and
+// `CachedInputFileSystem`'s default 4s TTL was short enough that some stat
+// calls would re-enter fs mid-benchmark and add timing jitter (~5% rme).
+//
+// Capped at 30s because CachedInputFileSystem's constructor allocates one
+// Set per 500ms of TTL (see CacheBackend), and the cold-cache case rebuilds
+// that cache every iteration — so a very large TTL would shift the
+// benchmark into measuring cache construction instead of resolve work.
+const WARM_FS_CACHE_TTL_MS = 30 * 1000;
+const COLD_FS_CACHE_TTL_MS = 4000;
+
 /**
  * @param {import('tinybench').Bench} bench
  * @param {{ fixtureDir: string }} ctx
  */
 export default function register(bench, { fixtureDir }) {
-	const fileSystem = new CachedInputFileSystem(fs, 4000);
+	const fileSystem = new CachedInputFileSystem(fs, WARM_FS_CACHE_TTL_MS);
 
 	const resolver = ResolverFactory.createResolver({
 		fileSystem,
@@ -76,7 +88,7 @@ export default function register(bench, { fixtureDir }) {
 	// iteration, so the fs cache never helps us. This is the metric that most
 	// directly reflects the cost of the doResolve hot path itself.
 	bench.add("realistic-midsize: mixed batch (cold cache)", async () => {
-		const coldFs = new CachedInputFileSystem(fs, 4000);
+		const coldFs = new CachedInputFileSystem(fs, COLD_FS_CACHE_TTL_MS);
 		const coldResolver = ResolverFactory.createResolver({
 			fileSystem: coldFs,
 			extensions: [".js", ".json"],
