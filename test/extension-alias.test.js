@@ -88,3 +88,34 @@ describe("extension-alias", () => {
 		});
 	});
 });
+
+describe("extension-alias array logging", () => {
+	const fixtures = path.join(__dirname, "fixtures");
+
+	const ResolverFactory = require("../lib/ResolverFactory");
+	const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
+
+	const nodeFileSystem = new CachedInputFileSystem(fs, 4000);
+
+	it("tries multiple extension aliases in order and logs each failure", (done) => {
+		const resolver = ResolverFactory.createResolver({
+			fileSystem: nodeFileSystem,
+			extensionAlias: { ".js": [".missing1", ".missing2", ".js"] },
+		});
+		const log = [];
+		resolver.resolve(
+			{},
+			fixtures,
+			"./a.js",
+			{ log: (m) => log.push(m) },
+			(err, result) => {
+				if (err) return done(err);
+				expect(result).toEqual(path.join(fixtures, "a.js"));
+				expect(
+					log.some((l) => l.includes("Failed to alias from extension alias")),
+				).toBe(true);
+				done();
+			},
+		);
+	});
+});

@@ -125,3 +125,19 @@ describe("self-reference resolution", () => {
 		});
 	});
 });
+
+describe("self-reference negative case", () => {
+	it("does not self-reference when the package name doesn't match the request prefix", (done) => {
+		const selfPkg = path.join(fixtures, "self-reference-pkg");
+		const resolver = ResolverFactory.createResolver({
+			extensions: [".js"],
+			conditionNames: ["node"],
+			exportsFields: ["exports"],
+			fileSystem: nodeFileSystem,
+		});
+		resolver.resolve({}, selfPkg, "other-pkg", {}, (err) => {
+			expect(err).toBeInstanceOf(Error);
+			done();
+		});
+	});
+});

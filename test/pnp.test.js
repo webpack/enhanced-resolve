@@ -386,3 +386,52 @@ describe("pnp coverage branches", () => {
 		);
 	});
 });
+
+describe("pnp alternate target and env detection", () => {
+	it("returns an error when neither pnp nor the alternate find a result", (done) => {
+		const pnpApi = {
+			resolveToUnqualified() {
+				return null;
+			},
+		};
+		const resolver = ResolverFactory.createResolver({
+			fileSystem: nodeFileSystem,
+			pnpApi,
+			modules: ["node_modules"],
+		});
+		resolver.resolve(
+			{},
+			path.resolve(__dirname, "fixtures"),
+			"no-such-package",
+			{},
+			(err) => {
+				expect(err).toBeInstanceOf(Error);
+				done();
+			},
+		);
+	});
+
+	it("attempts the process.versions.pnp auto-detection path", () => {
+		// eslint-disable-next-line jsdoc/reject-any-type
+		const { pnp: originalPnp } = /** @type {any} */ (process.versions);
+		try {
+			Object.defineProperty(process.versions, "pnp", {
+				value: "0.0.0",
+				configurable: true,
+			});
+			expect(() =>
+				ResolverFactory.createResolver({ fileSystem: nodeFileSystem }),
+			).not.toThrow();
+		} finally {
+			if (originalPnp === undefined) {
+				// eslint-disable-next-line jsdoc/reject-any-type
+				delete (/** @type {any} */ (process.versions).pnp);
+			} else {
+				Object.defineProperty(process.versions, "pnp", {
+					value: originalPnp,
+					configurable: true,
+				});
+			}
+		}
+	});
+});

@@ -76,3 +76,13 @@ describe("plugins", () => {
 		);
 	});
 });
+
+// cspell:ignore Hierachic
+describe("deprecated plugin aliases", () => {
+	it("re-exports ModulesInHierarchicalDirectoriesPlugin as ModulesInHierachicDirectoriesPlugin", () => {
+		const alias = require("../lib/ModulesInHierachicDirectoriesPlugin");
+		const target = require("../lib/ModulesInHierarchicalDirectoriesPlugin");
+
+		expect(alias).toBe(target);
+	});
+});

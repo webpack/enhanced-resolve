@@ -3383,3 +3383,27 @@ describe("exportsFieldPlugin", () => {
 		);
 	});
 });
+
+describe("exportsField error paths", () => {
+	const fixtures = path.join(__dirname, "fixtures");
+	const nodeFileSystem = new CachedInputFileSystem(fs, 4000);
+
+	it("emits 'is not exported' error when no conditions match", (done) => {
+		const resolver = ResolverFactory.createResolver({
+			extensions: [".js"],
+			conditionNames: ["unknown-cond"],
+			exportsFields: ["exports"],
+			fileSystem: nodeFileSystem,
+		});
+		resolver.resolve(
+			{},
+			path.join(fixtures, "exports-field"),
+			"exports-field/index",
+			{},
+			(err) => {
+				expect(err).toBeInstanceOf(Error);
+				done();
+			},
+		);
+	});
+});

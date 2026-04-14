@@ -258,3 +258,37 @@ describe("unsafe-cache", () => {
 		});
 	});
 });
+
+describe("unsafe-cache additional branches", () => {
+	const fixtures = path.join(__dirname, "fixtures");
+
+	it("passes through without caching when cachePredicate returns false", (done) => {
+		const cache = {};
+		const cachedResolve = resolve.create({
+			unsafeCache: cache,
+			cachePredicate: () => false,
+		});
+		cachedResolve(fixtures, "./a.js", (err, result) => {
+			if (err) return done(err);
+			expect(result).toEqual(path.join(fixtures, "a.js"));
+			expect(Object.keys(cache)).toHaveLength(0);
+			done();
+		});
+	});
+
+	it("returns a poisoned cache entry on a re-resolve (non-array branch)", (done) => {
+		const cache = {};
+		const cachedResolve = resolve.create({ unsafeCache: cache });
+		cachedResolve(fixtures, "./a.js", (err) => {
+			if (err) return done(err);
+			for (const key of Object.keys(cache)) {
+				cache[key] = { path: "poisoned" };
+			}
+			cachedResolve(fixtures, "./a.js", (err2, result) => {
+				if (err2) return done(err2);
+				expect(result).toBe("poisoned");
+				done();
+			});
+		});
+	});
+});

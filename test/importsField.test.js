@@ -1694,3 +1694,43 @@ describe("importsFieldPlugin", () => {
 		});
 	});
 });
+
+describe("importsField additional integration edges", () => {
+	const fixtures = path.join(__dirname, "fixtures");
+	const nodeFileSystem = new CachedInputFileSystem(fs, 4000);
+
+	it("resolves an imports-field key to a real file", (done) => {
+		const resolver = ResolverFactory.createResolver({
+			extensions: [".js"],
+			conditionNames: ["node"],
+			importsFields: ["imports"],
+			fileSystem: nodeFileSystem,
+		});
+		resolver.resolve(
+			{},
+			path.join(fixtures, "imports-field-error-trigger"),
+			"#trigger",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				expect(result).toEqual(
+					path.join(fixtures, "imports-field-error-trigger/resolved.js"),
+				);
+				done();
+			},
+		);
+	});
+
+	it("errors for # requests without a description file in scope", (done) => {
+		const resolver = ResolverFactory.createResolver({
+			extensions: [".js"],
+			conditionNames: ["node"],
+			importsFields: ["imports"],
+			fileSystem: nodeFileSystem,
+		});
+		resolver.resolve({}, "/tmp", "#not-in-scope", {}, (err) => {
+			expect(err).toBeInstanceOf(Error);
+			done();
+		});
+	});
+});
