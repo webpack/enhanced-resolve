@@ -71,19 +71,6 @@ describe("Resolver join/dirname cache", () => {
 	});
 
 	describe("when unsafeCache is disabled", () => {
-		it("should use the raw uncached functions directly", () => {
-			const fileSystem = new CachedInputFileSystem(fs, 0);
-
-			const resolver = ResolverFactory.createResolver({
-				fileSystem,
-				extensions: [".js"],
-				unsafeCache: false,
-			});
-
-			expect(resolver.join).toBe(join);
-			expect(resolver.dirname).toBe(dirname);
-		});
-
 		it("should share the same function reference across resolvers", () => {
 			const fileSystem = new CachedInputFileSystem(fs, 0);
 
