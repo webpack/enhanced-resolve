@@ -1,0 +1,5 @@
+{
+  "name": "alias-realistic-fixture",
+  "version": "1.0.0",
+  "main": "./src/index.js"
+}

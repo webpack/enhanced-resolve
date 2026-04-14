@@ -1,0 +1,11 @@
+{
+  "name": "alias-field-fixture",
+  "version": "1.0.0",
+  "browser": {
+    "./src/server.js": "./src/browser.js",
+    "./src/node-only.js": false,
+    "./src/fs-shim.js": "./src/fs-browser.js",
+    "fs": "./src/fs-browser.js",
+    "path": "./src/path-browser.js"
+  }
+}

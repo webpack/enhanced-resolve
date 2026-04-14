@@ -1,0 +1,22 @@
+{
+  "name": "imports-field-fixture",
+  "version": "1.0.0",
+  "imports": {
+    "#utils": {
+      "node": "./src/utils/node.js",
+      "default": "./src/utils/default.js"
+    },
+    "#config": {
+      "development": "./src/config.dev.js",
+      "production": "./src/config.prod.js",
+      "default": "./src/config.default.js"
+    },
+    "#features/*": {
+      "import": "./src/features/*.mjs",
+      "require": "./src/features/*.js",
+      "default": "./src/features/*.js"
+    },
+    "#lib/*.js": "./src/lib/*.js",
+    "#constant": "./src/constant.js"
+  }
+}
