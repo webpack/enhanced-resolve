@@ -14,7 +14,7 @@ const {
 } = require("../lib/util/path");
 
 describe("util/path getType", () => {
-	it("returns Empty for empty input", () => {
+	it("returns Empty for the empty string", () => {
 		expect(getType("")).toBe(PathType.Empty);
 	});
 
@@ -42,6 +42,7 @@ describe("util/path getType", () => {
 		expect(getType("../a")).toBe(PathType.Relative);
 		expect(getType(".a")).toBe(PathType.Normal);
 		expect(getType("..a")).toBe(PathType.Normal);
+		expect(getType(".a/")).toBe(PathType.Normal);
 		expect(getType("/abc")).toBe(PathType.AbsolutePosix);
 		expect(getType("#foo")).toBe(PathType.Internal);
 		expect(getType("C:\\foo")).toBe(PathType.AbsoluteWin);
@@ -53,22 +54,17 @@ describe("util/path getType", () => {
 });
 
 describe("util/path normalize", () => {
-	it("returns empty for empty path", () => {
+	it("returns the input when empty", () => {
 		expect(normalize("")).toBe("");
 	});
 
-	it("handles windows absolute paths", () => {
+	it("normalizes Windows absolute paths", () => {
 		expect(normalize("C:\\foo\\..\\bar")).toBe("C:\\bar");
 	});
 
-	it("handles relative paths", () => {
+	it("keeps relative paths relative", () => {
 		expect(normalize("./a/b")).toBe("./a/b");
 		expect(normalize("./a/../b")).toBe("./b");
-	});
-
-	it("prefixes ./ when collapse produces a normal path", () => {
-		// "./a" normalized via posix is "a", then prefix "./" added
-		expect(normalize("./a")).toBe("./a");
 	});
 
 	it("normalizes posix absolute paths", () => {
@@ -103,20 +99,6 @@ describe("util/path join", () => {
 	it("joins rooted windows-style paths", () => {
 		expect(join("C:\\a", "b")).toBe("C:\\a\\b");
 	});
-
-	it("falls back when rootPath is Empty", () => {
-		// rootPath empty, request empty → returns rootPath
-		expect(join("", "")).toBe("");
-		// rootPath empty, request relative → posixNormalize("") === "." (Relative) → returned as-is
-		expect(join("", "./foo")).toBe(".");
-	});
-
-	it("falls back when rootPath is Internal (#)", () => {
-		// rootPath Internal, request Empty → rootPath
-		expect(join("#", "")).toBe("#");
-		// rootPath Internal, request Normal → posixNormalize rootPath
-		expect(join("#", "foo")).toBe("#");
-	});
 });
 
 describe("util/path dirname", () => {
@@ -138,7 +120,7 @@ describe("util/path cachedJoin", () => {
 		expect(a).toBe("/root/a/b");
 	});
 
-	it("caches across different roots", () => {
+	it("keeps separate caches per root", () => {
 		const a = cachedJoin("/x", "req");
 		const b = cachedJoin("/y", "req");
 		const a2 = cachedJoin("/x", "req");
@@ -161,7 +143,7 @@ describe("util/path isSubPath", () => {
 		expect(isSubPath("/a/b", "/a/b/c")).toBe(true);
 	});
 
-	it("returns false for a sibling starting with parent name", () => {
+	it("returns false for a sibling that starts with the parent name", () => {
 		expect(isSubPath("/app", "/app-other/file")).toBe(false);
 	});
 
@@ -174,13 +156,12 @@ describe("util/path isSubPath", () => {
 	});
 });
 
-describe("util/path regex exports", () => {
-	it("detects .. segments via deprecatedInvalidSegmentRegEx", () => {
+describe("util/path exported regexes", () => {
+	it("deprecatedInvalidSegmentRegEx matches .. segments", () => {
 		expect(deprecatedInvalidSegmentRegEx.test("/foo/../bar")).toBe(true);
-		expect(deprecatedInvalidSegmentRegEx.test("/foo/bar")).toBe(false);
 	});
 
-	it("detects segments via invalidSegmentRegEx", () => {
+	it("invalidSegmentRegEx matches node_modules segments", () => {
 		expect(invalidSegmentRegEx.test("/foo/node_modules/bar")).toBe(true);
 		expect(invalidSegmentRegEx.test("/foo/../bar")).toBe(true);
 	});

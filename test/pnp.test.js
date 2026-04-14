@@ -325,3 +325,64 @@ describe("pnp", () => {
 		);
 	});
 });
+
+describe("pnp coverage branches", () => {
+	const fixture = path.resolve(__dirname, "fixtures", "pnp");
+
+	it("falls through when pnpApi throws an UNDECLARED_DEPENDENCY error and logs each line", (done) => {
+		const pnpApi = {
+			resolveToUnqualified() {
+				const err =
+					/** @type {Error & { code: string, pnpCode: string }} */
+					(new Error("line-1\nline-2"));
+				err.code = "MODULE_NOT_FOUND";
+				err.pnpCode = "UNDECLARED_DEPENDENCY";
+				throw err;
+			},
+		};
+		const resolver = ResolverFactory.createResolver({
+			fileSystem: nodeFileSystem,
+			pnpApi,
+			modules: ["node_modules", path.resolve(fixture, "../pnp-a")],
+		});
+		const logs = [];
+		resolver.resolve(
+			{},
+			path.resolve(__dirname, "fixtures"),
+			"m2/a.js",
+			{ log: (m) => logs.push(m) },
+			(err, result) => {
+				if (err) return done(err);
+				expect(result).toEqual(path.resolve(fixture, "../pnp-a/m2/a.js"));
+				expect(
+					logs.some((l) => l.includes("request is not managed by the pnpapi")),
+				).toBe(true);
+				done();
+			},
+		);
+	});
+
+	it("propagates unexpected errors from pnpApi", (done) => {
+		const pnpApi = {
+			resolveToUnqualified() {
+				throw new Error("unexpected-pnp");
+			},
+		};
+		const resolver = ResolverFactory.createResolver({
+			fileSystem: nodeFileSystem,
+			pnpApi,
+			modules: ["node_modules", path.resolve(fixture, "../pnp-a")],
+		});
+		resolver.resolve(
+			{},
+			path.resolve(__dirname, "fixtures"),
+			"m2/a.js",
+			{},
+			(err) => {
+				expect(err).toBeTruthy();
+				expect(/** @type {Error} */ (err).message).toBe("unexpected-pnp");
+				done();
+			},
+		);
+	});
+});

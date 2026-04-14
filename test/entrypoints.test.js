@@ -27,7 +27,7 @@ describe("util/entrypoints processExportsField", () => {
 		);
 	});
 
-	it("returns empty array for unmatched export key", () => {
+	it("returns an empty array for an unmatched export key", () => {
 		const processor = processExportsField({ ".": "./main.js" });
 		const [paths] = processor("./not-listed", new Set(["node"]));
 		expect(paths).toEqual([]);
@@ -76,7 +76,7 @@ describe("util/entrypoints processImportsField", () => {
 		);
 	});
 
-	it("returns empty array for unmatched import key", () => {
+	it("returns an empty array for an unmatched import key", () => {
 		const processor = processImportsField({ "#a": "./main.js" });
 		const [paths] = processor("#x", new Set(["node"]));
 		expect(paths).toEqual([]);

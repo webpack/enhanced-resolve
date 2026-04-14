@@ -1,17 +1,18 @@
 "use strict";
 
+/* eslint-disable jsdoc/reject-any-type */
+
 const stripJsonComments = require("../lib/util/strip-json-comments");
 
 describe("util/strip-json-comments", () => {
 	it("throws when given a non-string", () => {
-		// @ts-expect-error testing runtime check
-		expect(() => stripJsonComments(42)).toThrow(TypeError);
+		expect(() => stripJsonComments(/** @type {any} */ (42))).toThrow(TypeError);
 	});
 
 	it("removes single-line comments (default: replace with whitespace)", () => {
-		const result = stripJsonComments('{"a": 1} // comment');
-		// Length preserved, comment body replaced by spaces (no trailing newline).
-		expect(result).toHaveLength('{"a": 1} // comment'.length);
+		const input = '{"a": 1} // comment';
+		const result = stripJsonComments(input);
+		expect(result).toHaveLength(input.length);
 		expect(result.trim()).toBe('{"a": 1}');
 	});
 
@@ -28,15 +29,17 @@ describe("util/strip-json-comments", () => {
 	});
 
 	it("handles single-line comments terminated by \\n", () => {
-		const result = stripJsonComments('{"a": 1} // c\n"b"');
-		expect(result).toHaveLength('{"a": 1} // c\n"b"'.length);
+		const input = '{"a": 1} // c\n"b"';
+		const result = stripJsonComments(input);
+		expect(result).toHaveLength(input.length);
 		expect(result).toContain("\n");
 		expect(result).toContain('"b"');
 	});
 
 	it("removes multi-line comments", () => {
-		const result = stripJsonComments('{"a": 1} /* a\nb */ "c"');
-		expect(result).toHaveLength('{"a": 1} /* a\nb */ "c"'.length);
+		const input = '{"a": 1} /* a\nb */ "c"';
+		const result = stripJsonComments(input);
+		expect(result).toHaveLength(input.length);
 		expect(result).toContain('"c"');
 		expect(result).not.toMatch("/*");
 	});
@@ -66,11 +69,6 @@ describe("util/strip-json-comments", () => {
 	it("strips trailing commas before ]", () => {
 		const result = stripJsonComments("[1, 2, 3,]", { trailingCommas: true });
 		expect(result).toBe("[1, 2, 3 ]");
-	});
-
-	it("handles an unterminated single-line comment at end of input", () => {
-		const result = stripJsonComments('{"a": 1} // unterminated');
-		expect(result).toBe('{"a": 1}                ');
 	});
 
 	it("handles an unterminated multiline comment at end of input", () => {

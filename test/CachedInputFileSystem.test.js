@@ -1,5 +1,7 @@
 "use strict";
 
+/* eslint-disable jsdoc/reject-any-type */
+
 const path = require("path");
 const url = require("url");
 const { CachedInputFileSystem } = require("../");
@@ -589,5 +591,108 @@ describe("cachedInputFileSystem OperationMergerBackend and Node.JS filesystem", 
 	it("should work with URL sync", () => {
 		const r = fs.readFileSync(url.pathToFileURL(file));
 		expect(r.toString()).toBe("abc");
+	});
+});
+
+describe("cachedInputFileSystem argument validation and readJson fallback", () => {
+	let cached;
+
+	beforeEach(() => {
+		cached = new CachedInputFileSystem(require("fs"), 0);
+	});
+
+	it("rejects non-path arguments from the async API", (done) => {
+		cached.stat(/** @type {any} */ ({ not: "a path" }), (err) => {
+			expect(err).toBeInstanceOf(TypeError);
+			expect(/** @type {Error} */ (err).message).toMatch(
+				/path must be a string/,
+			);
+			done();
+		});
+	});
+
+	it("rejects non-path arguments from the sync API (CacheBackend)", () => {
+		const cachedLong = new CachedInputFileSystem(require("fs"), 1000);
+		expect(() => cachedLong.statSync(/** @type {any} */ ({}))).toThrow(
+			/path must be a string/,
+		);
+	});
+
+	it("reads a valid JSON file via the readJson fallback", (done) => {
+		// Wrap fs so that readJson/readJsonSync are not present, forcing the fallback.
+		const baseFs = require("fs");
+
+		const wrapped = {
+			stat: baseFs.stat.bind(baseFs),
+			statSync: baseFs.statSync.bind(baseFs),
+			readFile: baseFs.readFile.bind(baseFs),
+			readFileSync: baseFs.readFileSync.bind(baseFs),
+			readdir: baseFs.readdir.bind(baseFs),
+			readdirSync: baseFs.readdirSync.bind(baseFs),
+			readlink: baseFs.readlink.bind(baseFs),
+			readlinkSync: baseFs.readlinkSync.bind(baseFs),
+			lstat: baseFs.lstat.bind(baseFs),
+			lstatSync: baseFs.lstatSync.bind(baseFs),
+		};
+		const cachedWrapped = new CachedInputFileSystem(wrapped, 0);
+		cachedWrapped.readJson(
+			path.resolve(__dirname, "./fixtures/browser-module/package.json"),
+			(err, result) => {
+				if (err) return done(err);
+				expect(result).toHaveProperty("browser");
+				done();
+			},
+		);
+	});
+
+	it("surfaces 'No file content' when reading an empty file via readJson fallback", (done) => {
+		const baseFs = require("fs");
+
+		const wrapped = {
+			stat: baseFs.stat.bind(baseFs),
+			statSync: baseFs.statSync.bind(baseFs),
+			readFile: baseFs.readFile.bind(baseFs),
+			readFileSync: baseFs.readFileSync.bind(baseFs),
+			readdir: baseFs.readdir.bind(baseFs),
+			readdirSync: baseFs.readdirSync.bind(baseFs),
+			readlink: baseFs.readlink.bind(baseFs),
+			readlinkSync: baseFs.readlinkSync.bind(baseFs),
+			lstat: baseFs.lstat.bind(baseFs),
+			lstatSync: baseFs.lstatSync.bind(baseFs),
+		};
+		const cachedWrapped = new CachedInputFileSystem(wrapped, 0);
+		cachedWrapped.readJson(
+			path.resolve(__dirname, "./fixtures/empty-description-file/package.json"),
+			(err) => {
+				expect(err).toBeInstanceOf(Error);
+				expect(/** @type {Error} */ (err).message).toMatch(/No file content/);
+				done();
+			},
+		);
+	});
+
+	it("surfaces JSON parse errors via readJson fallback", (done) => {
+		const baseFs = require("fs");
+
+		const wrapped = {
+			stat: baseFs.stat.bind(baseFs),
+			statSync: baseFs.statSync.bind(baseFs),
+			readFile: baseFs.readFile.bind(baseFs),
+			readFileSync: baseFs.readFileSync.bind(baseFs),
+			readdir: baseFs.readdir.bind(baseFs),
+			readdirSync: baseFs.readdirSync.bind(baseFs),
+			readlink: baseFs.readlink.bind(baseFs),
+			readlinkSync: baseFs.readlinkSync.bind(baseFs),
+			lstat: baseFs.lstat.bind(baseFs),
+			lstatSync: baseFs.lstatSync.bind(baseFs),
+		};
+		const cachedWrapped = new CachedInputFileSystem(wrapped, 0);
+		cachedWrapped.readJson(
+			path.resolve(__dirname, "./fixtures/bad-description-file/package.json"),
+			(err) => {
+				expect(err).toBeInstanceOf(SyntaxError);
+				done();
+			},
+		);
 	});
 });
