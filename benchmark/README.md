@@ -96,6 +96,15 @@ export default function register(bench, { caseName, caseDir, fixtureDir }) {
 | `prefer-relative`         | `preferRelative: true` — bare specifiers attempted as relative before node_modules                           |
 | `main-field`              | MainFieldPlugin with `browser`/`module`/`main` candidates against packages defining different combinations   |
 | `sync-resolver`           | `useSyncFileSystemCalls: true` via `resolveSync` — the loader-resolver hot path                              |
+| `symlinks`                | SymlinkPlugin on vs off, resolves routed through symlink targets created at bench setup                      |
+| `resolve-to-context`      | `resolveToContext: true` directory-only branch of the resolver pipeline                                      |
+| `failed-resolution`       | Error path: missing files and packages, walks the full pipeline before reporting the miss                    |
+| `concurrent-batch`        | 15 resolves through `Promise.all`, exercising in-flight request de-duplication                               |
+| `large-alias-list`        | 50 non-matching + 8 matching aliases, stresses AliasPlugin's linear scan                                     |
+| `multiple-modules`        | `modules: [shared, vendor, node_modules]` mix of root + hierarchical directories                             |
+| `mixed-conditions`        | Nested condition map (browser/worker/node/development/production/...) under 4 condition configurations       |
+| `exports-patterns-many`   | Package with 6 wildcard subpath exports × 4 leaves per prefix — pattern-matcher stress                       |
+| `tsconfig-extends`        | 3-level tsconfig `extends` chain merged into `paths`                                                         |
 
 Add new cases by creating a new directory under `cases/` — `run.mjs` will
 pick it up automatically on the next run.
