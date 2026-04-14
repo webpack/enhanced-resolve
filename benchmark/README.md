@@ -96,6 +96,25 @@ export default function register(bench, { caseName, caseDir, fixtureDir }) {
 | `prefer-relative`         | `preferRelative: true` — bare specifiers attempted as relative before node_modules                           |
 | `main-field`              | MainFieldPlugin with `browser`/`module`/`main` candidates against packages defining different combinations   |
 | `sync-resolver`           | `useSyncFileSystemCalls: true` via `resolveSync` — the loader-resolver hot path                              |
+| `symlinks`                | SymlinkPlugin on vs off, resolves routed through symlink targets created at bench setup                      |
+| `resolve-to-context`      | `resolveToContext: true` directory-only branch of the resolver pipeline                                      |
+| `failed-resolution`       | Error path: missing files and packages, walks the full pipeline before reporting the miss                    |
+| `concurrent-batch`        | 15 resolves through `Promise.all`, exercising in-flight request de-duplication                               |
+| `large-alias-list`        | 50 non-matching + 8 matching aliases, stresses AliasPlugin's linear scan                                     |
+| `multiple-modules`        | `modules: [shared, vendor, node_modules]` mix of root + hierarchical directories                             |
+| `mixed-conditions`        | Nested condition map (browser/worker/node/development/production/...) under 4 condition configurations       |
+| `exports-patterns-many`   | Package with 6 wildcard subpath exports × 4 leaves per prefix — pattern-matcher stress                       |
+| `tsconfig-extends`        | 3-level tsconfig `extends` chain merged into `paths`                                                         |
+| `enforce-extension`       | `enforceExtension: true`, explicit `.js` requests — tighter pipeline than the default                        |
+| `deep-package-subpath`    | `pkg/a`, `pkg/a/b`, `pkg/a/b/c` requests into a single package (lodash/fp style)                             |
+| `query-fragment`          | `?query` and `#fragment` suffixes, exercises ParsePlugin's split/rejoin on the result                        |
+| `prefer-absolute`         | `preferAbsolute: true` with absolute paths — different normal-resolve branch than `preferRelative`           |
+| `cache-predicate`         | `unsafeCache: true` + custom `cachePredicate` filtering which results actually cache                         |
+| `extension-alias-many`    | `extensionAlias` with 3 source extensions each mapping to a list of candidates                               |
+| `array-alias`             | AliasPlugin with an array alias value (`{ alias: [preferred, fallback] }`)                                   |
+| `main-files`              | Custom `mainFiles: ["main", "entry", "index"]` walked by UseFilePlugin                                       |
+| `description-files-multi` | `descriptionFiles: [package.json, bower.json, component.json]` walked per directory                          |
+| `many-extensions-miss`    | Worst-case extension probing: 5 misses + 1 hit per resolve for a 6-extension list                            |
 
 Add new cases by creating a new directory under `cases/` — `run.mjs` will
 pick it up automatically on the next run.
