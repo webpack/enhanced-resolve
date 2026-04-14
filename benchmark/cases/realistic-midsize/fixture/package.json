@@ -1,0 +1,6 @@
+{
+  "name": "realistic-midsize-fixture",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "main": "./src/index.js"
+}

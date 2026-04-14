@@ -41,7 +41,8 @@
     "test:watch": "npm run test:only -- --watch",
     "test:coverage": "npm run test:only -- --collectCoverageFrom=\"lib/**/*.js\" --coverage",
     "version": "changeset version",
-    "release": "changeset publish"
+    "release": "changeset publish",
+    "benchmark": "node --max-old-space-size=4096 --hash-seed=1 --random-seed=1 --no-opt --predictable --predictable-gc-schedule --interpreted-frames-native-stack --allow-natives-syntax --expose-gc --no-concurrent-sweeping ./benchmark/run.mjs"
   },
   "lint-staged": {
     "*.{js,cjs,mjs}": [
@@ -59,12 +60,13 @@
   "devDependencies": {
     "@changesets/cli": "^2.30.0",
     "@changesets/get-github-info": "^0.8.0",
+    "@codspeed/core": "^5.2.0",
     "@types/graceful-fs": "^4.1.6",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.10.4",
     "cspell": "^10.0.0",
     "eslint": "^9.39.2",
-    "eslint-config-webpack": "^4.9.0",
+    "eslint-config-webpack": "^4.9.5",
     "husky": "^9.1.7",
     "jest": "^30.3.0",
     "lint-staged": "^16.2.7",
@@ -72,6 +74,7 @@
     "prettier": "^3.7.4",
     "prettier-2": "npm:prettier@^2",
     "tooling": "webpack/tooling#v1.26.1",
+    "tinybench": "^6.0.0",
     "typescript": "^6.0.2"
   },
   "engines": {
