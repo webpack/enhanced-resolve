@@ -1,7 +1,9 @@
 "use strict";
 
+const fs = require("fs");
 const path = require("path");
 const resolve = require("../");
+const { CachedInputFileSystem, ResolverFactory } = require("../");
 
 describe("promise api", () => {
 	const pathsToIt = [
@@ -88,6 +90,40 @@ describe("promise api", () => {
 			});
 			await expect(
 				myResolve(__dirname, "this-module-should-not-exist"),
+			).rejects.toThrow(/Can't resolve/);
+		});
+	});
+
+	describe("Resolver.resolvePromise", () => {
+		const resolver = ResolverFactory.createResolver({
+			fileSystem: new CachedInputFileSystem(fs, 4000),
+			extensions: [".js", ".json", ".node"],
+		});
+
+		it("should resolve via the Resolver.resolvePromise method", async () => {
+			const filename = await resolver.resolvePromise(
+				{},
+				__dirname,
+				"../lib/index",
+				{},
+			);
+
+			expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+		});
+
+		it("should allow omitting resolveContext", async () => {
+			const filename = await resolver.resolvePromise(
+				{},
+				__dirname,
+				"../lib/index",
+			);
+
+			expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+		});
+
+		it("should reject on unresolvable requests", async () => {
+			await expect(
+				resolver.resolvePromise({}, __dirname, "this-module-should-not-exist"),
 			).rejects.toThrow(/Can't resolve/);
 		});
 	});

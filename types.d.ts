@@ -1525,6 +1525,12 @@ declare abstract class Resolver {
 		null | ResolveRequest
 	>;
 	resolveSync(context: Context, path: string, request: string): string | false;
+	resolvePromise(
+		context: Context,
+		path: string,
+		request: string,
+		resolveContext?: ResolveContext,
+	): Promise<string | false>;
 	resolve(
 		context: Context,
 		path: string,
