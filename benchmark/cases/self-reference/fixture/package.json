@@ -1,0 +1,10 @@
+{
+  "name": "self-ref-pkg",
+  "version": "1.0.0",
+  "exports": {
+    ".": "./src/index.js",
+    "./utils": "./src/utils.js",
+    "./features/*": "./src/features/*.js",
+    "./package.json": "./package.json"
+  }
+}
