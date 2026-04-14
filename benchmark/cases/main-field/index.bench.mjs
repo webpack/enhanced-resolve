@@ -39,12 +39,9 @@ export default function register(bench, { fixtureDir }) {
 			});
 		});
 
-	bench.add(
-		"main-field: browser/module/main combos (warm)",
-		async () => {
-			for (const req of requests) {
-				await resolve(req);
-			}
-		},
-	);
+	bench.add("main-field: browser/module/main combos (warm)", async () => {
+		for (const req of requests) {
+			await resolve(req);
+		}
+	});
 }

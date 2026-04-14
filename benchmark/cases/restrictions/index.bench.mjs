@@ -23,10 +23,7 @@ export default function register(bench, { fixtureDir }) {
 	const resolver = ResolverFactory.createResolver({
 		fileSystem,
 		extensions: [".js"],
-		restrictions: [
-			path.join(fixtureDir, "src"),
-			/\.js$/,
-		],
+		restrictions: [path.join(fixtureDir, "src"), /\.js$/],
 	});
 
 	const from = path.join(fixtureDir, "src");
