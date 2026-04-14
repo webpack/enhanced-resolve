@@ -1,0 +1,6 @@
+{
+	"name": "imports-field-error-trigger",
+	"imports": {
+		"#trigger": "./resolved.js"
+	}
+}

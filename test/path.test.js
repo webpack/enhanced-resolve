@@ -166,3 +166,28 @@ describe("util/path exported regexes", () => {
 		expect(invalidSegmentRegEx.test("/foo/../bar")).toBe(true);
 	});
 });
+
+describe("util/path join fallbacks for special rootPath types", () => {
+	it("falls back when rootPath is Empty and request is Relative", () => {
+		// rootPath empty → falls into the last switch. Relative request returns
+		// posixNormalize("") === "." which is itself relative, returned as-is.
+		expect(join("", "./foo")).toBe(".");
+	});
+
+	it("falls back when rootPath is Empty and request is a Normal name", () => {
+		// Normal request: falls through to posixNormalize(rootPath) === "."
+		expect(join("", "foo")).toBe(".");
+	});
+
+	it("falls back when rootPath is Internal (#...) and request is Normal", () => {
+		// rootPath "#x" (Internal) and request "foo" (Normal): falls through to
+		// posixNormalize(rootPath).
+		expect(join("#x", "foo")).toBe("#x");
+	});
+
+	it("falls back when rootPath is Internal (#...) and request is Relative", () => {
+		// rootPath "#x" (Internal) and request "./foo" (Relative): returns
+		// posixNormalize(rootPath) ("#x"), not relative, so prefixed with "./".
+		expect(join("#x", "./foo")).toBe("./#x");
+	});
+});
