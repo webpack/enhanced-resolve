@@ -28,7 +28,7 @@
     "lint:types": "tsc",
     "lint:types-test": "tsc -p tsconfig.types.test.json",
     "lint:spellcheck": "cspell --cache --no-must-find-files --quiet \"**/*.*\"",
-    "fmt": "npm run fmt:base -- --loglevel warn --write",
+    "fmt": "npm run fmt:base -- --log-level warn --write",
     "fmt:check": "npm run fmt:base -- --check",
     "fmt:base": "node_modules/prettier/bin/prettier.cjs --cache --ignore-unknown .",
     "fix": "npm run fix:code && npm run fix:special",

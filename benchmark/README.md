@@ -79,6 +79,23 @@ export default function register(bench, { caseName, caseDir, fixtureDir }) {
 | ------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | `realistic-midsize`       | Mixed batch of relative/bare/scoped/exports/nested-`node_modules` requests against a synthetic mid-size tree |
 | `pathological-deep-stack` | 50-deep alias chain, specifically stresses the `doResolve` recursion-check path                              |
+| `alias-realistic`         | Webpack-style `@/components`, `@utils`, `~` aliases — AliasPlugin with a realistic number of entries         |
+| `alias-field`             | `browser` field remapping (AliasFieldPlugin), including the `false`/ignored branch                           |
+| `exports-field`           | Package with nested condition maps and wildcard subpath exports, run under both `require` and `import`       |
+| `imports-field`           | Package-internal `#foo` imports with conditionals and patterns                                               |
+| `extension-alias`         | `.js` → `.ts` TypeScript-style extension remapping                                                           |
+| `extensions-many`         | Six-extension trial list (`.ts`, `.tsx`, `.mjs`, `.js`, `.jsx`, `.json`), hitting each position              |
+| `fully-specified`         | ESM-style `fullySpecified: true` resolution where extensions are mandatory                                   |
+| `tsconfig-paths`          | TsconfigPathsPlugin with five wildcard path prefixes and a plain-string fallback                             |
+| `roots`                   | RootsPlugin: server-relative (`/…`) requests against a configured root                                       |
+| `restrictions`            | RestrictionsPlugin: path prefix + regex restriction checked on every successful resolve                      |
+| `fallback`                | `fallback` aliases (common Node-built-in polyfill pattern)                                                   |
+| `self-reference`          | SelfReferencePlugin: a package imports itself via its own package name and `exports` map                     |
+| `unsafe-cache`            | UnsafeCachePlugin on vs off, with three passes over the same request list per iteration                      |
+| `deep-hierarchy`          | Bare + relative resolution from 10 directory levels deep (walks `ModulesInHierarchicalDirectoriesPlugin`)    |
+| `prefer-relative`         | `preferRelative: true` — bare specifiers attempted as relative before node_modules                           |
+| `main-field`              | MainFieldPlugin with `browser`/`module`/`main` candidates against packages defining different combinations   |
+| `sync-resolver`           | `useSyncFileSystemCalls: true` via `resolveSync` — the loader-resolver hot path                              |
 
 Add new cases by creating a new directory under `cases/` — `run.mjs` will
 pick it up automatically on the next run.
