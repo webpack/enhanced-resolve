@@ -86,6 +86,17 @@ declare interface BaseResolveRequest {
 	 */
 	__innerRequest_relativePath?: string;
 }
+declare interface BasenameCacheEntry {
+	/**
+	 * cached dirname function
+	 */
+	fn: (maybePath: string, suffix?: string) => string;
+
+	/**
+	 * the underlying cache map
+	 */
+	cache: Map<string, Map<undefined | string, undefined | string>>;
+}
 type BufferEncoding =
 	| "ascii"
 	| "utf8"
@@ -216,6 +227,17 @@ declare interface Dirent<T extends string | Buffer = string> {
 	 * path
 	 */
 	path?: string;
+}
+declare interface DirnameCacheEntry {
+	/**
+	 * cached dirname function
+	 */
+	fn: (maybePath: string) => string;
+
+	/**
+	 * the underlying cache map
+	 */
+	cache: Map<string, string>;
 }
 type EncodingOption =
 	| undefined
@@ -548,6 +570,17 @@ declare interface Iterator<T, Z> {
 		i: number,
 	): void;
 }
+declare interface JoinCacheEntry {
+	/**
+	 * cached join function
+	 */
+	fn: (rootPath: string, request: string) => string;
+
+	/**
+	 * the underlying cache map
+	 */
+	cache: Map<string, Map<string, undefined | string>>;
+}
 declare interface JsonObject {
 	[index: string]:
 		| undefined
@@ -716,6 +749,22 @@ declare interface ParsedIdentifier {
 	 * is internal
 	 */
 	internal: boolean;
+}
+declare interface PathCacheFunctions {
+	/**
+	 * cached join
+	 */
+	join: JoinCacheEntry;
+
+	/**
+	 * cached dirname
+	 */
+	dirname: DirnameCacheEntry;
+
+	/**
+	 * cached basename
+	 */
+	basename: BasenameCacheEntry;
 }
 type PathLike = string | Buffer | URL_url;
 type PathOrFileDescriptor = string | number | Buffer | URL_url;
@@ -1438,6 +1487,7 @@ type ResolveRequest = BaseResolveRequest & Partial<ParsedIdentifier>;
 declare abstract class Resolver {
 	fileSystem: FileSystem;
 	options: ResolveOptionsResolverFactoryObject_1;
+	pathCache: PathCacheFunctions;
 	hooks: KnownHooks;
 	ensureHook(
 		name:
@@ -1487,8 +1537,10 @@ declare abstract class Resolver {
 	isModule(path: string): boolean;
 	isPrivate(path: string): boolean;
 	isDirectory(path: string): boolean;
-	join(path: string, request: string): string;
 	normalize(path: string): string;
+	join(path: string, request: string): string;
+	dirname(path: string): string;
+	basename(path: string, suffix?: string): string;
 }
 declare interface Stat {
 	(
