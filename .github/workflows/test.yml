@@ -54,6 +54,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          rm package-lock.json
           npm install -D typescript@^4 jest@^27 memfs@^3 --ignore-scripts
           npm install --ignore-scripts
         if: matrix.node-version == '10.x' || matrix.node-version == '12.x' || matrix.node-version == '14.x' || matrix.node-version == '16.x'
