@@ -86,6 +86,17 @@ declare interface BaseResolveRequest {
 	 */
 	__innerRequest_relativePath?: string;
 }
+declare interface BasenameCacheEntry {
+	/**
+	 * cached dirname function
+	 */
+	fn: (maybePath: string, suffix?: string) => string;
+
+	/**
+	 * the underlying cache map
+	 */
+	cache: Map<string, Map<undefined | string, undefined | string>>;
+}
 type BufferEncoding =
 	| "ascii"
 	| "utf8"
@@ -559,6 +570,17 @@ declare interface Iterator<T, Z> {
 		i: number,
 	): void;
 }
+declare interface JoinCacheEntry {
+	/**
+	 * cached join function
+	 */
+	fn: (rootPath: string, request: string) => string;
+
+	/**
+	 * the underlying cache map
+	 */
+	cache: Map<string, Map<string, undefined | string>>;
+}
 declare interface JsonObject {
 	[index: string]:
 		| undefined
@@ -728,22 +750,11 @@ declare interface ParsedIdentifier {
 	 */
 	internal: boolean;
 }
-declare interface PathCacheEntry {
-	/**
-	 * cached join function
-	 */
-	fn: (rootPath: string, request: string) => string;
-
-	/**
-	 * the underlying cache map
-	 */
-	cache: Map<string, Map<string, undefined | string>>;
-}
 declare interface PathCacheFunctions {
 	/**
 	 * cached join
 	 */
-	join: PathCacheEntry;
+	join: JoinCacheEntry;
 
 	/**
 	 * cached dirname
@@ -751,9 +762,9 @@ declare interface PathCacheFunctions {
 	dirname: DirnameCacheEntry;
 
 	/**
-	 * clear caches
+	 * cached basename
 	 */
-	clear: (type?: "join" | "dirname") => void;
+	basename: BasenameCacheEntry;
 }
 type PathLike = string | Buffer | URL_url;
 type PathOrFileDescriptor = string | number | Buffer | URL_url;
@@ -1478,8 +1489,6 @@ declare abstract class Resolver {
 	options: ResolveOptionsResolverFactoryObject_1;
 	pathCache: PathCacheFunctions;
 	hooks: KnownHooks;
-	join(path: string, request: string): string;
-	dirname(path: string): string;
 	ensureHook(
 		name:
 			| string
@@ -1529,6 +1538,9 @@ declare abstract class Resolver {
 	isPrivate(path: string): boolean;
 	isDirectory(path: string): boolean;
 	normalize(path: string): string;
+	join(path: string, request: string): string;
+	dirname(path: string): string;
+	basename(path: string, suffix?: string): string;
 }
 declare interface Stat {
 	(
