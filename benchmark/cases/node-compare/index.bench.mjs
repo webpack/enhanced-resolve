@@ -14,12 +14,21 @@
  *   - Same 10000-entry request list (one entry per unique target, see below)
  *   - Same starting directory
  *
- * The enhanced-resolve side is benched in two variants per API flavour:
- *   - without `unsafeCache` — measures the real cost of walking the
- *     plugin pipeline on every call
- *   - with `unsafeCache: true` — the closest analogue to Node's
- *     per-specifier memoization (Module._pathCache for CJS, the ESM
- *     loader cache for `import.meta.resolve`)
+ * The enhanced-resolve side is benched in three variants per API flavour
+ * so the contribution of each caching layer is visible:
+ *   - `(no cache)` — `CachedInputFileSystem` constructed with
+ *     `duration: 0`, which routes through `OperationMergerBackend`
+ *     instead of `CacheBackend` and does no stat/readdir/readJson
+ *     memoization (see `lib/CachedInputFileSystem.js:527-532`). No
+ *     `unsafeCache` either. Real pipeline work AND real fs work on every
+ *     call.
+ *   - `(fs cache)` — `CachedInputFileSystem` with a 30s TTL so stat /
+ *     readdir / readJson are memoized in memory. Mirrors the OS-level fs
+ *     cache Node itself relies on, but does NOT cache the
+ *     specifier → path mapping.
+ *   - `(fs + unsafeCache)` — adds `unsafeCache: true`, the closest
+ *     analogue to Node's per-specifier memoization (Module._pathCache for
+ *     CJS, the ESM loader cache for `import.meta.resolve`).
  *
  * The request list is *unique-per-entry* — every specifier in the 10000-
  * request batch points at a distinct resolvable target. This defeats the
@@ -27,14 +36,8 @@
  * `unsafeCache` on the first pass through the list must run the full
  * resolver pipeline for every entry. Subsequent tinybench iterations
  * replay the list, at which point Node's internal caches and
- * enhanced-resolve's `unsafeCache` do start hitting — which is exactly
- * what the cached variants are there to illustrate.
- *
- * `CachedInputFileSystem` is retained on every enhanced-resolve task
- * because it mirrors the OS-level fs cache Node itself benefits from
- * (stat / readdir / readJson memoized in memory); it does NOT cache the
- * specifier → path mapping, so it cannot short-circuit a fresh
- * specifier.
+ * enhanced-resolve's `unsafeCache` / fs cache start hitting — which is
+ * exactly what the cached variants are there to illustrate.
  *
  * Cross-iteration caching is unavoidable: tinybench replays the same
  * request list across 2 warmup + 10 measurement iterations, and the
@@ -185,31 +188,48 @@ export default async function register(bench, { fixtureDir }) {
 		pathToFileURL(path.join(srcDir, "resolver.mjs")).href
 	);
 
-	// Shared fs cache across enhanced-resolve tasks. 30s TTL is long enough
-	// that stat / readdir entries never expire during a bench run.
+	// Two filesystem wrappers:
+	//   - raw: duration 0 → OperationMergerBackend, no stat/readdir cache
+	//   - cached: 30s TTL is long enough that entries never expire during
+	//     a bench run
+	const rawFileSystem = new CachedInputFileSystem(fs, 0);
 	const fileSystem = new CachedInputFileSystem(fs, 30 * 1000);
 
-	const commonOptions = {
-		fileSystem,
+	const baseOptions = {
 		extensions: [".js"],
 		conditionNames: ["node", "require", "import"],
 		mainFields: ["main"],
 	};
 
-	// Two parallel resolver setups per API flavour: one without
-	// `unsafeCache` (real pipeline work every call), one with it (result
-	// memoization on second+ iteration).
-	const asyncResolver = ResolverFactory.createResolver(commonOptions);
-	const asyncResolverCached = ResolverFactory.createResolver({
-		...commonOptions,
+	// Three resolver configs per API flavour: no cache / fs cache / fs +
+	// unsafeCache. Each flavour gets its own factory call so tinybench
+	// measures independent V8 inline-cache state per task.
+	const asyncResolverNone = ResolverFactory.createResolver({
+		...baseOptions,
+		fileSystem: rawFileSystem,
+	});
+	const asyncResolverFs = ResolverFactory.createResolver({
+		...baseOptions,
+		fileSystem,
+	});
+	const asyncResolverFsUnsafe = ResolverFactory.createResolver({
+		...baseOptions,
+		fileSystem,
 		unsafeCache: true,
 	});
-	const syncResolver = ResolverFactory.createResolver({
-		...commonOptions,
+	const syncResolverNone = ResolverFactory.createResolver({
+		...baseOptions,
+		fileSystem: rawFileSystem,
 		useSyncFileSystemCalls: true,
 	});
-	const syncResolverCached = ResolverFactory.createResolver({
-		...commonOptions,
+	const syncResolverFs = ResolverFactory.createResolver({
+		...baseOptions,
+		fileSystem,
+		useSyncFileSystemCalls: true,
+	});
+	const syncResolverFsUnsafe = ResolverFactory.createResolver({
+		...baseOptions,
+		fileSystem,
 		useSyncFileSystemCalls: true,
 		unsafeCache: true,
 	});
@@ -223,43 +243,43 @@ export default async function register(bench, { fixtureDir }) {
 			});
 		});
 
+	// --- async (callback API, wrapped in a Promise) ---
 	bench.add(
-		`node-compare: enhanced-resolve async x ${BATCH_SIZE}`,
+		`node-compare: enhanced-resolve async x ${BATCH_SIZE} (no cache)`,
 		async () => {
 			for (let i = 0; i < requests.length; i++) {
-				await resolveAsync(asyncResolver, requests[i]);
+				await resolveAsync(asyncResolverNone, requests[i]);
 			}
 		},
 	);
 
 	bench.add(
-		`node-compare: enhanced-resolve async x ${BATCH_SIZE} (unsafeCache)`,
+		`node-compare: enhanced-resolve async x ${BATCH_SIZE} (fs cache)`,
 		async () => {
 			for (let i = 0; i < requests.length; i++) {
-				await resolveAsync(asyncResolverCached, requests[i]);
-			}
-		},
-	);
-
-	// Promise API (resolver.resolvePromise). Functionally equivalent to the
-	// callback-based async task wrapped in a new Promise — benching it
-	// separately shows the overhead (or lack thereof) of the built-in
-	// promise wrapper versus a manual one.
-	bench.add(
-		`node-compare: enhanced-resolve promise x ${BATCH_SIZE}`,
-		async () => {
-			for (let i = 0; i < requests.length; i++) {
-				const r = await asyncResolver.resolvePromise({}, srcDir, requests[i]);
-				if (!r) throw new Error(`no result for ${requests[i]}`);
+				await resolveAsync(asyncResolverFs, requests[i]);
 			}
 		},
 	);
 
 	bench.add(
-		`node-compare: enhanced-resolve promise x ${BATCH_SIZE} (unsafeCache)`,
+		`node-compare: enhanced-resolve async x ${BATCH_SIZE} (fs + unsafeCache)`,
 		async () => {
 			for (let i = 0; i < requests.length; i++) {
-				const r = await asyncResolverCached.resolvePromise(
+				await resolveAsync(asyncResolverFsUnsafe, requests[i]);
+			}
+		},
+	);
+
+	// --- promise API (resolver.resolvePromise) ---
+	// Functionally equivalent to the callback task wrapped in a new
+	// Promise — benched separately so the overhead (or lack thereof) of
+	// the built-in promise wrapper vs a hand-rolled one is visible.
+	bench.add(
+		`node-compare: enhanced-resolve promise x ${BATCH_SIZE} (no cache)`,
+		async () => {
+			for (let i = 0; i < requests.length; i++) {
+				const r = await asyncResolverNone.resolvePromise(
 					{},
 					srcDir,
 					requests[i],
@@ -269,18 +289,56 @@ export default async function register(bench, { fixtureDir }) {
 		},
 	);
 
-	bench.add(`node-compare: enhanced-resolve sync x ${BATCH_SIZE}`, () => {
-		for (let i = 0; i < requests.length; i++) {
-			const r = syncResolver.resolveSync({}, srcDir, requests[i]);
-			if (!r) throw new Error(`no result for ${requests[i]}`);
-		}
-	});
+	bench.add(
+		`node-compare: enhanced-resolve promise x ${BATCH_SIZE} (fs cache)`,
+		async () => {
+			for (let i = 0; i < requests.length; i++) {
+				const r = await asyncResolverFs.resolvePromise({}, srcDir, requests[i]);
+				if (!r) throw new Error(`no result for ${requests[i]}`);
+			}
+		},
+	);
 
 	bench.add(
-		`node-compare: enhanced-resolve sync x ${BATCH_SIZE} (unsafeCache)`,
+		`node-compare: enhanced-resolve promise x ${BATCH_SIZE} (fs + unsafeCache)`,
+		async () => {
+			for (let i = 0; i < requests.length; i++) {
+				const r = await asyncResolverFsUnsafe.resolvePromise(
+					{},
+					srcDir,
+					requests[i],
+				);
+				if (!r) throw new Error(`no result for ${requests[i]}`);
+			}
+		},
+	);
+
+	// --- sync API (resolveSync, useSyncFileSystemCalls: true) ---
+	bench.add(
+		`node-compare: enhanced-resolve sync x ${BATCH_SIZE} (no cache)`,
 		() => {
 			for (let i = 0; i < requests.length; i++) {
-				const r = syncResolverCached.resolveSync({}, srcDir, requests[i]);
+				const r = syncResolverNone.resolveSync({}, srcDir, requests[i]);
+				if (!r) throw new Error(`no result for ${requests[i]}`);
+			}
+		},
+	);
+
+	bench.add(
+		`node-compare: enhanced-resolve sync x ${BATCH_SIZE} (fs cache)`,
+		() => {
+			for (let i = 0; i < requests.length; i++) {
+				const r = syncResolverFs.resolveSync({}, srcDir, requests[i]);
+				if (!r) throw new Error(`no result for ${requests[i]}`);
+			}
+		},
+	);
+
+	bench.add(
+		`node-compare: enhanced-resolve sync x ${BATCH_SIZE} (fs + unsafeCache)`,
+		() => {
+			for (let i = 0; i < requests.length; i++) {
+				const r = syncResolverFsUnsafe.resolveSync({}, srcDir, requests[i]);
 				if (!r) throw new Error(`no result for ${requests[i]}`);
 			}
 		},
