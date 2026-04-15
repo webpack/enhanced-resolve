@@ -57,6 +57,10 @@ describe("Resolver join/dirname cache", () => {
 			expect(resolver.basename("/a/b/c.ext", ".ext")).toBe(
 				path.basename("/a/b/c.ext", ".ext"),
 			);
+			expect(resolver.basename("/a/b/c.ext")).toBe(path.basename("/a/b/c.ext"));
+			expect(resolver.basename("/a/b/c.ext", ".other")).toBe(
+				path.basename("/a/b/c.ext", ".other"),
+			);
 		});
 
 		it("should clear all caches when calling pathCache.clear()", () => {
