@@ -6,20 +6,7 @@ const { dirname, join } = require("../lib/util/path");
 
 describe("Resolver join/dirname cache", () => {
 	describe("when unsafeCache is enabled", () => {
-		it("should use cached versions (not the raw functions)", () => {
-			const fileSystem = new CachedInputFileSystem(fs, 0);
-
-			const resolver = ResolverFactory.createResolver({
-				fileSystem,
-				extensions: [".js"],
-				unsafeCache: true,
-			});
-
-			expect(resolver.join).not.toBe(join);
-			expect(resolver.dirname).not.toBe(dirname);
-		});
-
-		it("should share caches across resolvers with the same fileSystem", () => {
+		it("should share pathCache across resolvers with the same fileSystem", () => {
 			const fileSystem = new CachedInputFileSystem(fs, 0);
 
 			const resolver1 = ResolverFactory.createResolver({
@@ -33,8 +20,7 @@ describe("Resolver join/dirname cache", () => {
 				unsafeCache: true,
 			});
 
-			expect(resolver1.join).toBe(resolver2.join);
-			expect(resolver1.dirname).toBe(resolver2.dirname);
+			expect(resolver1.pathCache).toBe(resolver2.pathCache);
 		});
 
 		it("should use independent caches for different fileSystems", () => {
@@ -52,8 +38,7 @@ describe("Resolver join/dirname cache", () => {
 				unsafeCache: true,
 			});
 
-			expect(resolver1.join).not.toBe(resolver2.join);
-			expect(resolver1.dirname).not.toBe(resolver2.dirname);
+			expect(resolver1.pathCache).not.toBe(resolver2.pathCache);
 		});
 
 		it("should produce correct results", () => {
@@ -68,10 +53,71 @@ describe("Resolver join/dirname cache", () => {
 			expect(resolver.join("/a/b", "c")).toBe(join("/a/b", "c"));
 			expect(resolver.dirname("/a/b/c")).toBe(dirname("/a/b/c"));
 		});
+
+		it("should clear all caches when calling pathCache.clear()", () => {
+			const fileSystem = new CachedInputFileSystem(fs, 0);
+
+			const resolver = ResolverFactory.createResolver({
+				fileSystem,
+				extensions: [".js"],
+				unsafeCache: true,
+			});
+
+			resolver.join("/a/b", "c");
+			resolver.dirname("/a/b/c");
+
+			expect(resolver.pathCache.join.cache.size).toBeGreaterThan(0);
+			expect(resolver.pathCache.dirname.cache.size).toBeGreaterThan(0);
+
+			resolver.pathCache.clear();
+
+			expect(resolver.pathCache.join.cache.size).toBe(0);
+			expect(resolver.pathCache.dirname.cache.size).toBe(0);
+
+			// Still works after clearing
+			expect(resolver.join("/a/b", "c")).toBe(join("/a/b", "c"));
+			expect(resolver.dirname("/a/b/c")).toBe(dirname("/a/b/c"));
+		});
+
+		it("should clear only join cache when calling pathCache.clear('join')", () => {
+			const fileSystem = new CachedInputFileSystem(fs, 0);
+
+			const resolver = ResolverFactory.createResolver({
+				fileSystem,
+				extensions: [".js"],
+				unsafeCache: true,
+			});
+
+			resolver.join("/a/b", "c");
+			resolver.dirname("/a/b/c");
+
+			resolver.pathCache.clear("join");
+
+			expect(resolver.pathCache.join.cache.size).toBe(0);
+			expect(resolver.pathCache.dirname.cache.size).toBeGreaterThan(0);
+		});
+
+		it("should clear only dirname cache when calling pathCache.clear('dirname')", () => {
+			const fileSystem = new CachedInputFileSystem(fs, 0);
+
+			const resolver = ResolverFactory.createResolver({
+				fileSystem,
+				extensions: [".js"],
+				unsafeCache: true,
+			});
+
+			resolver.join("/a/b", "c");
+			resolver.dirname("/a/b/c");
+
+			resolver.pathCache.clear("dirname");
+
+			expect(resolver.pathCache.join.cache.size).toBeGreaterThan(0);
+			expect(resolver.pathCache.dirname.cache.size).toBe(0);
+		});
 	});
 
 	describe("when unsafeCache is disabled", () => {
-		it("should share the same function reference across resolvers", () => {
+		it("should share pathCache across resolvers with the same fileSystem", () => {
 			const fileSystem = new CachedInputFileSystem(fs, 0);
 
 			const resolver1 = ResolverFactory.createResolver({
@@ -83,8 +129,7 @@ describe("Resolver join/dirname cache", () => {
 				extensions: [".js"],
 			});
 
-			expect(resolver1.join).toBe(resolver2.join);
-			expect(resolver1.dirname).toBe(resolver2.dirname);
+			expect(resolver1.pathCache).toBe(resolver2.pathCache);
 		});
 	});
 });

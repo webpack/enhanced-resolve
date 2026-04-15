@@ -217,6 +217,17 @@ declare interface Dirent<T extends string | Buffer = string> {
 	 */
 	path?: string;
 }
+declare interface DirnameCacheEntry {
+	/**
+	 * cached dirname function
+	 */
+	fn: (maybePath: string) => string;
+
+	/**
+	 * the underlying cache map
+	 */
+	cache: Map<string, string>;
+}
 type EncodingOption =
 	| undefined
 	| null
@@ -716,6 +727,33 @@ declare interface ParsedIdentifier {
 	 * is internal
 	 */
 	internal: boolean;
+}
+declare interface PathCacheEntry {
+	/**
+	 * cached join function
+	 */
+	fn: (rootPath: string, request: string) => string;
+
+	/**
+	 * the underlying cache map
+	 */
+	cache: Map<string, Map<string, undefined | string>>;
+}
+declare interface PathCacheFunctions {
+	/**
+	 * cached join
+	 */
+	join: PathCacheEntry;
+
+	/**
+	 * cached dirname
+	 */
+	dirname: DirnameCacheEntry;
+
+	/**
+	 * clear caches
+	 */
+	clear: (type?: "join" | "dirname") => void;
 }
 type PathLike = string | Buffer | URL_url;
 type PathOrFileDescriptor = string | number | Buffer | URL_url;
@@ -1438,8 +1476,9 @@ type ResolveRequest = BaseResolveRequest & Partial<ParsedIdentifier>;
 declare abstract class Resolver {
 	fileSystem: FileSystem;
 	options: ResolveOptionsResolverFactoryObject_1;
-	join: (rootPath: string, request: string) => string;
-	dirname: (maybePath: string) => string;
+	pathCache: PathCacheFunctions;
+	join(path: string, request: string): string;
+	dirname(path: string): string;
 	hooks: KnownHooks;
 	ensureHook(
 		name:
