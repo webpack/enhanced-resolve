@@ -1142,7 +1142,12 @@ declare interface ResolveContext {
 	yield?: (request: ResolveRequest) => void;
 }
 declare interface ResolveFunction {
-	(context: Context, path: string, request: string): string | false;
+	(
+		context: Context,
+		path: string,
+		request: string,
+		resolveContext?: ResolveContext,
+	): string | false;
 	(path: string, request: string): string | false;
 }
 declare interface ResolveFunctionAsync {

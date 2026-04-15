@@ -116,12 +116,18 @@ describe("simple", () => {
 
 	it("should reject on unresolvable requests", async () => {
 		await expect(
-			new Promise((res, rej) => {
-				resolve(__dirname, "this-module-should-not-exist", (err) => {
-					if (err) return rej(err);
-					res();
-				});
-			}),
+			new Promise(
+				/**
+				 * @param {(value: void) => void} res resolve
+				 * @param {(reason?: Error) => void} rej reject
+				 */
+				(res, rej) => {
+					resolve(__dirname, "this-module-should-not-exist", (err) => {
+						if (err) return rej(err);
+						res();
+					});
+				},
+			),
 		).rejects.toThrow(/Can't resolve/);
 	});
 
@@ -175,12 +181,18 @@ describe("simple", () => {
 		});
 
 		await expect(
-			new Promise((res, rej) => {
-				myResolve(__dirname, "this-module-should-not-exist", (err) => {
-					if (err) return rej(err);
-					res();
-				});
-			}),
+			new Promise(
+				/**
+				 * @param {(value: void) => void} res resolve
+				 * @param {(reason?: Error) => void} rej reject
+				 */
+				(res, rej) => {
+					myResolve(__dirname, "this-module-should-not-exist", (err) => {
+						if (err) return rej(err);
+						res();
+					});
+				},
+			),
 		).rejects.toThrow(/Can't resolve/);
 	});
 
