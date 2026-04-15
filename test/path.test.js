@@ -2,8 +2,9 @@
 
 const {
 	PathType,
-	cachedDirname,
-	cachedJoin,
+	createCachedBasename,
+	createCachedDirname,
+	createCachedJoin,
 	deprecatedInvalidSegmentRegEx,
 	dirname,
 	getType,
@@ -114,6 +115,7 @@ describe("util/path dirname", () => {
 
 describe("util/path cachedJoin", () => {
 	it("returns the same value on cache hit", () => {
+		const cachedJoin = createCachedJoin().fn;
 		const a = cachedJoin("/root", "a/b");
 		const b = cachedJoin("/root", "a/b");
 		expect(a).toBe(b);
@@ -121,6 +123,7 @@ describe("util/path cachedJoin", () => {
 	});
 
 	it("keeps separate caches per root", () => {
+		const cachedJoin = createCachedJoin().fn;
 		const a = cachedJoin("/x", "req");
 		const b = cachedJoin("/y", "req");
 		const a2 = cachedJoin("/x", "req");
@@ -131,10 +134,47 @@ describe("util/path cachedJoin", () => {
 
 describe("util/path cachedDirname", () => {
 	it("returns the same value on cache hit", () => {
+		const cachedDirname = createCachedDirname().fn;
 		const a = cachedDirname("/cached/a/b");
 		const b = cachedDirname("/cached/a/b");
 		expect(a).toBe(b);
 		expect(a).toBe("/cached/a");
+	});
+});
+
+describe("util/path cachedBasename", () => {
+	it("returns the same value on cache hit", () => {
+		const cachedBasename = createCachedBasename().fn;
+		const a = cachedBasename("/cached/a/b");
+		const b = cachedBasename("/cached/a/b");
+		expect(a).toBe(b);
+		expect(a).toBe("b");
+	});
+
+	it("returns the same value on cache hit with suffix", () => {
+		const cachedBasename = createCachedBasename().fn;
+		const a = cachedBasename("/cached/a/b.ext", ".ext");
+		const b = cachedBasename("/cached/a/b.ext", ".ext");
+		expect(a).toBe(b);
+		expect(a).toBe("b");
+	});
+
+	it("keeps separate caches per root", () => {
+		const cachedBasename = createCachedBasename().fn;
+		const a = cachedBasename("/x");
+		const b = cachedBasename("/y");
+		const a2 = cachedBasename("/x");
+		expect(a).toBe(a2);
+		expect(a).not.toBe(b);
+	});
+
+	it("keeps separate caches per root with suffix", () => {
+		const cachedBasename = createCachedBasename().fn;
+		const a = cachedBasename("/x.ext", ".ext");
+		const b = cachedBasename("/y.ext", ".ext");
+		const a2 = cachedBasename("/x.ext", ".ext");
+		expect(a).toBe(a2);
+		expect(a).not.toBe(b);
 	});
 });
 
