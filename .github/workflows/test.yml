@@ -61,7 +61,7 @@ jobs:
 
           if [ "${{ matrix.node-version }}" = "10.x" ]; then
             npm install -g npm@6
-            npm install --ignore-scripts --no-audit --prefer-offline
+            npm install --ignore-scripts --no-audit --prefer-offline --no-package-lock
           else
             npm install -g npm@7
           fi
