@@ -60,7 +60,7 @@ jobs:
           npm config set progress false
 
           if [ "${{ matrix.node-version }}" = "10.x" ]; then
-            yarn upgrade -D typescript@^4 jest@^27 memfs@^3 --ignore-scripts --ignore-engines
+            yarn add -D typescript@^4 jest@^27 memfs@^3 --ignore-scripts --ignore-engines
           else
             npm install -g npm@7
             npm install -D typescript@^4 jest@^27 memfs@^3 --ignore-scripts --no-audit --prefer-offline --no-save --no-package-lock
