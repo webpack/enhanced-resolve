@@ -1477,9 +1477,9 @@ declare abstract class Resolver {
 	fileSystem: FileSystem;
 	options: ResolveOptionsResolverFactoryObject_1;
 	pathCache: PathCacheFunctions;
+	hooks: KnownHooks;
 	join(path: string, request: string): string;
 	dirname(path: string): string;
-	hooks: KnownHooks;
 	ensureHook(
 		name:
 			| string
