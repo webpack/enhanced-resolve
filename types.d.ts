@@ -1148,7 +1148,11 @@ declare interface ResolveFunction {
 		request: string,
 		resolveContext?: ResolveContext,
 	): string | false;
-	(path: string, request: string): string | false;
+	(
+		path: string,
+		request: string,
+		resolveContext?: ResolveContext,
+	): string | false;
 }
 declare interface ResolveFunctionAsync {
 	(
