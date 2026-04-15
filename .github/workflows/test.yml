@@ -59,11 +59,11 @@ jobs:
 
           if [ "${{ matrix.node-version }}" = "10.x" ]; then
             npm install -g npm@6
+            npm install --ignore-scripts --no-audit --prefer-offline
           else
             npm install -g npm@7
           fi
 
-          rm -f package-lock.json
           npm install -D typescript@^4 jest@^27 memfs@^3 --ignore-scripts --no-audit --prefer-offline
         if: matrix.node-version == '10.x' || matrix.node-version == '12.x' || matrix.node-version == '14.x' || matrix.node-version == '16.x'
 
