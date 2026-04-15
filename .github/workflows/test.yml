@@ -53,9 +53,18 @@ jobs:
           cache: npm
 
       - name: Install dependencies
+        shell: bash
         run: |
-          npm install -D typescript@^4 jest@^27 memfs@^3 --ignore-scripts
-          npm install --ignore-scripts
+          rm -f package-lock.json
+
+          npm config set progress false
+
+          if [ "${{ matrix.node-version }}" = "10.x" ]; then
+            yarn add -D typescript@^4 jest@^27 memfs@^3 --ignore-scripts --ignore-engines
+          else
+            npm install -g npm@7
+            npm install -D typescript@^4 jest@^27 memfs@^3 --ignore-scripts --no-audit --prefer-offline --no-save --no-package-lock
+          fi
         if: matrix.node-version == '10.x' || matrix.node-version == '12.x' || matrix.node-version == '14.x' || matrix.node-version == '16.x'
 
       - name: Install dependencies
