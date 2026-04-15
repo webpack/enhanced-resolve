@@ -46,18 +46,3 @@ describe("mainFields normalization", () => {
 		]);
 	});
 });
-
-describe("function-style plugins", () => {
-	it("are invoked during createResolver with the resolver instance", () => {
-		let seenResolver;
-		const r = ResolverFactory.createResolver({
-			fileSystem: nodeFileSystem,
-			plugins: [
-				function fnPlugin(resolver) {
-					seenResolver = resolver;
-				},
-			],
-		});
-		expect(seenResolver).toBe(r);
-	});
-});

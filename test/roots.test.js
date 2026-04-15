@@ -134,18 +134,8 @@ describe("roots", () => {
 			},
 		);
 	});
-});
 
-describe("roots guard clauses", () => {
-	const fixtures = path.resolve(__dirname, "fixtures");
-	const fileSystem = new CachedInputFileSystem(fs, 4000);
-	const resolver = ResolverFactory.createResolver({
-		extensions: [".js"],
-		roots: [fixtures],
-		fileSystem,
-	});
-
-	it("falls through for empty requests (no root rewriting)", (done) => {
+	it("should throw an error for empty requests (no root rewriting)", (done) => {
 		// Empty request should produce an error, not a root rewrite.
 		resolver.resolve({}, fixtures, "", {}, (err) => {
 			expect(err).toBeInstanceOf(Error);
@@ -153,7 +143,7 @@ describe("roots guard clauses", () => {
 		});
 	});
 
-	it("falls through for relative requests (no root rewriting)", (done) => {
+	it("should work falls through for relative requests (no root rewriting)", (done) => {
 		// Relative request resolves normally (not via roots).
 		resolver.resolve({}, fixtures, "./a.js", {}, (err, result) => {
 			if (err) return done(err);
@@ -162,7 +152,7 @@ describe("roots guard clauses", () => {
 		});
 	});
 
-	it("rewrites absolute-style requests against roots", (done) => {
+	it("should rewrites absolute-style requests against roots", (done) => {
 		// Absolute request "/a.js" should be rewritten to roots[0] + /a.js
 		resolver.resolve({}, fixtures, "/a.js", {}, (err, result) => {
 			if (err) return done(err);

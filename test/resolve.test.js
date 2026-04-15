@@ -16,6 +16,11 @@ const syncContextResolve = resolve.create.sync({
 	resolveToContext: true,
 });
 
+const promiseContextResolve = resolve.create.promise({
+	extensions: [".js", ".json", ".node"],
+	resolveToContext: true,
+});
+
 const issue238Resolve = resolve.create({
 	extensions: [".js", ".jsx", ".ts", ".tsx"],
 	modules: ["src/a", "src/b", "src/common", "node_modules"],
@@ -48,6 +53,12 @@ function testResolve(name, context, moduleName, result) {
 				done();
 			});
 		});
+
+		it("should resolve promise correctly", async () => {
+			const filename = await resolve.promise(context, moduleName);
+			expect(filename).toBeDefined();
+			expect(filename).toEqual(result);
+		});
 	});
 }
 
@@ -71,6 +82,12 @@ function testResolveContext(name, context, moduleName, result) {
 
 		it("should resolve sync correctly", () => {
 			const filename = syncContextResolve(context, moduleName);
+			expect(filename).toBeDefined();
+			expect(filename).toEqual(result);
+		});
+
+		it("should resolve promise correctly", async () => {
+			const filename = await promiseContextResolve(context, moduleName);
 			expect(filename).toBeDefined();
 			expect(filename).toEqual(result);
 		});

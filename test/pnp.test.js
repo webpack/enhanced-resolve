@@ -324,10 +324,6 @@ describe("pnp", () => {
 			},
 		);
 	});
-});
-
-describe("pnp coverage branches", () => {
-	const fixture = path.resolve(__dirname, "fixtures", "pnp");
 
 	it("falls through when pnpApi throws an UNDECLARED_DEPENDENCY error and logs each line", (done) => {
 		const pnpApi = {
@@ -385,9 +381,7 @@ describe("pnp coverage branches", () => {
 			},
 		);
 	});
-});
 
-describe("pnp alternate target and env detection", () => {
 	it("returns an error when neither pnp nor the alternate find a result", (done) => {
 		const pnpApi = {
 			resolveToUnqualified() {

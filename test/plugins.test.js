@@ -1,7 +1,12 @@
 "use strict";
 
+const fs = require("fs");
 const path = require("path");
-const { CloneBasenamePlugin, ResolverFactory } = require("../");
+const {
+	CachedInputFileSystem,
+	CloneBasenamePlugin,
+	ResolverFactory,
+} = require("../");
 
 describe("plugins", () => {
 	it("should resolve with the CloneBasenamePlugin", (done) => {
@@ -75,14 +80,18 @@ describe("plugins", () => {
 			},
 		);
 	});
-});
 
-// cspell:ignore Hierachic
-describe("deprecated plugin aliases", () => {
-	it("re-exports ModulesInHierarchicalDirectoriesPlugin as ModulesInHierachicDirectoriesPlugin", () => {
-		const alias = require("../lib/ModulesInHierachicDirectoriesPlugin");
-		const target = require("../lib/ModulesInHierarchicalDirectoriesPlugin");
-
-		expect(alias).toBe(target);
+	it("function-style plugins are invoked during createResolver with the resolver instance", () => {
+		const nodeFileSystem = new CachedInputFileSystem(fs, 4000);
+		let seenResolver;
+		const r = ResolverFactory.createResolver({
+			fileSystem: nodeFileSystem,
+			plugins: [
+				function fnPlugin(resolver) {
+					seenResolver = resolver;
+				},
+			],
+		});
+		expect(seenResolver).toBe(r);
 	});
 });

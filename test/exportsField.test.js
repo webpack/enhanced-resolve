@@ -3382,11 +3382,6 @@ describe("exportsFieldPlugin", () => {
 			},
 		);
 	});
-});
-
-describe("exportsField error paths", () => {
-	const fixtures = path.join(__dirname, "fixtures");
-	const nodeFileSystem = new CachedInputFileSystem(fs, 4000);
 
 	it("emits 'is not exported' error when no conditions match", (done) => {
 		const resolver = ResolverFactory.createResolver({
@@ -3397,7 +3392,7 @@ describe("exportsField error paths", () => {
 		});
 		resolver.resolve(
 			{},
-			path.join(fixtures, "exports-field"),
+			path.join(path.join(__dirname, "fixtures"), "exports-field"),
 			"exports-field/index",
 			{},
 			(err) => {

@@ -92,9 +92,7 @@ describe("browserField", () => {
 			p("lib", "toString.js"),
 		);
 	});
-});
 
-describe("browserField self-pointing aliases", () => {
 	const aliasFieldExtras = path.join(
 		__dirname,
 		"fixtures",

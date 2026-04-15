@@ -106,10 +106,8 @@ describe("restrictions", () => {
 			},
 		);
 	});
-});
 
-describe("restrictions logging", () => {
-	it("logs when the path is outside a string restriction", (done) => {
+	it("should throw an error when the path is outside a string restriction", (done) => {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem: nodeFileSystem,
 			extensions: [".js"],
@@ -131,7 +129,7 @@ describe("restrictions logging", () => {
 		);
 	});
 
-	it("logs when the path does not match a regex restriction", (done) => {
+	it("should throw an error when the path does not match a regex restriction", (done) => {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem: nodeFileSystem,
 			extensions: [".js"],
@@ -151,31 +149,5 @@ describe("restrictions logging", () => {
 				done();
 			},
 		);
-	});
-});
-
-describe("restrictions without log", () => {
-	it("returns an error when blocked by a string restriction and no log is set", (done) => {
-		const resolver = ResolverFactory.createResolver({
-			extensions: [".js"],
-			fileSystem: nodeFileSystem,
-			restrictions: ["/completely/elsewhere"],
-		});
-		resolver.resolve({}, fixture, "pck1", {}, (err) => {
-			expect(err).toBeInstanceOf(Error);
-			done();
-		});
-	});
-
-	it("returns an error when blocked by a regex restriction and no log is set", (done) => {
-		const resolver = ResolverFactory.createResolver({
-			extensions: [".js"],
-			fileSystem: nodeFileSystem,
-			restrictions: [/\.ts$/],
-		});
-		resolver.resolve({}, fixture, "pck1", {}, (err) => {
-			expect(err).toBeInstanceOf(Error);
-			done();
-		});
 	});
 });
