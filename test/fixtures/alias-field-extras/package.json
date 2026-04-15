@@ -1,0 +1,8 @@
+{
+	"name": "alias-field-extras",
+	"browser": {
+		"./self-alias": "./self-alias",
+		"self-mod": "self-mod",
+		"./points-nowhere": "./does-not-exist"
+	}
+}

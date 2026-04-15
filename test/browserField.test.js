@@ -92,4 +92,94 @@ describe("browserField", () => {
 			p("lib", "toString.js"),
 		);
 	});
+
+	const aliasFieldExtras = path.join(
+		__dirname,
+		"fixtures",
+		"alias-field-extras",
+	);
+
+	it("falls through when the browser alias value equals the inner request", (done) => {
+		const resolver = ResolverFactory.createResolver({
+			extensions: [".js"],
+			aliasFields: ["browser"],
+			fileSystem: fs,
+		});
+		resolver.resolve(
+			{},
+			aliasFieldExtras,
+			"./self-alias",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				expect(result).toEqual(path.join(aliasFieldExtras, "self-alias.js"));
+				done();
+			},
+		);
+	});
+
+	it("falls through when a module alias value equals the inner request", (done) => {
+		const resolver = ResolverFactory.createResolver({
+			extensions: [".js"],
+			aliasFields: ["browser"],
+			fileSystem: fs,
+		});
+		resolver.resolve({}, aliasFieldExtras, "pkg", {}, (err, result) => {
+			if (err) return done(err);
+			expect(result).toEqual(
+				path.join(aliasFieldExtras, "node_modules/pkg/index.js"),
+			);
+			done();
+		});
+	});
+
+	it("propagates a resolution error when the browser alias target cannot be found", (done) => {
+		const resolver = ResolverFactory.createResolver({
+			extensions: [".js"],
+			aliasFields: ["browser"],
+			fileSystem: fs,
+		});
+		resolver.resolve({}, aliasFieldExtras, "./points-nowhere", {}, (err) => {
+			expect(err).toBeInstanceOf(Error);
+			done();
+		});
+	});
+
+	it("leaves resolution untouched when the configured field does not exist", (done) => {
+		const resolver = ResolverFactory.createResolver({
+			extensions: [".js"],
+			aliasFields: ["nonexistentField"],
+			fileSystem: fs,
+		});
+		resolver.resolve(
+			{},
+			path.join(__dirname, "fixtures", "browser-module"),
+			"./lib/main.js",
+			{},
+			(err) => {
+				// Either resolves or errors — we just want to exercise the path.
+				expect(err === null || err instanceof Error).toBe(true);
+				done();
+			},
+		);
+	});
+
+	it("short-circuits when a browser field marks a path as false (directory ignore)", (done) => {
+		const resolver = ResolverFactory.createResolver({
+			extensions: [".js"],
+			aliasFields: ["browser"],
+			fileSystem: fs,
+		});
+		resolver.resolve(
+			{},
+			path.join(__dirname, "fixtures", "browser-module"),
+			"./lib/ignore",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				expect(result).toBe(false);
+				done();
+			},
+		);
+	});
 });

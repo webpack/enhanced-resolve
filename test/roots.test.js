@@ -134,4 +134,30 @@ describe("roots", () => {
 			},
 		);
 	});
+
+	it("should throw an error for empty requests (no root rewriting)", (done) => {
+		// Empty request should produce an error, not a root rewrite.
+		resolver.resolve({}, fixtures, "", {}, (err) => {
+			expect(err).toBeInstanceOf(Error);
+			done();
+		});
+	});
+
+	it("should work falls through for relative requests (no root rewriting)", (done) => {
+		// Relative request resolves normally (not via roots).
+		resolver.resolve({}, fixtures, "./a.js", {}, (err, result) => {
+			if (err) return done(err);
+			expect(result).toEqual(path.join(fixtures, "a.js"));
+			done();
+		});
+	});
+
+	it("should rewrites absolute-style requests against roots", (done) => {
+		// Absolute request "/a.js" should be rewritten to roots[0] + /a.js
+		resolver.resolve({}, fixtures, "/a.js", {}, (err, result) => {
+			if (err) return done(err);
+			expect(result).toEqual(path.join(fixtures, "a.js"));
+			done();
+		});
+	});
 });

@@ -1616,6 +1616,47 @@ describe("importsFieldPlugin", () => {
 		});
 	});
 
+	it("should work and resolve an imports-field key to a real file", (done) => {
+		const resolver = ResolverFactory.createResolver({
+			extensions: [".js"],
+			conditionNames: ["node"],
+			importsFields: ["imports"],
+			fileSystem: nodeFileSystem,
+		});
+		resolver.resolve(
+			{},
+			path.join(
+				path.join(__dirname, "fixtures"),
+				"imports-field-error-trigger",
+			),
+			"#trigger",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				expect(result).toEqual(
+					path.join(
+						path.join(__dirname, "fixtures"),
+						"imports-field-error-trigger/resolved.js",
+					),
+				);
+				done();
+			},
+		);
+	});
+
+	it("should throw errors for # requests without a description file in scope", (done) => {
+		const resolver = ResolverFactory.createResolver({
+			extensions: [".js"],
+			conditionNames: ["node"],
+			importsFields: ["imports"],
+			fileSystem: nodeFileSystem,
+		});
+		resolver.resolve({}, "/tmp", "#not-in-scope", {}, (err) => {
+			expect(err).toBeInstanceOf(Error);
+			done();
+		});
+	});
+
 	// Test for spec compliance: non-relative imports targets should not
 	// re-enter imports resolution (Node.js uses PACKAGE_RESOLVE for these,
 	// which only does node_modules lookup).

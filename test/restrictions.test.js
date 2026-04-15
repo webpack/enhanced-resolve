@@ -106,4 +106,48 @@ describe("restrictions", () => {
 			},
 		);
 	});
+
+	it("should throw an error when the path is outside a string restriction", (done) => {
+		const resolver = ResolverFactory.createResolver({
+			fileSystem: nodeFileSystem,
+			extensions: [".js"],
+			restrictions: ["/definitely/not/here"],
+		});
+		const log = [];
+		resolver.resolve(
+			{},
+			fixture,
+			"pck1",
+			{ log: (m) => log.push(m) },
+			(err) => {
+				expect(err).toBeInstanceOf(Error);
+				expect(
+					log.some((l) => l.includes("is not inside of the restriction")),
+				).toBe(true);
+				done();
+			},
+		);
+	});
+
+	it("should throw an error when the path does not match a regex restriction", (done) => {
+		const resolver = ResolverFactory.createResolver({
+			fileSystem: nodeFileSystem,
+			extensions: [".js"],
+			restrictions: [/\.ts$/],
+		});
+		const log = [];
+		resolver.resolve(
+			{},
+			fixture,
+			"pck1",
+			{ log: (m) => log.push(m) },
+			(err) => {
+				expect(err).toBeInstanceOf(Error);
+				expect(
+					log.some((l) => l.includes("doesn't match the restriction")),
+				).toBe(true);
+				done();
+			},
+		);
+	});
 });

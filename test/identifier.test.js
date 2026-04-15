@@ -145,4 +145,14 @@ describe("identifier", () => {
 
 		run(tests);
 	});
+
+	describe("parse identifier. malformed inputs", () => {
+		it("returns null for a single null-byte input (regex no-match)", () => {
+			expect(parseIdentifier("\0")).toBeNull();
+		});
+
+		it("returns null for an empty input", () => {
+			expect(parseIdentifier("")).toBeNull();
+		});
+	});
 });

@@ -3382,4 +3382,23 @@ describe("exportsFieldPlugin", () => {
 			},
 		);
 	});
+
+	it("emits 'is not exported' error when no conditions match", (done) => {
+		const resolver = ResolverFactory.createResolver({
+			extensions: [".js"],
+			conditionNames: ["unknown-cond"],
+			exportsFields: ["exports"],
+			fileSystem: nodeFileSystem,
+		});
+		resolver.resolve(
+			{},
+			path.join(path.join(__dirname, "fixtures"), "exports-field"),
+			"exports-field/index",
+			{},
+			(err) => {
+				expect(err).toBeInstanceOf(Error);
+				done();
+			},
+		);
+	});
 });
