@@ -1142,8 +1142,17 @@ declare interface ResolveContext {
 	yield?: (request: ResolveRequest) => void;
 }
 declare interface ResolveFunction {
-	(context: Context, path: string, request: string): string | false;
-	(path: string, request: string): string | false;
+	(
+		context: Context,
+		path: string,
+		request: string,
+		resolveContext?: ResolveContext,
+	): string | false;
+	(
+		path: string,
+		request: string,
+		resolveContext?: ResolveContext,
+	): string | false;
 }
 declare interface ResolveFunctionAsync {
 	(
@@ -1186,6 +1195,19 @@ declare interface ResolveFunctionAsync {
 			req?: ResolveRequest,
 		) => void,
 	): void;
+}
+declare interface ResolveFunctionPromise {
+	(
+		context: Context,
+		path: string,
+		request: string,
+		resolveContext?: ResolveContext,
+	): Promise<string | false>;
+	(
+		path: string,
+		request: string,
+		resolveContext?: ResolveContext,
+	): Promise<string | false>;
 }
 type ResolveOptionsOptionalFS = Omit<
 	ResolveOptionsResolverFactoryObject_2,
@@ -1511,7 +1533,18 @@ declare abstract class Resolver {
 		[ResolveRequest, ResolveContext],
 		null | ResolveRequest
 	>;
-	resolveSync(context: Context, path: string, request: string): string | false;
+	resolveSync(
+		context: Context,
+		path: string,
+		request: string,
+		resolveContext?: ResolveContext,
+	): string | false;
+	resolvePromise(
+		context: Context,
+		path: string,
+		request: string,
+		resolveContext?: ResolveContext,
+	): Promise<string | false>;
 	resolve(
 		context: Context,
 		path: string,
@@ -1756,11 +1789,15 @@ declare function exports(
 ): void;
 declare namespace exports {
 	export const sync: ResolveFunction;
+	export const promise: ResolveFunctionPromise;
 	export function create(
 		options: ResolveOptionsOptionalFS,
 	): ResolveFunctionAsync;
 	export namespace create {
 		export const sync: (options: ResolveOptionsOptionalFS) => ResolveFunction;
+		export const promise: (
+			options: ResolveOptionsOptionalFS,
+		) => ResolveFunctionPromise;
 	}
 	export namespace ResolverFactory {
 		export let createResolver: (
@@ -1795,6 +1832,7 @@ declare namespace exports {
 		ResolveOptionsResolverFactoryObject_2 as ResolveOptions,
 		ResolveFunctionAsync,
 		ResolveFunction,
+		ResolveFunctionPromise,
 	};
 }
 
