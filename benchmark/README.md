@@ -116,6 +116,7 @@ export default function register(bench, { caseName, caseDir, fixtureDir }) {
 | `main-files`              | Custom `mainFiles: ["main", "entry", "index"]` walked by UseFilePlugin                                       |
 | `description-files-multi` | `descriptionFiles: [package.json, bower.json, component.json]` walked per directory                          |
 | `many-extensions-miss`    | Worst-case extension probing: 5 misses + 1 hit per resolve for a 6-extension list                            |
+| `alias-wildcard-scan`     | Scan of 100 aliases where one is a wildcard (`pkg-*`) — isolates AliasUtils per-item wildcard-detection cost |
 
 Add new cases by creating a new directory under `cases/` — `run.mjs` will
 pick it up automatically on the next run.
