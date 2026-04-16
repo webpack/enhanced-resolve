@@ -476,6 +476,68 @@ describe("cachedInputFileSystem CacheBackend", () => {
 	});
 });
 
+describe("cachedInputFileSystem CacheBackend with Infinity duration", () => {
+	let fs;
+
+	beforeEach(() => {
+		fs = new CachedInputFileSystem(
+			{
+				stat(path, options, callback) {
+					if (!callback) {
+						callback = options;
+						options = undefined;
+					}
+					setTimeout(
+						callback.bind(null, null, {
+							path,
+							options,
+						}),
+						100,
+					);
+				},
+				// @ts-expect-error for tests
+				statSync(path, options) {
+					return {
+						path,
+						options,
+					};
+				},
+			},
+			Infinity,
+		);
+	});
+
+	afterEach(() => {
+		fs.purge();
+	});
+
+	it("should not crash the constructor with Infinity", () => {
+		expect(fs).toBeDefined();
+	});
+
+	it("should cache accesses forever", (done) => {
+		fs.stat("a", (err, result) => {
+			result.a = true;
+			fs.stat("a", (err, result) => {
+				expect(result.a).toBeDefined();
+				setTimeout(() => {
+					fs.stat("a", (err, result) => {
+						expect(result.a).toBeDefined();
+						done();
+					});
+				}, 100);
+			});
+		});
+	});
+
+	it("should cache sync accesses forever", () => {
+		const result = fs.statSync("a");
+		result.a = true;
+		const result2 = fs.statSync("a");
+		expect(result2.a).toBeDefined();
+	});
+});
+
 describe("cachedInputFileSystem CacheBackend and Node.JS filesystem", () => {
 	let fs;
 
