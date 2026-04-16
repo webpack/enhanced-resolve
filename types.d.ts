@@ -176,6 +176,42 @@ declare class CloneBasenamePlugin {
 		  >;
 	apply(resolver: Resolver): void;
 }
+declare interface CompiledAliasOption {
+	/**
+	 * original alias name
+	 */
+	name: string;
+
+	/**
+	 * name + "/" — precomputed to avoid per-resolve concat
+	 */
+	nameWithSlash: string;
+
+	/**
+	 * alias target(s)
+	 */
+	alias: Alias;
+
+	/**
+	 * normalized onlyModule flag
+	 */
+	onlyModule: boolean;
+
+	/**
+	 * absolute form of `name` (with slash ending), null when not absolute
+	 */
+	absolutePath: null | string;
+
+	/**
+	 * substring before the single "*" in `name`, null when no wildcard
+	 */
+	wildcardPrefix: null | string;
+
+	/**
+	 * substring after the single "*" in `name`, null when no wildcard
+	 */
+	wildcardSuffix: null | string;
+}
 type Context = KnownContext & Record<any, any>;
 declare interface Dirent<T extends string | Buffer = string> {
 	/**
@@ -1723,7 +1759,7 @@ declare interface TsconfigPathsData {
 	/**
 	 * tsconfig file data
 	 */
-	alias: AliasOption[];
+	alias: CompiledAliasOption[];
 
 	/**
 	 * tsconfig file data
