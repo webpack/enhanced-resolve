@@ -182,4 +182,103 @@ describe("alias", () => {
 	it("should resolve a wildcard alias with multiple targets correctly", () => {
 		expect(resolver.resolveSync({}, "/", "shared/b")).toBe("/src/components/b");
 	});
+
+	// Regression tests for the watch-mode fallback described in
+	// https://github.com/webpack/enhanced-resolve/issues/395 and
+	// https://github.com/webpack/enhanced-resolve/issues/250.
+	//
+	// When an alias maps to an array of target paths (used for
+	// theme-override-style setups), a subsequent resolve after one of the
+	// target files is deleted must gracefully fall back to the next target
+	// in the array instead of holding on to the previously-resolved path.
+	// Conversely, a newly created higher-priority file must be used on the
+	// next resolve.
+	describe("multi-target alias (theme override) watch-mode behavior", () => {
+		const AliasPlugin = require("../lib/AliasPlugin");
+
+		/**
+		 * Builds a fresh resolver over an in-memory filesystem with a
+		 * `theme` alias that maps to two directories in priority order.
+		 * @param {Record<string, string>} files initial file contents keyed by absolute path
+		 * @returns {{ resolver: import("../").Resolver, fileSystem: import("memfs").Volume }} helpers
+		 */
+		const createThemeResolver = (files) => {
+			const fileSystem = Volume.fromJSON(files, "/");
+			const resolver = ResolverFactory.createResolver({
+				extensions: [".js"],
+				useSyncFileSystemCalls: true,
+				// @ts-expect-error for tests
+				fileSystem,
+				plugins: [
+					new AliasPlugin(
+						"described-resolve",
+						[{ name: "theme", alias: ["/fancy-theme", "/default-theme"] }],
+						"resolve",
+					),
+				],
+			});
+
+			return { resolver, fileSystem };
+		};
+
+		it("falls back to the next target once the preferred file is removed", () => {
+			const { resolver, fileSystem } = createThemeResolver({
+				"/fancy-theme/Hello.js": "",
+				"/default-theme/Hello.js": "",
+			});
+
+			expect(resolver.resolveSync({}, "/", "theme/Hello")).toBe(
+				"/fancy-theme/Hello.js",
+			);
+
+			fileSystem.unlinkSync("/fancy-theme/Hello.js");
+
+			expect(resolver.resolveSync({}, "/", "theme/Hello")).toBe(
+				"/default-theme/Hello.js",
+			);
+		});
+
+		it("picks up a newly created higher-priority file", () => {
+			const { resolver, fileSystem } = createThemeResolver({
+				"/default-theme/Hello.js": "",
+			});
+
+			expect(resolver.resolveSync({}, "/", "theme/Hello")).toBe(
+				"/default-theme/Hello.js",
+			);
+
+			fileSystem.mkdirSync("/fancy-theme");
+			fileSystem.writeFileSync("/fancy-theme/Hello.js", "");
+
+			expect(resolver.resolveSync({}, "/", "theme/Hello")).toBe(
+				"/fancy-theme/Hello.js",
+			);
+		});
+
+		it("reports a missing-higher-priority path as a missing dependency so watchers can invalidate", (done) => {
+			const { resolver } = createThemeResolver({
+				"/default-theme/Hello.js": "",
+			});
+
+			const fileDependencies = new Set();
+			const missingDependencies = new Set();
+
+			resolver.resolve(
+				{},
+				"/",
+				"theme/Hello",
+				{ fileDependencies, missingDependencies },
+				(err, result) => {
+					if (err) return done(err);
+					expect(result).toBe("/default-theme/Hello.js");
+					// The winning file is tracked so that deletions invalidate.
+					expect(fileDependencies.has("/default-theme/Hello.js")).toBe(true);
+					// The non-existent higher-priority file is tracked so that
+					// its creation triggers a re-resolve (see issue #250).
+					expect(missingDependencies.has("/fancy-theme/Hello.js")).toBe(true);
+					done();
+				},
+			);
+		});
+	});
 });
