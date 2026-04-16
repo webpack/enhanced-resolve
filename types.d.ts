@@ -1127,9 +1127,9 @@ declare interface ResolveContext {
 	missingDependencies?: WriteOnlySet<string>;
 
 	/**
-	 * set of hooks' calls. For instance, `resolve → parsedResolve → describedResolve`,
+	 * tip of the resolver call stack (a singly-linked list with Set-like API). For instance, `resolve → parsedResolve → describedResolve`,
 	 */
-	stack?: Set<string>;
+	stack?: StackEntry;
 
 	/**
 	 * log function
@@ -1574,6 +1574,33 @@ declare abstract class Resolver {
 	join(path: string, request: string): string;
 	dirname(path: string): string;
 	basename(path: string, suffix?: string): string;
+}
+declare abstract class StackEntry {
+	name?: string;
+	path: string | false;
+	request: string;
+	query: string;
+	fragment: string;
+	directory: boolean;
+	module: boolean;
+	parent?: StackEntry;
+
+	/**
+	 * Walk the linked list looking for an entry with the same request shape.
+	 * Set-compatible: callers that used `stack.has(entry)` keep working.
+	 */
+	has(query: StackEntry): boolean;
+
+	/**
+	 * Number of entries on the stack (oldest-to-newest length).
+	 */
+	get size(): number;
+
+	/**
+	 * Human-readable form used in recursion error messages and logs.
+	 * Matches the historical string format so existing log parsers stay valid.
+	 */
+	toString(): string;
 }
 declare interface Stat {
 	(
