@@ -508,6 +508,11 @@ describe("should resolve all aliases", () => {
 									/** @type {string} */
 									(
 										Object.keys(cache).find((id) => {
+											// Cache keys are "type\0context\0path\0query\0fragment\0request".
+											// We only need the request field for this assertion.
+											// const parts = id.split("\0");
+											// return parts[parts.length - 1] === "index/b";
+
 											const { request } = JSON.parse(id);
 											return request === "index/b";
 										})

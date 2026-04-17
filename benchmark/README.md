@@ -93,6 +93,7 @@ export default function register(bench, { caseName, caseDir, fixtureDir }) {
 | `fallback`                | `fallback` aliases (common Node-built-in polyfill pattern)                                                   |
 | `self-reference`          | SelfReferencePlugin: a package imports itself via its own package name and `exports` map                     |
 | `unsafe-cache`            | UnsafeCachePlugin on vs off, with three passes over the same request list per iteration                      |
+| `unsafe-cache-miss-heavy` | UnsafeCachePlugin with a 42-request batch run miss-pass + hit-pass, stresses the cache-id hot path           |
 | `deep-hierarchy`          | Bare + relative resolution from 10 directory levels deep (walks `ModulesInHierarchicalDirectoriesPlugin`)    |
 | `prefer-relative`         | `preferRelative: true` — bare specifiers attempted as relative before node_modules                           |
 | `main-field`              | MainFieldPlugin with `browser`/`module`/`main` candidates against packages defining different combinations   |

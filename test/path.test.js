@@ -9,6 +9,7 @@ const {
 	dirname,
 	getType,
 	invalidSegmentRegEx,
+	isRelativeRequest,
 	isSubPath,
 	join,
 	normalize,
@@ -175,6 +176,44 @@ describe("util/path cachedBasename", () => {
 		const a2 = cachedBasename("/x.ext", ".ext");
 		expect(a).toBe(a2);
 		expect(a).not.toBe(b);
+	});
+});
+
+describe("util/path isRelativeRequest", () => {
+	// Must match the legacy /^\.\.?(?:\/|$)/ regex exactly, since the helper
+	// replaced it in several hot paths. Verify each branch individually.
+	it("returns true for exactly '.'", () => {
+		expect(isRelativeRequest(".")).toBe(true);
+	});
+
+	it("returns true for exactly '..'", () => {
+		expect(isRelativeRequest("..")).toBe(true);
+	});
+
+	it("returns true for './' and './foo/bar'", () => {
+		expect(isRelativeRequest("./")).toBe(true);
+		expect(isRelativeRequest("./foo")).toBe(true);
+		expect(isRelativeRequest("./foo/bar")).toBe(true);
+	});
+
+	it("returns true for '../' and '../foo'", () => {
+		expect(isRelativeRequest("../")).toBe(true);
+		expect(isRelativeRequest("../foo")).toBe(true);
+	});
+
+	it("returns false for bare specifiers and absolute paths", () => {
+		expect(isRelativeRequest("")).toBe(false);
+		expect(isRelativeRequest("foo")).toBe(false);
+		expect(isRelativeRequest("/abs")).toBe(false);
+		expect(isRelativeRequest("#imports")).toBe(false);
+		expect(isRelativeRequest("C:\\win")).toBe(false);
+	});
+
+	it("returns false for dotted names that are not relative requests", () => {
+		// ".foo" is a normal specifier (hidden-file-style), not a relative request.
+		expect(isRelativeRequest(".foo")).toBe(false);
+		// "..foo" likewise — only "..", "../..." are relative.
+		expect(isRelativeRequest("..foo")).toBe(false);
 	});
 });
 
