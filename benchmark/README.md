@@ -102,6 +102,8 @@ export default function register(bench, { caseName, caseDir, fixtureDir }) {
 | `failed-resolution`       | Error path: missing files and packages, walks the full pipeline before reporting the miss                    |
 | `concurrent-batch`        | 15 resolves through `Promise.all`, exercising in-flight request de-duplication                               |
 | `large-alias-list`        | 50 non-matching + 8 matching aliases, stresses AliasPlugin's linear scan                                     |
+| `huge-alias-list`         | 300 non-matching + 8 matching aliases, match near end — monorepo-scale AliasPlugin scan                      |
+| `huge-alias-miss`         | 300 aliases + requests that never match any — pure per-option overhead, no `doResolve` recursion             |
 | `multiple-modules`        | `modules: [shared, vendor, node_modules]` mix of root + hierarchical directories                             |
 | `mixed-conditions`        | Nested condition map (browser/worker/node/development/production/...) under 4 condition configurations       |
 | `exports-patterns-many`   | Package with 6 wildcard subpath exports × 4 leaves per prefix — pattern-matcher stress                       |
