@@ -54,6 +54,131 @@ myResolve("/some/path/to/folder", "ts-module", (err, result) => {
 });
 ```
 
+### Public API
+
+All of the following are exposed from `require("enhanced-resolve")`.
+
+#### `resolve(context?, path, request, resolveContext?, callback)`
+
+Async Node-style resolver using the built-in defaults (`conditionNames: ["node"]`, `extensions: [".js", ".json", ".node"]`). `context` is optional; when omitted, a built-in Node context is used.
+
+```js
+const resolve = require("enhanced-resolve");
+
+resolve(__dirname, "./utils", (err, result) => {
+	// result === "/abs/path/to/utils.js"
+});
+```
+
+#### `resolve.sync(context?, path, request, resolveContext?) => string | false`
+
+Synchronous variant. Throws on failure, returns `false` when the resolve yields no result.
+
+```js
+const file = resolve.sync(__dirname, "./utils");
+```
+
+#### `resolve.promise(context?, path, request, resolveContext?) => Promise<string | false>`
+
+Promise variant of `resolve`.
+
+```js
+const file = await resolve.promise(__dirname, "./utils");
+```
+
+#### `resolve.create(options) => ResolveFunctionAsync`
+
+Builds a customized async resolve function. Options are the same as for [`ResolverFactory.createResolver`](#resolver-options); `fileSystem` defaults to the built-in Node.js filesystem.
+
+```js
+const resolveTs = resolve.create({ extensions: [".ts", ".tsx", ".js"] });
+
+resolveTs(__dirname, "./component", (err, result) => {
+	// result === "/abs/path/to/component.tsx"
+});
+```
+
+#### `resolve.create.sync(options) => ResolveFunction`
+
+Sync variant of `resolve.create`.
+
+```js
+const resolveTsSync = resolve.create.sync({ extensions: [".ts", ".js"] });
+const file = resolveTsSync(__dirname, "./component");
+```
+
+#### `resolve.create.promise(options) => ResolveFunctionPromise`
+
+Promise variant of `resolve.create`.
+
+```js
+const resolveTsPromise = resolve.create.promise({ extensions: [".ts", ".js"] });
+const file = await resolveTsPromise(__dirname, "./component");
+```
+
+#### `ResolverFactory.createResolver(options) => Resolver`
+
+Lower-level factory. Returns a `Resolver` whose `resolve`, `resolveSync`, and `resolvePromise` methods accept `(context, path, request, resolveContext, [callback])`. Use this when you need a reusable resolver instance or access to its `hooks` (see the [Plugins](#plugins) section). `fileSystem` is required here — the high-level `resolve.create` defaults it for you.
+
+```js
+const fs = require("fs");
+const {
+	CachedInputFileSystem,
+	ResolverFactory,
+} = require("enhanced-resolve");
+
+const resolver = ResolverFactory.createResolver({
+	fileSystem: new CachedInputFileSystem(fs, 4000),
+	extensions: [".js", ".json"],
+});
+
+resolver.resolve({}, __dirname, "./utils", {}, (err, file) => {
+	// ...
+});
+```
+
+#### `CachedInputFileSystem(fileSystem, duration)`
+
+Wraps any Node-compatible `fs` to add an in-memory cache for `stat`, `readdir`, `readFile`, `readJson`, and `readlink`. `duration` is the cache TTL in milliseconds (typically `4000`). Call `.purge()` to invalidate, or `.purge(path)` / `.purge([path, ...])` to invalidate specific entries — do this whenever you know files changed (e.g. from a watcher).
+
+```js
+const fs = require("fs");
+const { CachedInputFileSystem } = require("enhanced-resolve");
+
+const cachedFs = new CachedInputFileSystem(fs, 4000);
+// later, when files change:
+cachedFs.purge("/abs/path/to/changed-file.js");
+```
+
+#### Exported plugins & helpers
+
+For use with the `plugins` option or as standalone utilities:
+
+- `ResolverFactory` — see above.
+- `CachedInputFileSystem` — see above.
+- `CloneBasenamePlugin(source, target)` — joins the directory's basename onto the path. See [Built-in Plugins](#built-in-plugins).
+- `LogInfoPlugin(source)` — logs pipeline state at a hook; enable by passing a `log` function on the `resolveContext`.
+- `TsconfigPathsPlugin(options)` — applies `tsconfig.json` `paths` / `baseUrl` mappings; typically configured via the `tsconfig` resolver option instead.
+- `forEachBail(array, iterator, callback)` — bail-style async iterator used internally; useful when authoring plugins that try several candidates in order.
+
+```js
+const { LogInfoPlugin } = require("enhanced-resolve");
+
+const resolver = ResolverFactory.createResolver({
+	fileSystem: cachedFs,
+	extensions: [".js"],
+	plugins: [new LogInfoPlugin("described-resolve")],
+});
+
+resolver.resolve(
+	{},
+	__dirname,
+	"./utils",
+	{ log: (msg) => console.log(msg) },
+	() => {},
+);
+```
+
 ### Creating a Resolver
 
 The easiest way to create a resolver is to use the `createResolver` function on `ResolveFactory`, along with one of the supplied File System implementations.
@@ -119,6 +244,123 @@ myResolver.resolve(
 | tsconfig.references | []                          | Project references. `'auto'` to load from tsconfig, or an array of paths to referenced projects                                                                                                                                                                                             |
 | tsconfig.baseUrl    | undefined                   | Override baseUrl from tsconfig.json. If provided, this value will be used instead of the baseUrl in the tsconfig file                                                                                                                                                                       |
 | unsafeCache         | false                       | Use this cache object to unsafely cache the successful requests                                                                                                                                                                                                                             |
+
+#### Option Examples
+
+Small snippets for the non-obvious options. All options are passed to `resolve.create({ ... })` or `ResolverFactory.createResolver({ ... })`.
+
+**`alias`** — rewrite matching requests to a target path, module, or to `false` to ignore them. Accepts an object or an array of entries (array form lets you specify ordering / `onlyModule`).
+
+```js
+alias: {
+	"@": path.resolve(__dirname, "src"),       // @/utils → src/utils
+	"lodash$": "lodash-es",                    // exact "lodash", not "lodash/foo"
+	"ignored-module": false,                   // short-circuit to an empty module
+},
+```
+
+**`aliasFields`** — read alias maps from fields in `package.json`. The `browser` field is the common case:
+
+```js
+aliasFields: ["browser"],
+```
+
+**`extensionAlias`** — maps one request extension to a list of candidate extensions. Useful for TypeScript ESM where imports are written with `.js` but the source is `.ts`:
+
+```js
+extensionAlias: {
+	".js": [".ts", ".js"],
+	".mjs": [".mts", ".mjs"],
+},
+```
+
+**`conditionNames` + `exportsFields`** — pick which conditions to match in the `exports` field of `package.json`:
+
+```js
+conditionNames: ["import", "node", "default"],
+exportsFields: ["exports"],
+```
+
+**`extensions`** — extensions to try for extensionless requests, in order:
+
+```js
+extensions: [".ts", ".tsx", ".js", ".json"],
+```
+
+**`fallback`** — same shape as `alias`, but only consulted when the primary resolve fails. Handy for polyfills:
+
+```js
+fallback: {
+	crypto: require.resolve("crypto-browserify"),
+	stream: false,
+},
+```
+
+**`modules`** — where to look for bare-module requests. Entries can be folder names (searched hierarchically up the tree) or absolute paths (searched directly):
+
+```js
+modules: [path.resolve(__dirname, "src"), "node_modules"],
+```
+
+**`mainFields` / `mainFiles`** — fields in `package.json` to try for a package entry point, and filenames to try inside a directory:
+
+```js
+mainFields: ["browser", "module", "main"],
+mainFiles: ["index"],
+```
+
+**`roots` + `preferAbsolute`** — resolve server-relative URLs (starting with `/`) against one or more root directories. With `preferAbsolute: true`, absolute-path resolution is tried before the roots are consulted.
+
+```js
+roots: [path.resolve(__dirname, "public")],
+preferAbsolute: false,
+```
+
+**`restrictions`** — reject results that don't satisfy at least one restriction. Accepts strings (path prefixes) or `RegExp`s:
+
+```js
+restrictions: [path.resolve(__dirname, "src"), /\.(js|ts)$/],
+```
+
+**`tsconfig`** — apply TypeScript `paths` / `baseUrl` mappings. Either pass `true` to load `./tsconfig.json`, a path string, or a configuration object:
+
+```js
+tsconfig: {
+	configFile: path.resolve(__dirname, "tsconfig.json"),
+	references: "auto", // honor project references declared in tsconfig
+},
+```
+
+**`symlinks`** — resolve to the real path by following symlinks. Set to `false` to keep the symlinked path (common for monorepo / pnpm layouts where you want module identity tied to the workspace location):
+
+```js
+symlinks: false,
+```
+
+**`fullySpecified`** — require fully-specified requests (no extension inference, no `index` lookup) for non-internal requests. Matches Node.js ESM semantics:
+
+```js
+fullySpecified: true,
+```
+
+**`unsafeCache`** — pass an object to use as an in-memory cache of successful resolves. Set to `true` to let the resolver allocate its own:
+
+```js
+unsafeCache: {}, // or true
+cacheWithContext: false, // skip context in the cache key — faster, but only safe if context doesn't change the result
+```
+
+**`fileSystem`** — any `fs`-compatible implementation. Usually `new CachedInputFileSystem(fs, 4000)`; can be a virtual filesystem (e.g. `memfs`) for testing:
+
+```js
+fileSystem: new CachedInputFileSystem(require("fs"), 4000),
+```
+
+**`plugins`** — additional plugin instances appended to the pipeline. See [Plugins](#plugins):
+
+```js
+plugins: [new TsconfigPathsPlugin({ configFile: "./tsconfig.json" })],
+```
 
 ## Plugins
 
