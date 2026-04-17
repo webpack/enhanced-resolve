@@ -22,11 +22,12 @@ describe("resolveContext.stack", () => {
 		});
 	});
 
-	it("should resolve when an empty Set is supplied as stack", (done) => {
+	it("should resolve when an empty StackEntry is supplied as stack", (done) => {
 		resolver.resolve(
 			{},
 			fixture,
 			"./foo",
+			// @ts-expect-error for test cases old Set API
 			{ stack: new Set() },
 			(err, result) => {
 				if (err) return done(err);
@@ -44,6 +45,7 @@ describe("resolveContext.stack", () => {
 			{},
 			fixture,
 			"./foo",
+			// @ts-expect-error for test cases old Set API
 			{ stack: new Set(["custom-entry-1", "custom-entry-2"]) },
 			(err, result) => {
 				if (err) return done(err);
@@ -62,6 +64,7 @@ describe("resolveContext.stack", () => {
 			{},
 			fixture,
 			"./foo",
+			// @ts-expect-error for test cases old Set API
 			{ stack: new Set([preSeededEntry]) },
 			(err) => {
 				expect(err).toBeTruthy();
