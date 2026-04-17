@@ -127,6 +127,44 @@ These plugins can extend the functionality of the library, adding other ways for
 
 A plugin should be a `class` (or its ES5 equivalent) with an `apply` method. The `apply` method will receive a `resolver` instance, that can be used to hook in to the event system.
 
+Plugins are executed in a pipeline, and register which event they should be executed before/after. `source` is the name of the event that starts the pipeline, and `target` is what event this plugin should fire, which is what continues the execution of the pipeline. For a full view of how these plugin events form a chain, see `lib/ResolverFactory.js`, in the `//// pipeline ////` section.
+
+### Built-in Plugins
+
+`enhanced-resolve` ships with the following plugins. Most of them are wired up automatically by `ResolverFactory` based on the [resolver options](#resolver-options); the ones exported from the package entry (`TsconfigPathsPlugin`, `CloneBasenamePlugin`, `LogInfoPlugin`) are the ones you're most likely to use explicitly.
+
+| Plugin                                | Purpose                                                                                                                              |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `AliasPlugin`                         | Replaces a matching request with one or more alternative targets. Powers the `alias` and `fallback` options.                         |
+| `AliasFieldPlugin`                    | Applies aliasing based on a field in the description file (e.g. the `browser` field). Powers `aliasFields`.                          |
+| `AppendPlugin`                        | Appends a string (typically an extension) to the current path. Used for `extensions`.                                                |
+| `CloneBasenamePlugin`                 | Joins the current directory basename onto the path (e.g. `/foo/bar` → `/foo/bar/bar`). Useful for directory-named main-file schemes. |
+| `ConditionalPlugin`                   | Forwards the request only when it matches a given partial request shape.                                                             |
+| `DescriptionFilePlugin`               | Finds and loads the nearest description file (e.g. `package.json`) so other plugins can read its fields. Powers `descriptionFiles`.  |
+| `DirectoryExistsPlugin`               | Only continues the pipeline if the current path is an existing directory.                                                            |
+| `ExportsFieldPlugin`                  | Resolves requests through the `exports` field of a package's description file. Powers `exportsFields` and `conditionNames`.          |
+| `ExtensionAliasPlugin`                | Maps one extension to a list of alternative extensions (e.g. `.js` → `.ts`, `.js`). Powers `extensionAlias`.                         |
+| `FileExistsPlugin`                    | Only continues the pipeline if the current path is an existing file, and records the file as a dependency.                           |
+| `ImportsFieldPlugin`                  | Resolves `#name` requests through the `imports` field of the enclosing package.                                                      |
+| `JoinRequestPlugin`                   | Joins the current path with the current request into a new path.                                                                     |
+| `JoinRequestPartPlugin`               | Splits a module request into module name + inner request, joining the inner request onto the path.                                   |
+| `LogInfoPlugin`                       | Emits verbose log output at a given pipeline step. Handy for debugging resolves via `resolveContext.log`.                            |
+| `MainFieldPlugin`                     | Uses a field in the description file (e.g. `main`) to point to the entry file of a package. Powers `mainFields`.                     |
+| `ModulesInHierarchicalDirectoriesPlugin` | Searches for a module by walking up parent directories (the standard `node_modules` lookup). Powers `modules`.                    |
+| `ModulesInRootPlugin`                 | Searches for a module in a single absolute directory. Powers absolute-path entries in `modules`.                                     |
+| `NextPlugin`                          | Forwards the request from one hook to another without modification — glue between pipeline steps.                                    |
+| `ParsePlugin`                         | Parses a raw request string into its components (path, query, fragment, module flag, etc.).                                          |
+| `PnpPlugin`                           | Resolves module requests through a Yarn PnP API when one is available.                                                               |
+| `RestrictionsPlugin`                  | Rejects results that don't match a list of path restrictions (strings or regular expressions). Powers `restrictions`.                |
+| `ResultPlugin`                        | Terminal plugin that fires the `result` hook — signals a successful resolve.                                                         |
+| `RootsPlugin`                         | Resolves server-relative URL requests (starting with `/`) against one or more root directories. Powers `roots`.                      |
+| `SelfReferencePlugin`                 | Resolves a package self-reference (e.g. `my-pkg/foo` from within `my-pkg`).                                                          |
+| `SymlinkPlugin`                       | Realpaths the resolved file by following symlinks. Can be disabled via the `symlinks` option.                                        |
+| `TryNextPlugin`                       | Forwards the request to the next hook with a log message. Useful for trying alternative resolutions.                                 |
+| `TsconfigPathsPlugin`                 | Rewrites requests using the `paths` and `baseUrl` from a `tsconfig.json`. Powers the `tsconfig` option.                              |
+| `UnsafeCachePlugin`                   | Caches successful resolves in an in-memory map to speed up repeated requests. Powers `unsafeCache`.                                  |
+| `UseFilePlugin`                       | Joins a fixed filename onto the current path (e.g. `index`). Powers `mainFiles`.                                                     |
+
 ### Plugin Boilerplate
 
 ```js
@@ -148,7 +186,51 @@ class MyResolverPlugin {
 }
 ```
 
-Plugins are executed in a pipeline, and register which event they should be executed before/after. In the example above, `source` is the name of the event that starts the pipeline, and `target` is what event this plugin should fire, which is what continues the execution of the pipeline. For an example of how these different plugin events create a chain, see `lib/ResolverFactory.js`, in the `//// pipeline ////` section.
+### Writing a Custom Plugin
+
+The example below adds a plugin that rewrites any request starting with `my-lib/` to `my-lib/src/`. It taps the `described-resolve` hook (after the description file has been located) and forwards the rewritten request to `resolve`, so the pipeline restarts with the new request.
+
+```js
+const { ResolverFactory, CachedInputFileSystem } = require("enhanced-resolve");
+const fs = require("fs");
+
+class MyLibSrcPlugin {
+	apply(resolver) {
+		const target = resolver.ensureHook("resolve");
+		resolver
+			.getHook("described-resolve")
+			.tapAsync("MyLibSrcPlugin", (request, resolveContext, callback) => {
+				if (!request.request || !request.request.startsWith("my-lib/")) {
+					return callback();
+				}
+				const newRequest = {
+					...request,
+					request: request.request.replace(/^my-lib\//, "my-lib/src/"),
+				};
+				resolver.doResolve(
+					target,
+					newRequest,
+					`rewrote my-lib → my-lib/src`,
+					resolveContext,
+					callback,
+				);
+			});
+	}
+}
+
+const myResolver = ResolverFactory.createResolver({
+	fileSystem: new CachedInputFileSystem(fs, 4000),
+	extensions: [".js", ".json"],
+	plugins: [new MyLibSrcPlugin()],
+});
+```
+
+Tips for writing your own plugin:
+
+- Call `callback()` with no arguments to pass the request on to the next tapped handler at the same `source` hook. This is how you "opt out" when a request doesn't apply.
+- Call `resolver.doResolve(target, newRequest, message, resolveContext, callback)` to continue the pipeline at a different hook with a (possibly modified) request.
+- Return early with `callback(null, result)` to short-circuit with a specific result, or `callback(err)` to fail the resolve.
+- Common hook names you'll see as `source`/`target`: `resolve`, `parsed-resolve`, `described-resolve`, `raw-resolve`, `normal-resolve`, `relative`, `directory`, `file`, `existing-file`, `resolved`. Read `lib/ResolverFactory.js` for the full pipeline.
 
 ## Escaping
 
