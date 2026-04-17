@@ -395,7 +395,7 @@ Plugins are executed in a pipeline, and register which event they should be exec
 `enhanced-resolve` ships with the following plugins. Most of them are wired up automatically by `ResolverFactory` based on the [resolver options](#resolver-options); the ones exported from the package entry (`TsconfigPathsPlugin`, `CloneBasenamePlugin`, `LogInfoPlugin`) are the ones you're most likely to use explicitly.
 
 | Plugin                                   | Purpose                                                                                                                              |
-| ---------------------------------------- |--------------------------------------------------------------------------------------------------------------------------------------|
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | `AliasPlugin`                            | Replaces a matching request with one or more alternative targets. Powers the `alias` and `fallback` options.                         |
 | `AliasFieldPlugin`                       | Applies aliasing based on a field in the description file (e.g. the `browser` field). Powers `aliasFields`.                          |
 | `AppendPlugin`                           | Appends a string (typically an extension) to the current path. Used for `extensions`.                                                |
