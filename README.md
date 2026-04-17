@@ -431,8 +431,8 @@ Plugins are executed in a pipeline, and register which event they should be exec
 The example below adds a plugin that rewrites any request starting with `my-lib/` to `my-lib/src/`. It taps the `described-resolve` hook (after the description file has been located) and forwards the rewritten request to `resolve`, so the pipeline restarts with the new request.
 
 ```js
-const { ResolverFactory, CachedInputFileSystem } = require("enhanced-resolve");
 const fs = require("fs");
+const { CachedInputFileSystem, ResolverFactory } = require("enhanced-resolve");
 
 class MyLibSrcPlugin {
 	apply(resolver) {
@@ -450,7 +450,7 @@ class MyLibSrcPlugin {
 				resolver.doResolve(
 					target,
 					newRequest,
-					`rewrote my-lib → my-lib/src`,
+					"rewrote my-lib → my-lib/src",
 					resolveContext,
 					callback,
 				);
