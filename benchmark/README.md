@@ -75,51 +75,56 @@ export default function register(bench, { caseName, caseDir, fixtureDir }) {
 
 ## Existing cases
 
-| Case                      | What it measures                                                                                             |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `realistic-midsize`       | Mixed batch of relative/bare/scoped/exports/nested-`node_modules` requests against a synthetic mid-size tree |
-| `pathological-deep-stack` | 50-deep alias chain, specifically stresses the `doResolve` recursion-check path                              |
-| `stack-churn`             | Several independent depth-60 alias chains — stresses `doResolve`'s per-level stack-allocation pressure       |
-| `alias-realistic`         | Webpack-style `@/components`, `@utils`, `~` aliases — AliasPlugin with a realistic number of entries         |
-| `alias-field`             | `browser` field remapping (AliasFieldPlugin), including the `false`/ignored branch                           |
-| `exports-field`           | Package with nested condition maps and wildcard subpath exports, run under both `require` and `import`       |
-| `imports-field`           | Package-internal `#foo` imports with conditionals and patterns                                               |
-| `extension-alias`         | `.js` → `.ts` TypeScript-style extension remapping                                                           |
-| `extensions-many`         | Six-extension trial list (`.ts`, `.tsx`, `.mjs`, `.js`, `.jsx`, `.json`), hitting each position              |
-| `fully-specified`         | ESM-style `fullySpecified: true` resolution where extensions are mandatory                                   |
-| `tsconfig-paths`          | TsconfigPathsPlugin with five wildcard path prefixes and a plain-string fallback                             |
-| `roots`                   | RootsPlugin: server-relative (`/…`) requests against a configured root                                       |
-| `restrictions`            | RestrictionsPlugin: path prefix + regex restriction checked on every successful resolve                      |
-| `fallback`                | `fallback` aliases (common Node-built-in polyfill pattern)                                                   |
-| `self-reference`          | SelfReferencePlugin: a package imports itself via its own package name and `exports` map                     |
-| `unsafe-cache`            | UnsafeCachePlugin on vs off, with three passes over the same request list per iteration                      |
-| `unsafe-cache-miss-heavy` | UnsafeCachePlugin with a 42-request batch run miss-pass + hit-pass, stresses the cache-id hot path           |
-| `deep-hierarchy`          | Bare + relative resolution from 10 directory levels deep (walks `ModulesInHierarchicalDirectoriesPlugin`)    |
-| `prefer-relative`         | `preferRelative: true` — bare specifiers attempted as relative before node_modules                           |
-| `main-field`              | MainFieldPlugin with `browser`/`module`/`main` candidates against packages defining different combinations   |
-| `sync-resolver`           | `useSyncFileSystemCalls: true` via `resolveSync` — the loader-resolver hot path                              |
-| `symlinks`                | SymlinkPlugin on vs off, resolves routed through symlink targets created at bench setup                      |
-| `resolve-to-context`      | `resolveToContext: true` directory-only branch of the resolver pipeline                                      |
-| `failed-resolution`       | Error path: missing files and packages, walks the full pipeline before reporting the miss                    |
-| `concurrent-batch`        | 15 resolves through `Promise.all`, exercising in-flight request de-duplication                               |
-| `large-alias-list`        | 50 non-matching + 8 matching aliases, stresses AliasPlugin's linear scan                                     |
-| `huge-alias-list`         | 300 non-matching + 8 matching aliases, match near end — monorepo-scale AliasPlugin scan                      |
-| `huge-alias-miss`         | 300 aliases + requests that never match any — pure per-option overhead, no `doResolve` recursion             |
-| `multiple-modules`        | `modules: [shared, vendor, node_modules]` mix of root + hierarchical directories                             |
-| `mixed-conditions`        | Nested condition map (browser/worker/node/development/production/...) under 4 condition configurations       |
-| `exports-patterns-many`   | Package with 6 wildcard subpath exports × 4 leaves per prefix — pattern-matcher stress                       |
-| `tsconfig-extends`        | 3-level tsconfig `extends` chain merged into `paths`                                                         |
-| `enforce-extension`       | `enforceExtension: true`, explicit `.js` requests — tighter pipeline than the default                        |
-| `deep-package-subpath`    | `pkg/a`, `pkg/a/b`, `pkg/a/b/c` requests into a single package (lodash/fp style)                             |
-| `query-fragment`          | `?query` and `#fragment` suffixes, exercises ParsePlugin's split/rejoin on the result                        |
-| `prefer-absolute`         | `preferAbsolute: true` with absolute paths — different normal-resolve branch than `preferRelative`           |
-| `cache-predicate`         | `unsafeCache: true` + custom `cachePredicate` filtering which results actually cache                         |
-| `extension-alias-many`    | `extensionAlias` with 3 source extensions each mapping to a list of candidates                               |
-| `array-alias`             | AliasPlugin with an array alias value (`{ alias: [preferred, fallback] }`)                                   |
-| `main-files`              | Custom `mainFiles: ["main", "entry", "index"]` walked by UseFilePlugin                                       |
-| `description-files-multi` | `descriptionFiles: [package.json, bower.json, component.json]` walked per directory                          |
-| `many-extensions-miss`    | Worst-case extension probing: 5 misses + 1 hit per resolve for a 6-extension list                            |
-| `alias-wildcard-scan`     | Scan of 100 aliases where one is a wildcard (`pkg-*`) — isolates AliasUtils per-item wildcard-detection cost |
+| Case                      | What it measures                                                                                                               |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `realistic-midsize`       | Mixed batch of relative/bare/scoped/exports/nested-`node_modules` requests against a synthetic mid-size tree                   |
+| `pathological-deep-stack` | 50-deep alias chain, specifically stresses the `doResolve` recursion-check path                                                |
+| `stack-churn`             | Several independent depth-60 alias chains — stresses `doResolve`'s per-level stack-allocation pressure                         |
+| `alias-realistic`         | Webpack-style `@/components`, `@utils`, `~` aliases — AliasPlugin with a realistic number of entries                           |
+| `alias-field`             | `browser` field remapping (AliasFieldPlugin), including the `false`/ignored branch                                             |
+| `exports-field`           | Package with nested condition maps and wildcard subpath exports, run under both `require` and `import`                         |
+| `imports-field`           | Package-internal `#foo` imports with conditionals and patterns                                                                 |
+| `extension-alias`         | `.js` → `.ts` TypeScript-style extension remapping                                                                             |
+| `extensions-many`         | Six-extension trial list (`.ts`, `.tsx`, `.mjs`, `.js`, `.jsx`, `.json`), hitting each position                                |
+| `fully-specified`         | ESM-style `fullySpecified: true` resolution where extensions are mandatory                                                     |
+| `tsconfig-paths`          | TsconfigPathsPlugin with five wildcard path prefixes and a plain-string fallback                                               |
+| `roots`                   | RootsPlugin: server-relative (`/…`) requests against a configured root                                                         |
+| `restrictions`            | RestrictionsPlugin: path prefix + regex restriction checked on every successful resolve                                        |
+| `fallback`                | `fallback` aliases (common Node-built-in polyfill pattern)                                                                     |
+| `self-reference`          | SelfReferencePlugin: a package imports itself via its own package name and `exports` map                                       |
+| `unsafe-cache`            | UnsafeCachePlugin on vs off, with three passes over the same request list per iteration                                        |
+| `unsafe-cache-miss-heavy` | UnsafeCachePlugin with a 42-request batch run miss-pass + hit-pass, stresses the cache-id hot path                             |
+| `deep-hierarchy`          | Bare + relative resolution from 10 directory levels deep (walks `ModulesInHierarchicalDirectoriesPlugin`)                      |
+| `prefer-relative`         | `preferRelative: true` — bare specifiers attempted as relative before node_modules                                             |
+| `main-field`              | MainFieldPlugin with `browser`/`module`/`main` candidates against packages defining different combinations                     |
+| `sync-resolver`           | `useSyncFileSystemCalls: true` via `resolveSync` — the loader-resolver hot path                                                |
+| `symlinks`                | SymlinkPlugin on vs off, resolves routed through symlink targets created at bench setup                                        |
+| `resolve-to-context`      | `resolveToContext: true` directory-only branch of the resolver pipeline                                                        |
+| `failed-resolution`       | Error path: missing files and packages, walks the full pipeline before reporting the miss                                      |
+| `concurrent-batch`        | 15 resolves through `Promise.all`, exercising in-flight request de-duplication                                                 |
+| `large-alias-list`        | 50 non-matching + 8 matching aliases, stresses AliasPlugin's linear scan                                                       |
+| `huge-alias-list`         | 300 non-matching + 8 matching aliases, match near end — monorepo-scale AliasPlugin scan                                        |
+| `huge-alias-miss`         | 300 aliases + requests that never match any — pure per-option overhead, no `doResolve` recursion                               |
+| `multiple-modules`        | `modules: [shared, vendor, node_modules]` mix of root + hierarchical directories                                               |
+| `mixed-conditions`        | Nested condition map (browser/worker/node/development/production/...) under 4 condition configurations                         |
+| `exports-patterns-many`   | Package with 6 wildcard subpath exports × 4 leaves per prefix — pattern-matcher stress                                         |
+| `tsconfig-extends`        | 3-level tsconfig `extends` chain merged into `paths`                                                                           |
+| `enforce-extension`       | `enforceExtension: true`, explicit `.js` requests — tighter pipeline than the default                                          |
+| `deep-package-subpath`    | `pkg/a`, `pkg/a/b`, `pkg/a/b/c` requests into a single package (lodash/fp style)                                               |
+| `query-fragment`          | `?query` and `#fragment` suffixes, exercises ParsePlugin's split/rejoin on the result                                          |
+| `prefer-absolute`         | `preferAbsolute: true` with absolute paths — different normal-resolve branch than `preferRelative`                             |
+| `cache-predicate`         | `unsafeCache: true` + custom `cachePredicate` filtering which results actually cache                                           |
+| `extension-alias-many`    | `extensionAlias` with 3 source extensions each mapping to a list of candidates                                                 |
+| `array-alias`             | AliasPlugin with an array alias value (`{ alias: [preferred, fallback] }`)                                                     |
+| `main-files`              | Custom `mainFiles: ["main", "entry", "index"]` walked by UseFilePlugin                                                         |
+| `description-files-multi` | `descriptionFiles: [package.json, bower.json, component.json]` walked per directory                                            |
+| `many-extensions-miss`    | Worst-case extension probing: 5 misses + 1 hit per resolve for a 6-extension list                                              |
+| `alias-wildcard-scan`     | Scan of 100 aliases where one is a wildcard (`pkg-*`) — isolates AliasUtils per-item wildcard-detection cost                   |
+| `get-paths`               | Micro-bench: `lib/getPaths.js` over a mix of POSIX, Windows, and bare inputs (drives `ModulesInHierarchicalDirectoriesPlugin`) |
+| `get-inner-request`       | Micro-bench: `lib/getInnerRequest.js` cold + memoized hot paths (called from most resolve-step plugins)                        |
+| `cd-up`                   | Micro-bench: `DescriptionFileUtils.cdUp` single-level calls + walk-to-root (drives `loadDescriptionFile` ancestor walk)        |
+| `unsafe-cache-key-build`  | Stress for `UnsafeCachePlugin.getCacheId` over 48 distinct requests with query/fragment variants (3-pass cached)               |
+| `modules-flat-addrs`      | 8-deep src dir × 4-entry `modules` list — exercises the flat addr build inside `ModulesUtils.modulesResolveHandler`            |
 
 Add new cases by creating a new directory under `cases/` — `run.mjs` will
 pick it up automatically on the next run.
