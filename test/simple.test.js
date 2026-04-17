@@ -409,6 +409,7 @@ describe("resolver argument validation", () => {
 
 	it("throws when callback is not a function", () => {
 		expect(() => {
+			// @ts-expect-error for tests
 			resolver.resolve({}, fixtures, "./a", {});
 		}).toThrow("callback argument is not a function");
 	});
