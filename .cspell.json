@@ -46,7 +46,9 @@
     "preact",
     "compat",
     "Sindre",
-    "Sorhus"
+    "Sorhus",
+    "readlink",
+    "extensionless"
   ],
   "ignorePaths": [
     "package.json",
