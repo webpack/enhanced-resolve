@@ -1857,7 +1857,6 @@ declare namespace exports {
 		PnpApi,
 		Resolver,
 		Context,
-		StackEntry,
 		FileSystem,
 		ResolveContext,
 		ResolveRequest,
