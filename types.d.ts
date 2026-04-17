@@ -1601,12 +1601,6 @@ declare abstract class StackEntry {
 	 * Matches the historical string format so existing log parsers stay valid.
 	 */
 	toString(): string;
-
-	/**
-	 * Iterate entries from oldest (root) to newest (tip), matching how a
-	 * `Set` that was populated in insertion order would iterate.
-	 */
-	[Symbol.iterator](): IterableIterator<StackEntry>;
 }
 declare interface Stat {
 	(
