@@ -144,6 +144,18 @@ describe("util/path cachedDirname", () => {
 });
 
 describe("util/path cachedBasename", () => {
+	it("returns null when path contains no separators", () => {
+		const cachedBasename = createCachedBasename().fn;
+
+		expect(cachedBasename("foo")).toBe("foo");
+	});
+
+	it("returns basename after the last forward slash", () => {
+		const cachedBasename = createCachedBasename().fn;
+
+		expect(cachedBasename("/a/b/c")).toBe("c");
+	});
+
 	it("returns the same value on cache hit", () => {
 		const cachedBasename = createCachedBasename().fn;
 		const a = cachedBasename("/cached/a/b");
