@@ -1585,8 +1585,14 @@ declare abstract class Resolver {
 		context: Context,
 		path: string,
 		request: string,
-		resolveContext: ResolveContext,
-		callback: (
+		resolveContext?:
+			| ((
+					err: null | ErrorWithDetail,
+					res?: string | false,
+					req?: ResolveRequest,
+			  ) => void)
+			| ResolveContext,
+		callback?: (
 			err: null | ErrorWithDetail,
 			res?: string | false,
 			req?: ResolveRequest,

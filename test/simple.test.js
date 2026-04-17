@@ -384,21 +384,33 @@ describe("resolver argument validation", () => {
 		);
 	});
 
-	it("reports an error when resolveContext is not provided", (done) => {
+	it("resolves when resolveContext is omitted", (done) => {
+		resolver.resolve({}, fixtures, "./a", (err, result) => {
+			if (err) return done(err);
+			expect(typeof result).toBe("string");
+			done();
+		});
+	});
+
+	it("resolves when resolveContext is null", (done) => {
 		resolver.resolve(
 			{},
 			fixtures,
 			"./a",
 			// @ts-expect-error for tests
 			null,
-			(err) => {
-				expect(err).toBeInstanceOf(Error);
-				expect(/** @type {Error} */ (err).message).toMatch(
-					"resolveContext argument is not set",
-				);
+			(err, result) => {
+				if (err) return done(err);
+				expect(typeof result).toBe("string");
 				done();
 			},
 		);
+	});
+
+	it("throws when callback is not a function", () => {
+		expect(() => {
+			resolver.resolve({}, fixtures, "./a", {});
+		}).toThrow("callback argument is not a function");
 	});
 
 	it("invokes the noResolve hook on resolution failure", (done) => {
