@@ -5,6 +5,8 @@ const path = require("path");
 const resolve = require("../");
 const { CachedInputFileSystem, ResolverFactory } = require("../");
 
+const fixtures = path.join(__dirname, "fixtures");
+
 describe("simple", () => {
 	const pathsToIt = [
 		[__dirname, "../lib/index", "direct"],
@@ -256,7 +258,57 @@ describe("simple", () => {
 			extensions: [".js", ".json", ".node"],
 		});
 
-		// TODO allow to use `resolve` without `resolveContext`
+		resolver.resolve(__dirname, "../lib/index", (err, filename) => {
+			if (err) {
+				done(err);
+				return;
+			}
+
+			expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+			done();
+		});
+	});
+
+	it("should resolve via the Resolver.resolve method with resolve context", (done) => {
+		const resolver = ResolverFactory.createResolver({
+			fileSystem: new CachedInputFileSystem(fs, 4000),
+			extensions: [".js", ".json", ".node"],
+		});
+
+		resolver.resolve(__dirname, "../lib/index", {}, (err, filename) => {
+			if (err) {
+				done(err);
+				return;
+			}
+
+			expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+			done();
+		});
+	});
+
+	it("should resolve via the Resolver.resolve method with context", (done) => {
+		const resolver = ResolverFactory.createResolver({
+			fileSystem: new CachedInputFileSystem(fs, 4000),
+			extensions: [".js", ".json", ".node"],
+		});
+
+		resolver.resolve({}, __dirname, "../lib/index", (err, filename) => {
+			if (err) {
+				done(err);
+				return;
+			}
+
+			expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+			done();
+		});
+	});
+
+	it("should resolve via the Resolver.resolve method with context and resolve context", (done) => {
+		const resolver = ResolverFactory.createResolver({
+			fileSystem: new CachedInputFileSystem(fs, 4000),
+			extensions: [".js", ".json", ".node"],
+		});
+
 		resolver.resolve({}, __dirname, "../lib/index", {}, (err, filename) => {
 			if (err) {
 				done(err);
@@ -275,12 +327,24 @@ describe("simple", () => {
 			extensions: [".js", ".json", ".node"],
 		});
 
-		const filename = resolver.resolveSync({}, __dirname, "../lib/index", {});
+		const filename = resolver.resolveSync(__dirname, "../lib/index");
 
 		expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
 	});
 
-	it("should resolve via the Resolver.resolveSync method without resolve context", () => {
+	it("should resolve via the Resolver.resolveSync method with resolve context", () => {
+		const resolver = ResolverFactory.createResolver({
+			useSyncFileSystemCalls: true,
+			fileSystem: new CachedInputFileSystem(fs, 4000),
+			extensions: [".js", ".json", ".node"],
+		});
+
+		const filename = resolver.resolveSync(__dirname, "../lib/index", {});
+
+		expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+	});
+
+	it("should resolve via the Resolver.resolveSync method with context", () => {
 		const resolver = ResolverFactory.createResolver({
 			useSyncFileSystemCalls: true,
 			fileSystem: new CachedInputFileSystem(fs, 4000),
@@ -292,50 +356,19 @@ describe("simple", () => {
 		expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
 	});
 
-	it("should resolve via the Resolver.resolvePromise method", async () => {
-		const resolver = ResolverFactory.createResolver({
-			fileSystem: new CachedInputFileSystem(fs, 4000),
-			extensions: [".js", ".json", ".node"],
-		});
-
-		const filename = await resolver.resolvePromise(
-			{},
-			__dirname,
-			"../lib/index",
-			{},
-		);
-
-		expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
-	});
-
-	it("should resolve via the Resolver.resolvePromise method without resolve context", async () => {
-		const resolver = ResolverFactory.createResolver({
-			fileSystem: new CachedInputFileSystem(fs, 4000),
-			extensions: [".js", ".json", ".node"],
-		});
-
-		const filename = await resolver.resolvePromise(
-			{},
-			__dirname,
-			"../lib/index",
-		);
-
-		expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
-	});
-
-	it("should resolve via the Resolver.resolveSync method without context", () => {
+	it("should resolve via the Resolver.resolveSync method with context and resolve context", () => {
 		const resolver = ResolverFactory.createResolver({
 			useSyncFileSystemCalls: true,
 			fileSystem: new CachedInputFileSystem(fs, 4000),
 			extensions: [".js", ".json", ".node"],
 		});
 
-		const filename = resolver.resolveSync(__dirname, "../lib/index");
+		const filename = resolver.resolveSync({}, __dirname, "../lib/index", {});
 
 		expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
 	});
 
-	it("should resolve via the Resolver.resolvePromise method without context", async () => {
+	it("should resolve via the Resolver.resolvePromise method", async () => {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem: new CachedInputFileSystem(fs, 4000),
 			extensions: [".js", ".json", ".node"],
@@ -346,286 +379,250 @@ describe("simple", () => {
 		expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
 	});
 
-	it("should resolve via the Resolver.resolve method without context", (done) => {
+	it("should resolve via the Resolver.resolvePromise method with resolve context", async () => {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem: new CachedInputFileSystem(fs, 4000),
 			extensions: [".js", ".json", ".node"],
 		});
 
-		resolver.resolve(__dirname, "../lib/index", (err, filename) => {
-			if (err) {
-				done(err);
-				return;
-			}
-
-			expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
-			done();
-		});
-	});
-});
-
-const fixtures = path.join(__dirname, "fixtures");
-const nodeFileSystem = new CachedInputFileSystem(fs, 4000);
-
-describe("resolver argument validation", () => {
-	const resolver = ResolverFactory.createResolver({
-		fileSystem: nodeFileSystem,
-		extensions: [".js"],
-	});
-
-	it("resolves when context is omitted", (done) => {
-		resolver.resolve(fixtures, "./a", (err, result) => {
-			if (err) return done(err);
-			expect(typeof result).toBe("string");
-			done();
-		});
-	});
-
-	it("resolves when context is omitted (with resolveContext)", (done) => {
-		resolver.resolve(fixtures, "./a", {}, (err, result) => {
-			if (err) return done(err);
-			expect(typeof result).toBe("string");
-			done();
-		});
-	});
-
-	it("reports an error when the path argument is not a string", (done) => {
-		resolver.resolve(
+		const filename = await resolver.resolvePromise(
+			__dirname,
+			"../lib/index",
 			{},
-			// @ts-expect-error for tests
-			123,
-			"./a",
-			{},
-			(err) => {
-				expect(err).toBeInstanceOf(Error);
-				expect(/** @type {Error} */ (err).message).toMatch(
-					"path argument is not a string",
-				);
-				done();
-			},
 		);
+
+		expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
 	});
 
-	it("reports an error when the request argument is not a string", (done) => {
-		resolver.resolve(
-			{},
-			fixtures,
-			// @ts-expect-error for tests
-			null,
-			{},
-			(err) => {
-				expect(err).toBeInstanceOf(Error);
-				expect(/** @type {Error} */ (err).message).toMatch(
-					"request argument is not a string",
-				);
-				done();
-			},
-		);
-	});
-
-	it("resolves when resolveContext is omitted", (done) => {
-		resolver.resolve({}, fixtures, "./a", (err, result) => {
-			if (err) return done(err);
-			expect(typeof result).toBe("string");
-			done();
+	it("should resolve via the Resolver.resolvePromise method with context", async () => {
+		const resolver = ResolverFactory.createResolver({
+			fileSystem: new CachedInputFileSystem(fs, 4000),
+			extensions: [".js", ".json", ".node"],
 		});
-	});
 
-	it("resolves when resolveContext is null", (done) => {
-		resolver.resolve(
+		const filename = await resolver.resolvePromise(
 			{},
-			fixtures,
-			"./a",
-			// @ts-expect-error for tests
-			null,
-			(err, result) => {
-				if (err) return done(err);
-				expect(typeof result).toBe("string");
-				done();
-			},
+			__dirname,
+			"../lib/index",
 		);
+
+		expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
 	});
 
-	it("throws when callback is not a function", () => {
-		expect(() => {
-			// @ts-expect-error for tests
-			resolver.resolve({}, fixtures, "./a", {});
-		}).toThrow("callback argument is not a function");
+	it("should resolve via the Resolver.resolvePromise method with context and resolve context", async () => {
+		const resolver = ResolverFactory.createResolver({
+			fileSystem: new CachedInputFileSystem(fs, 4000),
+			extensions: [".js", ".json", ".node"],
+		});
+
+		const filename = await resolver.resolvePromise(
+			{},
+			__dirname,
+			"../lib/index",
+		);
+
+		expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
 	});
 
-	it("invokes the noResolve hook on resolution failure", (done) => {
-		const customResolver = ResolverFactory.createResolver({
+	describe("API", () => {
+		const nodeFileSystem = new CachedInputFileSystem(fs, 4000);
+		const resolver = ResolverFactory.createResolver({
 			fileSystem: nodeFileSystem,
 			extensions: [".js"],
 		});
-		const failed = [];
-		customResolver.hooks.noResolve.tap("Test", (request, err) => {
-			failed.push({ request, err });
-		});
-		customResolver.resolve({}, fixtures, "./does-not-exist", {}, (err) => {
-			expect(err).toBeTruthy();
-			expect(failed).toHaveLength(1);
-			expect(failed[0].err).toBe(err);
-			done();
-		});
-	});
 
-	it("populates error.details when a resolve fails", (done) => {
-		resolver.resolve({}, fixtures, "./does-not-exist", {}, (err) => {
-			expect(err).toBeInstanceOf(Error);
-			expect(
-				/** @type {Error & { details?: string }} */ (err).details,
-			).toBeDefined();
-			done();
+		it("getHook returns the wrapped hook for 'before*' names", () => {
+			const hook = resolver.getHook("beforeResolve");
+			expect(typeof hook.tapAsync).toBe("function");
 		});
-	});
 
-	it("populates error.details when a resolve fails and log is present", (done) => {
-		const log = [];
-		resolver.resolve(
-			{},
-			fixtures,
-			"./does-not-exist",
-			{ log: (m) => log.push(m) },
-			(err) => {
+		it("getHook returns the wrapped hook for 'after*' names", () => {
+			const hook = resolver.getHook("afterResolve");
+			expect(typeof hook.tapAsync).toBe("function");
+		});
+
+		it("getHook throws on an unknown hook name", () => {
+			expect(() => resolver.getHook("doesNotExist")).toThrow(
+				"Hook doesNotExist doesn't exist",
+			);
+		});
+
+		it("getHook returns the given hook instance as-is", () => {
+			const hook = resolver.hooks.resolve;
+			expect(resolver.getHook(hook)).toBe(hook);
+		});
+
+		it("ensureHook creates a hook when it does not exist", () => {
+			const hook = resolver.ensureHook("customCreatedHook");
+			expect(typeof hook.tapAsync).toBe("function");
+			// Calling again should return the same hook.
+			const hook2 = resolver.ensureHook("customCreatedHook");
+			expect(hook2).toBe(hook);
+		});
+
+		it("ensureHook wraps 'before*' and 'after*' names", () => {
+			expect(typeof resolver.ensureHook("beforeAnotherHook").tapAsync).toBe(
+				"function",
+			);
+			expect(typeof resolver.ensureHook("afterAnotherHook").tapAsync).toBe(
+				"function",
+			);
+		});
+
+		it("isModule recognizes module paths", () => {
+			expect(resolver.isModule("foo")).toBe(true);
+			expect(resolver.isModule("./foo")).toBe(false);
+			expect(resolver.isModule("/foo")).toBe(false);
+		});
+
+		it("isPrivate recognizes internal paths", () => {
+			expect(resolver.isPrivate("#foo")).toBe(true);
+			expect(resolver.isPrivate("./foo")).toBe(false);
+		});
+
+		it("isDirectory recognizes paths ending in /", () => {
+			expect(resolver.isDirectory("/foo/")).toBe(true);
+			expect(resolver.isDirectory("/foo")).toBe(false);
+		});
+
+		it("join and normalize delegate to util/path", () => {
+			expect(resolver.join("/a", "b")).toBe("/a/b");
+			expect(resolver.normalize("/a/./b")).toBe("/a/b");
+		});
+
+		it("throws when resolveSync is used on a non-synchronous filesystem", () => {
+			const asyncResolver = ResolverFactory.createResolver({
+				fileSystem: nodeFileSystem,
+				extensions: [".js"],
+			});
+			expect(() => asyncResolver.resolveSync({}, fixtures, "./a")).toThrow(
+				"Cannot 'resolveSync' because the fileSystem is not sync. Use 'resolve'!",
+			);
+		});
+
+		it("resolves when context is omitted", (done) => {
+			resolver.resolve(fixtures, "./a", (err, result) => {
+				if (err) return done(err);
+				expect(typeof result).toBe("string");
+				done();
+			});
+		});
+
+		it("resolves when context is omitted (with resolveContext)", (done) => {
+			resolver.resolve(fixtures, "./a", {}, (err, result) => {
+				if (err) return done(err);
+				expect(typeof result).toBe("string");
+				done();
+			});
+		});
+
+		it("reports an error when the path argument is not a string", (done) => {
+			resolver.resolve(
+				{},
+				// @ts-expect-error for tests
+				123,
+				"./a",
+				{},
+				(err) => {
+					expect(err).toBeInstanceOf(Error);
+					expect(/** @type {Error} */ (err).message).toMatch(
+						"path argument is not a string",
+					);
+					done();
+				},
+			);
+		});
+
+		it("reports an error when the request argument is not a string", (done) => {
+			resolver.resolve(
+				{},
+				fixtures,
+				// @ts-expect-error for tests
+				null,
+				{},
+				(err) => {
+					expect(err).toBeInstanceOf(Error);
+					expect(/** @type {Error} */ (err).message).toMatch(
+						"request argument is not a string",
+					);
+					done();
+				},
+			);
+		});
+
+		it("resolves when resolveContext is omitted", (done) => {
+			resolver.resolve({}, fixtures, "./a", (err, result) => {
+				if (err) return done(err);
+				expect(typeof result).toBe("string");
+				done();
+			});
+		});
+
+		it("resolves when resolveContext is null", (done) => {
+			resolver.resolve(
+				{},
+				fixtures,
+				"./a",
+				// @ts-expect-error for tests
+				null,
+				(err, result) => {
+					if (err) return done(err);
+					expect(typeof result).toBe("string");
+					done();
+				},
+			);
+		});
+
+		it("throws when callback is not a function", () => {
+			expect(() => {
+				// @ts-expect-error for tests
+				resolver.resolve({}, fixtures, "./a", {});
+			}).toThrow("callback argument is not a function");
+		});
+
+		it("invokes the noResolve hook on resolution failure", (done) => {
+			const customResolver = ResolverFactory.createResolver({
+				fileSystem: nodeFileSystem,
+				extensions: [".js"],
+			});
+			const failed = [];
+			customResolver.hooks.noResolve.tap("Test", (request, err) => {
+				failed.push({ request, err });
+			});
+			customResolver.resolve({}, fixtures, "./does-not-exist", {}, (err) => {
+				expect(err).toBeTruthy();
+				expect(failed).toHaveLength(1);
+				expect(failed[0].err).toBe(err);
+				done();
+			});
+		});
+
+		it("populates error.details when a resolve fails", (done) => {
+			resolver.resolve({}, fixtures, "./does-not-exist", {}, (err) => {
 				expect(err).toBeInstanceOf(Error);
 				expect(
 					/** @type {Error & { details?: string }} */ (err).details,
 				).toBeDefined();
-				expect(log.length).toBeGreaterThan(0);
 				done();
-			},
-		);
-	});
-});
-
-describe("resolveSync API", () => {
-	it("returns a string for a successful sync resolve", () => {
-		const syncResolver = ResolverFactory.createResolver({
-			fileSystem: nodeFileSystem,
-			extensions: [".js"],
-			useSyncFileSystemCalls: true,
+			});
 		});
-		expect(typeof syncResolver.resolveSync({}, fixtures, "./a")).toBe("string");
-	});
 
-	it("throws 'Can't resolve' when sync resolve fails", () => {
-		const syncResolver = ResolverFactory.createResolver({
-			fileSystem: nodeFileSystem,
-			extensions: [".js"],
-			useSyncFileSystemCalls: true,
+		it("populates error.details when a resolve fails and log is present", (done) => {
+			const log = [];
+			resolver.resolve(
+				{},
+				fixtures,
+				"./does-not-exist",
+				{ log: (m) => log.push(m) },
+				(err) => {
+					expect(err).toBeInstanceOf(Error);
+					expect(
+						/** @type {Error & { details?: string }} */ (err).details,
+					).toBeDefined();
+					expect(log.length).toBeGreaterThan(0);
+					done();
+				},
+			);
 		});
-		expect(() =>
-			syncResolver.resolveSync({}, fixtures, "./does-not-exist"),
-		).toThrow(/Can't resolve/);
-	});
-
-	it("throws when resolveSync is used on a non-synchronous filesystem", () => {
-		const asyncResolver = ResolverFactory.createResolver({
-			fileSystem: nodeFileSystem,
-			extensions: [".js"],
-		});
-		expect(() => asyncResolver.resolveSync({}, fixtures, "./a")).toThrow(
-			"Cannot 'resolveSync' because the fileSystem is not sync. Use 'resolve'!",
-		);
-	});
-});
-
-describe("top-level resolve API", () => {
-	it("resolve.sync supports the two-argument form (path, request)", () => {
-		expect(typeof resolve.sync(fixtures, "./a.js")).toBe("string");
-	});
-
-	it("resolve.create.sync() returns a function that supports the two-argument form", () => {
-		const r = resolve.create.sync({});
-		expect(typeof r(fixtures, "./a.js")).toBe("string");
-	});
-
-	it("exposes plugin classes via lazy getters", () => {
-		expect(typeof resolve.CloneBasenamePlugin).toBe("function");
-		expect(typeof resolve.LogInfoPlugin).toBe("function");
-		expect(typeof resolve.TsconfigPathsPlugin).toBe("function");
-		expect(typeof resolve.forEachBail).toBe("function");
-		expect(typeof resolve.CachedInputFileSystem).toBe("function");
-		expect(resolve.ResolverFactory).toBeDefined();
-	});
-
-	it("module.exports is frozen", () => {
-		expect(() => {
-			// @ts-expect-error frozen
-			resolve.somethingNew = 1;
-		}).toThrow(/extensible|read only|Cannot add property/);
-	});
-});
-
-describe("hook helpers", () => {
-	const resolver = ResolverFactory.createResolver({
-		fileSystem: nodeFileSystem,
-		extensions: [".js"],
-	});
-
-	it("getHook returns the wrapped hook for 'before*' names", () => {
-		const hook = resolver.getHook("beforeResolve");
-		expect(typeof hook.tapAsync).toBe("function");
-	});
-
-	it("getHook returns the wrapped hook for 'after*' names", () => {
-		const hook = resolver.getHook("afterResolve");
-		expect(typeof hook.tapAsync).toBe("function");
-	});
-
-	it("getHook throws on an unknown hook name", () => {
-		expect(() => resolver.getHook("doesNotExist")).toThrow(
-			"Hook doesNotExist doesn't exist",
-		);
-	});
-
-	it("getHook returns the given hook instance as-is", () => {
-		const hook = resolver.hooks.resolve;
-		expect(resolver.getHook(hook)).toBe(hook);
-	});
-
-	it("ensureHook creates a hook when it does not exist", () => {
-		const hook = resolver.ensureHook("customCreatedHook");
-		expect(typeof hook.tapAsync).toBe("function");
-		// Calling again should return the same hook.
-		const hook2 = resolver.ensureHook("customCreatedHook");
-		expect(hook2).toBe(hook);
-	});
-
-	it("ensureHook wraps 'before*' and 'after*' names", () => {
-		expect(typeof resolver.ensureHook("beforeAnotherHook").tapAsync).toBe(
-			"function",
-		);
-		expect(typeof resolver.ensureHook("afterAnotherHook").tapAsync).toBe(
-			"function",
-		);
-	});
-});
-
-describe("resolver path classifiers", () => {
-	const resolver = ResolverFactory.createResolver({
-		fileSystem: nodeFileSystem,
-	});
-
-	it("isModule recognizes module paths", () => {
-		expect(resolver.isModule("foo")).toBe(true);
-		expect(resolver.isModule("./foo")).toBe(false);
-		expect(resolver.isModule("/foo")).toBe(false);
-	});
-
-	it("isPrivate recognizes internal paths", () => {
-		expect(resolver.isPrivate("#foo")).toBe(true);
-		expect(resolver.isPrivate("./foo")).toBe(false);
-	});
-
-	it("isDirectory recognizes paths ending in /", () => {
-		expect(resolver.isDirectory("/foo/")).toBe(true);
-		expect(resolver.isDirectory("/foo")).toBe(false);
-	});
-
-	it("join and normalize delegate to util/path", () => {
-		expect(resolver.join("/a", "b")).toBe("/a/b");
-		expect(resolver.normalize("/a/./b")).toBe("/a/b");
 	});
 });
