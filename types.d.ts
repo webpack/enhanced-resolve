@@ -1570,17 +1570,56 @@ declare abstract class Resolver {
 		null | ResolveRequest
 	>;
 	resolveSync(
+		path: string,
+		request: string,
+		resolveContext?: ResolveContext,
+	): string | false;
+	resolveSync(
 		context: Context,
 		path: string,
 		request: string,
 		resolveContext?: ResolveContext,
 	): string | false;
 	resolvePromise(
+		path: string,
+		request: string,
+		resolveContext?: ResolveContext,
+	): Promise<string | false>;
+	resolvePromise(
 		context: Context,
 		path: string,
 		request: string,
 		resolveContext?: ResolveContext,
 	): Promise<string | false>;
+	resolve(
+		path: string,
+		request: string,
+		callback: (
+			err: null | ErrorWithDetail,
+			res?: string | false,
+			req?: ResolveRequest,
+		) => void,
+	): void;
+	resolve(
+		path: string,
+		request: string,
+		resolveContext: ResolveContext,
+		callback: (
+			err: null | ErrorWithDetail,
+			res?: string | false,
+			req?: ResolveRequest,
+		) => void,
+	): void;
+	resolve(
+		context: Context,
+		path: string,
+		request: string,
+		callback: (
+			err: null | ErrorWithDetail,
+			res?: string | false,
+			req?: ResolveRequest,
+		) => void,
+	): void;
 	resolve(
 		context: Context,
 		path: string,
