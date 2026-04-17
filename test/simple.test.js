@@ -322,6 +322,46 @@ describe("simple", () => {
 
 		expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
 	});
+
+	it("should resolve via the Resolver.resolveSync method without context", () => {
+		const resolver = ResolverFactory.createResolver({
+			useSyncFileSystemCalls: true,
+			fileSystem: new CachedInputFileSystem(fs, 4000),
+			extensions: [".js", ".json", ".node"],
+		});
+
+		const filename = resolver.resolveSync(__dirname, "../lib/index");
+
+		expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+	});
+
+	it("should resolve via the Resolver.resolvePromise method without context", async () => {
+		const resolver = ResolverFactory.createResolver({
+			fileSystem: new CachedInputFileSystem(fs, 4000),
+			extensions: [".js", ".json", ".node"],
+		});
+
+		const filename = await resolver.resolvePromise(__dirname, "../lib/index");
+
+		expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+	});
+
+	it("should resolve via the Resolver.resolve method without context", (done) => {
+		const resolver = ResolverFactory.createResolver({
+			fileSystem: new CachedInputFileSystem(fs, 4000),
+			extensions: [".js", ".json", ".node"],
+		});
+
+		resolver.resolve(__dirname, "../lib/index", (err, filename) => {
+			if (err) {
+				done(err);
+				return;
+			}
+
+			expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+			done();
+		});
+	});
 });
 
 const fixtures = path.join(__dirname, "fixtures");
@@ -333,21 +373,20 @@ describe("resolver argument validation", () => {
 		extensions: [".js"],
 	});
 
-	it("reports an error when the context argument is not an object", (done) => {
-		resolver.resolve(
-			// @ts-expect-error for tests
-			"not-an-object",
-			fixtures,
-			"./a",
-			{},
-			(err) => {
-				expect(err).toBeInstanceOf(Error);
-				expect(/** @type {Error} */ (err).message).toMatch(
-					"context argument is not an object",
-				);
-				done();
-			},
-		);
+	it("resolves when context is omitted", (done) => {
+		resolver.resolve(fixtures, "./a", (err, result) => {
+			if (err) return done(err);
+			expect(typeof result).toBe("string");
+			done();
+		});
+	});
+
+	it("resolves when context is omitted (with resolveContext)", (done) => {
+		resolver.resolve(fixtures, "./a", {}, (err, result) => {
+			if (err) return done(err);
+			expect(typeof result).toBe("string");
+			done();
+		});
 	});
 
 	it("reports an error when the path argument is not a string", (done) => {
