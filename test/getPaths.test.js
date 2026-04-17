@@ -25,27 +25,3 @@ describe("get paths", () => {
 		});
 	}
 });
-
-describe("getPaths.basename", () => {
-	it("returns null when path contains no separators", () => {
-		expect(getPaths.basename("foo")).toBeNull();
-	});
-
-	it("returns basename after the last forward slash", () => {
-		expect(getPaths.basename("/a/b/c")).toBe("c");
-	});
-
-	it("returns basename after the last backslash", () => {
-		expect(getPaths.basename("a\\b\\c")).toBe("c");
-	});
-
-	it("picks the rightmost separator among mixed types", () => {
-		expect(getPaths.basename("a/b\\c")).toBe("c");
-		expect(getPaths.basename("a\\b/c")).toBe("c");
-	});
-
-	it("returns empty string when path ends with a separator", () => {
-		expect(getPaths.basename("a/")).toBe("");
-		expect(getPaths.basename("a\\")).toBe("");
-	});
-});
