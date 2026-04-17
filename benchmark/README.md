@@ -79,6 +79,7 @@ export default function register(bench, { caseName, caseDir, fixtureDir }) {
 | ------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | `realistic-midsize`       | Mixed batch of relative/bare/scoped/exports/nested-`node_modules` requests against a synthetic mid-size tree |
 | `pathological-deep-stack` | 50-deep alias chain, specifically stresses the `doResolve` recursion-check path                              |
+| `stack-churn`             | Several independent depth-60 alias chains — stresses `doResolve`'s per-level stack-allocation pressure       |
 | `alias-realistic`         | Webpack-style `@/components`, `@utils`, `~` aliases — AliasPlugin with a realistic number of entries         |
 | `alias-field`             | `browser` field remapping (AliasFieldPlugin), including the `false`/ignored branch                           |
 | `exports-field`           | Package with nested condition maps and wildcard subpath exports, run under both `require` and `import`       |
