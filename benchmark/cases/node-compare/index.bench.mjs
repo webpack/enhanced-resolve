@@ -70,8 +70,8 @@ import enhanced from "../../../lib/index.js";
 
 const { ResolverFactory, CachedInputFileSystem } = enhanced;
 
-const PKG_SUBPATH_COUNT = 5000;
-const FILE_COUNT = 5000;
+const PKG_SUBPATH_COUNT = 500;
+const FILE_COUNT = 500;
 const BATCH_SIZE = PKG_SUBPATH_COUNT + FILE_COUNT;
 
 /**
