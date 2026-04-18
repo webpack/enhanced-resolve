@@ -1827,6 +1827,11 @@ declare interface TsconfigPathsMap {
 	allContexts: { [index: string]: TsconfigPathsData };
 
 	/**
+	 * precomputed `Object.keys(allContexts)` — read-only; used on the `_selectPathsDataForContext` hot path
+	 */
+	contextList: string[];
+
+	/**
 	 * file dependencies
 	 */
 	fileDependencies: Set<string>;
