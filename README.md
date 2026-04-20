@@ -426,6 +426,40 @@ Plugins are executed in a pipeline, and register which event they should be exec
 | `UnsafeCachePlugin`                      | Caches successful resolves in an in-memory map to speed up repeated requests. Powers `unsafeCache`.                                  |
 | `UseFilePlugin`                          | Joins a fixed filename onto the current path (e.g. `index`). Powers `mainFiles`.                                                     |
 
+#### Plugin wiring and goals
+
+One-line goal and default wiring (`source → target`) for each plugin. `*` means the plugin is tapped on several hooks — the common ones are listed. Plugins without a fixed wiring are user-tapped.
+
+- **`AliasPlugin`** — Goal: redirect requests matching a configured key to an alternative target. `raw-resolve` → `internal-resolve` for `alias`; `file` → `internal-resolve` as a last-chance remap; `described-resolve` → `internal-resolve` for `fallback`.
+- **`AliasFieldPlugin`** — Goal: apply aliases declared in a description-file field like `browser`, so environment-specific substitutions happen without user config. `raw-resolve` / `file` → `internal-resolve`.
+- **`AppendPlugin`** — Goal: try appending a fixed string (usually an extension) to the current path. `raw-file` → `file`, one instance per entry in `extensions`.
+- **`CloneBasenamePlugin`** — Goal: join the directory's basename onto the path (e.g. `/foo/bar` → `/foo/bar/bar`) for directory-named-main layouts. User-wired via `plugins`.
+- **`ConditionalPlugin`** — Goal: gate a forward on a partial match of the request shape (e.g. `{ module: true }`), used to fan-out at branching hooks. Tapped on `after-normal-resolve`, `resolve-as-module`, `described-relative`, and `raw-file`.
+- **`DescriptionFilePlugin`** — Goal: locate and attach the nearest description file (usually `package.json`) so downstream plugins can read its fields. `parsed-resolve` → `described-resolve`, `relative` → `described-relative`, `undescribed-resolve-in-package` → `resolve-in-package`, `undescribed-existing-directory` → `existing-directory`, `undescribed-raw-file` → `raw-file`.
+- **`DirectoryExistsPlugin`** — Goal: only continue the pipeline if the current path exists as a directory. `resolve-as-module` → `undescribed-resolve-in-package`, `directory` → `undescribed-existing-directory`.
+- **`ExportsFieldPlugin`** — Goal: map a request through the `exports` field of a package's description file (with `conditionNames`). `resolve-in-package` → `relative`.
+- **`ExtensionAliasPlugin`** — Goal: rewrite a request's extension to a list of candidate extensions (e.g. `.js` → `.ts`, `.js`) for TypeScript ESM and similar. `raw-resolve` → `normal-resolve`.
+- **`FileExistsPlugin`** — Goal: confirm a candidate path exists as a file and record it as a file dependency. `final-file` → `existing-file`.
+- **`ImportsFieldPlugin`** — Goal: resolve `#name` requests through the `imports` field of the enclosing package. `internal` → `relative` (relative target) or `imports-resolve` (bare target).
+- **`JoinRequestPlugin`** — Goal: join the current path with the current request into a single concrete path. `after-normal-resolve` → `relative` (three stage-offset copies for `preferRelative`, `preferAbsolute`, and default), `resolve-in-existing-directory` → `relative`.
+- **`JoinRequestPartPlugin`** — Goal: split a module request into module name + inner request, joining the inner part onto the path. `module` → `resolve-as-module`.
+- **`LogInfoPlugin`** — Goal: emit verbose log output at a chosen hook; enable by passing a `log` function on `resolveContext`. User-wired via `plugins`.
+- **`MainFieldPlugin`** — Goal: follow a description-file field (e.g. `main`, `module`, `browser`) to the entry file of a package. `existing-directory` → `resolve-in-existing-directory`, one instance per entry in `mainFields`.
+- **`ModulesInHierarchicalDirectoriesPlugin`** — Goal: search for a module by walking up parent directories (the standard `node_modules` lookup). `raw-module` → `module`; when PnP is enabled, `alternate-raw-module` → `module` too.
+- **`ModulesInRootPlugin`** — Goal: search for a module in a single absolute directory (powers absolute-path entries in `modules`). `raw-module` → `module`.
+- **`NextPlugin`** — Goal: glue — forward the current request unchanged from one hook to another. Used across the pipeline wherever two hooks should run sequentially.
+- **`ParsePlugin`** — Goal: split the raw request string into path / query / fragment / `module` / `directory` / `internal` flags. `resolve` → `parsed-resolve`; also wired on `internal-resolve` and `imports-resolve`.
+- **`PnpPlugin`** — Goal: resolve bare-module requests through Yarn's PnP API when available. `raw-module` → `undescribed-resolve-in-package` on hit, `alternate-raw-module` on miss.
+- **`RestrictionsPlugin`** — Goal: reject resolved paths that don't satisfy at least one string prefix or RegExp. Tapped on `resolved`.
+- **`ResultPlugin`** — Goal: terminal plugin — fires the `result` lifecycle hook and signals a successful resolve. Tapped on `resolved`.
+- **`RootsPlugin`** — Goal: resolve server-relative URL requests (starting with `/`) against one or more root directories. `after-normal-resolve` → `relative`.
+- **`SelfReferencePlugin`** — Goal: resolve a package self-reference (`my-pkg/foo` from inside `my-pkg`) via its own `exports`. `raw-module` → `resolve-as-module`.
+- **`SymlinkPlugin`** — Goal: real-path the resolved file by following symlinks; can be disabled via `symlinks: false`. `existing-file` → `existing-file` (runs via a stage offset on the same hook).
+- **`TryNextPlugin`** — Goal: forward the request to another hook with a log message, useful for trying an alternative candidate. `raw-file` → `file` (as the "no extension" attempt) and user-wired.
+- **`TsconfigPathsPlugin`** — Goal: rewrite requests using the `paths` and `baseUrl` from a `tsconfig.json` (including project references). Taps `described-resolve` internally and forwards to `internal-resolve`; exported for direct use as well.
+- **`UnsafeCachePlugin`** — Goal: cache successful resolves in an in-memory map for repeated requests. `described-resolve` → `raw-resolve` (only when `unsafeCache` is enabled).
+- **`UseFilePlugin`** — Goal: join a fixed filename (e.g. `index`) onto the current path to try as an entry file. `existing-directory` / `undescribed-existing-directory` → `undescribed-raw-file`, one instance per entry in `mainFiles`.
+
 ### Hooks
 
 A resolver exposes two kinds of [`tapable`](https://github.com/webpack/tapable) hooks:
