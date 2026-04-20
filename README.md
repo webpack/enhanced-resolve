@@ -479,6 +479,84 @@ Listed roughly in the order the default pipeline visits them. Full wiring lives 
 
 `ensureHook("before-foo")` and `getHook("before-foo")` return the `foo` hook with `stage: -10`; `after-foo` returns it with `stage: 10`. Use this to tap earlier or later than the default stage without creating a separate hook. You'll see `after-parsed-resolve`, `after-normal-resolve`, `after-relative`, and `after-undescribed-resolve-in-package` used this way inside `ResolverFactory`.
 
+#### Request flow by request type
+
+The same 26 pipeline hooks serve every request, but different request shapes take different paths through them. Each `➝` below is one `doResolve` / `NextPlugin` / plugin forward; `resolveStep` fires on every arrow, so tapping it (see [Hook examples](#hook-examples)) prints these chains live.
+
+Relative path (`./utils` from `/src/index.js`) — the default "resolve on disk" path:
+
+```text
+resolve                                    (ParsePlugin)
+  ➝ parsed-resolve                         (DescriptionFilePlugin attaches nearest package.json)
+  ➝ described-resolve                      (NextPlugin; or UnsafeCachePlugin short-circuit)
+  ➝ raw-resolve                            (NextPlugin; alias/tsconfig would branch here)
+  ➝ normal-resolve                         (JoinRequestPlugin: path=/src/utils, request="")
+  ➝ relative                               (DescriptionFilePlugin loads /src/package.json)
+  ➝ described-relative                     (branches to file and directory candidates)
+        ├─ ➝ raw-file                      (ConditionalPlugin / TryNextPlugin)
+        │     ➝ file                       (AppendPlugin tried each extension, e.g. .js)
+        │     ➝ final-file                 (FileExistsPlugin confirms the file)
+        │     ➝ existing-file              (SymlinkPlugin real-paths it)
+        │     ➝ resolved                   (RestrictionsPlugin → ResultPlugin)
+        └─ ➝ directory                     (DirectoryExistsPlugin; used when path is a dir)
+              ➝ undescribed-existing-directory
+              ➝ existing-directory         (MainFieldPlugin tries "main", UseFilePlugin tries "index")
+              ➝ undescribed-raw-file ➝ raw-file ➝ …
+```
+
+Bare module (`lodash/merge`) — walks up `node_modules`, then treats the hit as a package:
+
+```text
+resolve ➝ parsed-resolve ➝ described-resolve ➝ raw-resolve ➝ normal-resolve
+  ➝ raw-module                             (ConditionalPlugin {module:true})
+  ➝ module                                 (ModulesInHierarchicalDirectoriesPlugin walks
+                                            /src/node_modules, /node_modules, …)
+  ➝ resolve-as-module                      (JoinRequestPartPlugin splits "lodash" / "./merge")
+  ➝ undescribed-resolve-in-package         (DirectoryExistsPlugin gates on lodash/ existing)
+  ➝ resolve-in-package                     (DescriptionFilePlugin loads lodash/package.json)
+        ├─ ➝ relative                      (ExportsFieldPlugin, if "exports" matches)
+        └─ ➝ resolve-in-existing-directory (otherwise; JoinRequestPlugin joins "./merge")
+              ➝ relative ➝ … (same tail as the relative flow above)
+```
+
+Internal import (`#util` from inside a package) — re-enters the pipeline after mapping:
+
+```text
+resolve ➝ parsed-resolve ➝ described-resolve ➝ raw-resolve ➝ normal-resolve
+  ➝ internal                               (ConditionalPlugin {internal:true})
+  ➝ imports-resolve                        (ImportsFieldPlugin mapped "#util" to a target)
+  ➝ parsed-resolve ➝ …                     (fresh pipeline run, internal:false so # isn't remapped)
+```
+
+Alias hit (`@/button` with `alias: { "@": "/src" }`) — rewrites then restarts:
+
+```text
+resolve ➝ parsed-resolve ➝ described-resolve
+  ➝ raw-resolve
+  ➝ internal-resolve                       (AliasPlugin rewrote request → "/src/button")
+  ➝ parsed-resolve ➝ … (fullySpecified forced off; AliasPlugin won't re-fire for the rewritten form)
+```
+
+`exports`-field hit inside a package (`pkg/feature` matching `"./feature"` in `exports`):
+
+```text
+… ➝ raw-module ➝ module ➝ resolve-as-module ➝ undescribed-resolve-in-package
+  ➝ resolve-in-package
+  ➝ relative                               (ExportsFieldPlugin jumped to the exports target;
+                                            main-field / main-file logic is skipped)
+  ➝ described-relative ➝ raw-file ➝ file ➝ final-file ➝ existing-file ➝ resolved
+```
+
+Failure — every candidate opts out (`callback()`) and no handler ever short-circuits with a result. `noResolve` fires once, for the top-level request:
+
+```text
+… ➝ final-file
+       ✗ FileExistsPlugin: ENOENT  (opts out; no extension candidates left)
+  ⇠ bail hooks unwind, each tapped handler has already tried its alternatives
+  ⇒ top-level resolve() returns no result
+  ⇒ resolver.hooks.noResolve(request, error)    (ResultPlugin never fires)
+```
+
 #### Hook examples
 
 Trace every pipeline step and observe failures via the lifecycle hooks:
