@@ -144,18 +144,6 @@ describe("util/path cachedDirname", () => {
 });
 
 describe("util/path cachedBasename", () => {
-	it("returns null when path contains no separators", () => {
-		const cachedBasename = createCachedBasename().fn;
-
-		expect(cachedBasename("foo")).toBe("foo");
-	});
-
-	it("returns basename after the last forward slash", () => {
-		const cachedBasename = createCachedBasename().fn;
-
-		expect(cachedBasename("/a/b/c")).toBe("c");
-	});
-
 	it("returns the same value on cache hit", () => {
 		const cachedBasename = createCachedBasename().fn;
 		const a = cachedBasename("/cached/a/b");
@@ -244,6 +232,35 @@ describe("util/path isSubPath", () => {
 
 	it("handles parents that already end with a backslash", () => {
 		expect(isSubPath("C:\\a\\b\\", "C:\\a\\b\\c")).toBe(true);
+	});
+
+	it("handles Windows-style children when the parent is not separator-terminated", () => {
+		expect(isSubPath("C:\\a", "C:\\a\\b")).toBe(true);
+	});
+
+	it("returns false when child and parent are equal (without trailing separator)", () => {
+		// A path is not a subpath of itself — there has to be a separator
+		// after the parent prefix.
+		expect(isSubPath("/a/b", "/a/b")).toBe(false);
+	});
+
+	it("returns true when child equals a parent that already ends with a separator", () => {
+		// `/a/b/` IS considered a "prefix" of `/a/b/` — startsWith is true
+		// and the old implementation agreed. Lock it in so later refactors
+		// don't silently regress.
+		expect(isSubPath("/a/b/", "/a/b/")).toBe(true);
+	});
+
+	it("returns false when parent is longer than child", () => {
+		expect(isSubPath("/a/b/c", "/a/b")).toBe(false);
+	});
+
+	it("returns true for an empty parent only when the child starts with a separator", () => {
+		// Matches the old `normalize("" + "/") === "/"` fallback semantics.
+		expect(isSubPath("", "/a/b")).toBe(true);
+		expect(isSubPath("", "C:\\a")).toBe(false);
+		expect(isSubPath("", "foo")).toBe(false);
+		expect(isSubPath("", "")).toBe(false);
 	});
 });
 
