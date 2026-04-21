@@ -469,45 +469,45 @@ A resolver exposes two kinds of [`tapable`](https://github.com/webpack/tapable) 
 
 #### Lifecycle hooks
 
-| Hook          | Type                 | Fires when                                                                                                                     |
-| ------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `resolveStep` | `SyncHook`           | Every time the resolver hands a request to a pipeline hook. Arguments: `(hook, request)`. Ideal for tracing.                   |
-| `noResolve`   | `SyncHook`           | When a top-level `resolve()` call can't produce a result. Arguments: `(request, error)`.                                       |
-| `resolve`     | `AsyncSeriesBailHook`| Entry point of the pipeline (also listed below). Tap this to intercept requests before parsing.                                |
-| `result`      | `AsyncSeriesHook`    | After a successful resolve, with the final request. Fired by `ResultPlugin`. Tap to observe/record results without short-circuiting. |
+| Hook          | Type                  | Fires when                                                                                                                           |
+| ------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `resolveStep` | `SyncHook`            | Every time the resolver hands a request to a pipeline hook. Arguments: `(hook, request)`. Ideal for tracing.                         |
+| `noResolve`   | `SyncHook`            | When a top-level `resolve()` call can't produce a result. Arguments: `(request, error)`.                                             |
+| `resolve`     | `AsyncSeriesBailHook` | Entry point of the pipeline (also listed below). Tap this to intercept requests before parsing.                                      |
+| `result`      | `AsyncSeriesHook`     | After a successful resolve, with the final request. Fired by `ResultPlugin`. Tap to observe/record results without short-circuiting. |
 
 #### Pipeline hooks
 
 Listed roughly in the order the default pipeline visits them. Full wiring lives in `lib/ResolverFactory.js` under `//// pipeline ////`.
 
-| Hook                              | Role                                                                                                                                       |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `resolve`                         | Entry point. `ParsePlugin` parses the raw request (path, query, fragment, module flag) and forwards to `parsed-resolve`.                    |
-| `internal-resolve`                | Re-entry point used by internal rewrites (e.g. after an `alias` fires). Same role as `resolve`, but `fullySpecified` is forced off.         |
-| `imports-resolve`                 | Re-entry point for the target of an `imports` field match; prevents recursive `#` resolution per the Node.js ESM spec.                     |
-| `parsed-resolve`                  | Request has been parsed. `DescriptionFilePlugin` attaches the nearest `package.json`, then forwards to `described-resolve`.                |
-| `described-resolve`               | Description file is attached. Where `unsafeCache`, `fallback`, and most user plugins (including `MyLibSrcPlugin` below) hook in.           |
-| `raw-resolve`                     | After description. Where `alias`, `aliasFields`, `tsconfig` paths, and `extensionAlias` rewrites fire before default resolution.           |
-| `normal-resolve`                  | Default resolution starts. Branches into `relative` (for `./`, `../`, absolute), `raw-module` (bare modules), or `internal` (`#imports`).  |
-| `internal`                        | `#name` imports-field entry. `ImportsFieldPlugin` maps the specifier and forwards to `relative` or `imports-resolve`.                      |
-| `raw-module`                      | Bare-module lookup. `SelfReferencePlugin`, `ModulesInHierarchicalDirectoriesPlugin`, `ModulesInRootPlugin`, and `PnpPlugin` all tap here.    |
-| `alternate-raw-module`            | Fallback module lookup used by `PnpPlugin` when PnP can't resolve and `node_modules` should be tried.                                      |
-| `module`                          | A candidate module directory was built. `JoinRequestPartPlugin` splits off the inner request and forwards to `resolve-as-module`.          |
-| `resolve-as-module`               | Treat candidate as a package. `DirectoryExistsPlugin` gates on existence; short single-file modules may re-enter via `undescribed-raw-file`. |
-| `undescribed-resolve-in-package`  | Inside a located package directory, before its `package.json` has been read. Loads the description, forwards to `resolve-in-package`.      |
-| `resolve-in-package`              | Inside a package with its description loaded. `ExportsFieldPlugin` matches `exports`, otherwise forwards to `resolve-in-existing-directory`. |
-| `resolve-in-existing-directory`   | Package directory confirmed; join the remaining request onto it and continue at `relative`.                                                |
-| `relative`                        | A concrete path on disk. `DescriptionFilePlugin` loads the nearest `package.json` and forwards to `described-relative`.                    |
-| `described-relative`              | Branches to `raw-file` (treat as file) and `directory` (treat as directory). `resolveToContext` skips the file branch.                     |
-| `directory`                       | Candidate directory. `DirectoryExistsPlugin` gates on existence and forwards to `undescribed-existing-directory`.                          |
-| `undescribed-existing-directory`  | Existing directory, before its `package.json` has been read. `UseFilePlugin` tries `mainFiles` via `undescribed-raw-file`.                 |
-| `existing-directory`              | Existing directory with description loaded. `MainFieldPlugin` tries `mainFields`; `UseFilePlugin` falls back to `mainFiles`.               |
-| `undescribed-raw-file`            | Candidate file path, before description is read. Loads description, then forwards to `raw-file`.                                           |
-| `raw-file`                        | Apply extension handling: `ConditionalPlugin` short-circuits when `fullySpecified`, `TryNextPlugin` + `AppendPlugin` try each extension.   |
-| `file`                            | A specific file path. Last place `alias` and `aliasFields` can redirect; forwards to `final-file`.                                         |
-| `final-file`                      | `FileExistsPlugin` checks the file is real and records it as a file dependency, then forwards to `existing-file`.                          |
-| `existing-file`                   | Real file on disk. `SymlinkPlugin` real-paths symlinks (unless `symlinks: false`), then forwards to `resolved`.                            |
-| `resolved`                        | Terminal hook. `RestrictionsPlugin` enforces `restrictions`; `ResultPlugin` fires the `result` lifecycle hook.                             |
+| Hook                             | Role                                                                                                                                         |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `resolve`                        | Entry point. `ParsePlugin` parses the raw request (path, query, fragment, module flag) and forwards to `parsed-resolve`.                     |
+| `internal-resolve`               | Re-entry point used by internal rewrites (e.g. after an `alias` fires). Same role as `resolve`, but `fullySpecified` is forced off.          |
+| `imports-resolve`                | Re-entry point for the target of an `imports` field match; prevents recursive `#` resolution per the Node.js ESM spec.                       |
+| `parsed-resolve`                 | Request has been parsed. `DescriptionFilePlugin` attaches the nearest `package.json`, then forwards to `described-resolve`.                  |
+| `described-resolve`              | Description file is attached. Where `unsafeCache`, `fallback`, and most user plugins (including `MyLibSrcPlugin` below) hook in.             |
+| `raw-resolve`                    | After description. Where `alias`, `aliasFields`, `tsconfig` paths, and `extensionAlias` rewrites fire before default resolution.             |
+| `normal-resolve`                 | Default resolution starts. Branches into `relative` (for `./`, `../`, absolute), `raw-module` (bare modules), or `internal` (`#imports`).    |
+| `internal`                       | `#name` imports-field entry. `ImportsFieldPlugin` maps the specifier and forwards to `relative` or `imports-resolve`.                        |
+| `raw-module`                     | Bare-module lookup. `SelfReferencePlugin`, `ModulesInHierarchicalDirectoriesPlugin`, `ModulesInRootPlugin`, and `PnpPlugin` all tap here.    |
+| `alternate-raw-module`           | Fallback module lookup used by `PnpPlugin` when PnP can't resolve and `node_modules` should be tried.                                        |
+| `module`                         | A candidate module directory was built. `JoinRequestPartPlugin` splits off the inner request and forwards to `resolve-as-module`.            |
+| `resolve-as-module`              | Treat candidate as a package. `DirectoryExistsPlugin` gates on existence; short single-file modules may re-enter via `undescribed-raw-file`. |
+| `undescribed-resolve-in-package` | Inside a located package directory, before its `package.json` has been read. Loads the description, forwards to `resolve-in-package`.        |
+| `resolve-in-package`             | Inside a package with its description loaded. `ExportsFieldPlugin` matches `exports`, otherwise forwards to `resolve-in-existing-directory`. |
+| `resolve-in-existing-directory`  | Package directory confirmed; join the remaining request onto it and continue at `relative`.                                                  |
+| `relative`                       | A concrete path on disk. `DescriptionFilePlugin` loads the nearest `package.json` and forwards to `described-relative`.                      |
+| `described-relative`             | Branches to `raw-file` (treat as file) and `directory` (treat as directory). `resolveToContext` skips the file branch.                       |
+| `directory`                      | Candidate directory. `DirectoryExistsPlugin` gates on existence and forwards to `undescribed-existing-directory`.                            |
+| `undescribed-existing-directory` | Existing directory, before its `package.json` has been read. `UseFilePlugin` tries `mainFiles` via `undescribed-raw-file`.                   |
+| `existing-directory`             | Existing directory with description loaded. `MainFieldPlugin` tries `mainFields`; `UseFilePlugin` falls back to `mainFiles`.                 |
+| `undescribed-raw-file`           | Candidate file path, before description is read. Loads description, then forwards to `raw-file`.                                             |
+| `raw-file`                       | Apply extension handling: `ConditionalPlugin` short-circuits when `fullySpecified`, `TryNextPlugin` + `AppendPlugin` try each extension.     |
+| `file`                           | A specific file path. Last place `alias` and `aliasFields` can redirect; forwards to `final-file`.                                           |
+| `final-file`                     | `FileExistsPlugin` checks the file is real and records it as a file dependency, then forwards to `existing-file`.                            |
+| `existing-file`                  | Real file on disk. `SymlinkPlugin` real-paths symlinks (unless `symlinks: false`), then forwards to `resolved`.                              |
+| `resolved`                       | Terminal hook. `RestrictionsPlugin` enforces `restrictions`; `ResultPlugin` fires the `result` lifecycle hook.                               |
 
 #### `before-` and `after-` prefixes
 
@@ -617,7 +617,7 @@ class StubCssPlugin {
 			.getHook("file")
 			.tapAsync("StubCssPlugin", (request, _ctx, callback) => {
 				if (!request.path || !request.path.endsWith(".css")) return callback();
-				callback(null, { ...request, path: require.resolve("./empty.js") });
+				callback(null, { ...request, path: require.resolve("./empty.css") });
 			});
 	}
 }
