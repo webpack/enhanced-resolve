@@ -17,8 +17,8 @@ const { ResolverFactory, CachedInputFileSystem } = enhanced;
 const PARALLEL_ALIASES = 300;
 
 /**
- * @param {import('tinybench').Bench} bench
- * @param {{ fixtureDir: string }} ctx
+ * @param {import("tinybench").Bench} bench bench
+ * @param {{ fixtureDir: string }} ctx ctx
  */
 export default function register(bench, { fixtureDir }) {
 	const fileSystem = new CachedInputFileSystem(fs, 4000);
@@ -30,10 +30,10 @@ export default function register(bench, { fixtureDir }) {
 			alias: path.join(fixtureDir, "src/target/a.js"),
 		});
 	}
-	for (const f of ["a", "b", "c", "d", "e", "f", "g", "h"]) {
+	for (const fixture of ["a", "b", "c", "d", "e", "f", "g", "h"]) {
 		aliases.push({
-			name: `t-${f}`,
-			alias: path.join(fixtureDir, `src/target/${f}.js`),
+			name: `t-${fixture}`,
+			alias: path.join(fixtureDir, `src/target/${fixture}.js`),
 		});
 	}
 

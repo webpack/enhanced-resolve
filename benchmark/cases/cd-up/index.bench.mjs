@@ -13,7 +13,7 @@
 import { cdUp } from "../../../lib/DescriptionFileUtils.js";
 
 /**
- * @param {import('tinybench').Bench} bench
+ * @param {import("tinybench").Bench} bench bench
  */
 export default function register(bench) {
 	const posixDirs = [

@@ -17,8 +17,8 @@ import enhanced from "../../../lib/index.js";
 const { ResolverFactory, CachedInputFileSystem } = enhanced;
 
 /**
- * @param {import('tinybench').Bench} bench
- * @param {{ fixtureDir: string }} ctx
+ * @param {import("tinybench").Bench} bench bench
+ * @param {{ fixtureDir: string }} ctx ctx
  */
 export default function register(bench, { fixtureDir }) {
 	const fileSystem = new CachedInputFileSystem(fs, 4000);
@@ -47,16 +47,16 @@ export default function register(bench, { fixtureDir }) {
 		"ten",
 	];
 	const requests = [];
-	for (const d of subDirs) {
+	for (const dir of subDirs) {
 		for (const n of names) {
-			requests.push(`./${d}/${n}`);
+			requests.push(`./${dir}/${n}`);
 		}
 	}
 	// Add some query/fragment variants so that branch of getCacheId is
 	// covered too.
-	for (const d of subDirs) {
-		requests.push(`./${d}/one?v=1`);
-		requests.push(`./${d}/two#section`);
+	for (const dir of subDirs) {
+		requests.push(`./${dir}/one?v=1`);
+		requests.push(`./${dir}/two#section`);
 	}
 
 	const resolve = (req) =>

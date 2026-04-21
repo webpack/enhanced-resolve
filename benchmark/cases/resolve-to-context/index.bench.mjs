@@ -8,14 +8,13 @@
  */
 
 import fs from "fs";
-import path from "path";
 import enhanced from "../../../lib/index.js";
 
 const { ResolverFactory, CachedInputFileSystem } = enhanced;
 
 /**
- * @param {import('tinybench').Bench} bench
- * @param {{ fixtureDir: string }} ctx
+ * @param {import("tinybench").Bench} bench bench
+ * @param {{ fixtureDir: string }} ctx ctx
  */
 export default function register(bench, { fixtureDir }) {
 	const fileSystem = new CachedInputFileSystem(fs, 4000);

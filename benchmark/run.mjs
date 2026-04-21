@@ -20,8 +20,8 @@
 import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath, pathToFileURL } from "url";
-import { withCodSpeed } from "./with-codspeed.mjs";
 import { Bench, hrtimeNow } from "tinybench";
+import { withCodSpeed } from "./with-codspeed.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const casesPath = path.join(__dirname, "cases");

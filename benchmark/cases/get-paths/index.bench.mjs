@@ -16,7 +16,7 @@
 import getPaths from "../../../lib/getPaths.js";
 
 /**
- * @param {import('tinybench').Bench} bench
+ * @param {import("tinybench").Bench} bench bench
  */
 export default function register(bench) {
 	const inputs = [

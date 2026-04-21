@@ -22,7 +22,7 @@ const fakeResolver = {
 };
 
 /**
- * @param {import('tinybench').Bench} bench
+ * @param {import("tinybench").Bench} bench bench
  */
 export default function register(bench) {
 	// A mix of request shapes: the cheap no-relative-prefix path dominates in
