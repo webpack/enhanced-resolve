@@ -29,7 +29,7 @@ describe("get paths", () => {
 
 describe("getPathsCached", () => {
 	it("returns identical arrays on cache hit per-fs", () => {
-		const fs = {};
+		const fs = /** @type {import("../lib/Resolver").FileSystem} */ ({});
 		const a = getPathsCached(fs, "/a/b/c");
 		const b = getPathsCached(fs, "/a/b/c");
 		// Same cached object — paths/segments arrays are shared.
@@ -39,7 +39,7 @@ describe("getPathsCached", () => {
 	});
 
 	it("still returns correct values after cache miss", () => {
-		const fs = {};
+		const fs = /** @type {import("../lib/Resolver").FileSystem} */ ({});
 		expect(getPathsCached(fs, "/a/b").paths).toEqual(["/a/b", "/a", "/"]);
 		expect(getPathsCached(fs, "/x/y/z").paths).toEqual([
 			"/x/y/z",
@@ -50,7 +50,7 @@ describe("getPathsCached", () => {
 	});
 
 	it("handles the root-only input", () => {
-		const fs = {};
+		const fs = /** @type {import("../lib/Resolver").FileSystem} */ ({});
 		const a = getPathsCached(fs, "/");
 		const b = getPathsCached(fs, "/");
 		expect(a).toBe(b);
@@ -59,8 +59,8 @@ describe("getPathsCached", () => {
 	});
 
 	it("keeps caches independent across filesystems", () => {
-		const fsA = {};
-		const fsB = {};
+		const fsA = /** @type {import("../lib/Resolver").FileSystem} */ ({});
+		const fsB = /** @type {import("../lib/Resolver").FileSystem} */ ({});
 		const first = getPathsCached(fsA, "/p/q");
 		const second = getPathsCached(fsB, "/p/q");
 		// Values equal but not the same object — separate cache namespaces.
