@@ -24,8 +24,8 @@ const { ResolverFactory, CachedInputFileSystem } = enhanced;
 const PARALLEL_ALIASES = 300;
 
 /**
- * @param {import('tinybench').Bench} bench
- * @param {{ fixtureDir: string }} ctx
+ * @param {import("tinybench").Bench} bench bench
+ * @param {{ fixtureDir: string }} ctx ctx
  */
 export default function register(bench, { fixtureDir }) {
 	const fileSystem = new CachedInputFileSystem(fs, 4000);
@@ -36,19 +36,19 @@ export default function register(bench, { fixtureDir }) {
 	// list. The char-code screen short-circuits the other ~99%.
 	const letters = "abcdefghijklmnopqrstuvwxyz0123456789";
 	for (let i = 0; i < PARALLEL_ALIASES; i++) {
-		const c = letters[i % letters.length];
+		const char = letters[i % letters.length];
 		aliases.push({
-			name: `${c}-unused-${i}`,
+			name: `${char}-unused-${i}`,
 			alias: path.join(fixtureDir, "src/target/a.js"),
 		});
 	}
 	// Tail entries that actually match — they start with `@` so they only
 	// appear after the linear scan has rejected every `a-*` … `9-*` entry via
 	// the char-code screen.
-	for (const f of ["a", "b", "c", "d", "e", "f", "g", "h"]) {
+	for (const file of ["a", "b", "c", "d", "e", "f", "g", "h"]) {
 		aliases.push({
-			name: `@tail/${f}`,
-			alias: path.join(fixtureDir, `src/target/${f}.js`),
+			name: `@tail/${file}`,
+			alias: path.join(fixtureDir, `src/target/${file}.js`),
 		});
 	}
 
