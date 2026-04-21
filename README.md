@@ -367,6 +367,31 @@ const options = {
 };
 ```
 
+To observe whether a request was served from the cache, wrap the cache object in a `Proxy`. `UnsafeCachePlugin` reads entries with `cache[id]` (cache lookup) and writes them with `cache[id] = result` (cache store), so trapping `get` and `set` is enough to distinguish hits from misses:
+
+```js
+const cache = {};
+const observedCache = new Proxy(cache, {
+	get(target, name, receiver) {
+		const hit = name in target;
+		console.log(hit ? `[cache hit]  ${name}` : `[cache miss] ${name}`);
+		return Reflect.get(target, name, receiver);
+	},
+	set(target, name, value, receiver) {
+		console.log(`[cache set]  ${name}`);
+		return Reflect.set(target, name, value, receiver);
+	},
+});
+
+const resolver = ResolverFactory.createResolver({
+	fileSystem: new CachedInputFileSystem(fs, 4000),
+	extensions: [".js", ".json"],
+	unsafeCache: observedCache,
+});
+```
+
+The `name` argument is the cache id — a `JSON.stringify`'d object containing `type`, `context`, `path`, `query`, `fragment`, and `request` — so you can parse it to report on specific resolves. Only successful resolves go through the cache; failures never touch it.
+
 **`fileSystem`** — any `fs`-compatible implementation. Usually `new CachedInputFileSystem(fs, 4000)`; can be a virtual filesystem (e.g. `memfs`) for testing:
 
 ```js
