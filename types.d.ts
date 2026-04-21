@@ -211,6 +211,16 @@ declare interface CompiledAliasOption {
 	 * substring after the single "*" in `name`, null when no wildcard
 	 */
 	wildcardSuffix: null | string;
+
+	/**
+	 * first character code of `name` — used as a cheap screen on the hot path. `-1` indicates "matches any first char" (empty wildcard prefix).
+	 */
+	firstCharCode: number;
+
+	/**
+	 * true when `alias` is an array — precomputed so the hot path skips `Array.isArray`
+	 */
+	arrayAlias: boolean;
 }
 type Context = KnownContext & Record<any, any>;
 declare interface Dirent<T extends string | Buffer = string> {
@@ -340,6 +350,21 @@ declare interface FileSystem {
 	 * realpath method
 	 */
 	realpath?: RealPath;
+}
+declare interface GetPathsCacheEntry {
+	/**
+	 * cached getPaths function
+	 */
+	fn: (path: string) => GetPathsResult;
+
+	/**
+	 * the underlying cache map
+	 */
+	cache: Map<string, GetPathsResult>;
+}
+declare interface GetPathsResult {
+	paths: string[];
+	segments: string[];
 }
 type IBigIntStats = IStatsBase<bigint> & {
 	atimeNs: bigint;
@@ -801,6 +826,11 @@ declare interface PathCacheFunctions {
 	 * cached basename
 	 */
 	basename: BasenameCacheEntry;
+
+	/**
+	 * cached getPaths (ancestor walk)
+	 */
+	getPaths: GetPathsCacheEntry;
 }
 type PathLike = string | Buffer | URL_url;
 type PathOrFileDescriptor = string | number | Buffer | URL_url;
