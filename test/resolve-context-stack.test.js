@@ -27,7 +27,6 @@ describe("resolveContext.stack", () => {
 			{},
 			fixture,
 			"./foo",
-			// @ts-expect-error for test cases old Set API
 			{ stack: new Set() },
 			(err, result) => {
 				if (err) return done(err);
@@ -45,7 +44,6 @@ describe("resolveContext.stack", () => {
 			{},
 			fixture,
 			"./foo",
-			// @ts-expect-error for test cases old Set API
 			{ stack: new Set(["custom-entry-1", "custom-entry-2"]) },
 			(err, result) => {
 				if (err) return done(err);
@@ -64,8 +62,29 @@ describe("resolveContext.stack", () => {
 			{},
 			fixture,
 			"./foo",
-			// @ts-expect-error for test cases old Set API
 			{ stack: new Set([preSeededEntry]) },
+			(err) => {
+				expect(err).toBeTruthy();
+				expect(
+					/** @type {Error & { recursion?: boolean }} */ (err).recursion,
+				).toBe(true);
+				done();
+			},
+		);
+	});
+
+	it("should detect recursion against Set entries at deeper resolve steps", (done) => {
+		// `parsedResolve` runs after the top-level `resolve` hook, so
+		// pre-seeding its entry only triggers recursion at a deeper
+		// `doResolve` call. This exercises the path where the legacy Set
+		// needs to be propagated through the StackEntry chain, not just
+		// checked on the first call.
+		const deeperEntry = `parsedResolve: (${fixture}) ./foo`;
+		resolver.resolve(
+			{},
+			fixture,
+			"./foo",
+			{ stack: new Set([deeperEntry]) },
 			(err) => {
 				expect(err).toBeTruthy();
 				expect(
