@@ -48,7 +48,8 @@
     "Sindre",
     "Sorhus",
     "readlink",
-    "extensionless"
+    "extensionless",
+    "ENOENT"
   ],
   "ignorePaths": [
     "package.json",
