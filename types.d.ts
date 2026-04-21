@@ -1163,9 +1163,9 @@ declare interface ResolveContext {
 	missingDependencies?: WriteOnlySet<string>;
 
 	/**
-	 * tip of the resolver call stack (a singly-linked list with Set-like API). For instance, `resolve → parsedResolve → describedResolve`,
+	 * tip of the resolver call stack (a singly-linked list with Set-like API). For instance, `resolve → parsedResolve → describedResolve`. Accepts a legacy `Set<string>` for back-compat with older callers; it is normalized internally without a hot-path branch.
 	 */
-	stack?: StackEntry;
+	stack?: StackEntry | Set<string>;
 
 	/**
 	 * log function
@@ -1659,6 +1659,14 @@ declare abstract class StackEntry {
 	directory: boolean;
 	module: boolean;
 	parent?: StackEntry;
+
+	/**
+	 * Strings seeded by callers that still pass `stack: new Set([...])`.
+	 * Propagated through the chain so deeper `doResolve` calls still see
+	 * them during recursion checks. `undefined` in the common case so
+	 * there is no extra work on the hot path.
+	 */
+	preSeeded?: Set<string>;
 
 	/**
 	 * Walk the linked list looking for an entry with the same request shape.
