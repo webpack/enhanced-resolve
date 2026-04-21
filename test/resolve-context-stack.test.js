@@ -142,4 +142,95 @@ describe("resolveContext.stack", () => {
 			});
 		});
 	});
+
+	// Plugin pattern: a cache plugin (e.g. webpack's ResolverCachePlugin)
+	// taps into a hook and, on a cache miss, re-issues a fresh
+	// `resolver.resolve()` to populate the cache. The inner call needs to
+	// preserve the parent context (log, deps, yield) but start with an
+	// empty recursion-tracking stack — otherwise it inherits the outer
+	// chain and the guard fires on the first inner step (the same
+	// `resolve: (path) request` it just pushed).
+	//
+	// Old API: `{ ...resolveContext, stack: new Set() }`.
+	// New API (works today, future-proof once Set support is dropped):
+	// `{ ...resolveContext, stack: undefined }`.
+	describe("re-issuing resolves from inside a hook (cache-plugin pattern)", () => {
+		/**
+		 * @param {boolean} resetStack whether the plugin clears `stack`
+		 * @returns {import("../").Resolver} resolver
+		 */
+		const buildReplayResolver = (resetStack) => {
+			let didReplay = false;
+			return ResolverFactory.createResolver({
+				extensions: [".ts", ".js"],
+				fileSystem: nodeFileSystem,
+				plugins: [
+					{
+						/** @param {import("../").Resolver} r resolver */
+						apply(r) {
+							const target = r.ensureHook("parsed-resolve");
+							r.getHook("resolve").tapAsync(
+								"ReplayPlugin",
+								(request, resolveContext, callback) => {
+									if (didReplay) {
+										// Inner pass: continue normally so the test
+										// actually finishes its resolve.
+										return r.doResolve(
+											target,
+											request,
+											null,
+											resolveContext,
+											callback,
+										);
+									}
+									didReplay = true;
+									r.resolve(
+										/** @type {import("../").Context} */
+										(request.context || {}),
+										/** @type {string} */ (request.path),
+										/** @type {string} */ (request.request),
+										resetStack
+											? { ...resolveContext, stack: undefined }
+											: resolveContext,
+										(err, _result, fullResult) => {
+											if (err) return callback(err);
+											callback(null, fullResult);
+										},
+									);
+								},
+							);
+						},
+					},
+				],
+			});
+		};
+
+		it("succeeds when the plugin resets `stack` to undefined before re-issuing", (done) => {
+			buildReplayResolver(true).resolve(
+				{},
+				fixture,
+				"./foo",
+				{},
+				(err, result) => {
+					if (err) return done(err);
+					expect(result).toBeTruthy();
+					done();
+				},
+			);
+		});
+
+		it("trips the recursion guard if the plugin forgets to reset `stack`", (done) => {
+			// Negative control: confirms the reset above isn't a no-op.
+			// Without it, the inner `resolver.resolve()` inherits the outer
+			// chain, sees its own `resolve: (...)` entry already on the stack,
+			// and aborts.
+			buildReplayResolver(false).resolve({}, fixture, "./foo", {}, (err) => {
+				expect(err).toBeTruthy();
+				expect(
+					/** @type {Error & { recursion?: boolean }} */ (err).recursion,
+				).toBe(true);
+				done();
+			});
+		});
+	});
 });
