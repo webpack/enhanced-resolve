@@ -1,6 +1,7 @@
 "use strict";
 
 const getPaths = require("../lib/getPaths");
+const { getPathsCached } = require("../lib/getPaths");
 
 /**
  * @type {[string, { paths: string[], segments: string[] }][]}
@@ -24,4 +25,46 @@ describe("get paths", () => {
 			expect(segments).toEqual(case_[1].segments);
 		});
 	}
+});
+
+describe("getPathsCached", () => {
+	it("returns identical arrays on cache hit per-fs", () => {
+		const fs = {};
+		const a = getPathsCached(fs, "/a/b/c");
+		const b = getPathsCached(fs, "/a/b/c");
+		// Same cached object — paths/segments arrays are shared.
+		expect(a).toBe(b);
+		expect(a.paths).toBe(b.paths);
+		expect(a.segments).toBe(b.segments);
+	});
+
+	it("still returns correct values after cache miss", () => {
+		const fs = {};
+		expect(getPathsCached(fs, "/a/b").paths).toEqual(["/a/b", "/a", "/"]);
+		expect(getPathsCached(fs, "/x/y/z").paths).toEqual([
+			"/x/y/z",
+			"/x/y",
+			"/x",
+			"/",
+		]);
+	});
+
+	it("handles the root-only input", () => {
+		const fs = {};
+		const a = getPathsCached(fs, "/");
+		const b = getPathsCached(fs, "/");
+		expect(a).toBe(b);
+		expect(a.paths).toEqual(["/"]);
+		expect(a.segments).toEqual([""]);
+	});
+
+	it("keeps caches independent across filesystems", () => {
+		const fsA = {};
+		const fsB = {};
+		const first = getPathsCached(fsA, "/p/q");
+		const second = getPathsCached(fsB, "/p/q");
+		// Values equal but not the same object — separate cache namespaces.
+		expect(first).not.toBe(second);
+		expect(first.paths).toEqual(second.paths);
+	});
 });
