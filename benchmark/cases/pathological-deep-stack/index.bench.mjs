@@ -20,20 +20,23 @@
  */
 
 import fs from "fs";
-import path from "path";
 import enhanced from "../../../lib/index.js";
 
 const { ResolverFactory, CachedInputFileSystem } = enhanced;
 
 const CHAIN_LENGTH = 50;
 
-/**
+/*
  * Build an AliasPlugin-compatible alias list that forms a chain:
- *   chain-0 -> chain-1 -> chain-2 -> ... -> chain-49 -> ./target
+ * chain-0 -> chain-1 -> chain-2 -> ... -> chain-49 -> ./target
  *
  * Each entry rewrites one specifier to the next, so a single resolve of
  * `chain-0` forces enhanced-resolve to re-enter the pipeline CHAIN_LENGTH
  * times before bottoming out.
+ */
+
+/**
+ * @returns {string[]} aliases
  */
 function buildChainAliases() {
 	const aliases = [];
@@ -45,8 +48,8 @@ function buildChainAliases() {
 }
 
 /**
- * @param {import('tinybench').Bench} bench
- * @param {{ fixtureDir: string }} ctx
+ * @param {import("tinybench").Bench} bench bench
+ * @param {{ fixtureDir: string }} ctx ctx
  */
 export default function register(bench, { fixtureDir }) {
 	const fileSystem = new CachedInputFileSystem(fs, 4000);

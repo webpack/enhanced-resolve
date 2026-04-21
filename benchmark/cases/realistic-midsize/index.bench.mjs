@@ -33,8 +33,8 @@ const WARM_FS_CACHE_TTL_MS = 30 * 1000;
 const COLD_FS_CACHE_TTL_MS = 4000;
 
 /**
- * @param {import('tinybench').Bench} bench
- * @param {{ fixtureDir: string }} ctx
+ * @param {import("tinybench").Bench} bench bench
+ * @param {{ fixtureDir: string }} ctx ctx
  */
 export default function register(bench, { fixtureDir }) {
 	const fileSystem = new CachedInputFileSystem(fs, WARM_FS_CACHE_TTL_MS);

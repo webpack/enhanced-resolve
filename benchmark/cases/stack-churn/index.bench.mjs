@@ -29,28 +29,31 @@ const CHAIN_COUNT = 4;
 const CHAIN_DEPTH = 60;
 const RESOLVES_PER_ITER = 20;
 
-/**
+/*
  * Build CHAIN_COUNT independent alias chains, each of length CHAIN_DEPTH:
  *   c0-0 -> c0-1 -> ... -> c0-(n-1) -> ./target
  *   c1-0 -> c1-1 -> ... -> c1-(n-1) -> ./target
  *   ...
  * so every top-level resolve forces CHAIN_DEPTH `doResolve` re-entries.
- * @returns {Array<{name: string, alias: string}>} alias list
+ */
+
+/**
+ * @returns {{ name: string, alias: string }[]} alias list
  */
 function buildChains() {
 	const aliases = [];
-	for (let c = 0; c < CHAIN_COUNT; c++) {
+	for (let chain = 0; chain < CHAIN_COUNT; chain++) {
 		for (let i = 0; i < CHAIN_DEPTH - 1; i++) {
-			aliases.push({ name: `c${c}-${i}`, alias: `c${c}-${i + 1}` });
+			aliases.push({ name: `c${chain}-${i}`, alias: `c${chain}-${i + 1}` });
 		}
-		aliases.push({ name: `c${c}-${CHAIN_DEPTH - 1}`, alias: "./target" });
+		aliases.push({ name: `c${chain}-${CHAIN_DEPTH - 1}`, alias: "./target" });
 	}
 	return aliases;
 }
 
 /**
- * @param {import('tinybench').Bench} bench
- * @param {{ fixtureDir: string }} ctx
+ * @param {import("tinybench").Bench} bench bench
+ * @param {{ fixtureDir: string }} ctx ctx
  */
 export default function register(bench, { fixtureDir }) {
 	const fileSystem = new CachedInputFileSystem(fs, 4000);

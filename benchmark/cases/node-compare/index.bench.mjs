@@ -63,8 +63,8 @@
  */
 
 import fs from "fs";
-import path from "path";
 import { createRequire } from "module";
+import path from "path";
 import { pathToFileURL } from "url";
 import enhanced from "../../../lib/index.js";
 
@@ -74,7 +74,7 @@ const PKG_SUBPATH_COUNT = 500;
 const FILE_COUNT = 500;
 const BATCH_SIZE = PKG_SUBPATH_COUNT + FILE_COUNT;
 
-/**
+/*
  * Build a deterministic fixture tree on disk. Skipped entirely when a
  * sentinel file records that the current (PKG_SUBPATH_COUNT, FILE_COUNT)
  * combination has already been materialized — creating 10k tiny files is
@@ -90,6 +90,10 @@ const BATCH_SIZE = PKG_SUBPATH_COUNT + FILE_COUNT;
  *       package.json                        // wildcard subpath exports
  *       lib/
  *         file0000.js .. file4999.js        // bare-specifier targets
+ */
+
+/**
+ * @param {string} fixtureDir fixture dir
  */
 function ensureFixture(fixtureDir) {
 	const sentinel = path.join(fixtureDir, ".ok");
@@ -156,8 +160,8 @@ function ensureFixture(fixtureDir) {
 }
 
 /**
- * @param {import('tinybench').Bench} bench
- * @param {{ fixtureDir: string }} ctx
+ * @param {import("tinybench").Bench} bench bench
+ * @param {{ fixtureDir: string }} ctx ctx
  */
 export default async function register(bench, { fixtureDir }) {
 	ensureFixture(fixtureDir);
@@ -167,7 +171,7 @@ export default async function register(bench, { fixtureDir }) {
 	// per-specifier result caches in Node's CJS and ESM resolvers (and
 	// enhanced-resolve's `unsafeCache` if we'd enabled it) cannot
 	// short-circuit anything within a single batch.
-	const requests = new Array(BATCH_SIZE);
+	const requests = Array.from({ length: BATCH_SIZE });
 	for (let i = 0; i < PKG_SUBPATH_COUNT; i++) {
 		requests[i] = `megapkg/file${String(i).padStart(4, "0")}`;
 	}

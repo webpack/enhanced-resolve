@@ -23,8 +23,8 @@ const { ResolverFactory, CachedInputFileSystem } = enhanced;
 const NON_MATCHING_ALIASES = 100;
 
 /**
- * @param {import('tinybench').Bench} bench
- * @param {{ fixtureDir: string }} ctx
+ * @param {import("tinybench").Bench} bench bench
+ * @param {{ fixtureDir: string }} ctx ctx
  */
 export default function register(bench, { fixtureDir }) {
 	const fileSystem = new CachedInputFileSystem(fs, 4000);
