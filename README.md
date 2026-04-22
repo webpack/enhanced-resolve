@@ -131,9 +131,16 @@ const resolver = ResolverFactory.createResolver({
 	extensions: [".js", ".json"],
 });
 
+// callback
 resolver.resolve({}, __dirname, "./utils", {}, (err, file) => {
 	// ...
 });
+
+// sync (requires a sync fileSystem)
+const fileSync = resolver.resolveSync({}, __dirname, "./utils");
+
+// promise
+const filePromise = await resolver.resolvePromise({}, __dirname, "./utils", {});
 ```
 
 #### `CachedInputFileSystem(fileSystem, duration)`
@@ -199,6 +206,8 @@ const context = {};
 const lookupStartPath = "/Users/webpack/some/root/dir";
 const request = "./path/to-look-up.js";
 const resolveContext = {};
+
+// callback
 myResolver.resolve(
 	context,
 	lookupStartPath,
@@ -208,6 +217,22 @@ myResolver.resolve(
 		// Do something with the path
 	},
 );
+
+// promise
+try {
+	const filepath = await myResolver.resolvePromise(
+		context,
+		lookupStartPath,
+		request,
+		resolveContext,
+	);
+	// Do something with the path
+} catch (err) {
+	// handle resolve failure
+}
+
+// sync (requires a sync fileSystem, e.g. the default Node.js one)
+const filepath = myResolver.resolveSync(context, lookupStartPath, request);
 ```
 
 #### Resolver Options
