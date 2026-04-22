@@ -1423,10 +1423,7 @@ declare interface ResolveOptionsResolverFactoryObject_2 {
 	extensionAlias?: ExtensionAliasOptions;
 
 	/**
-	 * Also apply `extensionAlias` to paths resolved through the package.json
-	 * `exports` field. Off by default (Node.js-aligned); when enabled, matches
-	 * TypeScript's behavior for packages that ship TS sources alongside
-	 * compiled JS.
+	 * Also apply `extensionAlias` to paths resolved through the package.json `exports` field. Off by default (Node.js-aligned); when enabled, matches TypeScript's behavior for packages that ship TS sources alongside compiled JS.
 	 */
 	extensionAliasForExports?: boolean;
 
