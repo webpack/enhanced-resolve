@@ -1415,6 +1415,63 @@ describe("importsFieldPlugin", () => {
 		});
 	});
 
+	it("resolver should respect query parameters #1", (done) => {
+		resolver.resolve({}, fixture, "#a/dist/main.js?foo", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) return done(new Error("No result"));
+			expect(result).toEqual(
+				path.resolve(fixture, "node_modules/a/lib/main.js?foo"),
+			);
+			done();
+		});
+	});
+
+	it("resolver should respect query parameters #2. Direct matching", (done) => {
+		resolver.resolve({}, fixture, "#imports-field?foo", {}, (err, result) => {
+			if (!err) return done(new Error(`expect error, got ${result}`));
+			expect(err).toBeInstanceOf(Error);
+			expect(err.message).toMatch(/is not imported from package/);
+			done();
+		});
+	});
+
+	it("resolver should respect fragment parameters #1", (done) => {
+		resolver.resolve({}, fixture, "#a/dist/main.js#foo", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) return done(new Error("No result"));
+			expect(result).toEqual(
+				path.resolve(fixture, "node_modules/a/lib/main.js#foo"),
+			);
+			done();
+		});
+	});
+
+	it("resolver should respect fragment parameters #2. Direct matching", (done) => {
+		resolver.resolve({}, fixture, "#imports-field#foo", {}, (err, result) => {
+			if (!err) return done(new Error(`expect error, got ${result}`));
+			expect(err).toBeInstanceOf(Error);
+			expect(err.message).toMatch(/is not imported from package/);
+			done();
+		});
+	});
+
+	it("resolver should respect query and fragment parameters together", (done) => {
+		resolver.resolve(
+			{},
+			fixture,
+			"#a/dist/main.js?foo=bar#frag",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(
+					path.resolve(fixture, "node_modules/a/lib/main.js?foo=bar#frag"),
+				);
+				done();
+			},
+		);
+	});
+
 	it("should work and throw an error on invalid imports #1", (done) => {
 		// Note: #/ patterns are now allowed per Node.js PR #60864
 		// #/dep will now try to resolve but fail because there's no mapping
