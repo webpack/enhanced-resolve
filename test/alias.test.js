@@ -198,6 +198,178 @@ describe("alias", () => {
 		expect(resolver.resolveSync({}, "/", "shared/b")).toBe("/src/components/b");
 	});
 
+	// Absolute-path aliasing — posix + windows shapes.
+	//
+	// `memfs` (used by the full-resolver tests above) is posix-only, so
+	// these cases drive the alias matcher through `aliasResolveHandler`
+	// directly. The stub implements just the two `Resolver` methods it
+	// touches — `join` (for compiling the normalized `absolutePath`) and
+	// `doResolve` (for forwarding the aliased request) — which keeps
+	// the tests hermetic and lets us exercise both path dialects on the
+	// same machine.
+	describe("absolute path aliasing (posix + windows shapes)", () => {
+		const {
+			aliasResolveHandler,
+			compileAliasOptions,
+		} = require("../lib/AliasUtils");
+		const { join } = require("../lib/util/path");
+
+		/**
+		 * @typedef {object} ForwardedRequest
+		 * @property {string=} request aliased request string
+		 * @property {string | false=} path carried-through path
+		 */
+
+		/**
+		 * @param {{ name: string, alias: string }[]} options alias options
+		 * @param {{ request?: string, path?: string }} request request shape
+		 * @returns {ForwardedRequest | null} forwarded request or null when the alias was skipped
+		 */
+		const runAlias = (options, request) => {
+			/** @type {ForwardedRequest | null} */
+			let forwarded = null;
+			const resolver = {
+				join,
+				/**
+				 * @param {unknown} _hook target hook (unused — intercepted)
+				 * @param {ForwardedRequest} obj aliased request
+				 * @param {unknown} _msg log message (unused)
+				 * @param {unknown} _ctx resolve context (unused)
+				 * @param {(err: null, r: ForwardedRequest) => void} cb callback
+				 * @returns {void}
+				 */
+				doResolve: (_hook, obj, _msg, _ctx, cb) => {
+					forwarded = obj;
+					cb(null, obj);
+				},
+			};
+			// @ts-expect-error stub resolver intentionally omits unrelated methods
+			const compiled = compileAliasOptions(resolver, options);
+			aliasResolveHandler(
+				// @ts-expect-error stub resolver intentionally omits unrelated methods
+				resolver,
+				compiled,
+				// @ts-expect-error target hook is intercepted by the stub
+				{},
+				// @ts-expect-error partial request shape is sufficient for the matcher
+				request,
+				// @ts-expect-error empty resolve context
+				{},
+				() => {},
+			);
+			return forwarded;
+		};
+
+		describe("posix (Linux)", () => {
+			it("matches a raw absolute subpath request (raw-resolve hook)", () => {
+				const f = runAlias([{ name: "/abs/foo", alias: "/new/bar" }], {
+					request: "/abs/foo/baz",
+					path: "/issuer",
+				});
+				expect(f).not.toBeNull();
+				expect(/** @type {ForwardedRequest} */ (f).request).toBe(
+					"/new/bar/baz",
+				);
+			});
+
+			it("matches a joined absolute path (file hook, request.request undefined)", () => {
+				const f = runAlias([{ name: "/abs/foo", alias: "/new/bar" }], {
+					request: undefined,
+					path: "/abs/foo/baz",
+				});
+				expect(f).not.toBeNull();
+				expect(/** @type {ForwardedRequest} */ (f).request).toBe(
+					"/new/bar/baz",
+				);
+			});
+
+			it("matches by exact equality when innerRequest === name", () => {
+				const f = runAlias([{ name: "/abs/foo", alias: "/new/bar" }], {
+					request: "/abs/foo",
+					path: "/issuer",
+				});
+				expect(f).not.toBeNull();
+				expect(/** @type {ForwardedRequest} */ (f).request).toBe("/new/bar");
+			});
+
+			it("does not match a different posix prefix", () => {
+				const f = runAlias([{ name: "/abs/foo", alias: "/new/bar" }], {
+					request: "/abs/food/baz",
+					path: "/issuer",
+				});
+				// "/abs/food/baz" shares `/abs/foo` as a prefix but not
+				// `/abs/foo/`, so the alias must not fire.
+				expect(f).toBeNull();
+			});
+		});
+
+		describe("windows", () => {
+			it("matches a joined absolute path with native backslashes (file hook)", () => {
+				const f = runAlias([{ name: "C:\\abs\\foo", alias: "D:\\new\\bar" }], {
+					request: undefined,
+					path: "C:\\abs\\foo\\baz",
+				});
+				expect(f).not.toBeNull();
+				expect(/** @type {ForwardedRequest} */ (f).request).toBe(
+					"D:\\new\\bar\\baz",
+				);
+			});
+
+			it("matches by exact equality for a raw windows absolute request", () => {
+				const f = runAlias([{ name: "C:\\abs\\foo", alias: "D:\\new\\bar" }], {
+					request: "C:\\abs\\foo",
+					path: "C:\\issuer",
+				});
+				expect(f).not.toBeNull();
+				expect(/** @type {ForwardedRequest} */ (f).request).toBe(
+					"D:\\new\\bar",
+				);
+			});
+
+			it("matches a raw absolute subpath request with native backslashes (raw-resolve hook)", () => {
+				// Regression: before the fix, `nameWithSlash` appended
+				// a forward slash (`C:\\abs\\foo/`), so a raw request that
+				// used the native backslash (`C:\\abs\\foo\\baz`) failed
+				// `startsWith` and the alias was silently skipped.
+				const f = runAlias([{ name: "C:\\abs\\foo", alias: "D:\\new\\bar" }], {
+					request: "C:\\abs\\foo\\baz",
+					path: "C:\\issuer",
+				});
+				expect(f).not.toBeNull();
+				expect(/** @type {ForwardedRequest} */ (f).request).toBe(
+					"D:\\new\\bar\\baz",
+				);
+			});
+
+			it("matches a raw absolute subpath request with forward slashes", () => {
+				const f = runAlias([{ name: "C:/abs/foo", alias: "D:/new/bar" }], {
+					request: "C:/abs/foo/baz",
+					path: "C:/issuer",
+				});
+				expect(f).not.toBeNull();
+				expect(/** @type {ForwardedRequest} */ (f).request).toBe(
+					"D:/new/bar/baz",
+				);
+			});
+
+			it("does not match a different windows prefix", () => {
+				const f = runAlias([{ name: "C:\\abs\\foo", alias: "D:\\new\\bar" }], {
+					request: undefined,
+					path: "C:\\abs\\food\\baz",
+				});
+				expect(f).toBeNull();
+			});
+
+			it("does not match a different drive letter", () => {
+				const f = runAlias([{ name: "C:\\abs\\foo", alias: "D:\\new\\bar" }], {
+					request: undefined,
+					path: "E:\\abs\\foo\\baz",
+				});
+				expect(f).toBeNull();
+			});
+		});
+	});
+
 	// Regression tests for the watch-mode fallback described in
 	// https://github.com/webpack/enhanced-resolve/issues/395 and
 	// https://github.com/webpack/enhanced-resolve/issues/250.
