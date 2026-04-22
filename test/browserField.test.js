@@ -38,57 +38,61 @@ describe("browserField", () => {
 		});
 	});
 
-	it("should ignore #2", () => {
-		expect(resolver.resolveSync({}, p(), "./lib/ignore")).toBe(false);
-		expect(resolver.resolveSync({}, p(), "./lib/ignore.js")).toBe(false);
-		expect(resolver.resolveSync({}, p("lib"), "./ignore")).toBe(false);
-		expect(resolver.resolveSync({}, p("lib"), "./ignore.js")).toBe(false);
-	});
-
-	it("should replace a file", () => {
-		expect(resolver.resolveSync({}, p(), "./lib/replaced")).toEqual(
-			p("lib", "browser.js"),
+	it("should ignore #2", async () => {
+		expect(await resolver.resolvePromise({}, p(), "./lib/ignore")).toBe(false);
+		expect(await resolver.resolvePromise({}, p(), "./lib/ignore.js")).toBe(
+			false,
 		);
-		expect(resolver.resolveSync({}, p(), "./lib/replaced.js")).toEqual(
-			p("lib", "browser.js"),
-		);
-		expect(resolver.resolveSync({}, p("lib"), "./replaced")).toEqual(
-			p("lib", "browser.js"),
-		);
-		expect(resolver.resolveSync({}, p("lib"), "./replaced.js")).toEqual(
-			p("lib", "browser.js"),
+		expect(await resolver.resolvePromise({}, p("lib"), "./ignore")).toBe(false);
+		expect(await resolver.resolvePromise({}, p("lib"), "./ignore.js")).toBe(
+			false,
 		);
 	});
 
-	it("should replace a module with a file", () => {
-		expect(resolver.resolveSync({}, p(), "module-a")).toEqual(
+	it("should replace a file", async () => {
+		expect(await resolver.resolvePromise({}, p(), "./lib/replaced")).toEqual(
+			p("lib", "browser.js"),
+		);
+		expect(await resolver.resolvePromise({}, p(), "./lib/replaced.js")).toEqual(
+			p("lib", "browser.js"),
+		);
+		expect(await resolver.resolvePromise({}, p("lib"), "./replaced")).toEqual(
+			p("lib", "browser.js"),
+		);
+		expect(
+			await resolver.resolvePromise({}, p("lib"), "./replaced.js"),
+		).toEqual(p("lib", "browser.js"));
+	});
+
+	it("should replace a module with a file", async () => {
+		expect(await resolver.resolvePromise({}, p(), "module-a")).toEqual(
 			p("browser", "module-a.js"),
 		);
-		expect(resolver.resolveSync({}, p("lib"), "module-a")).toEqual(
+		expect(await resolver.resolvePromise({}, p("lib"), "module-a")).toEqual(
 			p("browser", "module-a.js"),
 		);
 	});
 
-	it("should replace a module with a module", () => {
-		expect(resolver.resolveSync({}, p(), "module-b")).toEqual(
+	it("should replace a module with a module", async () => {
+		expect(await resolver.resolvePromise({}, p(), "module-b")).toEqual(
 			p("node_modules", "module-c.js"),
 		);
-		expect(resolver.resolveSync({}, p("lib"), "module-b")).toEqual(
+		expect(await resolver.resolvePromise({}, p("lib"), "module-b")).toEqual(
 			p("node_modules", "module-c.js"),
 		);
 	});
 
-	it("should resolve in nested property", () => {
-		expect(resolver.resolveSync({}, p(), "./lib/main1.js")).toEqual(
+	it("should resolve in nested property", async () => {
+		expect(await resolver.resolvePromise({}, p(), "./lib/main1.js")).toEqual(
 			p("lib", "main.js"),
 		);
-		expect(resolver.resolveSync({}, p(), "./lib/main2.js")).toEqual(
+		expect(await resolver.resolvePromise({}, p(), "./lib/main2.js")).toEqual(
 			p("lib", "browser.js"),
 		);
 	});
 
-	it("should check only alias field properties", () => {
-		expect(resolver.resolveSync({}, p(), "./toString")).toEqual(
+	it("should check only alias field properties", async () => {
+		expect(await resolver.resolvePromise({}, p(), "./toString")).toEqual(
 			p("lib", "toString.js"),
 		);
 	});

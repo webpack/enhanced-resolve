@@ -1,10 +1,10 @@
 /*
  * sync-resolver
  *
- * Measures the `useSyncFileSystemCalls: true` path via `resolveSync`, which
- * webpack's loader resolver uses. This path bypasses the async plumbing in
- * the resolver and is a distinct hot code path worth tracking separately
- * from the async case.
+ * Measures the resolve path on a sync-capable filesystem. The underlying
+ * resolver is now fully promise-based, so this case uses `resolvePromise`;
+ * the `useSyncFileSystemCalls: true` flag still shortcuts fs I/O to sync
+ * calls, which is what webpack's loader resolver configures.
  */
 
 import fs from "fs";
@@ -37,9 +37,9 @@ export default function register(bench, { fixtureDir }) {
 		"lodash",
 	];
 
-	bench.add("sync-resolver: resolveSync mixed batch (warm)", () => {
+	bench.add("sync-resolver: resolvePromise mixed batch (warm)", async () => {
 		for (const req of requests) {
-			const result = resolver.resolveSync({}, from, req);
+			const result = await resolver.resolvePromise({}, from, req);
 			if (!result) throw new Error(`no result for ${req}`);
 		}
 	});

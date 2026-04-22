@@ -45,63 +45,85 @@ describe("fallback", () => {
 		});
 	});
 
-	it("should resolve a not aliased module", () => {
-		expect(resolver.resolveSync({}, "/", "a")).toBe("/a/index");
-		expect(resolver.resolveSync({}, "/", "a/index")).toBe("/a/index");
-		expect(resolver.resolveSync({}, "/", "a/dir")).toBe("/a/dir/index");
-		expect(resolver.resolveSync({}, "/", "a/dir/index")).toBe("/a/dir/index");
-	});
-
-	it("should resolve an fallback module", () => {
-		expect(resolver.resolveSync({}, "/", "aliasA")).toBe("/a/index");
-		expect(resolver.resolveSync({}, "/", "aliasA/index")).toBe("/a/index");
-		expect(resolver.resolveSync({}, "/", "aliasA/dir")).toBe("/a/dir/index");
-		expect(resolver.resolveSync({}, "/", "aliasA/dir/index")).toBe(
+	it("should resolve a not aliased module", async () => {
+		expect(await resolver.resolvePromise({}, "/", "a")).toBe("/a/index");
+		expect(await resolver.resolvePromise({}, "/", "a/index")).toBe("/a/index");
+		expect(await resolver.resolvePromise({}, "/", "a/dir")).toBe(
+			"/a/dir/index",
+		);
+		expect(await resolver.resolvePromise({}, "/", "a/dir/index")).toBe(
 			"/a/dir/index",
 		);
 	});
 
-	it("should resolve an ignore module", () => {
-		expect(resolver.resolveSync({}, "/", "ignored")).toBe(false);
+	it("should resolve an fallback module", async () => {
+		expect(await resolver.resolvePromise({}, "/", "aliasA")).toBe("/a/index");
+		expect(await resolver.resolvePromise({}, "/", "aliasA/index")).toBe(
+			"/a/index",
+		);
+		expect(await resolver.resolvePromise({}, "/", "aliasA/dir")).toBe(
+			"/a/dir/index",
+		);
+		expect(await resolver.resolvePromise({}, "/", "aliasA/dir/index")).toBe(
+			"/a/dir/index",
+		);
 	});
 
-	it("should resolve a recursive aliased module", () => {
-		expect(resolver.resolveSync({}, "/", "recursive")).toBe("/recursive/index");
-		expect(resolver.resolveSync({}, "/", "recursive/index")).toBe(
+	it("should resolve an ignore module", async () => {
+		expect(await resolver.resolvePromise({}, "/", "ignored")).toBe(false);
+	});
+
+	it("should resolve a recursive aliased module", async () => {
+		expect(await resolver.resolvePromise({}, "/", "recursive")).toBe(
 			"/recursive/index",
 		);
-		expect(resolver.resolveSync({}, "/", "recursive/dir")).toBe(
+		expect(await resolver.resolvePromise({}, "/", "recursive/index")).toBe(
+			"/recursive/index",
+		);
+		expect(await resolver.resolvePromise({}, "/", "recursive/dir")).toBe(
 			"/recursive/dir/index",
 		);
-		expect(resolver.resolveSync({}, "/", "recursive/dir/index")).toBe(
+		expect(await resolver.resolvePromise({}, "/", "recursive/dir/index")).toBe(
 			"/recursive/dir/index",
 		);
-		expect(resolver.resolveSync({}, "/", "recursive/file")).toBe(
+		expect(await resolver.resolvePromise({}, "/", "recursive/file")).toBe(
 			"/recursive/dir/file",
 		);
 	});
 
-	it("should resolve a file aliased module with a query", () => {
-		expect(resolver.resolveSync({}, "/", "b?query")).toBe("/b/index?query");
-		expect(resolver.resolveSync({}, "/", "c?query")).toBe("/c/index?query");
+	it("should resolve a file aliased module with a query", async () => {
+		expect(await resolver.resolvePromise({}, "/", "b?query")).toBe(
+			"/b/index?query",
+		);
+		expect(await resolver.resolvePromise({}, "/", "c?query")).toBe(
+			"/c/index?query",
+		);
 	});
 
-	it("should resolve a path in a file aliased module", () => {
-		expect(resolver.resolveSync({}, "/", "b/index")).toBe("/b/index");
-		expect(resolver.resolveSync({}, "/", "b/dir")).toBe("/b/dir/index");
-		expect(resolver.resolveSync({}, "/", "b/dir/index")).toBe("/b/dir/index");
-		expect(resolver.resolveSync({}, "/", "c/index")).toBe("/c/index");
-		expect(resolver.resolveSync({}, "/", "c/dir")).toBe("/c/dir/index");
-		expect(resolver.resolveSync({}, "/", "c/dir/index")).toBe("/c/dir/index");
+	it("should resolve a path in a file aliased module", async () => {
+		expect(await resolver.resolvePromise({}, "/", "b/index")).toBe("/b/index");
+		expect(await resolver.resolvePromise({}, "/", "b/dir")).toBe(
+			"/b/dir/index",
+		);
+		expect(await resolver.resolvePromise({}, "/", "b/dir/index")).toBe(
+			"/b/dir/index",
+		);
+		expect(await resolver.resolvePromise({}, "/", "c/index")).toBe("/c/index");
+		expect(await resolver.resolvePromise({}, "/", "c/dir")).toBe(
+			"/c/dir/index",
+		);
+		expect(await resolver.resolvePromise({}, "/", "c/dir/index")).toBe(
+			"/c/dir/index",
+		);
 	});
 
-	it("should resolve a file in multiple aliased dirs", () => {
-		expect(resolver.resolveSync({}, "/", "multiAlias/dir/file")).toBe(
+	it("should resolve a file in multiple aliased dirs", async () => {
+		expect(await resolver.resolvePromise({}, "/", "multiAlias/dir/file")).toBe(
 			"/e/dir/file",
 		);
-		expect(resolver.resolveSync({}, "/", "multiAlias/anotherDir")).toBe(
-			"/e/anotherDir/index",
-		);
+		expect(
+			await resolver.resolvePromise({}, "/", "multiAlias/anotherDir"),
+		).toBe("/e/anotherDir/index");
 	});
 
 	it("should log the correct info", (done) => {

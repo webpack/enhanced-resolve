@@ -11,11 +11,6 @@ const asyncContextResolve = resolve.create({
 	resolveToContext: true,
 });
 
-const syncContextResolve = resolve.create.sync({
-	extensions: [".js", ".json", ".node"],
-	resolveToContext: true,
-});
-
 const promiseContextResolve = resolve.create.promise({
 	extensions: [".js", ".json", ".node"],
 	resolveToContext: true,
@@ -39,8 +34,8 @@ const preferRelativeResolve = resolve.create({
  */
 function testResolve(name, context, moduleName, result) {
 	describe(name, () => {
-		it("should resolve sync correctly", () => {
-			const filename = resolve.sync(context, moduleName);
+		it("should resolve sync correctly", async () => {
+			const filename = await resolve.promise(context, moduleName);
 			expect(filename).toBeDefined();
 			expect(filename).toEqual(result);
 		});
@@ -80,8 +75,8 @@ function testResolveContext(name, context, moduleName, result) {
 			});
 		});
 
-		it("should resolve sync correctly", () => {
-			const filename = syncContextResolve(context, moduleName);
+		it("should resolve sync correctly", async () => {
+			const filename = await promiseContextResolve(context, moduleName);
 			expect(filename).toBeDefined();
 			expect(filename).toEqual(result);
 		});

@@ -105,7 +105,7 @@ describe("symlink", () => {
 		const resolveWithoutSymlinks = resolve.create({
 			symlinks: false,
 		});
-		const resolveSyncWithoutSymlinks = resolve.create.sync({
+		const resolvePromiseWithoutSymlinks = resolve.create.promise({
 			symlinks: false,
 		});
 
@@ -228,13 +228,16 @@ describe("symlink", () => {
 				});
 			});
 
-			it(`should resolve symlink to itself sync ${pathToIt[2]}`, () => {
-				let filename = resolve.sync(pathToIt[0], pathToIt[1]);
+			it(`should resolve symlink to itself sync ${pathToIt[2]}`, async () => {
+				let filename = await resolve.promise(pathToIt[0], pathToIt[1]);
 				expect(filename).toBeDefined();
 				expect(typeof filename).toBe("string");
 				expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
 
-				filename = resolveSyncWithoutSymlinks(pathToIt[0], pathToIt[1]);
+				filename = await resolvePromiseWithoutSymlinks(
+					pathToIt[0],
+					pathToIt[1],
+				);
 
 				expect(typeof filename).toBe("string");
 				expect(filename).toEqual(path.resolve(pathToIt[0], pathToIt[1]));

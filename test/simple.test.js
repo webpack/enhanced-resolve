@@ -63,23 +63,23 @@ describe("simple", () => {
 			});
 		});
 
-		it(`should resolve itself sync ${pathToIt[2]}`, () => {
-			const filename = resolve.sync(pathToIt[0], pathToIt[1]);
+		it(`should resolve itself sync ${pathToIt[2]}`, async () => {
+			const filename = await resolve.promise(pathToIt[0], pathToIt[1]);
 
 			expect(filename).toBeDefined();
 			expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
 		});
 
-		it(`should resolve itself sync ${pathToIt[2]} and accept a context argument`, () => {
-			const filename = resolve.sync({}, pathToIt[0], pathToIt[1]);
+		it(`should resolve itself sync ${pathToIt[2]} and accept a context argument`, async () => {
+			const filename = await resolve.promise({}, pathToIt[0], pathToIt[1]);
 
 			expect(filename).toBeDefined();
 			expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
 		});
 
-		it(`should resolve itself promise ${pathToIt[2]} and accept a resolveContext argument`, () => {
+		it(`should resolve itself promise ${pathToIt[2]} and accept a resolveContext argument (sync api)`, async () => {
 			const resolveContext = {};
-			const filename = resolve.sync(
+			const filename = await resolve.promise(
 				{},
 				pathToIt[0],
 				pathToIt[1],
@@ -133,10 +133,10 @@ describe("simple", () => {
 		).rejects.toThrow(/Can't resolve/);
 	});
 
-	it("should reject on unresolvable requests sync", () => {
-		expect(() =>
-			resolve.sync(__dirname, "this-module-should-not-exist"),
-		).toThrow(/Can't resolve/);
+	it("should reject on unresolvable requests sync", async () => {
+		await expect(
+			resolve.promise(__dirname, "this-module-should-not-exist"),
+		).rejects.toThrow(/Can't resolve/);
 	});
 
 	it("should reject on unresolvable requests promise", async () => {
@@ -198,31 +198,31 @@ describe("simple", () => {
 		).rejects.toThrow(/Can't resolve/);
 	});
 
-	it("should create a sync resolver", () => {
-		const myResolve = resolve.create.sync({
+	it("should create a sync resolver", async () => {
+		const myResolve = resolve.create.promise({
 			extensions: [".js", ".json", ".node"],
 		});
-		const filename = myResolve(__dirname, "../lib/index");
+		const filename = await myResolve(__dirname, "../lib/index");
 
 		expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
 	});
 
-	it("should create a sync resolver and accepting context", () => {
-		const myResolve = resolve.create.sync({
+	it("should create a sync resolver and accepting context", async () => {
+		const myResolve = resolve.create.promise({
 			extensions: [".js", ".json", ".node"],
 		});
-		const filename = myResolve({}, __dirname, "../lib/index");
+		const filename = await myResolve({}, __dirname, "../lib/index");
 
 		expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
 	});
 
-	it("should create a sync resolver and throw an error on unresolvable request", () => {
-		const myResolve = resolve.create.sync({
+	it("should create a sync resolver and throw an error on unresolvable request", async () => {
+		const myResolve = resolve.create.promise({
 			extensions: [".js"],
 		});
-		expect(() => myResolve(__dirname, "this-module-should-not-exist")).toThrow(
-			/Can't resolve/,
-		);
+		await expect(
+			myResolve(__dirname, "this-module-should-not-exist"),
+		).rejects.toThrow(/Can't resolve/);
 	});
 
 	it("should create a promise resolver", async () => {
@@ -320,50 +320,64 @@ describe("simple", () => {
 		});
 	});
 
-	it("should resolve via the Resolver.resolveSync method", () => {
+	it("should resolve via the Resolver.resolveSync method", async () => {
 		const resolver = ResolverFactory.createResolver({
-			useSyncFileSystemCalls: true,
 			fileSystem: new CachedInputFileSystem(fs, 4000),
 			extensions: [".js", ".json", ".node"],
 		});
 
-		const filename = resolver.resolveSync(__dirname, "../lib/index");
+		const filename = await resolver.resolvePromise(
+			{},
+			__dirname,
+			"../lib/index",
+		);
 
 		expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
 	});
 
-	it("should resolve via the Resolver.resolveSync method with resolve context", () => {
+	it("should resolve via the Resolver.resolveSync method with resolve context", async () => {
 		const resolver = ResolverFactory.createResolver({
-			useSyncFileSystemCalls: true,
 			fileSystem: new CachedInputFileSystem(fs, 4000),
 			extensions: [".js", ".json", ".node"],
 		});
 
-		const filename = resolver.resolveSync(__dirname, "../lib/index", {});
+		const filename = await resolver.resolvePromise(
+			{},
+			__dirname,
+			"../lib/index",
+			{},
+		);
 
 		expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
 	});
 
-	it("should resolve via the Resolver.resolveSync method with context", () => {
+	it("should resolve via the Resolver.resolveSync method with context", async () => {
 		const resolver = ResolverFactory.createResolver({
-			useSyncFileSystemCalls: true,
 			fileSystem: new CachedInputFileSystem(fs, 4000),
 			extensions: [".js", ".json", ".node"],
 		});
 
-		const filename = resolver.resolveSync({}, __dirname, "../lib/index");
+		const filename = await resolver.resolvePromise(
+			{},
+			__dirname,
+			"../lib/index",
+		);
 
 		expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
 	});
 
-	it("should resolve via the Resolver.resolveSync method with context and resolve context", () => {
+	it("should resolve via the Resolver.resolveSync method with context and resolve context", async () => {
 		const resolver = ResolverFactory.createResolver({
-			useSyncFileSystemCalls: true,
 			fileSystem: new CachedInputFileSystem(fs, 4000),
 			extensions: [".js", ".json", ".node"],
 		});
 
-		const filename = resolver.resolveSync({}, __dirname, "../lib/index", {});
+		const filename = await resolver.resolvePromise(
+			{},
+			__dirname,
+			"../lib/index",
+			{},
+		);
 
 		expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
 	});

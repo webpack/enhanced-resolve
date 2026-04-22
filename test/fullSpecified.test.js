@@ -79,19 +79,21 @@ describe("fullSpecified", () => {
 	for (const key of Object.keys(failingResolves)) {
 		const request = failingResolves[key];
 
-		it(`should fail resolving ${key}`, () => {
-			expect(() => {
-				resolver.resolveSync({}, "/a", request);
-			}).toThrow(/Can't resolve/);
+		it(`should fail resolving ${key}`, async () => {
+			await expect(resolver.resolvePromise({}, "/a", request)).rejects.toThrow(
+				/Can't resolve/,
+			);
 		});
 	}
 
 	for (const key of Object.keys(successfulResolves)) {
 		const [request, expected] = successfulResolves[key];
 
-		it(`should resolve ${key} successfully`, () => {
+		it(`should resolve ${key} successfully`, async () => {
 			try {
-				expect(resolver.resolveSync({}, "/a", request)).toEqual(expected);
+				expect(await resolver.resolvePromise({}, "/a", request)).toEqual(
+					expected,
+				);
 			} catch (err) {
 				err.message += `\n${err.details}`;
 				throw err;
@@ -119,9 +121,9 @@ describe("fullSpecified", () => {
 	for (const key of Object.keys(successfulContextResolves)) {
 		const [request, expected] = successfulContextResolves[key];
 
-		it(`should resolve ${key} successfully to an context`, () => {
+		it(`should resolve ${key} successfully to an context`, async () => {
 			try {
-				expect(contextResolver.resolveSync({}, "/a", request)).toEqual(
+				expect(await contextResolver.resolvePromise({}, "/a", request)).toEqual(
 					expected,
 				);
 			} catch (err) {

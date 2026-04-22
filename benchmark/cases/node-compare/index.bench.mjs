@@ -317,12 +317,18 @@ export default async function register(bench, { fixtureDir }) {
 		},
 	);
 
-	// --- sync API (resolveSync, useSyncFileSystemCalls: true) ---
+	// --- sync API (was `resolveSync` with `useSyncFileSystemCalls: true`,
+	// now exposed via `resolvePromise` on top of a sync-capable filesystem
+	// because the resolver pipeline is promise-based end to end) ---
 	bench.add(
 		`node-compare: enhanced-resolve sync x ${BATCH_SIZE} (no cache)`,
-		() => {
+		async () => {
 			for (let i = 0; i < requests.length; i++) {
-				const r = syncResolverNone.resolveSync({}, srcDir, requests[i]);
+				const r = await syncResolverNone.resolvePromise(
+					{},
+					srcDir,
+					requests[i],
+				);
 				if (!r) throw new Error(`no result for ${requests[i]}`);
 			}
 		},
@@ -330,9 +336,9 @@ export default async function register(bench, { fixtureDir }) {
 
 	bench.add(
 		`node-compare: enhanced-resolve sync x ${BATCH_SIZE} (fs cache)`,
-		() => {
+		async () => {
 			for (let i = 0; i < requests.length; i++) {
-				const r = syncResolverFs.resolveSync({}, srcDir, requests[i]);
+				const r = await syncResolverFs.resolvePromise({}, srcDir, requests[i]);
 				if (!r) throw new Error(`no result for ${requests[i]}`);
 			}
 		},
@@ -340,9 +346,13 @@ export default async function register(bench, { fixtureDir }) {
 
 	bench.add(
 		`node-compare: enhanced-resolve sync x ${BATCH_SIZE} (fs + unsafeCache)`,
-		() => {
+		async () => {
 			for (let i = 0; i < requests.length; i++) {
-				const r = syncResolverFsUnsafe.resolveSync({}, srcDir, requests[i]);
+				const r = await syncResolverFsUnsafe.resolvePromise(
+					{},
+					srcDir,
+					requests[i],
+				);
 				if (!r) throw new Error(`no result for ${requests[i]}`);
 			}
 		},
