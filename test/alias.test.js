@@ -179,6 +179,21 @@ describe("alias", () => {
 		});
 	});
 
+	// Regression guard for the `firstCharCode` screen added in
+	// AliasUtils. Absolute-path aliases must keep matching both when the
+	// request is a raw absolute-path string (`request.request`, hits the
+	// `nameWithSlash` branch at the `raw-resolve` hook) and after
+	// `JoinRequestPlugin` has turned it into a joined `request.path`
+	// (hits the `absolutePath` branch at the `file` hook). If the
+	// char-code screen ever diverges from the startsWith comparison
+	// these resolves silently fall through to the original target.
+	it("should not skip absolute path aliasing", () => {
+		expect(resolver.resolveSync({}, "/", "/d/dir")).toBe("/c/dir/index");
+		expect(resolver.resolveSync({}, "/", "/d/dir/index")).toBe("/c/dir/index");
+		expect(resolver.resolveSync({}, "/", "d/dir/index")).toBe("/c/dir/index");
+		expect(resolver.resolveSync({}, "/", "d")).toBe("/c/index");
+	});
+
 	it("should resolve a wildcard alias with multiple targets correctly", () => {
 		expect(resolver.resolveSync({}, "/", "shared/b")).toBe("/src/components/b");
 	});
