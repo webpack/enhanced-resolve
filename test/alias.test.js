@@ -179,8 +179,105 @@ describe("alias", () => {
 		});
 	});
 
+	// Regression guard for the `firstCharCode` screen added in
+	// AliasUtils. Absolute-path aliases must keep matching both when the
+	// request is a raw absolute-path string (`request.request`, hits the
+	// `nameWithSlash` branch at the `raw-resolve` hook) and after
+	// `JoinRequestPlugin` has turned it into a joined `request.path`
+	// (hits the `absolutePath` branch at the `file` hook). If the
+	// char-code screen ever diverges from the startsWith comparison
+	// these resolves silently fall through to the original target.
+	it("should not skip absolute path aliasing", () => {
+		expect(resolver.resolveSync({}, "/", "/d/dir")).toBe("/c/dir/index");
+		expect(resolver.resolveSync({}, "/", "/d/dir/index")).toBe("/c/dir/index");
+		expect(resolver.resolveSync({}, "/", "d/dir/index")).toBe("/c/dir/index");
+		expect(resolver.resolveSync({}, "/", "d")).toBe("/c/index");
+	});
+
 	it("should resolve a wildcard alias with multiple targets correctly", () => {
 		expect(resolver.resolveSync({}, "/", "shared/b")).toBe("/src/components/b");
+	});
+
+	// Absolute-path aliasing — OS-native (posix on Linux CI, backslash
+	// on Windows CI).
+	//
+	// These cases drive the full `resolver.resolve` pipeline against the
+	// real `test/fixtures/` tree with `CachedInputFileSystem` — no
+	// filesystem or matcher mocking. Paths are built through the Node
+	// `path` module, so on Linux the alias name uses forward slashes
+	// and on Windows the same test code exercises native backslashes.
+	// That covers the regression the previous commit fixed
+	// (`nameWithSlash` hardcodes `/`, which silently skipped native
+	// backslash windows subpaths at the `raw-resolve` hook).
+	describe("absolute path aliasing (OS-native)", () => {
+		const fixturesDir = path.resolve(__dirname, "fixtures");
+		// `imaginary-foo` deliberately does NOT exist on disk so the
+		// only way the resolver can succeed for requests under it is
+		// through the alias.
+		const aliasName = path.resolve(fixturesDir, "imaginary-foo");
+		const aliasTarget = path.resolve(fixturesDir, "foo");
+		const expectedIndex = path.resolve(aliasTarget, "index.js");
+
+		const absResolver = ResolverFactory.createResolver({
+			extensions: [".js"],
+			alias: { [aliasName]: aliasTarget },
+			fileSystem: nodeFileSystem,
+		});
+
+		it("aliases a raw absolute subpath request (raw-resolve hook)", (done) => {
+			// path.join uses the OS-native separator, so on windows this
+			// is `...\\imaginary-foo\\index` and exercises the backslash
+			// fallback; on linux it is `.../imaginary-foo/index`.
+			absResolver.resolve(
+				{},
+				fixturesDir,
+				path.join(aliasName, "index"),
+				{},
+				(err, result) => {
+					if (err) return done(err);
+					expect(result).toBe(expectedIndex);
+					done();
+				},
+			);
+		});
+
+		it("aliases a request that equals the alias name (exact equality)", (done) => {
+			absResolver.resolve({}, fixturesDir, aliasName, {}, (err, result) => {
+				if (err) return done(err);
+				expect(result).toBe(expectedIndex);
+				done();
+			});
+		});
+
+		it("aliases after JoinRequestPlugin normalizes the path (file hook)", (done) => {
+			// A relative request hits `JoinRequestPlugin` first, which
+			// turns it into `request.path` with `request.request` set to
+			// `undefined`. That hits the `absolutePath`-only branch of
+			// the matcher.
+			absResolver.resolve(
+				{},
+				fixturesDir,
+				`./${path.basename(aliasName)}/index`,
+				{},
+				(err, result) => {
+					if (err) return done(err);
+					expect(result).toBe(expectedIndex);
+					done();
+				},
+			);
+		});
+
+		it("does not fire for a different absolute prefix sharing the same head", (done) => {
+			// `imaginary-food` shares `imaginary-foo` as a prefix but
+			// not `imaginary-foo<sep>`. The alias must not fire, and
+			// since `imaginary-food` does not exist, the resolve fails.
+			const requestPath = path.join(fixturesDir, "imaginary-food", "index");
+			absResolver.resolve({}, fixturesDir, requestPath, {}, (err, result) => {
+				expect(err).toBeInstanceOf(Error);
+				expect(result).toBeFalsy();
+				done();
+			});
+		});
 	});
 
 	// Regression tests for the watch-mode fallback described in
