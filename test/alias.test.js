@@ -201,18 +201,13 @@ describe("alias", () => {
 	// Absolute-path aliasing — posix + windows shapes.
 	//
 	// `memfs` (used by the full-resolver tests above) is posix-only, so
-	// these cases drive the alias matcher through `aliasResolveHandler`
-	// directly. The stub implements just the two `Resolver` methods it
-	// touches — `join` (for compiling the normalized `absolutePath`) and
-	// `doResolve` (for forwarding the aliased request) — which keeps
-	// the tests hermetic and lets us exercise both path dialects on the
-	// same machine.
+	// these cases drive a real `Resolver` wired with `AliasPlugin` and
+	// a capture tap that stops the resolve immediately after aliasing.
+	// No filesystem I/O happens, so both path dialects can be exercised
+	// on the same machine.
 	describe("absolute path aliasing (posix + windows shapes)", () => {
-		const {
-			aliasResolveHandler,
-			compileAliasOptions,
-		} = require("../lib/AliasUtils");
-		const { join } = require("../lib/util/path");
+		const Resolver = require("../lib/Resolver");
+		const AliasPlugin = require("../lib/AliasPlugin");
 
 		/**
 		 * @typedef {object} ForwardedRequest
@@ -221,51 +216,56 @@ describe("alias", () => {
 		 */
 
 		/**
+		 * Builds a minimal `Resolver` with only the `AliasPlugin` under
+		 * test tapped on a `source` hook. A capture tap on the `target`
+		 * hook records the request produced by the alias transform and
+		 * short-circuits the resolve, so the filesystem is never
+		 * consulted.
 		 * @param {{ name: string, alias: string }[]} options alias options
-		 * @param {{ request?: string, path?: string }} request request shape
-		 * @returns {ForwardedRequest | null} forwarded request or null when the alias was skipped
+		 * @returns {(request: { request?: string, path?: string }) => ForwardedRequest | null} runner for a single request
 		 */
-		const runAlias = (options, request) => {
+		const createAliasRunner = (options) => {
+			// Minimal filesystem stub — never touched because the capture
+			// tap ends the resolve before any real file lookup.
+			const resolver = new Resolver(
+				/** @type {import("../lib/Resolver").FileSystem} */ (
+					/** @type {unknown} */ ({})
+				),
+				/** @type {import("../lib/Resolver").ResolveOptions} */ (
+					/** @type {unknown} */ ({})
+				),
+			);
+			const source = resolver.ensureHook("source");
+			const target = resolver.ensureHook("target");
+			new AliasPlugin(source, options, target).apply(resolver);
+
 			/** @type {ForwardedRequest | null} */
 			let forwarded = null;
-			const resolver = {
-				join,
-				/**
-				 * @param {unknown} _hook target hook (unused — intercepted)
-				 * @param {ForwardedRequest} obj aliased request
-				 * @param {unknown} _msg log message (unused)
-				 * @param {unknown} _ctx resolve context (unused)
-				 * @param {(err: null, r: ForwardedRequest) => void} cb callback
-				 * @returns {void}
-				 */
-				doResolve: (_hook, obj, _msg, _ctx, cb) => {
-					forwarded = obj;
-					cb(null, obj);
-				},
+			target.tapAsync("Capture", (request, _resolveContext, cb) => {
+				forwarded = /** @type {ForwardedRequest} */ (request);
+				cb(null, request);
+			});
+
+			return (request) => {
+				forwarded = null;
+				resolver.doResolve(
+					source,
+					/** @type {import("../lib/Resolver").ResolveRequest} */ (
+						/** @type {unknown} */ (request)
+					),
+					null,
+					{ stack: new Set() },
+					() => {},
+				);
+				return forwarded;
 			};
-			// @ts-expect-error stub resolver intentionally omits unrelated methods
-			const compiled = compileAliasOptions(resolver, options);
-			aliasResolveHandler(
-				// @ts-expect-error stub resolver intentionally omits unrelated methods
-				resolver,
-				compiled,
-				// @ts-expect-error target hook is intercepted by the stub
-				{},
-				// @ts-expect-error partial request shape is sufficient for the matcher
-				request,
-				// @ts-expect-error empty resolve context
-				{},
-				() => {},
-			);
-			return forwarded;
 		};
 
 		describe("posix (Linux)", () => {
+			const run = createAliasRunner([{ name: "/abs/foo", alias: "/new/bar" }]);
+
 			it("matches a raw absolute subpath request (raw-resolve hook)", () => {
-				const f = runAlias([{ name: "/abs/foo", alias: "/new/bar" }], {
-					request: "/abs/foo/baz",
-					path: "/issuer",
-				});
+				const f = run({ request: "/abs/foo/baz", path: "/issuer" });
 				expect(f).not.toBeNull();
 				expect(/** @type {ForwardedRequest} */ (f).request).toBe(
 					"/new/bar/baz",
@@ -273,10 +273,7 @@ describe("alias", () => {
 			});
 
 			it("matches a joined absolute path (file hook, request.request undefined)", () => {
-				const f = runAlias([{ name: "/abs/foo", alias: "/new/bar" }], {
-					request: undefined,
-					path: "/abs/foo/baz",
-				});
+				const f = run({ request: undefined, path: "/abs/foo/baz" });
 				expect(f).not.toBeNull();
 				expect(/** @type {ForwardedRequest} */ (f).request).toBe(
 					"/new/bar/baz",
@@ -284,31 +281,26 @@ describe("alias", () => {
 			});
 
 			it("matches by exact equality when innerRequest === name", () => {
-				const f = runAlias([{ name: "/abs/foo", alias: "/new/bar" }], {
-					request: "/abs/foo",
-					path: "/issuer",
-				});
+				const f = run({ request: "/abs/foo", path: "/issuer" });
 				expect(f).not.toBeNull();
 				expect(/** @type {ForwardedRequest} */ (f).request).toBe("/new/bar");
 			});
 
 			it("does not match a different posix prefix", () => {
-				const f = runAlias([{ name: "/abs/foo", alias: "/new/bar" }], {
-					request: "/abs/food/baz",
-					path: "/issuer",
-				});
 				// "/abs/food/baz" shares `/abs/foo` as a prefix but not
 				// `/abs/foo/`, so the alias must not fire.
+				const f = run({ request: "/abs/food/baz", path: "/issuer" });
 				expect(f).toBeNull();
 			});
 		});
 
-		describe("windows", () => {
+		describe("windows (native backslash alias)", () => {
+			const run = createAliasRunner([
+				{ name: "C:\\abs\\foo", alias: "D:\\new\\bar" },
+			]);
+
 			it("matches a joined absolute path with native backslashes (file hook)", () => {
-				const f = runAlias([{ name: "C:\\abs\\foo", alias: "D:\\new\\bar" }], {
-					request: undefined,
-					path: "C:\\abs\\foo\\baz",
-				});
+				const f = run({ request: undefined, path: "C:\\abs\\foo\\baz" });
 				expect(f).not.toBeNull();
 				expect(/** @type {ForwardedRequest} */ (f).request).toBe(
 					"D:\\new\\bar\\baz",
@@ -316,10 +308,7 @@ describe("alias", () => {
 			});
 
 			it("matches by exact equality for a raw windows absolute request", () => {
-				const f = runAlias([{ name: "C:\\abs\\foo", alias: "D:\\new\\bar" }], {
-					request: "C:\\abs\\foo",
-					path: "C:\\issuer",
-				});
+				const f = run({ request: "C:\\abs\\foo", path: "C:\\issuer" });
 				expect(f).not.toBeNull();
 				expect(/** @type {ForwardedRequest} */ (f).request).toBe(
 					"D:\\new\\bar",
@@ -331,41 +320,35 @@ describe("alias", () => {
 				// a forward slash (`C:\\abs\\foo/`), so a raw request that
 				// used the native backslash (`C:\\abs\\foo\\baz`) failed
 				// `startsWith` and the alias was silently skipped.
-				const f = runAlias([{ name: "C:\\abs\\foo", alias: "D:\\new\\bar" }], {
-					request: "C:\\abs\\foo\\baz",
-					path: "C:\\issuer",
-				});
+				const f = run({ request: "C:\\abs\\foo\\baz", path: "C:\\issuer" });
 				expect(f).not.toBeNull();
 				expect(/** @type {ForwardedRequest} */ (f).request).toBe(
 					"D:\\new\\bar\\baz",
 				);
 			});
 
-			it("matches a raw absolute subpath request with forward slashes", () => {
-				const f = runAlias([{ name: "C:/abs/foo", alias: "D:/new/bar" }], {
-					request: "C:/abs/foo/baz",
-					path: "C:/issuer",
-				});
-				expect(f).not.toBeNull();
-				expect(/** @type {ForwardedRequest} */ (f).request).toBe(
-					"D:/new/bar/baz",
-				);
-			});
-
 			it("does not match a different windows prefix", () => {
-				const f = runAlias([{ name: "C:\\abs\\foo", alias: "D:\\new\\bar" }], {
-					request: undefined,
-					path: "C:\\abs\\food\\baz",
-				});
+				const f = run({ request: undefined, path: "C:\\abs\\food\\baz" });
 				expect(f).toBeNull();
 			});
 
 			it("does not match a different drive letter", () => {
-				const f = runAlias([{ name: "C:\\abs\\foo", alias: "D:\\new\\bar" }], {
-					request: undefined,
-					path: "E:\\abs\\foo\\baz",
-				});
+				const f = run({ request: undefined, path: "E:\\abs\\foo\\baz" });
 				expect(f).toBeNull();
+			});
+		});
+
+		describe("windows (forward-slash alias)", () => {
+			const run = createAliasRunner([
+				{ name: "C:/abs/foo", alias: "D:/new/bar" },
+			]);
+
+			it("matches a raw absolute subpath request with forward slashes", () => {
+				const f = run({ request: "C:/abs/foo/baz", path: "C:/issuer" });
+				expect(f).not.toBeNull();
+				expect(/** @type {ForwardedRequest} */ (f).request).toBe(
+					"D:/new/bar/baz",
+				);
 			});
 		});
 	});
