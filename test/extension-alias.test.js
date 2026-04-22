@@ -131,7 +131,7 @@ describe("extension-alias", () => {
 		});
 	});
 
-	describe("exports field (applyExtensionAliasToExportsField)", () => {
+	describe("exports field (extensionAliasForExports)", () => {
 		const exportsFixture = path.resolve(
 			__dirname,
 			"fixtures",
@@ -165,7 +165,7 @@ describe("extension-alias", () => {
 			const tsResolver = ResolverFactory.createResolver({
 				extensions: [".js"],
 				extensionAlias: { ".js": [".ts", ".js"] },
-				applyExtensionAliasToExportsField: true,
+				extensionAliasForExports: true,
 				fileSystem: nodeFileSystem,
 				fullySpecified: true,
 				conditionNames: ["default"],

@@ -1284,7 +1284,7 @@ declare interface ResolveOptionsResolverFactoryObject_1 {
 	/**
 	 * apply extension alias to exports field targets
 	 */
-	applyExtensionAliasToExportsField: boolean;
+	extensionAliasForExports: boolean;
 
 	/**
 	 * cache predicate
@@ -1428,7 +1428,7 @@ declare interface ResolveOptionsResolverFactoryObject_2 {
 	 * TypeScript's behavior for packages that ship TS sources alongside
 	 * compiled JS.
 	 */
-	applyExtensionAliasToExportsField?: boolean;
+	extensionAliasForExports?: boolean;
 
 	/**
 	 * A list of alias fields in description files
