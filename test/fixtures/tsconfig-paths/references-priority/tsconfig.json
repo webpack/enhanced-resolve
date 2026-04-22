@@ -1,0 +1,9 @@
+{
+	"compilerOptions": {
+		"baseUrl": ".",
+		"paths": {
+			"@lib/*": ["./main-lib/*"]
+		}
+	},
+	"references": [{ "path": "./ref" }]
+}

@@ -1,0 +1,10 @@
+{
+	"compilerOptions": {
+		"baseUrl": ".",
+		"paths": {
+			"@lib/*": ["./ref-lib/*"]
+		},
+		"composite": true,
+		"outDir": "./dist"
+	}
+}

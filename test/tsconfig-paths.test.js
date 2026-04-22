@@ -1003,6 +1003,76 @@ describe("TsconfigPathsPlugin", () => {
 				);
 			});
 		});
+
+		describe("references take priority over main paths", () => {
+			const referencesPriorityDir = path.resolve(
+				__dirname,
+				"fixtures",
+				"tsconfig-paths",
+				"references-priority",
+			);
+
+			it("should resolve a conflicting alias from the reference, not from main's paths", (done) => {
+				const resolver = ResolverFactory.createResolver({
+					fileSystem,
+					extensions: [".ts", ".tsx"],
+					mainFields: ["browser", "main"],
+					mainFiles: ["index"],
+					tsconfig: {
+						configFile: path.join(referencesPriorityDir, "tsconfig.json"),
+						references: "auto",
+					},
+				});
+
+				// Main defines "@lib/*": ["./main-lib/*"], the reference defines
+				// "@lib/*": ["./ref-lib/*"]. Both would resolve, but references
+				// take priority so the reference target should win.
+				resolver.resolve(
+					{},
+					referencesPriorityDir,
+					"@lib/foo",
+					{},
+					(err, result) => {
+						if (err) return done(err);
+						if (!result) return done(new Error("No result"));
+						expect(result).toEqual(
+							path.join(referencesPriorityDir, "ref", "ref-lib", "foo.ts"),
+						);
+						done();
+					},
+				);
+			});
+
+			it("should still fall back to main paths when no reference alias matches", (done) => {
+				const resolver = ResolverFactory.createResolver({
+					fileSystem,
+					extensions: [".ts", ".tsx"],
+					mainFields: ["browser", "main"],
+					mainFiles: ["index"],
+					tsconfig: {
+						configFile: path.join(referencesPriorityDir, "tsconfig.json"),
+						references: [],
+					},
+				});
+
+				// Without references loaded, "@lib/foo" should resolve via the
+				// main tsconfig's paths.
+				resolver.resolve(
+					{},
+					referencesPriorityDir,
+					"@lib/foo",
+					{},
+					(err, result) => {
+						if (err) return done(err);
+						if (!result) return done(new Error("No result"));
+						expect(result).toEqual(
+							path.join(referencesPriorityDir, "main-lib", "foo.ts"),
+						);
+						done();
+					},
+				);
+			});
+		});
 	});
 
 	describe("bug: baseUrl from deep extends chain (non-sibling directories)", () => {
