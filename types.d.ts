@@ -1282,6 +1282,11 @@ declare interface ResolveOptionsResolverFactoryObject_1 {
 	extensionAlias: ExtensionAliasOption[];
 
 	/**
+	 * apply extension alias to exports field targets
+	 */
+	extensionAliasForExports: boolean;
+
+	/**
 	 * cache predicate
 	 */
 	cachePredicate: (predicate: ResolveRequest) => boolean;
@@ -1416,6 +1421,11 @@ declare interface ResolveOptionsResolverFactoryObject_2 {
 	 * An object which maps extension to extension aliases
 	 */
 	extensionAlias?: ExtensionAliasOptions;
+
+	/**
+	 * Also apply `extensionAlias` to paths resolved through the package.json `exports` field. Off by default (Node.js-aligned); when enabled, matches TypeScript's behavior for packages that ship TS sources alongside compiled JS.
+	 */
+	extensionAliasForExports?: boolean;
 
 	/**
 	 * A list of alias fields in description files

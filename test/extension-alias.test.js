@@ -131,6 +131,61 @@ describe("extension-alias", () => {
 		});
 	});
 
+	describe("exports field (extensionAliasForExports)", () => {
+		const exportsFixture = path.resolve(
+			__dirname,
+			"fixtures",
+			"exports-field-extension-alias-opt-in",
+		);
+
+		it("should not apply extension alias to exports-field targets by default (Node.js-aligned)", (done) => {
+			const defaultResolver = ResolverFactory.createResolver({
+				extensions: [".js"],
+				extensionAlias: { ".js": [".ts", ".js"] },
+				fileSystem: nodeFileSystem,
+				fullySpecified: true,
+				conditionNames: ["default"],
+			});
+			defaultResolver.resolve(
+				{},
+				exportsFixture,
+				"pkg/string.js",
+				{},
+				(err, result) => {
+					if (err) return done(err);
+					expect(result).toEqual(
+						path.resolve(exportsFixture, "./node_modules/pkg/dist/string.js"),
+					);
+					done();
+				},
+			);
+		});
+
+		it("should prefer the TS source over the exports-declared JS target when the option is enabled", (done) => {
+			const tsResolver = ResolverFactory.createResolver({
+				extensions: [".js"],
+				extensionAlias: { ".js": [".ts", ".js"] },
+				extensionAliasForExports: true,
+				fileSystem: nodeFileSystem,
+				fullySpecified: true,
+				conditionNames: ["default"],
+			});
+			tsResolver.resolve(
+				{},
+				exportsFixture,
+				"pkg/string.js",
+				{},
+				(err, result) => {
+					if (err) return done(err);
+					expect(result).toEqual(
+						path.resolve(exportsFixture, "./node_modules/pkg/dist/string.ts"),
+					);
+					done();
+				},
+			);
+		});
+	});
+
 	describe("should not apply extension alias to extensions or mainFiles field", () => {
 		const resolver = ResolverFactory.createResolver({
 			extensions: [".js"],
