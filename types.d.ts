@@ -351,21 +351,6 @@ declare interface FileSystem {
 	 */
 	realpath?: RealPath;
 }
-declare interface GetPathsCacheEntry {
-	/**
-	 * cached getPaths function
-	 */
-	fn: (path: string) => GetPathsResult;
-
-	/**
-	 * the underlying cache map
-	 */
-	cache: Map<string, GetPathsResult>;
-}
-declare interface GetPathsResult {
-	paths: string[];
-	segments: string[];
-}
 type IBigIntStats = IStatsBase<bigint> & {
 	atimeNs: bigint;
 	mtimeNs: bigint;
@@ -826,11 +811,6 @@ declare interface PathCacheFunctions {
 	 * cached basename
 	 */
 	basename: BasenameCacheEntry;
-
-	/**
-	 * cached getPaths (ancestor walk)
-	 */
-	getPaths: GetPathsCacheEntry;
 }
 type PathLike = string | Buffer | URL_url;
 type PathOrFileDescriptor = string | number | Buffer | URL_url;
