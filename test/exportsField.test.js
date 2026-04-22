@@ -2394,6 +2394,26 @@ describe("exportsFieldPlugin", () => {
 		});
 	});
 
+	it("resolver should respect query and fragment parameters together", (done) => {
+		resolver.resolve(
+			{},
+			fixture2,
+			"exports-field/dist/browser.js?foo=bar#frag",
+			{},
+			(err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(
+					path.resolve(
+						fixture2,
+						"node_modules/exports-field/lib/browser.js?foo=bar#frag",
+					),
+				);
+				done();
+			},
+		);
+	});
+
 	it("relative path should work, if relative path as request is used", (done) => {
 		resolver.resolve(
 			{},
