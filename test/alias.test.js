@@ -198,157 +198,84 @@ describe("alias", () => {
 		expect(resolver.resolveSync({}, "/", "shared/b")).toBe("/src/components/b");
 	});
 
-	// Absolute-path aliasing — posix + windows shapes.
+	// Absolute-path aliasing — OS-native (posix on Linux CI, backslash
+	// on Windows CI).
 	//
-	// `memfs` (used by the full-resolver tests above) is posix-only, so
-	// these cases drive a real `Resolver` wired with `AliasPlugin` and
-	// a capture tap that stops the resolve immediately after aliasing.
-	// No filesystem I/O happens, so both path dialects can be exercised
-	// on the same machine.
-	describe("absolute path aliasing (posix + windows shapes)", () => {
-		const Resolver = require("../lib/Resolver");
-		const AliasPlugin = require("../lib/AliasPlugin");
+	// These cases drive the full `resolver.resolve` pipeline against the
+	// real `test/fixtures/` tree with `CachedInputFileSystem` — no
+	// filesystem or matcher mocking. Paths are built through the Node
+	// `path` module, so on Linux the alias name uses forward slashes
+	// and on Windows the same test code exercises native backslashes.
+	// That covers the regression the previous commit fixed
+	// (`nameWithSlash` hardcodes `/`, which silently skipped native
+	// backslash windows subpaths at the `raw-resolve` hook).
+	describe("absolute path aliasing (OS-native)", () => {
+		const fixturesDir = path.resolve(__dirname, "fixtures");
+		// `imaginary-foo` deliberately does NOT exist on disk so the
+		// only way the resolver can succeed for requests under it is
+		// through the alias.
+		const aliasName = path.resolve(fixturesDir, "imaginary-foo");
+		const aliasTarget = path.resolve(fixturesDir, "foo");
+		const expectedIndex = path.resolve(aliasTarget, "index.js");
 
-		/**
-		 * @typedef {object} ForwardedRequest
-		 * @property {string=} request aliased request string
-		 * @property {string | false=} path carried-through path
-		 */
+		const absResolver = ResolverFactory.createResolver({
+			extensions: [".js"],
+			alias: { [aliasName]: aliasTarget },
+			fileSystem: nodeFileSystem,
+		});
 
-		/**
-		 * Builds a minimal `Resolver` with only the `AliasPlugin` under
-		 * test tapped on a `source` hook. A capture tap on the `target`
-		 * hook records the request produced by the alias transform and
-		 * short-circuits the resolve, so the filesystem is never
-		 * consulted.
-		 * @param {{ name: string, alias: string }[]} options alias options
-		 * @returns {(request: { request?: string, path?: string }) => ForwardedRequest | null} runner for a single request
-		 */
-		const createAliasRunner = (options) => {
-			// Minimal filesystem stub — never touched because the capture
-			// tap ends the resolve before any real file lookup.
-			const resolver = new Resolver(
-				/** @type {import("../lib/Resolver").FileSystem} */ (
-					/** @type {unknown} */ ({})
-				),
-				/** @type {import("../lib/Resolver").ResolveOptions} */ (
-					/** @type {unknown} */ ({})
-				),
+		it("aliases a raw absolute subpath request (raw-resolve hook)", (done) => {
+			// path.join uses the OS-native separator, so on windows this
+			// is `...\\imaginary-foo\\index` and exercises the backslash
+			// fallback; on linux it is `.../imaginary-foo/index`.
+			absResolver.resolve(
+				{},
+				fixturesDir,
+				path.join(aliasName, "index"),
+				{},
+				(err, result) => {
+					if (err) return done(err);
+					expect(result).toBe(expectedIndex);
+					done();
+				},
 			);
-			const source = resolver.ensureHook("source");
-			const target = resolver.ensureHook("target");
-			new AliasPlugin(source, options, target).apply(resolver);
+		});
 
-			/** @type {ForwardedRequest | null} */
-			let forwarded = null;
-			target.tapAsync("Capture", (request, _resolveContext, cb) => {
-				forwarded = /** @type {ForwardedRequest} */ (request);
-				cb(null, request);
-			});
-
-			return (request) => {
-				forwarded = null;
-				resolver.doResolve(
-					source,
-					/** @type {import("../lib/Resolver").ResolveRequest} */ (
-						/** @type {unknown} */ (request)
-					),
-					null,
-					{ stack: new Set() },
-					() => {},
-				);
-				return forwarded;
-			};
-		};
-
-		describe("posix (Linux)", () => {
-			const run = createAliasRunner([{ name: "/abs/foo", alias: "/new/bar" }]);
-
-			it("matches a raw absolute subpath request (raw-resolve hook)", () => {
-				const f = run({ request: "/abs/foo/baz", path: "/issuer" });
-				expect(f).not.toBeNull();
-				expect(/** @type {ForwardedRequest} */ (f).request).toBe(
-					"/new/bar/baz",
-				);
-			});
-
-			it("matches a joined absolute path (file hook, request.request undefined)", () => {
-				const f = run({ request: undefined, path: "/abs/foo/baz" });
-				expect(f).not.toBeNull();
-				expect(/** @type {ForwardedRequest} */ (f).request).toBe(
-					"/new/bar/baz",
-				);
-			});
-
-			it("matches by exact equality when innerRequest === name", () => {
-				const f = run({ request: "/abs/foo", path: "/issuer" });
-				expect(f).not.toBeNull();
-				expect(/** @type {ForwardedRequest} */ (f).request).toBe("/new/bar");
-			});
-
-			it("does not match a different posix prefix", () => {
-				// "/abs/food/baz" shares `/abs/foo` as a prefix but not
-				// `/abs/foo/`, so the alias must not fire.
-				const f = run({ request: "/abs/food/baz", path: "/issuer" });
-				expect(f).toBeNull();
+		it("aliases a request that equals the alias name (exact equality)", (done) => {
+			absResolver.resolve({}, fixturesDir, aliasName, {}, (err, result) => {
+				if (err) return done(err);
+				expect(result).toBe(expectedIndex);
+				done();
 			});
 		});
 
-		describe("windows (native backslash alias)", () => {
-			const run = createAliasRunner([
-				{ name: "C:\\abs\\foo", alias: "D:\\new\\bar" },
-			]);
-
-			it("matches a joined absolute path with native backslashes (file hook)", () => {
-				const f = run({ request: undefined, path: "C:\\abs\\foo\\baz" });
-				expect(f).not.toBeNull();
-				expect(/** @type {ForwardedRequest} */ (f).request).toBe(
-					"D:\\new\\bar\\baz",
-				);
-			});
-
-			it("matches by exact equality for a raw windows absolute request", () => {
-				const f = run({ request: "C:\\abs\\foo", path: "C:\\issuer" });
-				expect(f).not.toBeNull();
-				expect(/** @type {ForwardedRequest} */ (f).request).toBe(
-					"D:\\new\\bar",
-				);
-			});
-
-			it("matches a raw absolute subpath request with native backslashes (raw-resolve hook)", () => {
-				// Regression: before the fix, `nameWithSlash` appended
-				// a forward slash (`C:\\abs\\foo/`), so a raw request that
-				// used the native backslash (`C:\\abs\\foo\\baz`) failed
-				// `startsWith` and the alias was silently skipped.
-				const f = run({ request: "C:\\abs\\foo\\baz", path: "C:\\issuer" });
-				expect(f).not.toBeNull();
-				expect(/** @type {ForwardedRequest} */ (f).request).toBe(
-					"D:\\new\\bar\\baz",
-				);
-			});
-
-			it("does not match a different windows prefix", () => {
-				const f = run({ request: undefined, path: "C:\\abs\\food\\baz" });
-				expect(f).toBeNull();
-			});
-
-			it("does not match a different drive letter", () => {
-				const f = run({ request: undefined, path: "E:\\abs\\foo\\baz" });
-				expect(f).toBeNull();
-			});
+		it("aliases after JoinRequestPlugin normalizes the path (file hook)", (done) => {
+			// A relative request hits `JoinRequestPlugin` first, which
+			// turns it into `request.path` with `request.request` set to
+			// `undefined`. That hits the `absolutePath`-only branch of
+			// the matcher.
+			absResolver.resolve(
+				{},
+				fixturesDir,
+				`./${path.basename(aliasName)}/index`,
+				{},
+				(err, result) => {
+					if (err) return done(err);
+					expect(result).toBe(expectedIndex);
+					done();
+				},
+			);
 		});
 
-		describe("windows (forward-slash alias)", () => {
-			const run = createAliasRunner([
-				{ name: "C:/abs/foo", alias: "D:/new/bar" },
-			]);
-
-			it("matches a raw absolute subpath request with forward slashes", () => {
-				const f = run({ request: "C:/abs/foo/baz", path: "C:/issuer" });
-				expect(f).not.toBeNull();
-				expect(/** @type {ForwardedRequest} */ (f).request).toBe(
-					"D:/new/bar/baz",
-				);
+		it("does not fire for a different absolute prefix sharing the same head", (done) => {
+			// `imaginary-food` shares `imaginary-foo` as a prefix but
+			// not `imaginary-foo<sep>`. The alias must not fire, and
+			// since `imaginary-food` does not exist, the resolve fails.
+			const requestPath = path.join(fixturesDir, "imaginary-food", "index");
+			absResolver.resolve({}, fixturesDir, requestPath, {}, (err, result) => {
+				expect(err).toBeInstanceOf(Error);
+				expect(result).toBeFalsy();
+				done();
 			});
 		});
 	});
