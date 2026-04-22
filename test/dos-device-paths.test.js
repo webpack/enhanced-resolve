@@ -26,75 +26,73 @@ describeWin("DOS device path resolution (Windows)", () => {
 
 	// `symlinks: false` keeps the result verbatim — the realpath plugin would
 	// otherwise strip the DOS prefix on Windows, masking what we want to test.
+	// Default (async) filesystem calls are used — sync fs is deliberately
+	// avoided so this exercises the same code paths as production resolves.
 	const resolver = ResolverFactory.createResolver({
-		useSyncFileSystemCalls: true,
 		fileSystem: fs,
 		extensions: [".js"],
 		symlinks: false,
 	});
 
-	test("resolves a relative request against a \\\\?\\ context", () => {
-		expect(resolver.resolveSync({}, dosFixtures, "./a")).toBe(
+	test("resolves a relative request against a \\\\?\\ context", async () => {
+		await expect(resolver.resolvePromise({}, dosFixtures, "./a")).resolves.toBe(
 			path.join(dosFixtures, "a.js"),
 		);
 	});
 
-	test("resolves a relative request to a subdirectory's index.js", () => {
-		expect(resolver.resolveSync({}, dosFixtures, "./foo")).toBe(
-			path.join(dosFixtures, "foo", "index.js"),
-		);
+	test("resolves a relative request to a subdirectory's index.js", async () => {
+		await expect(
+			resolver.resolvePromise({}, dosFixtures, "./foo"),
+		).resolves.toBe(path.join(dosFixtures, "foo", "index.js"));
 	});
 
-	test("resolves '.' to index.js in a \\\\?\\ context", () => {
-		expect(resolver.resolveSync({}, path.join(dosFixtures, "foo"), ".")).toBe(
-			path.join(dosFixtures, "foo", "index.js"),
-		);
+	test("resolves '.' to index.js in a \\\\?\\ context", async () => {
+		await expect(
+			resolver.resolvePromise({}, path.join(dosFixtures, "foo"), "."),
+		).resolves.toBe(path.join(dosFixtures, "foo", "index.js"));
 	});
 
-	test("resolves an absolute \\\\?\\ request regardless of context", () => {
+	test("resolves an absolute \\\\?\\ request regardless of context", async () => {
 		const request = path.join(dosFixtures, "a");
-		expect(resolver.resolveSync({}, fixtures, request)).toBe(
+		await expect(resolver.resolvePromise({}, fixtures, request)).resolves.toBe(
 			path.join(dosFixtures, "a.js"),
 		);
 	});
 
-	test("resolves through the \\\\.\\ device namespace", () => {
+	test("resolves through the \\\\.\\ device namespace", async () => {
 		// The `\\.\` walk used to infinite-loop in `cdUp` once it reached
 		// the bare `\` root — this test proves it terminates.
-		expect(resolver.resolveSync({}, dotFixtures, "./a")).toBe(
+		await expect(resolver.resolvePromise({}, dotFixtures, "./a")).resolves.toBe(
 			path.join(dotFixtures, "a.js"),
 		);
 	});
 
-	test("preserves a query string on a \\\\?\\ request", () => {
+	test("preserves a query string on a \\\\?\\ request", async () => {
 		// The literal `?` inside `\\?\` must not be mistaken for a query
 		// separator — the real query is the one trailing the path.
 		const request = `${path.join(dosFixtures, "a")}?foo=bar`;
-		expect(resolver.resolveSync({}, fixtures, request)).toBe(
+		await expect(resolver.resolvePromise({}, fixtures, request)).resolves.toBe(
 			`${path.join(dosFixtures, "a.js")}?foo=bar`,
 		);
 	});
 
-	test("preserves a fragment on a \\\\?\\ request", () => {
+	test("preserves a fragment on a \\\\?\\ request", async () => {
 		const request = `${path.join(dosFixtures, "a")}#frag`;
-		expect(resolver.resolveSync({}, fixtures, request)).toBe(
+		await expect(resolver.resolvePromise({}, fixtures, request)).resolves.toBe(
 			`${path.join(dosFixtures, "a.js")}#frag`,
 		);
 	});
 
-	test("rejects a missing file under a DOS device context", () => {
-		expect(() =>
-			resolver.resolveSync({}, dosFixtures, "./does-not-exist"),
-		).toThrow(/Can't resolve/);
+	test("rejects a missing file under a DOS device context", async () => {
+		await expect(
+			resolver.resolvePromise({}, dosFixtures, "./does-not-exist"),
+		).rejects.toThrow(/Can't resolve/);
 	});
 
 	test("locates the nearest package.json when resolving through \\\\?\\", (done) => {
-		const asyncResolver = ResolverFactory.createResolver({
-			fileSystem: fs,
-			extensions: [".js"],
-			symlinks: false,
-		});
-		asyncResolver.resolve(
+		// Uses the callback form because the `request` (third callback arg)
+		// carries `descriptionFilePath`, which the promise form drops.
+		resolver.resolve(
 			{},
 			path.join(dosFixtures, "foo"),
 			".",
