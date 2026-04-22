@@ -1003,6 +1003,101 @@ describe("TsconfigPathsPlugin", () => {
 				);
 			});
 		});
+
+		describe("paths are scoped to the containing tsconfig (tsc-aligned)", () => {
+			// Fixture layout:
+			//   references-priority/tsconfig.json       -> "@lib/*": ["./main-lib/*"], references ./ref
+			//   references-priority/main-lib/foo.ts     (source = "main")
+			//   references-priority/ref/tsconfig.json   -> "@lib/*": ["./ref-lib/*"]
+			//   references-priority/ref/ref-lib/foo.ts  (source = "ref")
+			//
+			// `tsc` resolves `paths` using the tsconfig that owns the importing
+			// file, not by merging across a `references` edge, so each context
+			// must see its own target even though the alias name collides.
+			const referencesPriorityDir = path.resolve(
+				__dirname,
+				"fixtures",
+				"tsconfig-paths",
+				"references-priority",
+			);
+			const refDir = path.join(referencesPriorityDir, "ref");
+
+			it("resolves @lib/foo from the main context to main's target", (done) => {
+				const resolver = ResolverFactory.createResolver({
+					fileSystem,
+					extensions: [".ts", ".tsx"],
+					mainFields: ["browser", "main"],
+					mainFiles: ["index"],
+					tsconfig: {
+						configFile: path.join(referencesPriorityDir, "tsconfig.json"),
+						references: "auto",
+					},
+				});
+
+				resolver.resolve(
+					{},
+					referencesPriorityDir,
+					"@lib/foo",
+					{},
+					(err, result) => {
+						if (err) return done(err);
+						if (!result) return done(new Error("No result"));
+						expect(result).toEqual(
+							path.join(referencesPriorityDir, "main-lib", "foo.ts"),
+						);
+						done();
+					},
+				);
+			});
+
+			it("resolves @lib/foo from the reference context to the reference's target", (done) => {
+				const resolver = ResolverFactory.createResolver({
+					fileSystem,
+					extensions: [".ts", ".tsx"],
+					mainFields: ["browser", "main"],
+					mainFiles: ["index"],
+					tsconfig: {
+						configFile: path.join(referencesPriorityDir, "tsconfig.json"),
+						references: "auto",
+					},
+				});
+
+				resolver.resolve({}, refDir, "@lib/foo", {}, (err, result) => {
+					if (err) return done(err);
+					if (!result) return done(new Error("No result"));
+					expect(result).toEqual(path.join(refDir, "ref-lib", "foo.ts"));
+					done();
+				});
+			});
+
+			it("reference paths do not leak into a sibling/unrelated main lookup", (done) => {
+				// When references are loaded but the request is made from the
+				// main context, the reference's alias target must not win over
+				// the main's target — even if the reference's target also exists.
+				const resolver = ResolverFactory.createResolver({
+					fileSystem,
+					extensions: [".ts", ".tsx"],
+					mainFields: ["browser", "main"],
+					mainFiles: ["index"],
+					tsconfig: {
+						configFile: path.join(referencesPriorityDir, "tsconfig.json"),
+						references: "auto",
+					},
+				});
+
+				resolver.resolve(
+					{},
+					referencesPriorityDir,
+					"@lib/foo",
+					{},
+					(err, result) => {
+						if (err) return done(err);
+						expect(result).not.toEqual(path.join(refDir, "ref-lib", "foo.ts"));
+						done();
+					},
+				);
+			});
+		});
 	});
 
 	describe("bug: baseUrl from deep extends chain (non-sibling directories)", () => {
