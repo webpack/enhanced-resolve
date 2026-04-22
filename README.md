@@ -266,7 +266,7 @@ const options = {
 const options = { aliasFields: ["browser"] };
 ```
 
-**`extensionAlias`** — maps one request extension to a list of candidate extensions. Useful for TypeScript ESM where imports are written with `.js` but the source is `.ts`:
+**`extensionAlias`** — maps one request extension to a list of candidate extensions. Useful for TypeScript ESM where imports are written with `.js` but the source is `.ts`. Applies both to direct requests (e.g. `./foo.js`) and to paths produced by the package.json `imports` field (e.g. `#foo` → `./foo.js` → `./foo.ts`). It does **not** apply to paths produced by the `exports` field, to avoid exposing files the package author didn't intend to export:
 
 ```js
 const options = {
@@ -463,9 +463,9 @@ One-line goal and default wiring (`source → target`) for each plugin. `*` mean
 - **`DescriptionFilePlugin`** — Goal: locate and attach the nearest description file (usually `package.json`) so downstream plugins can read its fields. `parsed-resolve` → `described-resolve`, `relative` → `described-relative`, `undescribed-resolve-in-package` → `resolve-in-package`, `undescribed-existing-directory` → `existing-directory`, `undescribed-raw-file` → `raw-file`.
 - **`DirectoryExistsPlugin`** — Goal: only continue the pipeline if the current path exists as a directory. `resolve-as-module` → `undescribed-resolve-in-package`, `directory` → `undescribed-existing-directory`.
 - **`ExportsFieldPlugin`** — Goal: map a request through the `exports` field of a package's description file (with `conditionNames`). `resolve-in-package` → `relative`.
-- **`ExtensionAliasPlugin`** — Goal: rewrite a request's extension to a list of candidate extensions (e.g. `.js` → `.ts`, `.js`) for TypeScript ESM and similar. `raw-resolve` → `normal-resolve`.
+- **`ExtensionAliasPlugin`** — Goal: rewrite a request's extension to a list of candidate extensions (e.g. `.js` → `.ts`, `.js`) for TypeScript ESM and similar. `raw-resolve` → `normal-resolve` for direct requests; also `imports-field-relative` → `relative` so extension substitution applies to `imports`-field targets.
 - **`FileExistsPlugin`** — Goal: confirm a candidate path exists as a file and record it as a file dependency. `final-file` → `existing-file`.
-- **`ImportsFieldPlugin`** — Goal: resolve `#name` requests through the `imports` field of the enclosing package. `internal` → `relative` (relative target) or `imports-resolve` (bare target).
+- **`ImportsFieldPlugin`** — Goal: resolve `#name` requests through the `imports` field of the enclosing package. `internal` → `imports-field-relative` (relative target) or `imports-resolve` (bare target).
 - **`JoinRequestPlugin`** — Goal: join the current path with the current request into a single concrete path. `after-normal-resolve` → `relative` (three stage-offset copies for `preferRelative`, `preferAbsolute`, and default), `resolve-in-existing-directory` → `relative`.
 - **`JoinRequestPartPlugin`** — Goal: split a module request into module name + inner request, joining the inner part onto the path. `module` → `resolve-as-module`.
 - **`LogInfoPlugin`** — Goal: emit verbose log output at a chosen hook; enable by passing a `log` function on `resolveContext`. User-wired via `plugins`.
@@ -505,34 +505,35 @@ A resolver exposes two kinds of [`tapable`](https://github.com/webpack/tapable) 
 
 Listed roughly in the order the default pipeline visits them. Full wiring lives in `lib/ResolverFactory.js` under `//// pipeline ////`.
 
-| Hook                             | Role                                                                                                                                         |
-| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `resolve`                        | Entry point. `ParsePlugin` parses the raw request (path, query, fragment, module flag) and forwards to `parsed-resolve`.                     |
-| `internal-resolve`               | Re-entry point used by internal rewrites (e.g. after an `alias` fires). Same role as `resolve`, but `fullySpecified` is forced off.          |
-| `imports-resolve`                | Re-entry point for the target of an `imports` field match; prevents recursive `#` resolution per the Node.js ESM spec.                       |
-| `parsed-resolve`                 | Request has been parsed. `DescriptionFilePlugin` attaches the nearest `package.json`, then forwards to `described-resolve`.                  |
-| `described-resolve`              | Description file is attached. Where `unsafeCache`, `fallback`, and most user plugins (including `MyLibSrcPlugin` below) hook in.             |
-| `raw-resolve`                    | After description. Where `alias`, `aliasFields`, `tsconfig` paths, and `extensionAlias` rewrites fire before default resolution.             |
-| `normal-resolve`                 | Default resolution starts. Branches into `relative` (for `./`, `../`, absolute), `raw-module` (bare modules), or `internal` (`#imports`).    |
-| `internal`                       | `#name` imports-field entry. `ImportsFieldPlugin` maps the specifier and forwards to `relative` or `imports-resolve`.                        |
-| `raw-module`                     | Bare-module lookup. `SelfReferencePlugin`, `ModulesInHierarchicalDirectoriesPlugin`, `ModulesInRootPlugin`, and `PnpPlugin` all tap here.    |
-| `alternate-raw-module`           | Fallback module lookup used by `PnpPlugin` when PnP can't resolve and `node_modules` should be tried.                                        |
-| `module`                         | A candidate module directory was built. `JoinRequestPartPlugin` splits off the inner request and forwards to `resolve-as-module`.            |
-| `resolve-as-module`              | Treat candidate as a package. `DirectoryExistsPlugin` gates on existence; short single-file modules may re-enter via `undescribed-raw-file`. |
-| `undescribed-resolve-in-package` | Inside a located package directory, before its `package.json` has been read. Loads the description, forwards to `resolve-in-package`.        |
-| `resolve-in-package`             | Inside a package with its description loaded. `ExportsFieldPlugin` matches `exports`, otherwise forwards to `resolve-in-existing-directory`. |
-| `resolve-in-existing-directory`  | Package directory confirmed; join the remaining request onto it and continue at `relative`.                                                  |
-| `relative`                       | A concrete path on disk. `DescriptionFilePlugin` loads the nearest `package.json` and forwards to `described-relative`.                      |
-| `described-relative`             | Branches to `raw-file` (treat as file) and `directory` (treat as directory). `resolveToContext` skips the file branch.                       |
-| `directory`                      | Candidate directory. `DirectoryExistsPlugin` gates on existence and forwards to `undescribed-existing-directory`.                            |
-| `undescribed-existing-directory` | Existing directory, before its `package.json` has been read. `UseFilePlugin` tries `mainFiles` via `undescribed-raw-file`.                   |
-| `existing-directory`             | Existing directory with description loaded. `MainFieldPlugin` tries `mainFields`; `UseFilePlugin` falls back to `mainFiles`.                 |
-| `undescribed-raw-file`           | Candidate file path, before description is read. Loads description, then forwards to `raw-file`.                                             |
-| `raw-file`                       | Apply extension handling: `ConditionalPlugin` short-circuits when `fullySpecified`, `TryNextPlugin` + `AppendPlugin` try each extension.     |
-| `file`                           | A specific file path. Last place `alias` and `aliasFields` can redirect; forwards to `final-file`.                                           |
-| `final-file`                     | `FileExistsPlugin` checks the file is real and records it as a file dependency, then forwards to `existing-file`.                            |
-| `existing-file`                  | Real file on disk. `SymlinkPlugin` real-paths symlinks (unless `symlinks: false`), then forwards to `resolved`.                              |
-| `resolved`                       | Terminal hook. `RestrictionsPlugin` enforces `restrictions`; `ResultPlugin` fires the `result` lifecycle hook.                               |
+| Hook                             | Role                                                                                                                                                                                      |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `resolve`                        | Entry point. `ParsePlugin` parses the raw request (path, query, fragment, module flag) and forwards to `parsed-resolve`.                                                                  |
+| `internal-resolve`               | Re-entry point used by internal rewrites (e.g. after an `alias` fires). Same role as `resolve`, but `fullySpecified` is forced off.                                                       |
+| `imports-resolve`                | Re-entry point for the target of an `imports` field match; prevents recursive `#` resolution per the Node.js ESM spec.                                                                    |
+| `parsed-resolve`                 | Request has been parsed. `DescriptionFilePlugin` attaches the nearest `package.json`, then forwards to `described-resolve`.                                                               |
+| `described-resolve`              | Description file is attached. Where `unsafeCache`, `fallback`, and most user plugins (including `MyLibSrcPlugin` below) hook in.                                                          |
+| `raw-resolve`                    | After description. Where `alias`, `aliasFields`, `tsconfig` paths, and `extensionAlias` rewrites fire before default resolution.                                                          |
+| `normal-resolve`                 | Default resolution starts. Branches into `relative` (for `./`, `../`, absolute), `raw-module` (bare modules), or `internal` (`#imports`).                                                 |
+| `internal`                       | `#name` imports-field entry. `ImportsFieldPlugin` maps the specifier and forwards to `imports-field-relative` or `imports-resolve`.                                                       |
+| `imports-field-relative`         | Concrete path from an `imports`-field match, before the normal `relative` flow. `ExtensionAliasPlugin` taps here so `.js` → `.ts` also fires for `#name` targets. Forwards to `relative`. |
+| `raw-module`                     | Bare-module lookup. `SelfReferencePlugin`, `ModulesInHierarchicalDirectoriesPlugin`, `ModulesInRootPlugin`, and `PnpPlugin` all tap here.                                                 |
+| `alternate-raw-module`           | Fallback module lookup used by `PnpPlugin` when PnP can't resolve and `node_modules` should be tried.                                                                                     |
+| `module`                         | A candidate module directory was built. `JoinRequestPartPlugin` splits off the inner request and forwards to `resolve-as-module`.                                                         |
+| `resolve-as-module`              | Treat candidate as a package. `DirectoryExistsPlugin` gates on existence; short single-file modules may re-enter via `undescribed-raw-file`.                                              |
+| `undescribed-resolve-in-package` | Inside a located package directory, before its `package.json` has been read. Loads the description, forwards to `resolve-in-package`.                                                     |
+| `resolve-in-package`             | Inside a package with its description loaded. `ExportsFieldPlugin` matches `exports`, otherwise forwards to `resolve-in-existing-directory`.                                              |
+| `resolve-in-existing-directory`  | Package directory confirmed; join the remaining request onto it and continue at `relative`.                                                                                               |
+| `relative`                       | A concrete path on disk. `DescriptionFilePlugin` loads the nearest `package.json` and forwards to `described-relative`.                                                                   |
+| `described-relative`             | Branches to `raw-file` (treat as file) and `directory` (treat as directory). `resolveToContext` skips the file branch.                                                                    |
+| `directory`                      | Candidate directory. `DirectoryExistsPlugin` gates on existence and forwards to `undescribed-existing-directory`.                                                                         |
+| `undescribed-existing-directory` | Existing directory, before its `package.json` has been read. `UseFilePlugin` tries `mainFiles` via `undescribed-raw-file`.                                                                |
+| `existing-directory`             | Existing directory with description loaded. `MainFieldPlugin` tries `mainFields`; `UseFilePlugin` falls back to `mainFiles`.                                                              |
+| `undescribed-raw-file`           | Candidate file path, before description is read. Loads description, then forwards to `raw-file`.                                                                                          |
+| `raw-file`                       | Apply extension handling: `ConditionalPlugin` short-circuits when `fullySpecified`, `TryNextPlugin` + `AppendPlugin` try each extension.                                                  |
+| `file`                           | A specific file path. Last place `alias` and `aliasFields` can redirect; forwards to `final-file`.                                                                                        |
+| `final-file`                     | `FileExistsPlugin` checks the file is real and records it as a file dependency, then forwards to `existing-file`.                                                                         |
+| `existing-file`                  | Real file on disk. `SymlinkPlugin` real-paths symlinks (unless `symlinks: false`), then forwards to `resolved`.                                                                           |
+| `resolved`                       | Terminal hook. `RestrictionsPlugin` enforces `restrictions`; `ResultPlugin` fires the `result` lifecycle hook.                                                                            |
 
 #### `before-` and `after-` prefixes
 
@@ -583,8 +584,17 @@ Internal import (`#util` from inside a package) — re-enters the pipeline after
 ```text
 resolve ➝ parsed-resolve ➝ described-resolve ➝ raw-resolve ➝ normal-resolve
   ➝ internal                               (ConditionalPlugin {internal:true})
-  ➝ imports-resolve                        (ImportsFieldPlugin mapped "#util" to a target)
+  ➝ imports-resolve                        (ImportsFieldPlugin mapped "#util" to a bare target)
   ➝ parsed-resolve ➝ …                     (fresh pipeline run, internal:false so # isn't remapped)
+```
+
+When the `imports` field maps to a relative target, the branch instead goes:
+
+```text
+  ➝ internal
+  ➝ imports-field-relative                 (ImportsFieldPlugin mapped "#util" to "./util.js";
+                                            ExtensionAliasPlugin can swap .js → .ts here)
+  ➝ relative ➝ … (same tail as the relative flow above)
 ```
 
 Alias hit (`@/button` with `alias: { "@": "/src" }`) — rewrites then restarts:

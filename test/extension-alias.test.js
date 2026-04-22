@@ -85,6 +85,52 @@ describe("extension-alias", () => {
 		);
 	});
 
+	describe("imports field", () => {
+		const importsFixture = path.resolve(
+			__dirname,
+			"fixtures",
+			"imports-field-extension-alias",
+		);
+
+		it("should apply extension alias to paths resolved via imports field", (done) => {
+			resolver.resolve({}, importsFixture, "#foo", {}, (err, result) => {
+				if (err) return done(err);
+				expect(result).toEqual(path.resolve(importsFixture, "foo.ts"));
+				done();
+			});
+		});
+
+		it("should fall back to later alternatives when first alias does not exist", (done) => {
+			resolver.resolve({}, importsFixture, "#bar", {}, (err, result) => {
+				if (err) return done(err);
+				expect(result).toEqual(path.resolve(importsFixture, "bar.js"));
+				done();
+			});
+		});
+
+		it("should support single-string alias (no array) via imports field", (done) => {
+			resolver.resolve({}, importsFixture, "#only", {}, (err, _result) => {
+				// ".mjs": ".mts" is a strict mapping with no fallback, so this
+				// should error because only.mts does not exist
+				expect(err).toBeInstanceOf(Error);
+				done();
+			});
+		});
+
+		it("should not fall back to the original extension via imports field (strict alias)", (done) => {
+			const strictResolver = ResolverFactory.createResolver({
+				extensions: [".js"],
+				fileSystem: nodeFileSystem,
+				extensionAlias: { ".js": [".ts"] },
+			});
+			strictResolver.resolve({}, importsFixture, "#bar", {}, (err, _result) => {
+				// bar.ts does not exist and we explicitly disallow fallback
+				expect(err).toBeInstanceOf(Error);
+				done();
+			});
+		});
+	});
+
 	describe("should not apply extension alias to extensions or mainFiles field", () => {
 		const resolver = ResolverFactory.createResolver({
 			extensions: [".js"],

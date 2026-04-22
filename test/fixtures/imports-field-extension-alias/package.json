@@ -1,0 +1,9 @@
+{
+	"name": "imports-field-extension-alias",
+	"version": "1.0.0",
+	"imports": {
+		"#foo": "./foo.js",
+		"#bar": "./bar.js",
+		"#only": "./only.mjs"
+	}
+}
