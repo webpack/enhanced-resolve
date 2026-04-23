@@ -26,7 +26,8 @@ BENCH_FILTER=pathological npm run benchmark
 Locally the runner uses tinybench's wall-clock measurements and prints a
 table of ops/s, mean, p99, and relative margin of error per task. Under CI,
 the plugin detects the CodSpeed runner environment and switches to
-instruction-counting mode automatically.
+instruction-counting (`simulation`) or heap-allocation (`memory`) mode
+automatically, depending on which CI job invoked it.
 
 The V8 flags in `package.json` (`--no-opt --predictable --hash-seed=1` etc.)
 are required by CodSpeed's instrumentation mode for deterministic results —
@@ -147,8 +148,19 @@ A few rules of thumb:
 ## CI integration
 
 CI is driven by `.github/workflows/benchmarks.yml`, which uses
-`CodSpeedHQ/action@v4` in `mode: "simulation"` and authenticates via the
-`CODSPEED_TOKEN` repo secret.
+`CodSpeedHQ/action@v4` to run the same `npm run benchmark` entry point under
+two modes via a matrix:
 
-Both `CODSPEED_TOKEN` and CodSpeed repo enablement must be configured by a
-repo admin once — see the top-level PR description for the handoff.
+- `simulation` — CPU / instruction-count measurements (the standard CodSpeed
+  performance benchmark).
+- `memory` — heap-allocation measurements via the same instrumentation hooks
+  (`InstrumentHooks.startBenchmark` / `stopBenchmark`); the CodSpeed runner
+  collects allocation stats between those markers instead of instructions.
+
+Both jobs share the same bench cases — `benchmark/with-codspeed.mjs` routes
+both modes through the identical instrumented code path, so there is nothing
+per-case to add for memory tracking.
+
+Authentication is via the `CODSPEED_TOKEN` repo secret. Both `CODSPEED_TOKEN`
+and CodSpeed repo enablement must be configured by a repo admin once — see
+the top-level PR description for the handoff.

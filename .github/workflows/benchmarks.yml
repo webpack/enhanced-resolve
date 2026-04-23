@@ -20,6 +20,11 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: ["simulation", "memory"]
+    name: benchmark (${{ matrix.mode }})
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -37,4 +42,4 @@ jobs:
         uses: CodSpeedHQ/action@db35df748deb45fdef0960669f57d627c1956c30 # v4.13.1
         with:
           run: npm run benchmark
-          mode: "simulation"
+          mode: ${{ matrix.mode }}
