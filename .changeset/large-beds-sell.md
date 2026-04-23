@@ -2,4 +2,4 @@
 "enhanced-resolve": patch
 ---
 
-Apply extensionAlias to imports-field resolutions.
+Apply the `extensionAlias` option to the `imports` field to be align with typescript resolution.
