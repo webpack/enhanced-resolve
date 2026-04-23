@@ -2,4 +2,4 @@
 "enhanced-resolve": patch
 ---
 
-Improved performance of the alias plugin.
+Improved performance of the many plugins.
