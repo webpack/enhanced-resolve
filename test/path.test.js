@@ -53,6 +53,36 @@ describe("util/path getType", () => {
 		expect(getType("9:/foo")).toBe(PathType.Normal);
 		expect(getType("C:foo")).toBe(PathType.Normal);
 	});
+
+	it("classifies DOS device paths as Windows-absolute", () => {
+		// Win32 file namespace (\\?\)
+		expect(getType("\\\\?\\C:\\foo")).toBe(PathType.AbsoluteWin);
+		expect(getType("\\\\?\\C:\\foo\\bar")).toBe(PathType.AbsoluteWin);
+		expect(getType("\\\\?\\UNC\\server\\share")).toBe(PathType.AbsoluteWin);
+		expect(getType("\\\\?\\Volume{abc}\\f")).toBe(PathType.AbsoluteWin);
+		// Win32 device namespace (\\.\)
+		expect(getType("\\\\.\\C:\\foo")).toBe(PathType.AbsoluteWin);
+		expect(getType("\\\\.\\PhysicalDrive0")).toBe(PathType.AbsoluteWin);
+		// Bare prefix still counts — the filesystem will reject it, but
+		// classifying it as Windows-absolute keeps downstream calls on
+		// `path.win32` instead of silently falling back to posix.
+		expect(getType("\\\\?\\")).toBe(PathType.AbsoluteWin);
+		expect(getType("\\\\.\\")).toBe(PathType.AbsoluteWin);
+	});
+
+	it("does not classify non-DOS backslash paths as Windows-absolute", () => {
+		// Plain UNC (\\server\share) is not a DOS device path — don't
+		// misclassify it (its handling is out of scope of this change).
+		expect(getType("\\\\server\\share")).toBe(PathType.Normal);
+		// Too short to match a DOS device prefix.
+		expect(getType("\\\\?")).toBe(PathType.Normal);
+		expect(getType("\\\\.")).toBe(PathType.Normal);
+		// Second char must also be a backslash.
+		expect(getType("\\?\\C:\\foo")).toBe(PathType.Normal);
+		// Forward-slash variants aren't equivalent — Windows won't normalize
+		// a DOS device path expressed with `/`.
+		expect(getType("//?/C:/foo")).toBe(PathType.AbsolutePosix);
+	});
 });
 
 describe("util/path normalize", () => {
@@ -75,6 +105,14 @@ describe("util/path normalize", () => {
 
 	it("normalizes normal paths through posix normalize", () => {
 		expect(normalize("a/b/../c")).toBe("a/c");
+	});
+
+	it("normalizes DOS device paths via win32", () => {
+		expect(normalize("\\\\?\\C:\\foo\\..\\bar")).toBe("\\\\?\\C:\\bar");
+		expect(normalize("\\\\.\\C:\\foo\\..\\bar")).toBe("\\\\.\\C:\\bar");
+		expect(normalize("\\\\?\\UNC\\server\\share\\a\\..\\b")).toBe(
+			"\\\\?\\UNC\\server\\share\\b",
+		);
 	});
 });
 
@@ -101,6 +139,13 @@ describe("util/path join", () => {
 	it("joins rooted windows-style paths", () => {
 		expect(join("C:\\a", "b")).toBe("C:\\a\\b");
 	});
+
+	it("joins DOS device paths with win32 semantics", () => {
+		expect(join("\\\\?\\C:\\a", "b")).toBe("\\\\?\\C:\\a\\b");
+		expect(join("\\\\.\\C:\\a", "b")).toBe("\\\\.\\C:\\a\\b");
+		// Absolute DOS device request wins over any root.
+		expect(join("/posix/root", "\\\\?\\C:\\c")).toBe("\\\\?\\C:\\c");
+	});
 });
 
 describe("util/path dirname", () => {
@@ -111,6 +156,14 @@ describe("util/path dirname", () => {
 
 	it("computes windows dirname for windows absolute paths", () => {
 		expect(dirname("C:\\foo\\bar")).toBe("C:\\foo");
+	});
+
+	it("computes windows dirname for DOS device paths", () => {
+		expect(dirname("\\\\?\\C:\\foo\\bar")).toBe("\\\\?\\C:\\foo");
+		expect(dirname("\\\\.\\C:\\foo\\bar")).toBe("\\\\.\\C:\\foo");
+		expect(dirname("\\\\?\\UNC\\server\\share\\a\\b")).toBe(
+			"\\\\?\\UNC\\server\\share\\a",
+		);
 	});
 });
 

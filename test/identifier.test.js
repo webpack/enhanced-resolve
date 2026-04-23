@@ -146,6 +146,48 @@ describe("identifier", () => {
 		run(tests);
 	});
 
+	describe("parse identifier. DOS device paths", () => {
+		/** @type {TestSuite[]} */
+		const tests = [
+			// The literal `?` inside `\\?\` is part of the prefix, not a query
+			// separator. Same for the `.` in `\\.\`.
+			{
+				input: "\\\\?\\C:\\foo",
+				expected: ["\\\\?\\C:\\foo", "", ""],
+			},
+			{
+				input: "\\\\.\\C:\\foo",
+				expected: ["\\\\.\\C:\\foo", "", ""],
+			},
+			{
+				input: "\\\\?\\UNC\\server\\share\\file.js",
+				expected: ["\\\\?\\UNC\\server\\share\\file.js", "", ""],
+			},
+			// Query/fragment past the prefix are still parsed normally.
+			{
+				input: "\\\\?\\C:\\foo?bar=1",
+				expected: ["\\\\?\\C:\\foo", "?bar=1", ""],
+			},
+			{
+				input: "\\\\?\\C:\\foo#frag",
+				expected: ["\\\\?\\C:\\foo", "", "#frag"],
+			},
+			{
+				input: "\\\\?\\C:\\foo?q=1#f",
+				expected: ["\\\\?\\C:\\foo", "?q=1", "#f"],
+			},
+			// `\\foo` (plain UNC-ish, not a DOS device path) should not trigger
+			// the prefix skip — its `?` would still be a query separator. We
+			// don't have one to test that the fallback still works unchanged.
+			{
+				input: "\\\\server\\share\\file.js",
+				expected: ["\\\\server\\share\\file.js", "", ""],
+			},
+		];
+
+		run(tests);
+	});
+
 	describe("parse identifier. malformed inputs", () => {
 		it("returns null for a single null-byte input (regex no-match)", () => {
 			expect(parseIdentifier("\0")).toBeNull();
