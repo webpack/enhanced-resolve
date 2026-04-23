@@ -1,5 +1,39 @@
 # enhanced-resolve
 
+## 5.21.0
+
+### Minor Changes
+
+- Added promise API and support to resolve without `context` and `resolveContext`. (by [@alexander-akait](https://github.com/alexander-akait) in [#520](https://github.com/webpack/enhanced-resolve/pull/520))
+
+- Add `extensionAliasForExports` option. When `true`, `extensionAlias` also applies to paths resolved through the `package.json` `exports` field. Off by default to match Node.js; opt in for full TypeScript-resolver parity with packages that ship `.ts` sources alongside the compiled `.js` they declare in `exports`. (by [@alexander-akait](https://github.com/alexander-akait) in [#554](https://github.com/webpack/enhanced-resolve/pull/554))
+
+### Patch Changes
+
+- Properly handle DOS device paths (`\\?\…` and `\\.\…`). (by [@alexander-akait](https://github.com/alexander-akait) in [#551](https://github.com/webpack/enhanced-resolve/pull/551))
+
+- Prevent fallback to parent node_modules when the `exports` field target file is not found. (by [@xiaoxiaojx](https://github.com/xiaoxiaojx) in [#495](https://github.com/webpack/enhanced-resolve/pull/495))
+
+- Imports field spec deviation: non-relative targets (e.g. `"#a": "#b"`) no longer re-enter imports resolution, aligning with the Node.js ESM spec where `PACKAGE_IMPORTS_RESOLVE` does not recursively resolve `#` specifiers. (by [@xiaoxiaojx](https://github.com/xiaoxiaojx) in [#503](https://github.com/webpack/enhanced-resolve/pull/503))
+
+  Previously `{ "#a": "#b", "#b": "./the.js" }` would chain-resolve `#a` to `./the.js`; now it correctly fails, matching Node.js behavior.
+
+- Move `cachedJoin`/`cachedDirname`/`createCachedBasename` caches from module-level globals to per-Resolver instances. This prevents unbounded memory growth in long-running processes — when a Resolver is garbage collected, its join/dirname/basename caches are released with it. (by [@xiaoxiaojx](https://github.com/xiaoxiaojx) in [#507](https://github.com/webpack/enhanced-resolve/pull/507))
+
+- Fixed when `tsconfig: true` is used (default config file) and no `tsconfig.json` exists. (by [@xiaoxiaojx](https://github.com/xiaoxiaojx) in [#502](https://github.com/webpack/enhanced-resolve/pull/502))
+
+- Apply the `extensionAlias` option to the `imports` field to be align with typescript resolution. (by [@alexander-akait](https://github.com/alexander-akait) in [#549](https://github.com/webpack/enhanced-resolve/pull/549))
+
+- Improved performance of the many plugins. (by [@alexander-akait](https://github.com/alexander-akait) in [#529](https://github.com/webpack/enhanced-resolve/pull/529))
+
+- Replace the `Set<string>`-based resolver stack with a singly-linked `StackEntry` class that exposes a Set-compatible API. (by [@xiaoxiaojx](https://github.com/xiaoxiaojx) in [#526](https://github.com/webpack/enhanced-resolve/pull/526))
+
+  Each `doResolve` call now prepends a single linked-list node instead of cloning the entire Set, making stack push O(1) in time and memory. Recursion detection walks the linked list (O(n)), but because the stack is typically shallow this is much cheaper than cloning a Set per call.
+
+- Cache the result of `stripJsonComments` + `JSON.parse` in `readJson` using a `WeakMap` keyed by the raw file buffer. This avoids redundant comment-stripping and JSON parsing on every resolve call that reads tsconfig.json files (via `stripComments: true`), improving TsconfigPathsPlugin warm performance by ~20-35% depending on the depth of the `extends` chain. (by [@xiaoxiaojx](https://github.com/xiaoxiaojx) in [#524](https://github.com/webpack/enhanced-resolve/pull/524))
+
+- Avoid OOM in CachedInputFileSystem when duration is Infinity. (by [@alexander-akait](https://github.com/alexander-akait) in [#527](https://github.com/webpack/enhanced-resolve/pull/527))
+
 ## 5.20.1
 
 ### Patch Changes
