@@ -96,7 +96,11 @@ describe("identifier", () => {
 			// (callers must escape '#' in paths via '\0#' — see webpack#16819)
 			{
 				input: "/home/user/projects/test#/webpack/src/file.js",
-				expected: ["/home/user/projects/test", "", "#/webpack/src/file.js"],
+				expected: ["/home/user/projects/test#/webpack/src/file.js", "", ""],
+			},
+			{
+				input: "/abs/path/file.js#fragment",
+				expected: ["/abs/path/file.js", "", "#fragment"],
 			},
 		];
 
@@ -136,10 +140,14 @@ describe("identifier", () => {
 				input: "C:\\Users\\test\0#proj\\webpack\\src\\file.js",
 				expected: ["C:\\Users\\test#proj\\webpack\\src\\file.js", "", ""],
 			},
+			{
+				input: "C:\\abs\\path\\file.js#fragment",
+				expected: ["C:\\abs\\path\\file.js", "", "#fragment"],
+			},
 			// Without escaping, '#' still starts a fragment (caller must escape)
 			{
 				input: "C:\\Users\\test#proj\\webpack\\src\\file.js",
-				expected: ["C:\\Users\\test", "", "#proj\\webpack\\src\\file.js"],
+				expected: ["C:\\Users\\test#proj\\webpack\\src\\file.js", "", ""],
 			},
 		];
 
