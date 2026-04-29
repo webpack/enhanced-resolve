@@ -49,7 +49,10 @@
     "Sorhus",
     "readlink",
     "extensionless",
-    "ENOENT"
+    "ENOENT",
+    "APFS",
+    "scandir",
+    "watchpack"
   ],
   "ignorePaths": [
     "package.json",
