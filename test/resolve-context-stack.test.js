@@ -233,4 +233,51 @@ describe("resolveContext.stack", () => {
 			});
 		});
 	});
+
+	// Regression for #567: a plugin tapped on the `resolved` hook spreads
+	// the stack and runs `String.prototype` methods on each entry. Pre-5.21
+	// this worked because `stack` was a `Set<string>`; the iterator must
+	// keep yielding strings so the snippet from the issue doesn't TypeError.
+	it("supports `[...resolveContext.stack].find(a => a.includes(...))` (issue #567)", (done) => {
+		/** @type {string | undefined} */
+		let moduleEntry;
+		const plugin = {
+			/** @param {import("../").Resolver} r resolver */
+			apply(r) {
+				r.ensureHook("resolved").tapAsync(
+					"DependencyDedupePlugin",
+					(_resolved, resolveContext, callback) => {
+						if (resolveContext.stack && moduleEntry === undefined) {
+							const { stack } =
+								/** @type {{ stack: Iterable<string> }} */
+								(resolveContext);
+							moduleEntry = [...stack].find((a) => a.includes("module:"));
+						}
+						callback();
+					},
+				);
+			},
+		};
+		// Resolve a bare specifier so the resolver enters the `module` hook
+		// and pushes a `module: (...)` entry onto the stack.
+		const r = ResolverFactory.createResolver({
+			extensions: [".ts", ".js"],
+			modules: [path.resolve(__dirname, "fixtures/node_modules")],
+			fileSystem: nodeFileSystem,
+			plugins: [plugin],
+		});
+		r.resolve({}, fixture, "m1/a", {}, (err, result) => {
+			if (err) return done(err);
+			expect(result).toBeTruthy();
+			const entry = /** @type {string} */ (moduleEntry);
+			expect(entry).toBeTruthy();
+			expect(typeof entry).toBe("string");
+			expect(entry).toMatch(/^module: \(.+\) \.\//);
+			// The exact regex from the issue's `DependencyDedupePlugin`
+			// plugin: strip the `module: (path) ./` prefix and keep the
+			// rest. For a `m1/a` request that yields `"m1/a"`.
+			expect(entry.replace(/^(module: \(.+\) \.\/)(?=.+$)/, "")).toBe("m1/a");
+			done();
+		});
+	});
 });
