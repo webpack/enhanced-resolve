@@ -181,7 +181,7 @@ describe("TsconfigPathsPlugin", () => {
 		);
 	});
 
-	it("resolves synchronously via resolveSync when useSyncFileSystemCalls is set (issue #571)", () => {
+	it("resolves synchronously via resolveSync when useSyncFileSystemCalls is set", () => {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem,
 			extensions: [".ts", ".tsx"],
@@ -202,7 +202,7 @@ describe("TsconfigPathsPlugin", () => {
 		}).toThrow(/Can't resolve 'does-not-exist'/);
 	});
 
-	it("resolveSync surfaces missing-tsconfig errors instead of fileSystem-not-sync (issue #571)", () => {
+	it("resolveSync surfaces missing-tsconfig errors instead of fileSystem-not-sync", () => {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem,
 			tsconfig: true,

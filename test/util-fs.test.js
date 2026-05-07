@@ -2,17 +2,9 @@
 
 /* eslint-disable jsdoc/reject-any-type */
 
-// readJson is a utility used internally by TsconfigPathsPlugin to load JSONC
-// files (tsconfig.json with comments). Because that plugin always passes
-// stripComments:true, the `readJson`-fast path and other options in this
-// utility have no integration callers — they are tested here directly
-// (matching the style of test/identifier.test.js, test/getPaths.test.js
-// and test/forEachBail.test.js).
-//
-// The API is callback-based (rather than Promise-based) so that synchronous
-// file systems remain synchronous all the way through `TsconfigPathsPlugin`,
-// which is what makes `resolveSync` work when `tsconfig` is enabled (see
-// issue #571).
+// `readJson` is the JSONC loader used internally by TsconfigPathsPlugin.
+// The plugin always passes stripComments:true, so the readJson-fast path
+// and other branches have no integration callers and are tested directly.
 const { readJson } = require("../lib/util/fs");
 
 /**
@@ -98,7 +90,7 @@ describe("util/fs readJson", () => {
 		).rejects.toThrow("read-fail");
 	});
 
-	it("invokes the callback synchronously when the file system is synchronous (issue #571)", () => {
+	it("invokes the callback synchronously when the file system is synchronous", () => {
 		const fileSystem = /** @type {any} */ ({
 			readFile(_p, callback) {
 				callback(null, Buffer.from('{"sync": true}'));
