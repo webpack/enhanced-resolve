@@ -181,6 +181,39 @@ describe("TsconfigPathsPlugin", () => {
 		);
 	});
 
+	it("resolves synchronously via resolveSync when useSyncFileSystemCalls is set (issue #571)", () => {
+		const resolver = ResolverFactory.createResolver({
+			fileSystem,
+			extensions: [".ts", ".tsx"],
+			mainFields: ["browser", "main"],
+			mainFiles: ["index"],
+			tsconfig: path.join(baseExampleDir, "tsconfig.json"),
+			useSyncFileSystemCalls: true,
+		});
+
+		expect(resolver.resolveSync({}, baseExampleDir, "@components/button")).toBe(
+			path.join(baseExampleDir, "src", "components", "button.ts"),
+		);
+		expect(resolver.resolveSync({}, baseExampleDir, "bar/file1")).toBe(
+			path.join(baseExampleDir, "src", "mapped", "bar", "file1.ts"),
+		);
+		expect(() => {
+			resolver.resolveSync({}, baseExampleDir, "does-not-exist");
+		}).toThrow(/Can't resolve 'does-not-exist'/);
+	});
+
+	it("resolveSync surfaces missing-tsconfig errors instead of fileSystem-not-sync (issue #571)", () => {
+		const resolver = ResolverFactory.createResolver({
+			fileSystem,
+			tsconfig: true,
+			useSyncFileSystemCalls: true,
+		});
+
+		expect(() => {
+			resolver.resolveSync(process.cwd(), "test");
+		}).toThrow(/Can't resolve 'test'/);
+	});
+
 	it("resolves '@components/*' using extends from extendsExampleDir project", (done) => {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem,
