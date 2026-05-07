@@ -1,5 +1,15 @@
 # enhanced-resolve
 
+## 5.21.1
+
+### Patch Changes
+
+- Allocation-free reductions on hot-path code: hoist `/#/g`, `/\$/g` and `/\\/g` to module-level constants and gate the corresponding `.replace` calls behind `includes(…)` so paths/queries/requests without the match char skip the regex state machine entirely (the common case); share a single `EMPTY_NO_MATCH` tuple instead of allocating `[[], null]` per "no match" / "no condition matched" return; switch `directMapping`'s `for...of` over `mappingTarget` and inner results to indexed loops to avoid iterator-object allocation per call; inline `isConditionalMapping` at its two hot-path call sites and merge the duplicate `default` / `conditionNames.has(condition)` branches in `computeConditionalMapping`; replace `invalidSegmentRegEx.exec(…) !== null` with `.test(…)` (no match-array allocation); drop the dead `deprecatedInvalidSegmentRegEx.test(…) !== null` clause in `ImportsFieldPlugin` (`.test` returns boolean; `true !== null` and `false !== null` are both true, so it was `&& true`); drop the redundant `relativePath.length === 0` guard before `!startsWith("./")` in `ExportsFieldPlugin` (the empty-string case is already covered). (by [@alexander-akait](https://github.com/alexander-akait) in [#558](https://github.com/webpack/enhanced-resolve/pull/558))
+
+- restore plugin compatibility for `[...resolveContext.stack]` iteration (by [@alexander-akait](https://github.com/alexander-akait) in [#569](https://github.com/webpack/enhanced-resolve/pull/569))
+
+- fix `TsconfigPathsPlugin` to support `resolveSync` with `useSyncFileSystemCalls` (by [@alexander-akait](https://github.com/alexander-akait) in [#572](https://github.com/webpack/enhanced-resolve/pull/572))
+
 ## 5.21.0
 
 ### Minor Changes
