@@ -1,5 +1,19 @@
 # enhanced-resolve
 
+## 5.21.2
+
+### Patch Changes
+
+- Fix TsconfigPathsPlugin circular project references causing stack overflow, add support for extending from unscoped npm packages, and use `stat` instead of `readFile` for existence checks in extends resolution. (by [@xiaoxiaojx](https://github.com/xiaoxiaojx) in [#575](https://github.com/webpack/enhanced-resolve/pull/575))
+
+- perf: dedupe miss paths in `DirectoryExistsPlugin`/`FileExistsPlugin` and prune the per-resolve `TsconfigPathsPlugin` context scan. (by [@alexander-akait](https://github.com/alexander-akait) in [#574](https://github.com/webpack/enhanced-resolve/pull/574))
+
+- perf: drop a dead Map lookup in `findMatch` and flatten `AliasFieldPlugin`'s cache check. (by [@alexander-akait](https://github.com/alexander-akait) in [#574](https://github.com/webpack/enhanced-resolve/pull/574))
+
+- perf: hot-path tweaks in `ImportsFieldPlugin`, `AliasUtils`, and `util/entrypoints`. (by [@alexander-akait](https://github.com/alexander-akait) in [#574](https://github.com/webpack/enhanced-resolve/pull/574))
+
+- perf: cut per-resolve allocations in `Resolver.parse`, `loadDescriptionFile`, and `TsconfigPathsPlugin._selectPathsDataForContext`. (by [@alexander-akait](https://github.com/alexander-akait) in [#574](https://github.com/webpack/enhanced-resolve/pull/574))
+
 ## 5.21.1
 
 ### Patch Changes
