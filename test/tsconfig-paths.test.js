@@ -38,6 +38,18 @@ const referencesProjectDir = path.resolve(
 	"tsconfig-paths",
 	"references-project",
 );
+const referencesCircularDir = path.resolve(
+	__dirname,
+	"fixtures",
+	"tsconfig-paths",
+	"references-circular",
+);
+const extendsUnscopedPkgDir = path.resolve(
+	__dirname,
+	"fixtures",
+	"tsconfig-paths",
+	"extends-unscoped-pkg",
+);
 
 describe("TsconfigPathsPlugin", () => {
 	it("resolves exact mapped path '@components/*' via tsconfig option (example)", (done) => {
@@ -1328,6 +1340,86 @@ describe("TsconfigPathsPlugin", () => {
 				);
 				done();
 			});
+		});
+	});
+
+	describe("bug: circular project references should not cause infinite recursion", () => {
+		it("should handle circular references without hanging or crashing", (done) => {
+			const aDir = path.join(referencesCircularDir, "a");
+			const resolver = ResolverFactory.createResolver({
+				fileSystem,
+				extensions: [".ts", ".tsx"],
+				mainFields: ["browser", "main"],
+				mainFiles: ["index"],
+				tsconfig: {
+					configFile: path.join(aDir, "tsconfig.json"),
+					references: "auto",
+				},
+			});
+
+			// a references b, b references a — should not stack overflow
+			resolver.resolve({}, aDir, "@a/index", {}, (err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(path.join(aDir, "src", "index.ts"));
+				done();
+			});
+		});
+
+		it("should resolve paths from a circular-referenced project", (done) => {
+			const aDir = path.join(referencesCircularDir, "a");
+			const bDir = path.join(referencesCircularDir, "b");
+			const resolver = ResolverFactory.createResolver({
+				fileSystem,
+				extensions: [".ts", ".tsx"],
+				mainFields: ["browser", "main"],
+				mainFiles: ["index"],
+				tsconfig: {
+					configFile: path.join(aDir, "tsconfig.json"),
+					references: "auto",
+				},
+			});
+
+			// From b's context, @b/* should resolve via b's own paths
+			resolver.resolve({}, bDir, "@b/index", {}, (err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(path.join(bDir, "src", "index.ts"));
+				done();
+			});
+		});
+	});
+
+	describe("bug: unscoped npm package in extends field", () => {
+		it("should resolve paths inherited from an unscoped npm package tsconfig (extends 'my-base-config')", (done) => {
+			const resolver = ResolverFactory.createResolver({
+				fileSystem,
+				extensions: [".ts", ".tsx"],
+				mainFields: ["browser", "main"],
+				mainFiles: ["index"],
+				tsconfig: path.join(extendsUnscopedPkgDir, "tsconfig.json"),
+			});
+
+			resolver.resolve(
+				{},
+				extendsUnscopedPkgDir,
+				"@pkg/util",
+				{},
+				(err, result) => {
+					if (err) return done(err);
+					if (!result) return done(new Error("No result"));
+					expect(result).toEqual(
+						path.join(
+							extendsUnscopedPkgDir,
+							"node_modules",
+							"my-base-config",
+							"src",
+							"util.ts",
+						),
+					);
+					done();
+				},
+			);
 		});
 	});
 });
