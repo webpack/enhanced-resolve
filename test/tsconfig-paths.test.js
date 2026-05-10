@@ -1390,6 +1390,59 @@ describe("TsconfigPathsPlugin", () => {
 		});
 	});
 
+	describe("bug: '@*' pattern should fall through for scoped npm packages (#20944)", () => {
+		const scopedPkgDir = path.resolve(
+			__dirname,
+			"fixtures",
+			"tsconfig-paths",
+			"scoped-pkg-fallthrough",
+		);
+
+		it("should resolve '@helper' via the '@*' mapping when the mapped path exists", (done) => {
+			const resolver = ResolverFactory.createResolver({
+				fileSystem,
+				extensions: [".ts", ".tsx", ".js"],
+				mainFields: ["main"],
+				mainFiles: ["index"],
+				tsconfig: path.join(scopedPkgDir, "tsconfig.json"),
+			});
+
+			resolver.resolve({}, scopedPkgDir, "@helper", {}, (err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(
+					path.join(scopedPkgDir, "src", "helper", "index.ts"),
+				);
+				done();
+			});
+		});
+
+		it("should fall through to node_modules for '@sentry/react' when '@*' mapping does not resolve", (done) => {
+			const resolver = ResolverFactory.createResolver({
+				fileSystem,
+				extensions: [".ts", ".tsx", ".js"],
+				mainFields: ["main"],
+				mainFiles: ["index"],
+				tsconfig: path.join(scopedPkgDir, "tsconfig.json"),
+			});
+
+			resolver.resolve({}, scopedPkgDir, "@sentry/react", {}, (err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(
+					path.join(
+						scopedPkgDir,
+						"node_modules",
+						"@sentry",
+						"react",
+						"index.js",
+					),
+				);
+				done();
+			});
+		});
+	});
+
 	describe("bug: unscoped npm package in extends field", () => {
 		it("should resolve paths inherited from an unscoped npm package tsconfig (extends 'my-base-config')", (done) => {
 			const resolver = ResolverFactory.createResolver({
