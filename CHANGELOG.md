@@ -1,5 +1,11 @@
 # enhanced-resolve
 
+## 5.21.3
+
+### Patch Changes
+
+- TsconfigPathsPlugin now falls through to normal module resolution when a `paths` pattern matches but the mapped path does not exist, matching TypeScript's native resolution behavior. Previously, patterns like `"@*"` would block scoped npm packages (e.g. `@sentry/react`) from resolving via `node_modules`. (by [@xiaoxiaojx](https://github.com/xiaoxiaojx) in [#579](https://github.com/webpack/enhanced-resolve/pull/579))
+
 ## 5.21.2
 
 ### Patch Changes
