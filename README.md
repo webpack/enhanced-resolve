@@ -263,6 +263,7 @@ const filepath = myResolver.resolveSync(context, lookupStartPath, request);
 | preferAbsolute           | false                       | Prefer to resolve server-relative urls as absolute paths before falling back to resolve in roots                                                                                                                                                                                            |
 | restrictions             | []                          | A list of resolve restrictions                                                                                                                                                                                                                                                              |
 | roots                    | []                          | A list of root paths                                                                                                                                                                                                                                                                        |
+| hardlinks                | false                       | Deduplicate hardlinked files by resolving them to the same path based on filesystem inode. Useful with pnpm, which hardlinks packages from a global store                                                                                                                                   |
 | symlinks                 | true                        | Whether to resolve symlinks to their symlinked location                                                                                                                                                                                                                                     |
 | tsconfig                 | false                       | TypeScript config for paths mapping. Can be `false` (disabled), `true` (use default `tsconfig.json`), a string path to `tsconfig.json`, or an object with `configFile`, `references`, and `baseUrl` options. Supports JSONC format (comments and trailing commas) like TypeScript compiler. |
 | tsconfig.configFile      | tsconfig.json               | Path to the tsconfig.json file                                                                                                                                                                                                                                                              |
@@ -381,6 +382,12 @@ const options = {
 };
 ```
 
+**`hardlinks`** — deduplicate hardlinked files so that multiple paths pointing to the same physical file (same inode) resolve to a single canonical path. This is especially useful with pnpm, which hardlinks packages from a global content-addressable store — without this option, bundlers like webpack treat each path as a separate module and emit duplicate code:
+
+```js
+const options = { hardlinks: true };
+```
+
 **`symlinks`** — resolve to the real path by following symlinks. Set to `false` to keep the symlinked path (common for monorepo / pnpm layouts where you want module identity tied to the workspace location):
 
 ```js
@@ -454,37 +461,38 @@ Plugins are executed in a pipeline, and register which event they should be exec
 
 `enhanced-resolve` ships with the following plugins. Most of them are wired up automatically by `ResolverFactory` based on the [resolver options](#resolver-options); the ones exported from the package entry (`TsconfigPathsPlugin`, `CloneBasenamePlugin`, `LogInfoPlugin`) are the ones you're most likely to use explicitly.
 
-| Plugin                                   | Purpose                                                                                                                              |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `AliasPlugin`                            | Replaces a matching request with one or more alternative targets. Powers the `alias` and `fallback` options.                         |
-| `AliasFieldPlugin`                       | Applies aliasing based on a field in the description file (e.g. the `browser` field). Powers `aliasFields`.                          |
-| `AppendPlugin`                           | Appends a string (typically an extension) to the current path. Used for `extensions`.                                                |
-| `CloneBasenamePlugin`                    | Joins the current directory basename onto the path (e.g. `/foo/bar` → `/foo/bar/bar`). Useful for directory-named main-file schemes. |
-| `ConditionalPlugin`                      | Forwards the request only when it matches a given partial request shape.                                                             |
-| `DescriptionFilePlugin`                  | Finds and loads the nearest description file (e.g. `package.json`) so other plugins can read its fields. Powers `descriptionFiles`.  |
-| `DirectoryExistsPlugin`                  | Only continues the pipeline if the current path is an existing directory.                                                            |
-| `ExportsFieldPlugin`                     | Resolves requests through the `exports` field of a package's description file. Powers `exportsFields` and `conditionNames`.          |
-| `ExtensionAliasPlugin`                   | Maps one extension to a list of alternative extensions (e.g. `.js` → `.ts`, `.js`). Powers `extensionAlias`.                         |
-| `FileExistsPlugin`                       | Only continues the pipeline if the current path is an existing file, and records the file as a dependency.                           |
-| `ImportsFieldPlugin`                     | Resolves `#name` requests through the `imports` field of the enclosing package.                                                      |
-| `JoinRequestPlugin`                      | Joins the current path with the current request into a new path.                                                                     |
-| `JoinRequestPartPlugin`                  | Splits a module request into module name + inner request, joining the inner request onto the path.                                   |
-| `LogInfoPlugin`                          | Emits verbose log output at a given pipeline step. Handy for debugging resolves via `resolveContext.log`.                            |
-| `MainFieldPlugin`                        | Uses a field in the description file (e.g. `main`) to point to the entry file of a package. Powers `mainFields`.                     |
-| `ModulesInHierarchicalDirectoriesPlugin` | Searches for a module by walking up parent directories (the standard `node_modules` lookup). Powers `modules`.                       |
-| `ModulesInRootPlugin`                    | Searches for a module in a single absolute directory. Powers absolute-path entries in `modules`.                                     |
-| `NextPlugin`                             | Forwards the request from one hook to another without modification — glue between pipeline steps.                                    |
-| `ParsePlugin`                            | Parses a raw request string into its components (path, query, fragment, module flag, etc.).                                          |
-| `PnpPlugin`                              | Resolves module requests through a Yarn PnP API when one is available.                                                               |
-| `RestrictionsPlugin`                     | Rejects results that don't match a list of path restrictions (strings or regular expressions). Powers `restrictions`.                |
-| `ResultPlugin`                           | Terminal plugin that fires the `result` hook — signals a successful resolve.                                                         |
-| `RootsPlugin`                            | Resolves server-relative URL requests (starting with `/`) against one or more root directories. Powers `roots`.                      |
-| `SelfReferencePlugin`                    | Resolves a package self-reference (e.g. `my-pkg/foo` from within `my-pkg`).                                                          |
-| `SymlinkPlugin`                          | Real paths the resolved file by following symlinks. Can be disabled via the `symlinks` option.                                       |
-| `TryNextPlugin`                          | Forwards the request to the next hook with a log message. Useful for trying alternative resolutions.                                 |
-| `TsconfigPathsPlugin`                    | Rewrites requests using the `paths` and `baseUrl` from a `tsconfig.json`. Powers the `tsconfig` option.                              |
-| `UnsafeCachePlugin`                      | Caches successful resolves in an in-memory map to speed up repeated requests. Powers `unsafeCache`.                                  |
-| `UseFilePlugin`                          | Joins a fixed filename onto the current path (e.g. `index`). Powers `mainFiles`.                                                     |
+| Plugin                                   | Purpose                                                                                                                                                  |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AliasPlugin`                            | Replaces a matching request with one or more alternative targets. Powers the `alias` and `fallback` options.                                             |
+| `AliasFieldPlugin`                       | Applies aliasing based on a field in the description file (e.g. the `browser` field). Powers `aliasFields`.                                              |
+| `AppendPlugin`                           | Appends a string (typically an extension) to the current path. Used for `extensions`.                                                                    |
+| `CloneBasenamePlugin`                    | Joins the current directory basename onto the path (e.g. `/foo/bar` → `/foo/bar/bar`). Useful for directory-named main-file schemes.                     |
+| `ConditionalPlugin`                      | Forwards the request only when it matches a given partial request shape.                                                                                 |
+| `DescriptionFilePlugin`                  | Finds and loads the nearest description file (e.g. `package.json`) so other plugins can read its fields. Powers `descriptionFiles`.                      |
+| `DirectoryExistsPlugin`                  | Only continues the pipeline if the current path is an existing directory.                                                                                |
+| `ExportsFieldPlugin`                     | Resolves requests through the `exports` field of a package's description file. Powers `exportsFields` and `conditionNames`.                              |
+| `ExtensionAliasPlugin`                   | Maps one extension to a list of alternative extensions (e.g. `.js` → `.ts`, `.js`). Powers `extensionAlias`.                                             |
+| `FileExistsPlugin`                       | Only continues the pipeline if the current path is an existing file, and records the file as a dependency.                                               |
+| `HardlinkPlugin`                         | Deduplicates hardlinked files by mapping inode to a canonical path, so multiple paths to the same physical file resolve identically. Powers `hardlinks`. |
+| `ImportsFieldPlugin`                     | Resolves `#name` requests through the `imports` field of the enclosing package.                                                                          |
+| `JoinRequestPlugin`                      | Joins the current path with the current request into a new path.                                                                                         |
+| `JoinRequestPartPlugin`                  | Splits a module request into module name + inner request, joining the inner request onto the path.                                                       |
+| `LogInfoPlugin`                          | Emits verbose log output at a given pipeline step. Handy for debugging resolves via `resolveContext.log`.                                                |
+| `MainFieldPlugin`                        | Uses a field in the description file (e.g. `main`) to point to the entry file of a package. Powers `mainFields`.                                         |
+| `ModulesInHierarchicalDirectoriesPlugin` | Searches for a module by walking up parent directories (the standard `node_modules` lookup). Powers `modules`.                                           |
+| `ModulesInRootPlugin`                    | Searches for a module in a single absolute directory. Powers absolute-path entries in `modules`.                                                         |
+| `NextPlugin`                             | Forwards the request from one hook to another without modification — glue between pipeline steps.                                                        |
+| `ParsePlugin`                            | Parses a raw request string into its components (path, query, fragment, module flag, etc.).                                                              |
+| `PnpPlugin`                              | Resolves module requests through a Yarn PnP API when one is available.                                                                                   |
+| `RestrictionsPlugin`                     | Rejects results that don't match a list of path restrictions (strings or regular expressions). Powers `restrictions`.                                    |
+| `ResultPlugin`                           | Terminal plugin that fires the `result` hook — signals a successful resolve.                                                                             |
+| `RootsPlugin`                            | Resolves server-relative URL requests (starting with `/`) against one or more root directories. Powers `roots`.                                          |
+| `SelfReferencePlugin`                    | Resolves a package self-reference (e.g. `my-pkg/foo` from within `my-pkg`).                                                                              |
+| `SymlinkPlugin`                          | Real paths the resolved file by following symlinks. Can be disabled via the `symlinks` option.                                                           |
+| `TryNextPlugin`                          | Forwards the request to the next hook with a log message. Useful for trying alternative resolutions.                                                     |
+| `TsconfigPathsPlugin`                    | Rewrites requests using the `paths` and `baseUrl` from a `tsconfig.json`. Powers the `tsconfig` option.                                                  |
+| `UnsafeCachePlugin`                      | Caches successful resolves in an in-memory map to speed up repeated requests. Powers `unsafeCache`.                                                      |
+| `UseFilePlugin`                          | Joins a fixed filename onto the current path (e.g. `index`). Powers `mainFiles`.                                                                         |
 
 #### Plugin wiring and goals
 
@@ -500,6 +508,7 @@ One-line goal and default wiring (`source → target`) for each plugin. `*` mean
 - **`ExportsFieldPlugin`** — Goal: map a request through the `exports` field of a package's description file (with `conditionNames`). `resolve-in-package` → `relative`.
 - **`ExtensionAliasPlugin`** — Goal: rewrite a request's extension to a list of candidate extensions (e.g. `.js` → `.ts`, `.js`) for TypeScript ESM and similar. `raw-resolve` → `normal-resolve` for direct requests; also `imports-field-relative` → `relative` so extension substitution applies to `imports`-field targets.
 - **`FileExistsPlugin`** — Goal: confirm a candidate path exists as a file and record it as a file dependency. `final-file` → `existing-file`.
+- **`HardlinkPlugin`** — Goal: deduplicate hardlinked files by caching the first-seen path for each filesystem inode; subsequent files with the same inode resolve to the canonical path. Tapped on `resolved` (only when `hardlinks` is enabled).
 - **`ImportsFieldPlugin`** — Goal: resolve `#name` requests through the `imports` field of the enclosing package. `internal` → `imports-field-relative` (relative target) or `imports-resolve` (bare target).
 - **`JoinRequestPlugin`** — Goal: join the current path with the current request into a single concrete path. `after-normal-resolve` → `relative` (three stage-offset copies for `preferRelative`, `preferAbsolute`, and default), `resolve-in-existing-directory` → `relative`.
 - **`JoinRequestPartPlugin`** — Goal: split a module request into module name + inner request, joining the inner part onto the path. `module` → `resolve-as-module`.
