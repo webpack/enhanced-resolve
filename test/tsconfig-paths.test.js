@@ -1268,6 +1268,65 @@ describe("TsconfigPathsPlugin", () => {
 		});
 	});
 
+	describe("tsconfig: true should walk up parent directories", () => {
+		const upwardDir = path.resolve(
+			__dirname,
+			"fixtures",
+			"tsconfig-paths",
+			"upward-traversal",
+		);
+
+		it("should find tsconfig.json in parent directory when resolving from subdirectory", (done) => {
+			const resolver = ResolverFactory.createResolver({
+				fileSystem,
+				extensions: [".ts", ".tsx"],
+				mainFields: ["browser", "main"],
+				mainFiles: ["index"],
+				tsconfig: true,
+			});
+
+			// resolve from src/app/ — tsconfig.json is in upward-traversal/ (parent's parent)
+			resolver.resolve(
+				{},
+				path.join(upwardDir, "src", "app"),
+				"@utils/helper",
+				{},
+				(err, result) => {
+					if (err) return done(err);
+					if (!result) return done(new Error("No result"));
+					expect(result).toEqual(
+						path.join(upwardDir, "src", "utils", "helper.ts"),
+					);
+					done();
+				},
+			);
+		});
+
+		it("should still fall through when no tsconfig.json exists anywhere up", (done) => {
+			const noTsconfigDir = path.resolve(
+				__dirname,
+				"fixtures",
+				"tsconfig-paths",
+				"no-tsconfig",
+			);
+
+			const resolver = ResolverFactory.createResolver({
+				fileSystem,
+				extensions: [".ts", ".tsx"],
+				mainFields: ["browser", "main"],
+				mainFiles: ["index"],
+				tsconfig: true,
+			});
+
+			resolver.resolve({}, noTsconfigDir, "./src/index", {}, (err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(path.join(noTsconfigDir, "src", "index.ts"));
+				done();
+			});
+		});
+	});
+
 	describe("JSONC support (comments in tsconfig.json)", () => {
 		const jsoncExampleDir = path.resolve(
 			__dirname,
