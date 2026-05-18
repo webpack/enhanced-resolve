@@ -1,5 +1,11 @@
 # enhanced-resolve
 
+## 5.21.4
+
+### Patch Changes
+
+- When `tsconfig: true` is used, walk up parent directories to find `tsconfig.json`, matching TypeScript's own `findConfigFile` behavior. (by [@xiaoxiaojx](https://github.com/xiaoxiaojx) in [#585](https://github.com/webpack/enhanced-resolve/pull/585))
+
 ## 5.21.3
 
 ### Patch Changes
