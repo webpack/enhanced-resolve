@@ -1,5 +1,11 @@
 # enhanced-resolve
 
+## 5.21.5
+
+### Patch Changes
+
+- Don't add configDir to modules when tsconfig has no baseUrl. (by [@alexander-akait](https://github.com/alexander-akait) in [`61f36fd`](https://github.com/webpack/enhanced-resolve/commit/61f36fd0bb7130a680fe747dc5e2d6589e3c9147))
+
 ## 5.21.4
 
 ### Patch Changes
