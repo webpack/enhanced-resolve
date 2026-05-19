@@ -1327,6 +1327,51 @@ describe("TsconfigPathsPlugin", () => {
 		});
 	});
 
+	describe("tsconfig without baseUrl should not add configDir to module search paths", () => {
+		const noBaseUrlDir = path.resolve(
+			__dirname,
+			"fixtures",
+			"tsconfig-paths",
+			"no-baseurl-upward",
+		);
+
+		it("should resolve node_modules package instead of matching a file at tsconfig root", (done) => {
+			const resolver = ResolverFactory.createResolver({
+				fileSystem,
+				extensions: [".ts", ".js", ".json"],
+				mainFields: ["main"],
+				mainFiles: ["index"],
+				tsconfig: true,
+			});
+
+			// Resolve "package" from subdir/ which has node_modules/package/.
+			// The parent tsconfig.json (without baseUrl) should NOT cause the
+			// tsconfig root to become a module search path — otherwise "package"
+			// would incorrectly match <root>/package.json instead of the real
+			// node_modules/package/index.js.
+			resolver.resolve(
+				{},
+				path.join(noBaseUrlDir, "subdir"),
+				"package",
+				{},
+				(err, result) => {
+					if (err) return done(err);
+					if (!result) return done(new Error("No result"));
+					expect(result).toEqual(
+						path.join(
+							noBaseUrlDir,
+							"subdir",
+							"node_modules",
+							"package",
+							"index.js",
+						),
+					);
+					done();
+				},
+			);
+		});
+	});
+
 	describe("JSONC support (comments in tsconfig.json)", () => {
 		const jsoncExampleDir = path.resolve(
 			__dirname,
