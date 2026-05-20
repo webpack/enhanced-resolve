@@ -1,6 +1,6 @@
 {
   "name": "enhanced-resolve",
-  "version": "5.21.5",
+  "version": "5.21.6",
   "description": "Offers a async require.resolve function. It's highly configurable.",
   "homepage": "http://github.com/webpack/enhanced-resolve",
   "repository": {
