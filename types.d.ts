@@ -222,6 +222,22 @@ declare interface CompiledAliasOption {
 	 */
 	arrayAlias: boolean;
 }
+declare interface CompiledAliasOptions {
+	/**
+	 * declaration-ordered list
+	 */
+	all: CompiledAliasOption[];
+
+	/**
+	 * bucketed by first char code
+	 */
+	byFirstChar: Map<number, CompiledAliasOption[]>;
+
+	/**
+	 * true when an empty-prefix wildcard is present
+	 */
+	hasAnyFirstChar: boolean;
+}
 type Context = KnownContext & Record<any, any>;
 declare interface Dirent<T extends string | Buffer = string> {
 	/**
@@ -1837,7 +1853,7 @@ declare interface TsconfigPathsData {
 	/**
 	 * tsconfig file data
 	 */
-	alias: CompiledAliasOption[];
+	alias: CompiledAliasOptions;
 
 	/**
 	 * tsconfig file data
