@@ -237,6 +237,11 @@ declare interface CompiledAliasOptions {
 	 * true when an empty-prefix wildcard is present
 	 */
 	hasAnyFirstChar: boolean;
+
+	/**
+	 * true when the bucket fast-path should be used at resolve time
+	 */
+	useBuckets: boolean;
 }
 type Context = KnownContext & Record<any, any>;
 declare interface Dirent<T extends string | Buffer = string> {
