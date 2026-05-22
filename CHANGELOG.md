@@ -1,5 +1,11 @@
 # enhanced-resolve
 
+## 5.22.0
+
+### Minor Changes
+
+- `CachedInputFileSystem#purge` accepts a second `{ exact?: boolean }` argument; `exact: true` removes only entries whose key matches `what` exactly instead of any entry whose key starts with `what`. (by [@alexander-akait](https://github.com/alexander-akait) in [#591](https://github.com/webpack/enhanced-resolve/pull/591))
+
 ## 5.21.6
 
 ### Patch Changes
