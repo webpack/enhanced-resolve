@@ -460,6 +460,91 @@ describe("cachedInputFileSystem CacheBackend", () => {
 		});
 	});
 
+	it("should purge exact entries only when exact: true", (done) => {
+		fs.stat("/test/path", (err, r1) => {
+			expect(r1.path).toBe("/test/path");
+			r1.cached = true;
+			fs.stat("/test/path/sub", (err, r2) => {
+				expect(r2.path).toBe("/test/path/sub");
+				r2.cached = true;
+				// Prefix purge with exact: true should NOT remove the child entry
+				fs.purge("/test/path", { exact: true });
+				fs.stat("/test/path", (err, r3) => {
+					// /test/path was the exact match, should be re-fetched (cached flag gone)
+					expect(r3.cached).toBeUndefined();
+					fs.stat("/test/path/sub", (err, r4) => {
+						// /test/path/sub should still be cached
+						expect(r4.cached).toBe(true);
+						done();
+					});
+				});
+			});
+		});
+	});
+
+	it("should purge an array exactly when exact: true", (done) => {
+		fs.stat("/test/path", (err, r1) => {
+			r1.cached = true;
+			fs.stat("/test/path/sub", (err, r2) => {
+				r2.cached = true;
+				fs.stat("/other", (err, r3) => {
+					r3.cached = true;
+					fs.purge(["/test/path", "/other"], { exact: true });
+					fs.stat("/test/path", (err, r4) => {
+						expect(r4.cached).toBeUndefined();
+						fs.stat("/test/path/sub", (err, r5) => {
+							expect(r5.cached).toBe(true);
+							fs.stat("/other", (err, r6) => {
+								expect(r6.cached).toBeUndefined();
+								done();
+							});
+						});
+					});
+				});
+			});
+		});
+	});
+
+	it("should still prefix-purge when exact is not set or false", (done) => {
+		fs.stat("/test/path", (err, r1) => {
+			r1.cached = true;
+			fs.stat("/test/path/sub", (err, r2) => {
+				r2.cached = true;
+				fs.purge("/test/path");
+				fs.stat("/test/path", (err, r3) => {
+					expect(r3.cached).toBeUndefined();
+					fs.stat("/test/path/sub", (err, r4) => {
+						expect(r4.cached).toBeUndefined();
+						done();
+					});
+				});
+			});
+		});
+	});
+
+	it("should accept Buffer with exact: true", (done) => {
+		fs.stat("/test/path", (err, r1) => {
+			r1.cached = true;
+			fs.stat("/test/path/sub", (err, r2) => {
+				r2.cached = true;
+				fs.purge(Buffer.from("/test/path"), { exact: true });
+				fs.stat("/test/path", (err, r3) => {
+					expect(r3.cached).toBeUndefined();
+					fs.stat("/test/path/sub", (err, r4) => {
+						expect(r4.cached).toBe(true);
+						fs.purge([Buffer.from("/test/path/sub")], {
+							exact: true,
+						});
+						fs.stat("/test/path/sub", (err, r5) => {
+							expect(r5.cached).toBeUndefined();
+							done();
+						});
+					});
+				});
+			});
+		});
+	});
+
 	it("should not stack overflow when resolving in an async loop", (done) => {
 		let i = 10000;
 		const next = () => {
