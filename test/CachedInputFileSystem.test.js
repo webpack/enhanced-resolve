@@ -460,6 +460,146 @@ describe("cachedInputFileSystem CacheBackend", () => {
 		});
 	});
 
+	it("should not clear the entire cache when purging falsy keys 0 or ''", (done) => {
+		// number 0 (a valid fd) and "" are valid cache keys per the signature;
+		// passing them must not be confused with the no-arg "clear all" form.
+		fs.stat("/test/path", (err, r1) => {
+			r1.cached = true;
+			fs.purge(0);
+			fs.stat("/test/path", (err, r2) => {
+				expect(r2.cached).toBe(true);
+				fs.purge("");
+				fs.stat("/test/path", (err, r3) => {
+					// Empty string is a prefix of every key, so prefix-purge still clears
+					// everything — but only because of the prefix semantics, not because
+					// "" was misclassified as "no argument".
+					expect(r3.cached).toBeUndefined();
+					done();
+				});
+			});
+		});
+	});
+
+	it("should not crash when options is null", (done) => {
+		fs.stat("/test/path", (err, r1) => {
+			r1.cached = true;
+			expect(() => fs.purge("/test/path", null)).not.toThrow();
+			fs.stat("/test/path", (err, r2) => {
+				// null is treated as "no options" — falls back to prefix purge
+				expect(r2.cached).toBeUndefined();
+				done();
+			});
+		});
+	});
+
+	it("should purge exact entries only when exact: true", (done) => {
+		fs.stat("/test/path", (err, r1) => {
+			expect(r1.path).toBe("/test/path");
+			r1.cached = true;
+			fs.stat("/test/path/sub", (err, r2) => {
+				expect(r2.path).toBe("/test/path/sub");
+				r2.cached = true;
+				// Prefix purge with exact: true should NOT remove the child entry
+				fs.purge("/test/path", { exact: true });
+				fs.stat("/test/path", (err, r3) => {
+					// /test/path was the exact match, should be re-fetched (cached flag gone)
+					expect(r3.cached).toBeUndefined();
+					fs.stat("/test/path/sub", (err, r4) => {
+						// /test/path/sub should still be cached
+						expect(r4.cached).toBe(true);
+						done();
+					});
+				});
+			});
+		});
+	});
+
+	it("should purge an array exactly when exact: true", (done) => {
+		fs.stat("/test/path", (err, r1) => {
+			r1.cached = true;
+			fs.stat("/test/path/sub", (err, r2) => {
+				r2.cached = true;
+				fs.stat("/other", (err, r3) => {
+					r3.cached = true;
+					fs.purge(["/test/path", "/other"], { exact: true });
+					fs.stat("/test/path", (err, r4) => {
+						expect(r4.cached).toBeUndefined();
+						fs.stat("/test/path/sub", (err, r5) => {
+							expect(r5.cached).toBe(true);
+							fs.stat("/other", (err, r6) => {
+								expect(r6.cached).toBeUndefined();
+								done();
+							});
+						});
+					});
+				});
+			});
+		});
+	});
+
+	it("should still prefix-purge when exact is not set or false", (done) => {
+		fs.stat("/test/path", (err, r1) => {
+			r1.cached = true;
+			fs.stat("/test/path/sub", (err, r2) => {
+				r2.cached = true;
+				fs.purge("/test/path");
+				fs.stat("/test/path", (err, r3) => {
+					expect(r3.cached).toBeUndefined();
+					fs.stat("/test/path/sub", (err, r4) => {
+						expect(r4.cached).toBeUndefined();
+						done();
+					});
+				});
+			});
+		});
+	});
+
+	it("should purge readdir of the exact directory when exact: true", (done) => {
+		fs.readdir("/test/path", (err, r1) => {
+			expect(r1[0]).toBe("0");
+			fs.readdir("/test/path/sub", (err, r2) => {
+				expect(r2[0]).toBe("1");
+				// Without exact, purging the dir path strips to dirname and prefix-purges
+				// readdir for that parent — meaning readdir("/test/path") would NOT be evicted
+				// by purge("/test/path/sub") in legacy mode (parent is "/test/path/", child of
+				// which is "/test/path/sub", but readdir key is "/test/path"). With exact: true
+				// the caller is naming the directory itself, so it should evict directly.
+				fs.purge("/test/path", { exact: true });
+				fs.readdir("/test/path", (err, r3) => {
+					expect(r3[0]).toBe("2");
+					// sibling readdir cache should still be intact
+					fs.readdir("/test/path/sub", (err, r4) => {
+						expect(r4[0]).toBe("1");
+						done();
+					});
+				});
+			});
+		});
+	});
+
+	it("should accept Buffer with exact: true", (done) => {
+		fs.stat("/test/path", (err, r1) => {
+			r1.cached = true;
+			fs.stat("/test/path/sub", (err, r2) => {
+				r2.cached = true;
+				fs.purge(Buffer.from("/test/path"), { exact: true });
+				fs.stat("/test/path", (err, r3) => {
+					expect(r3.cached).toBeUndefined();
+					fs.stat("/test/path/sub", (err, r4) => {
+						expect(r4.cached).toBe(true);
+						fs.purge([Buffer.from("/test/path/sub")], {
+							exact: true,
+						});
+						fs.stat("/test/path/sub", (err, r5) => {
+							expect(r5.cached).toBeUndefined();
+							done();
+						});
+					});
+				});
+			});
+		});
+	});
+
 	it("should not stack overflow when resolving in an async loop", (done) => {
 		let i = 10000;
 		const next = () => {

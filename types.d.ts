@@ -145,6 +145,7 @@ declare class CachedInputFileSystem {
 			| URL_url
 			| (string | number | Buffer | URL_url)[]
 			| Set<string | number | Buffer | URL_url>,
+		options?: { exact?: boolean },
 	): void;
 }
 declare class CloneBasenamePlugin {
