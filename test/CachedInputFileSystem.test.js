@@ -522,6 +522,29 @@ describe("cachedInputFileSystem CacheBackend", () => {
 		});
 	});
 
+	it("should purge readdir of the exact directory when exact: true", (done) => {
+		fs.readdir("/test/path", (err, r1) => {
+			expect(r1[0]).toBe("0");
+			fs.readdir("/test/path/sub", (err, r2) => {
+				expect(r2[0]).toBe("1");
+				// Without exact, purging the dir path strips to dirname and prefix-purges
+				// readdir for that parent — meaning readdir("/test/path") would NOT be evicted
+				// by purge("/test/path/sub") in legacy mode (parent is "/test/path/", child of
+				// which is "/test/path/sub", but readdir key is "/test/path"). With exact: true
+				// the caller is naming the directory itself, so it should evict directly.
+				fs.purge("/test/path", { exact: true });
+				fs.readdir("/test/path", (err, r3) => {
+					expect(r3[0]).toBe("2");
+					// sibling readdir cache should still be intact
+					fs.readdir("/test/path/sub", (err, r4) => {
+						expect(r4[0]).toBe("1");
+						done();
+					});
+				});
+			});
+		});
+	});
+
 	it("should accept Buffer with exact: true", (done) => {
 		fs.stat("/test/path", (err, r1) => {
 			r1.cached = true;
