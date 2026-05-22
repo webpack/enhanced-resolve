@@ -460,6 +460,26 @@ describe("cachedInputFileSystem CacheBackend", () => {
 		});
 	});
 
+	it("should not clear the entire cache when purging falsy keys 0 or ''", (done) => {
+		// number 0 (a valid fd) and "" are valid cache keys per the signature;
+		// passing them must not be confused with the no-arg "clear all" form.
+		fs.stat("/test/path", (err, r1) => {
+			r1.cached = true;
+			fs.purge(0);
+			fs.stat("/test/path", (err, r2) => {
+				expect(r2.cached).toBe(true);
+				fs.purge("");
+				fs.stat("/test/path", (err, r3) => {
+					// Empty string is a prefix of every key, so prefix-purge still clears
+					// everything — but only because of the prefix semantics, not because
+					// "" was misclassified as "no argument".
+					expect(r3.cached).toBeUndefined();
+					done();
+				});
+			});
+		});
+	});
+
 	it("should not crash when options is null", (done) => {
 		fs.stat("/test/path", (err, r1) => {
 			r1.cached = true;
