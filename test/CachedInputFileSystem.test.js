@@ -460,6 +460,18 @@ describe("cachedInputFileSystem CacheBackend", () => {
 		});
 	});
 
+	it("should not crash when options is null", (done) => {
+		fs.stat("/test/path", (err, r1) => {
+			r1.cached = true;
+			expect(() => fs.purge("/test/path", null)).not.toThrow();
+			fs.stat("/test/path", (err, r2) => {
+				// null is treated as "no options" — falls back to prefix purge
+				expect(r2.cached).toBeUndefined();
+				done();
+			});
+		});
+	});
+
 	it("should purge exact entries only when exact: true", (done) => {
 		fs.stat("/test/path", (err, r1) => {
 			expect(r1.path).toBe("/test/path");
