@@ -1,5 +1,11 @@
 # enhanced-resolve
 
+## 5.22.1
+
+### Patch Changes
+
+- Fix `restrictions` bypass via an in-root symlink pointing outside the root. (by [@alexander-akait](https://github.com/alexander-akait) in [#595](https://github.com/webpack/enhanced-resolve/pull/595))
+
 ## 5.22.0
 
 ### Minor Changes
