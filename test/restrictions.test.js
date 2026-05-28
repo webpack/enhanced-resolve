@@ -177,7 +177,25 @@ describe("restrictions", () => {
 		}
 
 		afterAll(() => {
-			fs.rmSync(symlinkRoot, { recursive: true, force: true });
+			for (const file of [
+				path.join(allowed, "link.js"),
+				path.join(allowed, "rel-link.js"),
+				path.join(allowed, "real.js"),
+				path.join(outside, "secret.js"),
+			]) {
+				try {
+					fs.unlinkSync(file);
+				} catch (_err) {
+					// ignore
+				}
+			}
+			for (const dir of [allowed, outside, symlinkRoot]) {
+				try {
+					fs.rmdirSync(dir);
+				} catch (_err) {
+					// ignore
+				}
+			}
 		});
 
 		if (canSymlink) {
