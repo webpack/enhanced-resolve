@@ -150,4 +150,101 @@ describe("restrictions", () => {
 			},
 		);
 	});
+
+	describe("with symlinks", () => {
+		const symlinkRoot = path.resolve(__dirname, "temp-restrictions-symlink");
+		const allowed = path.join(symlinkRoot, "allowed");
+		const outside = path.join(symlinkRoot, "outside");
+
+		let canSymlink = true;
+		try {
+			fs.mkdirSync(allowed, { recursive: true });
+			fs.mkdirSync(outside, { recursive: true });
+			fs.writeFileSync(path.join(outside, "secret.js"), "module.exports = 1;");
+			fs.writeFileSync(path.join(allowed, "real.js"), "module.exports = 2;");
+			fs.symlinkSync(
+				path.join(outside, "secret.js"),
+				path.join(allowed, "link.js"),
+				"file",
+			);
+			fs.symlinkSync(
+				path.join("..", "outside", "secret.js"),
+				path.join(allowed, "rel-link.js"),
+				"file",
+			);
+		} catch (_err) {
+			canSymlink = false;
+		}
+
+		afterAll(() => {
+			for (const file of [
+				path.join(allowed, "link.js"),
+				path.join(allowed, "rel-link.js"),
+				path.join(allowed, "real.js"),
+				path.join(outside, "secret.js"),
+			]) {
+				try {
+					fs.unlinkSync(file);
+				} catch (_err) {
+					// ignore
+				}
+			}
+			for (const dir of [allowed, outside, symlinkRoot]) {
+				try {
+					fs.rmdirSync(dir);
+				} catch (_err) {
+					// ignore
+				}
+			}
+		});
+
+		if (canSymlink) {
+			it("should reject an in-root symlink whose real target is outside the restriction", (done) => {
+				const resolver = ResolverFactory.createResolver({
+					fileSystem: nodeFileSystem,
+					extensions: [".js"],
+					restrictions: [allowed],
+				});
+
+				resolver.resolve({}, allowed, "./link.js", {}, (err, result) => {
+					if (!err) return done(new Error(`expect error, got ${result}`));
+					expect(err).toBeInstanceOf(Error);
+					done();
+				});
+			});
+
+			it("should reject an in-root relative symlink whose real target is outside the restriction", (done) => {
+				const resolver = ResolverFactory.createResolver({
+					fileSystem: nodeFileSystem,
+					extensions: [".js"],
+					restrictions: [allowed],
+				});
+
+				resolver.resolve({}, allowed, "./rel-link.js", {}, (err, result) => {
+					if (!err) return done(new Error(`expect error, got ${result}`));
+					expect(err).toBeInstanceOf(Error);
+					done();
+				});
+			});
+
+			it("should still resolve a real in-root file under the restriction", (done) => {
+				const resolver = ResolverFactory.createResolver({
+					fileSystem: nodeFileSystem,
+					extensions: [".js"],
+					restrictions: [allowed],
+				});
+
+				resolver.resolve({}, allowed, "./real.js", {}, (err, result) => {
+					if (err) return done(err);
+					expect(result).toEqual(path.join(allowed, "real.js"));
+					done();
+				});
+			});
+		} else {
+			// eslint-disable-next-line jest/expect-expect
+			it("cannot test symlinks because we have no permission to create them", () => {
+				// Nothing
+			});
+		}
+	});
 });
