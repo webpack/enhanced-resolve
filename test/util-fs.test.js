@@ -1,5 +1,8 @@
 "use strict";
 
+const assert = require("assert");
+const { describe, it } = require("node:test");
+
 /* eslint-disable jsdoc/reject-any-type */
 
 // `readJson` is the JSONC loader used internally by TsconfigPathsPlugin.
@@ -34,7 +37,7 @@ describe("util/fs readJson", () => {
 			},
 		});
 		const result = await readJsonPromise(fileSystem, "/a/package.json");
-		expect(result).toEqual(content);
+		assert.deepStrictEqual(result, content);
 	});
 
 	it("rejects if readJson yields an error", async () => {
@@ -46,9 +49,10 @@ describe("util/fs readJson", () => {
 				callback(null, Buffer.from("{}"));
 			},
 		});
-		await expect(
+		await assert.rejects(
 			readJsonPromise(fileSystem, "/a/package.json"),
-		).rejects.toThrow("boom");
+			(err) => err instanceof Error && err.message.includes("boom"),
+		);
 	});
 
 	it("falls back to readFile when stripComments is true", async () => {
@@ -66,7 +70,7 @@ describe("util/fs readJson", () => {
 		const result = await readJsonPromise(fileSystem, "/a/tsconfig.json", {
 			stripComments: true,
 		});
-		expect(result).toEqual({ a: 1, b: [1, 2] });
+		assert.deepStrictEqual(result, { a: 1, b: [1, 2] });
 	});
 
 	it("falls back to readFile when readJson is unavailable", async () => {
@@ -76,7 +80,7 @@ describe("util/fs readJson", () => {
 			},
 		});
 		const result = await readJsonPromise(fileSystem, "/a/package.json");
-		expect(result).toEqual({ hello: "world" });
+		assert.deepStrictEqual(result, { hello: "world" });
 	});
 
 	it("decodes a Uint8Array (non-Node file system) result", async () => {
@@ -112,9 +116,10 @@ describe("util/fs readJson", () => {
 				callback(new Error("read-fail"));
 			},
 		});
-		await expect(
+		await assert.rejects(
 			readJsonPromise(fileSystem, "/a/package.json"),
-		).rejects.toThrow("read-fail");
+			(err) => err instanceof Error && err.message.includes("read-fail"),
+		);
 	});
 
 	it("invokes the callback synchronously when the file system is synchronous", () => {
@@ -135,8 +140,8 @@ describe("util/fs readJson", () => {
 				sync = true;
 			},
 		);
-		expect(sync).toBe(true);
-		expect(result).toEqual({ sync: true });
+		assert.strictEqual(sync, true);
+		assert.deepStrictEqual(result, { sync: true });
 	});
 
 	// Regression: a file system may return a string from readFile (more likely

@@ -1,6 +1,9 @@
 "use strict";
 
+const assert = require("assert");
 const fs = require("fs");
+const { describe, it } = require("node:test");
+
 const path = require("path");
 
 const { ResolverFactory } = require("../");
@@ -46,7 +49,7 @@ describe("should resolve all aliases", () => {
 		fileSystem: nodeFileSystem,
 	});
 
-	it("should yield all b files", (done) => {
+	it("should yield all b files", (t, done) => {
 		const paths = [];
 		const yield_ = ({ path }) => paths.push(path);
 		const fileDependencies = new Set();
@@ -61,10 +64,13 @@ describe("should resolve all aliases", () => {
 		};
 
 		resolver.resolve({}, fixtures, "index/b", context, (err, result) => {
-			expect(err).toBeNull();
-			expect(result).toBeUndefined();
-			expect(paths).toEqual(makeFixturePaths(["/a/foo/b", "/a/foo-2/b"]));
-			expect(contextifyDependencies(fileDependencies)).toEqual([
+			assert.strictEqual(err, null);
+			assert.strictEqual(result, undefined);
+			assert.deepStrictEqual(
+				paths,
+				makeFixturePaths(["/a/foo/b", "/a/foo-2/b"]),
+			);
+			assert.deepStrictEqual(contextifyDependencies(fileDependencies), [
 				"",
 				"/a",
 				"/a/foo",
@@ -72,7 +78,7 @@ describe("should resolve all aliases", () => {
 				"/a/foo-2/b",
 				"/a/foo/b",
 			]);
-			expect(contextifyDependencies(missingDependencies)).toEqual([
+			assert.deepStrictEqual(contextifyDependencies(missingDependencies), [
 				"/a/foo-2/b",
 				"/a/foo-2/b.js",
 				"/a/foo-2/package.json",
@@ -82,12 +88,12 @@ describe("should resolve all aliases", () => {
 				"/a/package.json",
 				"/package.json",
 			]);
-			expect([...contextDependencies].sort()).toEqual([]);
+			assert.deepStrictEqual([...contextDependencies].sort(), []);
 			done();
 		});
 	});
 
-	it("should yield all foo files", (done) => {
+	it("should yield all foo files", (t, done) => {
 		const paths = [];
 		const yield_ = ({ path }) => paths.push(path);
 		const fileDependencies = new Set();
@@ -102,10 +108,10 @@ describe("should resolve all aliases", () => {
 		};
 
 		modulesResolver.resolve({}, fixtures, "foo/a", context, (err, result) => {
-			expect(err).toBeNull();
-			expect(result).toBeUndefined();
-			expect(paths).toEqual(makeFixturePaths(["/a/foo/a", "/b/foo/a"]));
-			expect(contextifyDependencies(fileDependencies)).toEqual([
+			assert.strictEqual(err, null);
+			assert.strictEqual(result, undefined);
+			assert.deepStrictEqual(paths, makeFixturePaths(["/a/foo/a", "/b/foo/a"]));
+			assert.deepStrictEqual(contextifyDependencies(fileDependencies), [
 				"",
 				"/a",
 				"/a/foo",
@@ -114,7 +120,7 @@ describe("should resolve all aliases", () => {
 				"/b/foo",
 				"/b/foo/a",
 			]);
-			expect(contextifyDependencies(missingDependencies)).toEqual([
+			assert.deepStrictEqual(contextifyDependencies(missingDependencies), [
 				"/a/foo/a",
 				"/a/foo/a.js",
 				"/a/foo/package.json",
@@ -125,12 +131,12 @@ describe("should resolve all aliases", () => {
 				"/b/package.json",
 				"/package.json",
 			]);
-			expect([...contextDependencies].sort()).toEqual([]);
+			assert.deepStrictEqual([...contextDependencies].sort(), []);
 			done();
 		});
 	});
 
-	it("should yield c file", (done) => {
+	it("should yield c file", (t, done) => {
 		const paths = [];
 		const yield_ = ({ path }) => paths.push(path);
 		/** @type {ResolveContext} */
@@ -139,14 +145,14 @@ describe("should resolve all aliases", () => {
 		};
 
 		resolver.resolve({}, fixtures, "index/c", context, (err, result) => {
-			expect(err).toBeNull();
-			expect(result).toBeUndefined();
-			expect(paths).toEqual(makeFixturePaths(["/a/foo-2/c"]));
+			assert.strictEqual(err, null);
+			assert.strictEqual(result, undefined);
+			assert.deepStrictEqual(paths, makeFixturePaths(["/a/foo-2/c"]));
 			done();
 		});
 	});
 
-	it("should resolve false alias", (done) => {
+	it("should resolve false alias", (t, done) => {
 		const paths = [];
 		const yield_ = ({ path }) => paths.push(path);
 		const fileDependencies = new Set();
@@ -161,20 +167,20 @@ describe("should resolve all aliases", () => {
 		};
 
 		resolver.resolve({}, fixtures, "foo", context, (err, result) => {
-			expect(err).toBeNull();
-			expect(result).toBeUndefined();
-			expect(paths).toEqual([false]);
-			expect(contextifyDependencies(fileDependencies)).toEqual([]);
-			expect(contextifyDependencies(missingDependencies)).toEqual([
+			assert.strictEqual(err, null);
+			assert.strictEqual(result, undefined);
+			assert.deepStrictEqual(paths, [false]);
+			assert.deepStrictEqual(contextifyDependencies(fileDependencies), []);
+			assert.deepStrictEqual(contextifyDependencies(missingDependencies), [
 				"/node_modules",
 				"/package.json",
 			]);
-			expect([...contextDependencies].sort()).toEqual([]);
+			assert.deepStrictEqual([...contextDependencies].sort(), []);
 			done();
 		});
 	});
 
-	it("should return error if no resolve", (done) => {
+	it("should return error if no resolve", (t, done) => {
 		const paths = [];
 		const yield_ = ({ path }) => paths.push(path);
 		const fileDependencies = new Set();
@@ -189,12 +195,12 @@ describe("should resolve all aliases", () => {
 		};
 
 		resolver.resolve({}, fixtures, "index/unknown", context, (err, result) => {
-			expect(err).not.toBeNull();
-			expect(err).toBeDefined();
-			expect(result).toBeUndefined();
-			expect(paths).toEqual([]);
-			expect(contextifyDependencies(fileDependencies)).toEqual([]);
-			expect(contextifyDependencies(missingDependencies)).toEqual([
+			assert.notStrictEqual(err, null);
+			assert.notStrictEqual(err, undefined);
+			assert.strictEqual(result, undefined);
+			assert.deepStrictEqual(paths, []);
+			assert.deepStrictEqual(contextifyDependencies(fileDependencies), []);
+			assert.deepStrictEqual(contextifyDependencies(missingDependencies), [
 				"/a/foo-2/package.json",
 				"/a/foo-2/unknown",
 				"/a/foo-2/unknown.js",
@@ -204,13 +210,13 @@ describe("should resolve all aliases", () => {
 				"/a/package.json",
 				"/package.json",
 			]);
-			expect([...contextDependencies].sort()).toEqual([]);
+			assert.deepStrictEqual([...contextDependencies].sort(), []);
 			done();
 		});
 	});
 
 	describe("resolve alias field", () => {
-		it("should handle false in alias field", (done) => {
+		it("should handle false in alias field", (t, done) => {
 			const resolver = ResolverFactory.createResolver({
 				extensions: [".js"],
 				alias: {
@@ -239,21 +245,21 @@ describe("should resolve all aliases", () => {
 
 			resolver.resolve({}, fixtures, "index/a", context, (err, result) => {
 				calls++;
-				expect(calls).toBe(1);
-				expect(err).toBeNull();
-				expect(result).toBeUndefined();
-				expect(paths).toEqual([false]);
-				expect(contextifyDependencies(fileDependencies)).toEqual([
+				assert.strictEqual(calls, 1);
+				assert.strictEqual(err, null);
+				assert.strictEqual(result, undefined);
+				assert.deepStrictEqual(paths, [false]);
+				assert.deepStrictEqual(contextifyDependencies(fileDependencies), [
 					"/c/foo/package.json",
 				]);
-				expect(contextifyDependencies(missingDependencies)).toEqual([
+				assert.deepStrictEqual(contextifyDependencies(missingDependencies), [
 					"/c/foo/a",
 					"/c/foo/a.js",
 					"/package.json",
 				]);
-				expect([...contextDependencies].sort()).toEqual([]);
+				assert.deepStrictEqual([...contextDependencies].sort(), []);
 
-				expect(beatifyLogs(logs)).toEqual([
+				assert.deepStrictEqual(beatifyLogs(logs), [
 					"resolve 'index/a' in 'fixtures'",
 					"  Parsed request is a module",
 					"  using description file (relative path: ./test/fixtures/yield)",
@@ -349,18 +355,18 @@ describe("should resolve all aliases", () => {
 
 				resolver.resolve({}, fixtures, "index/a", context, (err, result) => {
 					calls++;
-					expect(calls).toBe(1);
-					expect(err).toBeNull();
-					expect(result).toBeUndefined();
-					expect(paths).toEqual(makeFixturePaths(expectedResult));
-					expect(contextifyDependencies(fileDependencies)).toEqual([
+					assert.strictEqual(calls, 1);
+					assert.strictEqual(err, null);
+					assert.strictEqual(result, undefined);
+					assert.deepStrictEqual(paths, makeFixturePaths(expectedResult));
+					assert.deepStrictEqual(contextifyDependencies(fileDependencies), [
 						"",
 						"/a",
 						"/a/foo",
 						"/a/foo/a",
 						"/c/foo/package.json",
 					]);
-					expect(contextifyDependencies(missingDependencies)).toEqual([
+					assert.deepStrictEqual(contextifyDependencies(missingDependencies), [
 						"/a/foo/a",
 						"/a/foo/a.js",
 						"/a/foo/package.json",
@@ -369,15 +375,14 @@ describe("should resolve all aliases", () => {
 						"/c/foo/a.js",
 						"/package.json",
 					]);
-					expect([...contextDependencies].sort()).toEqual([]);
-					expect(beatifyLogs(logs)).toEqual(expectedLogs);
+					assert.deepStrictEqual([...contextDependencies].sort(), []);
+					assert.deepStrictEqual(beatifyLogs(logs), expectedLogs);
 
 					done();
 				});
 			}
 
-			// eslint-disable-next-line jest/expect-expect
-			it("default order", (done) => {
+			it("default order", (t, done) => {
 				resolver = createResolver(["/c/foo", "/a/foo"]);
 				run(
 					done,
@@ -392,8 +397,7 @@ describe("should resolve all aliases", () => {
 				);
 			});
 
-			// eslint-disable-next-line jest/expect-expect
-			it("reverse order", (done) => {
+			it("reverse order", (t, done) => {
 				resolver = createResolver(["/a/foo", "/c/foo"]);
 				run(
 					done,
@@ -417,7 +421,7 @@ describe("should resolve all aliases", () => {
 					fileSystem: nodeFileSystem,
 				});
 
-			it("should correctly handle resolve in callback", (done) => {
+			it("should correctly handle resolve in callback", (t, done) => {
 				const getResult = (request) => ({ ...request, path: "/a" });
 				const resolver = createResolver({
 					apply(resolver) {
@@ -437,14 +441,14 @@ describe("should resolve all aliases", () => {
 				};
 				resolver.resolve({}, fixtures, "unknown", context, (err, result) => {
 					if (err) done(err);
-					expect(err).toBeNull();
-					expect(result).toBeUndefined();
-					expect(paths).toEqual(["/a"]);
+					assert.strictEqual(err, null);
+					assert.strictEqual(result, undefined);
+					assert.deepStrictEqual(paths, ["/a"]);
 					done();
 				});
 			});
 
-			it("should correctly handle error in callback", (done) => {
+			it("should correctly handle error in callback", (t, done) => {
 				const resolver = createResolver({
 					apply(resolver) {
 						resolver
@@ -460,10 +464,10 @@ describe("should resolve all aliases", () => {
 				};
 				resolver.resolve({}, fixtures, "unknown", context, (err, result) => {
 					if (!err) return done(new Error("error expected"));
-					expect(err).not.toBeNull();
-					expect(err.message).toBe("error");
-					expect(result).toBeUndefined();
-					expect(paths).toEqual([]);
+					assert.notStrictEqual(err, null);
+					assert.strictEqual(err.message, "error");
+					assert.strictEqual(result, undefined);
+					assert.deepStrictEqual(paths, []);
 					done();
 				});
 			});
@@ -471,7 +475,7 @@ describe("should resolve all aliases", () => {
 
 		describe("unsafe cache", () => {
 			// same case as in "should yield all b files"
-			it("should return result from cache", (done) => {
+			it("should return result from cache", (t, done) => {
 				const cache = /** @type {Cache} */ ({});
 				const resolver = ResolverFactory.createResolver({
 					extensions: [".js"],
@@ -496,13 +500,14 @@ describe("should resolve all aliases", () => {
 							"index/b",
 							{ yield: (obj) => paths.push(obj.path) },
 							(err, result) => {
-								expect(err).toBeNull();
-								expect(result).toBeUndefined();
-								expect(paths).toEqual(
+								assert.strictEqual(err, null);
+								assert.strictEqual(result, undefined);
+								assert.deepStrictEqual(
+									paths,
 									makeFixturePaths(["/a/foo/b", "/a/foo-2/b"]),
 								);
 								// original + 2 aliases
-								expect(Object.keys(cache)).toHaveLength(3);
+								assert.strictEqual(Object.keys(cache).length, 3);
 
 								const cacheId =
 									/** @type {string} */
@@ -517,12 +522,13 @@ describe("should resolve all aliases", () => {
 											return request === "index/b";
 										})
 									);
-								expect(cacheId).toBeDefined();
-								expect(Array.isArray(cache[cacheId])).toBe(true);
-								expect(
+								assert.notStrictEqual(cacheId, undefined);
+								assert.strictEqual(Array.isArray(cache[cacheId]), true);
+								assert.deepStrictEqual(
 									/** @type {ResolveRequest[]} */
 									(cache[cacheId]).map((o) => o.path),
-								).toEqual(makeFixturePaths(["/a/foo/b", "/a/foo-2/b"]));
+									makeFixturePaths(["/a/foo/b", "/a/foo-2/b"]),
+								);
 								done();
 							},
 						);
@@ -531,7 +537,7 @@ describe("should resolve all aliases", () => {
 			});
 
 			// same as "should handle false in alias field"
-			it("should return ignore result from cache", (done) => {
+			it("should return ignore result from cache", (t, done) => {
 				const cache = /** @type {Cache} */ ({});
 				const resolver = ResolverFactory.createResolver({
 					extensions: [".js"],
@@ -551,20 +557,21 @@ describe("should resolve all aliases", () => {
 						"foo",
 						{ yield: (obj) => paths.push(obj.path) },
 						(err, result) => {
-							expect(err).toBeNull();
-							expect(result).toBeUndefined();
-							expect(paths).toEqual([false]);
+							assert.strictEqual(err, null);
+							assert.strictEqual(result, undefined);
+							assert.deepStrictEqual(paths, [false]);
 
 							// original + 0 aliases
-							expect(Object.keys(cache)).toHaveLength(1);
+							assert.strictEqual(Object.keys(cache).length, 1);
 
 							const [cacheId] = Object.keys(cache);
-							expect(cacheId).toBeDefined();
-							expect(Array.isArray(cache[cacheId])).toBe(true);
-							expect(
+							assert.notStrictEqual(cacheId, undefined);
+							assert.strictEqual(Array.isArray(cache[cacheId]), true);
+							assert.deepStrictEqual(
 								/** @type {ResolveRequest[]} */
 								(cache[cacheId]).map((o) => o.path),
-							).toEqual([false]);
+								[false],
+							);
 							done();
 						},
 					);

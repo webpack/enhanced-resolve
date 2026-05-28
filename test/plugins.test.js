@@ -1,6 +1,9 @@
 "use strict";
 
+const assert = require("assert");
 const fs = require("fs");
+const { describe, it } = require("node:test");
+
 const path = require("path");
 const {
 	CachedInputFileSystem,
@@ -9,7 +12,7 @@ const {
 } = require("../");
 
 describe("plugins", () => {
-	it("should resolve with the CloneBasenamePlugin", (done) => {
+	it("should resolve with the CloneBasenamePlugin", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem: require("fs"),
 			plugins: [
@@ -28,7 +31,8 @@ describe("plugins", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.resolve(
 						__dirname,
 						"fixtures/directory-default/directory-default.js",
@@ -39,7 +43,7 @@ describe("plugins", () => {
 		);
 	});
 
-	it("should ignore 'false'/'null'/'undefined' plugins", (done) => {
+	it("should ignore 'false'/'null'/'undefined' plugins", (t, done) => {
 		const FailedPlugin = class {
 			apply() {
 				throw new Error("FailedPlugin");
@@ -70,7 +74,8 @@ describe("plugins", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.resolve(
 						__dirname,
 						"fixtures/directory-default/directory-default.js",
@@ -92,6 +97,6 @@ describe("plugins", () => {
 				},
 			],
 		});
-		expect(seenResolver).toBe(r);
+		assert.strictEqual(seenResolver, r);
 	});
 });

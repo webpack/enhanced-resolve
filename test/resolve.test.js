@@ -1,5 +1,8 @@
 "use strict";
 
+const assert = require("assert");
+const { describe, it } = require("node:test");
+
 const path = require("path");
 const url = require("url");
 const resolve = require("../");
@@ -41,23 +44,23 @@ function testResolve(name, context, moduleName, result) {
 	describe(name, () => {
 		it("should resolve sync correctly", () => {
 			const filename = resolve.sync(context, moduleName);
-			expect(filename).toBeDefined();
-			expect(filename).toEqual(result);
+			assert.notStrictEqual(filename, undefined);
+			assert.deepStrictEqual(filename, result);
 		});
 
-		it("should resolve async correctly", (done) => {
+		it("should resolve async correctly", (t, done) => {
 			resolve(context, moduleName, (err, filename) => {
 				if (err) return done(err);
-				expect(filename).toBeDefined();
-				expect(filename).toEqual(result);
+				assert.notStrictEqual(filename, undefined);
+				assert.deepStrictEqual(filename, result);
 				done();
 			});
 		});
 
 		it("should resolve promise correctly", async () => {
 			const filename = await resolve.promise(context, moduleName);
-			expect(filename).toBeDefined();
-			expect(filename).toEqual(result);
+			assert.notStrictEqual(filename, undefined);
+			assert.deepStrictEqual(filename, result);
 		});
 	});
 }
@@ -71,25 +74,25 @@ function testResolve(name, context, moduleName, result) {
  */
 function testResolveContext(name, context, moduleName, result) {
 	describe(name, () => {
-		it("should resolve async correctly", (done) => {
+		it("should resolve async correctly", (t, done) => {
 			asyncContextResolve(context, moduleName, (err, filename) => {
 				if (err) done(err);
-				expect(filename).toBeDefined();
-				expect(filename).toEqual(result);
+				assert.notStrictEqual(filename, undefined);
+				assert.deepStrictEqual(filename, result);
 				done();
 			});
 		});
 
 		it("should resolve sync correctly", () => {
 			const filename = syncContextResolve(context, moduleName);
-			expect(filename).toBeDefined();
-			expect(filename).toEqual(result);
+			assert.notStrictEqual(filename, undefined);
+			assert.deepStrictEqual(filename, result);
 		});
 
 		it("should resolve promise correctly", async () => {
 			const filename = await promiseContextResolve(context, moduleName);
-			expect(filename).toBeDefined();
-			expect(filename).toEqual(result);
+			assert.notStrictEqual(filename, undefined);
+			assert.deepStrictEqual(filename, result);
 		});
 	});
 }
@@ -329,7 +332,7 @@ describe("resolve", () => {
 		path.join(fixtures, "main1.js"),
 	);
 
-	it("should correctly resolve", (done) => {
+	it("should correctly resolve", (t, done) => {
 		const issue238 = path.resolve(fixtures, "issue-238");
 
 		issue238Resolve(
@@ -337,8 +340,9 @@ describe("resolve", () => {
 			"config/myObjectFile",
 			(err, filename) => {
 				if (err) done(err);
-				expect(filename).toBeDefined();
-				expect(filename).toEqual(
+				assert.notStrictEqual(filename, undefined);
+				assert.deepStrictEqual(
+					filename,
 					path.resolve(issue238, "./src/common/config/myObjectFile.js"),
 				);
 				done();
@@ -346,46 +350,47 @@ describe("resolve", () => {
 		);
 	});
 
-	it("should correctly resolve with preferRelative", (done) => {
+	it("should correctly resolve with preferRelative", (t, done) => {
 		preferRelativeResolve(fixtures, "main1.js", (err, filename) => {
 			if (err) done(err);
-			expect(filename).toBeDefined();
-			expect(filename).toEqual(path.join(fixtures, "main1.js"));
+			assert.notStrictEqual(filename, undefined);
+			assert.deepStrictEqual(filename, path.join(fixtures, "main1.js"));
 			done();
 		});
 	});
 
-	it("should correctly resolve with preferRelative #2", (done) => {
+	it("should correctly resolve with preferRelative #2", (t, done) => {
 		preferRelativeResolve(fixtures, "m1/a.js", (err, filename) => {
 			if (err) done(err);
-			expect(filename).toBeDefined();
-			expect(filename).toEqual(
+			assert.notStrictEqual(filename, undefined);
+			assert.deepStrictEqual(
+				filename,
 				path.join(fixtures, "node_modules", "m1", "a.js"),
 			);
 			done();
 		});
 	});
 
-	it("should not crash when passing undefined as path", (done) => {
+	it("should not crash when passing undefined as path", (t, done) => {
 		// @ts-expect-error testing invalid arguments
 		resolve(fixtures, undefined, (err) => {
-			expect(err).toBeInstanceOf(Error);
+			assert.ok(err instanceof Error);
 			done();
 		});
 	});
 
-	it("should not crash when passing undefined as context", (done) => {
+	it("should not crash when passing undefined as context", (t, done) => {
 		// @ts-expect-error testing invalid arguments
 		resolve({}, undefined, "./test/resolve.js", (err) => {
-			expect(err).toBeInstanceOf(Error);
+			assert.ok(err instanceof Error);
 			done();
 		});
 	});
 
-	it("should not crash when passing undefined everywhere", (done) => {
+	it("should not crash when passing undefined everywhere", (t, done) => {
 		// @ts-expect-error testing invalid arguments
 		resolve(undefined, undefined, undefined, undefined, (err) => {
-			expect(err).toBeInstanceOf(Error);
+			assert.ok(err instanceof Error);
 			done();
 		});
 	});

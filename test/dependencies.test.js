@@ -1,5 +1,8 @@
 "use strict";
 
+const assert = require("assert");
+const { beforeEach, describe, it } = require("node:test");
+
 const { Volume } = require("memfs");
 const resolve = require("../");
 
@@ -84,7 +87,7 @@ describe("dependencies", () => {
 
 	for (const testCase of testCases) {
 		// eslint-disable-next-line no-loop-func
-		it(`should report correct dependencies for ${testCase.name}`, (done) => {
+		it(`should report correct dependencies for ${testCase.name}`, (t, done) => {
 			const fileDependencies = new Set();
 			const missingDependencies = new Set();
 			resolver(
@@ -97,11 +100,13 @@ describe("dependencies", () => {
 				(err, result) => {
 					if (err) return done(err);
 
-					expect(result).toEqual(testCase.result);
-					expect([...fileDependencies].sort()).toEqual(
+					assert.deepStrictEqual(result, testCase.result);
+					assert.deepStrictEqual(
+						[...fileDependencies].sort(),
 						testCase.fileDependencies.sort(),
 					);
-					expect([...missingDependencies].sort()).toEqual(
+					assert.deepStrictEqual(
+						[...missingDependencies].sort(),
 						testCase.missingDependencies.sort(),
 					);
 					done();

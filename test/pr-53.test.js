@@ -1,5 +1,8 @@
 "use strict";
 
+const assert = require("assert");
+const { describe, it } = require("node:test");
+
 const { CachedInputFileSystem } = require("../");
 
 describe("pr-53", () => {
@@ -14,6 +17,6 @@ describe("pr-53", () => {
 			1000,
 		);
 		if (!cfs.readJsonSync) throw new Error("readJsonSync must be available");
-		expect(cfs.readJsonSync("xyz")).toBe("abcxyz");
+		assert.strictEqual(cfs.readJsonSync("xyz"), "abcxyz");
 	});
 });

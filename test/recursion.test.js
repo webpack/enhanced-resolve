@@ -1,6 +1,9 @@
 "use strict";
 
+const assert = require("assert");
 const fs = require("fs");
+const { describe, it } = require("node:test");
+
 const path = require("path");
 const { CachedInputFileSystem, ResolverFactory } = require("../");
 
@@ -8,7 +11,7 @@ const fixtures = path.join(__dirname, "fixtures");
 const nodeFileSystem = new CachedInputFileSystem(fs, 4000);
 
 describe("recursion detection", () => {
-	it("surfaces a recursion error when a plugin re-invokes doResolve on the same hook/request", (done) => {
+	it("surfaces a recursion error when a plugin re-invokes doResolve on the same hook/request", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem: nodeFileSystem,
 			extensions: [".js"],
@@ -26,15 +29,18 @@ describe("recursion detection", () => {
 		});
 
 		resolver.resolve({}, fixtures, "./a.js", {}, (err) => {
-			expect(err).toBeInstanceOf(Error);
+			assert.ok(err instanceof Error);
 			// The recursion error may be wrapped; either shape is acceptable.
 			const msg = /** @type {Error} */ (err).message;
-			expect(/Recursion in resolving|Can't resolve/.test(msg)).toBe(true);
+			assert.strictEqual(
+				/Recursion in resolving|Can't resolve/.test(msg),
+				true,
+			);
 			done();
 		});
 	});
 
-	it("logs 'abort resolving because of recursion' when a log is provided", (done) => {
+	it("logs 'abort resolving because of recursion' when a log is provided", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem: nodeFileSystem,
 			extensions: [".js"],
@@ -56,10 +62,11 @@ describe("recursion detection", () => {
 			"./a.js",
 			{ log: (m) => log.push(m) },
 			(err) => {
-				expect(err).toBeInstanceOf(Error);
-				expect(
+				assert.ok(err instanceof Error);
+				assert.strictEqual(
 					log.some((l) => l.includes("abort resolving because of recursion")),
-				).toBe(true);
+					true,
+				);
 				done();
 			},
 		);

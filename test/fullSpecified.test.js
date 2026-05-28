@@ -1,5 +1,8 @@
 "use strict";
 
+const assert = require("assert");
+const { describe, it } = require("node:test");
+
 const { Volume } = require("memfs");
 const { ResolverFactory } = require("../");
 
@@ -80,9 +83,9 @@ describe("fullSpecified", () => {
 		const request = failingResolves[key];
 
 		it(`should fail resolving ${key}`, () => {
-			expect(() => {
+			assert.throws(() => {
 				resolver.resolveSync({}, "/a", request);
-			}).toThrow(/Can't resolve/);
+			}, /Can't resolve/);
 		});
 	}
 
@@ -91,7 +94,10 @@ describe("fullSpecified", () => {
 
 		it(`should resolve ${key} successfully`, () => {
 			try {
-				expect(resolver.resolveSync({}, "/a", request)).toEqual(expected);
+				assert.deepStrictEqual(
+					resolver.resolveSync({}, "/a", request),
+					expected,
+				);
 			} catch (err) {
 				err.message += `\n${err.details}`;
 				throw err;
@@ -121,7 +127,8 @@ describe("fullSpecified", () => {
 
 		it(`should resolve ${key} successfully to an context`, () => {
 			try {
-				expect(contextResolver.resolveSync({}, "/a", request)).toEqual(
+				assert.deepStrictEqual(
+					contextResolver.resolveSync({}, "/a", request),
 					expected,
 				);
 			} catch (err) {

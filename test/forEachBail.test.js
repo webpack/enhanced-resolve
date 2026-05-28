@@ -1,9 +1,12 @@
 "use strict";
 
+const assert = require("assert");
+const { describe, it } = require("node:test");
+
 const { forEachBail } = require("../");
 
 describe("forEachBail", () => {
-	it("should iterate correctly", (done) => {
+	it("should iterate correctly", (t, done) => {
 		const log = [];
 		forEachBail(
 			[0, 1, 2, 3, 4, 5, 6],
@@ -17,48 +20,48 @@ describe("forEachBail", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("Should have result"));
-				expect(result).toEqual({ path: "test" });
-				expect(log).toEqual([0, 1, 2, 3, 4, 5]);
+				assert.deepStrictEqual(result, { path: "test" });
+				assert.deepStrictEqual(log, [0, 1, 2, 3, 4, 5]);
 				done();
 			},
 		);
 	});
 
-	it("should handle empty array", (done) => {
+	it("should handle empty array", (t, done) => {
 		forEachBail(
 			[],
 			() => {
 				done(new Error("Should not be called"));
 			},
 			(err, result) => {
-				expect(err).toBeUndefined();
-				expect(result).toBeUndefined();
+				assert.strictEqual(err, undefined);
+				assert.strictEqual(result, undefined);
 				done();
 			},
 		);
 	});
 
-	it("should sync finish with undefined", (done) => {
+	it("should sync finish with undefined", (t, done) => {
 		forEachBail(
 			[2, 3, 4, 5, 6],
 			(value, callback) => callback(),
 			(err, result) => {
-				expect(err).toBeUndefined();
-				expect(result).toBeUndefined();
+				assert.strictEqual(err, undefined);
+				assert.strictEqual(result, undefined);
 				done();
 			},
 		);
 	});
 
-	it("should async finish with undefined", (done) => {
+	it("should async finish with undefined", (t, done) => {
 		forEachBail(
 			[2, 3, 4, 5, 6],
 			(value, callback) => {
 				process.nextTick(callback);
 			},
 			(err, result) => {
-				expect(err).toBeUndefined();
-				expect(result).toBeUndefined();
+				assert.strictEqual(err, undefined);
+				assert.strictEqual(result, undefined);
 				done();
 			},
 		);

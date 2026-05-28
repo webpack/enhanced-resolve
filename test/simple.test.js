@@ -1,6 +1,9 @@
 "use strict";
 
+const assert = require("assert");
 const fs = require("fs");
+const { describe, it } = require("node:test");
+
 const path = require("path");
 const resolve = require("../");
 const { CachedInputFileSystem, ResolverFactory } = require("../");
@@ -20,7 +23,7 @@ describe("simple", () => {
 	];
 
 	for (const pathToIt of pathsToIt) {
-		it(`should resolve itself callback ${pathToIt[2]}`, (done) => {
+		it(`should resolve itself callback ${pathToIt[2]}`, (t, done) => {
 			resolve(pathToIt[0], pathToIt[1], (err, filename) => {
 				if (err) {
 					return done(
@@ -28,13 +31,16 @@ describe("simple", () => {
 					);
 				}
 
-				expect(filename).toBeDefined();
-				expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+				assert.notStrictEqual(filename, undefined);
+				assert.deepStrictEqual(
+					filename,
+					path.join(__dirname, "..", "lib", "index.js"),
+				);
 				done();
 			});
 		});
 
-		it(`should resolve itself callback ${pathToIt[2]} and accept context argument`, (done) => {
+		it(`should resolve itself callback ${pathToIt[2]} and accept context argument`, (t, done) => {
 			resolve({}, pathToIt[0], pathToIt[1], (err, filename) => {
 				if (err) {
 					return done(
@@ -42,13 +48,16 @@ describe("simple", () => {
 					);
 				}
 
-				expect(filename).toBeDefined();
-				expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+				assert.notStrictEqual(filename, undefined);
+				assert.deepStrictEqual(
+					filename,
+					path.join(__dirname, "..", "lib", "index.js"),
+				);
 				done();
 			});
 		});
 
-		it(`should resolve itself callback ${pathToIt[2]} and accept a resolveContext argument`, (done) => {
+		it(`should resolve itself callback ${pathToIt[2]} and accept a resolveContext argument`, (t, done) => {
 			const resolveContext = {};
 			resolve({}, pathToIt[0], pathToIt[1], resolveContext, (err, filename) => {
 				if (err) {
@@ -57,8 +66,11 @@ describe("simple", () => {
 					);
 				}
 
-				expect(filename).toBeDefined();
-				expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+				assert.notStrictEqual(filename, undefined);
+				assert.deepStrictEqual(
+					filename,
+					path.join(__dirname, "..", "lib", "index.js"),
+				);
 				done();
 			});
 		});
@@ -66,15 +78,21 @@ describe("simple", () => {
 		it(`should resolve itself sync ${pathToIt[2]}`, () => {
 			const filename = resolve.sync(pathToIt[0], pathToIt[1]);
 
-			expect(filename).toBeDefined();
-			expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+			assert.notStrictEqual(filename, undefined);
+			assert.deepStrictEqual(
+				filename,
+				path.join(__dirname, "..", "lib", "index.js"),
+			);
 		});
 
 		it(`should resolve itself sync ${pathToIt[2]} and accept a context argument`, () => {
 			const filename = resolve.sync({}, pathToIt[0], pathToIt[1]);
 
-			expect(filename).toBeDefined();
-			expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+			assert.notStrictEqual(filename, undefined);
+			assert.deepStrictEqual(
+				filename,
+				path.join(__dirname, "..", "lib", "index.js"),
+			);
 		});
 
 		it(`should resolve itself promise ${pathToIt[2]} and accept a resolveContext argument`, () => {
@@ -86,21 +104,30 @@ describe("simple", () => {
 				resolveContext,
 			);
 
-			expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+			assert.deepStrictEqual(
+				filename,
+				path.join(__dirname, "..", "lib", "index.js"),
+			);
 		});
 
 		it(`should resolve itself promise ${pathToIt[2]}`, async () => {
 			const filename = await resolve.promise(pathToIt[0], pathToIt[1]);
 
-			expect(filename).toBeDefined();
-			expect(typeof filename).toBe("string");
-			expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+			assert.notStrictEqual(filename, undefined);
+			assert.strictEqual(typeof filename, "string");
+			assert.deepStrictEqual(
+				filename,
+				path.join(__dirname, "..", "lib", "index.js"),
+			);
 		});
 
 		it(`should resolve itself promise ${pathToIt[2]} and accept a context argument`, async () => {
 			const filename = await resolve.promise({}, pathToIt[0], pathToIt[1]);
 
-			expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+			assert.deepStrictEqual(
+				filename,
+				path.join(__dirname, "..", "lib", "index.js"),
+			);
 		});
 
 		it(`should resolve itself promise ${pathToIt[2]} and accept a resolveContext argument`, async () => {
@@ -112,12 +139,15 @@ describe("simple", () => {
 				resolveContext,
 			);
 
-			expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+			assert.deepStrictEqual(
+				filename,
+				path.join(__dirname, "..", "lib", "index.js"),
+			);
 		});
 	}
 
 	it("should reject on unresolvable requests", async () => {
-		await expect(
+		await assert.rejects(
 			new Promise(
 				/**
 				 * @param {(value: void) => void} res resolve
@@ -130,22 +160,25 @@ describe("simple", () => {
 					});
 				},
 			),
-		).rejects.toThrow(/Can't resolve/);
+			/Can't resolve/,
+		);
 	});
 
 	it("should reject on unresolvable requests sync", () => {
-		expect(() =>
-			resolve.sync(__dirname, "this-module-should-not-exist"),
-		).toThrow(/Can't resolve/);
+		assert.throws(
+			() => resolve.sync(__dirname, "this-module-should-not-exist"),
+			/Can't resolve/,
+		);
 	});
 
 	it("should reject on unresolvable requests promise", async () => {
-		await expect(
+		await assert.rejects(
 			resolve.promise(__dirname, "this-module-should-not-exist"),
-		).rejects.toThrow(/Can't resolve/);
+			/Can't resolve/,
+		);
 	});
 
-	it("should create a async resolver", (done) => {
+	it("should create a async resolver", (t, done) => {
 		const myResolve = resolve.create({
 			extensions: [".js", ".json", ".node"],
 		});
@@ -156,12 +189,15 @@ describe("simple", () => {
 				return;
 			}
 
-			expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+			assert.deepStrictEqual(
+				filename,
+				path.join(__dirname, "..", "lib", "index.js"),
+			);
 			done();
 		});
 	});
 
-	it("should create a async resolver and accepting context", (done) => {
+	it("should create a async resolver and accepting context", (t, done) => {
 		const myResolve = resolve.create({
 			extensions: [".js", ".json", ".node"],
 		});
@@ -172,7 +208,10 @@ describe("simple", () => {
 				return;
 			}
 
-			expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+			assert.deepStrictEqual(
+				filename,
+				path.join(__dirname, "..", "lib", "index.js"),
+			);
 			done();
 		});
 	});
@@ -182,7 +221,7 @@ describe("simple", () => {
 			extensions: [".js"],
 		});
 
-		await expect(
+		await assert.rejects(
 			new Promise(
 				/**
 				 * @param {(value: void) => void} res resolve
@@ -195,7 +234,8 @@ describe("simple", () => {
 					});
 				},
 			),
-		).rejects.toThrow(/Can't resolve/);
+			/Can't resolve/,
+		);
 	});
 
 	it("should create a sync resolver", () => {
@@ -204,7 +244,10 @@ describe("simple", () => {
 		});
 		const filename = myResolve(__dirname, "../lib/index");
 
-		expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+		assert.deepStrictEqual(
+			filename,
+			path.join(__dirname, "..", "lib", "index.js"),
+		);
 	});
 
 	it("should create a sync resolver and accepting context", () => {
@@ -213,14 +256,18 @@ describe("simple", () => {
 		});
 		const filename = myResolve({}, __dirname, "../lib/index");
 
-		expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+		assert.deepStrictEqual(
+			filename,
+			path.join(__dirname, "..", "lib", "index.js"),
+		);
 	});
 
 	it("should create a sync resolver and throw an error on unresolvable request", () => {
 		const myResolve = resolve.create.sync({
 			extensions: [".js"],
 		});
-		expect(() => myResolve(__dirname, "this-module-should-not-exist")).toThrow(
+		assert.throws(
+			() => myResolve(__dirname, "this-module-should-not-exist"),
 			/Can't resolve/,
 		);
 	});
@@ -231,7 +278,10 @@ describe("simple", () => {
 		});
 		const filename = await myResolve(__dirname, "../lib/index");
 
-		expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+		assert.deepStrictEqual(
+			filename,
+			path.join(__dirname, "..", "lib", "index.js"),
+		);
 	});
 
 	it("should create a promise resolver and accepting context", async () => {
@@ -240,19 +290,23 @@ describe("simple", () => {
 		});
 		const filename = await myResolve({}, __dirname, "../lib/index");
 
-		expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+		assert.deepStrictEqual(
+			filename,
+			path.join(__dirname, "..", "lib", "index.js"),
+		);
 	});
 
 	it("should create a promise resolver and return rejected promise on unresolvable request", async () => {
 		const myResolve = resolve.create.promise({
 			extensions: [".js"],
 		});
-		await expect(
+		await assert.rejects(
 			myResolve(__dirname, "this-module-should-not-exist"),
-		).rejects.toThrow(/Can't resolve/);
+			/Can't resolve/,
+		);
 	});
 
-	it("should resolve via the Resolver.resolve method", (done) => {
+	it("should resolve via the Resolver.resolve method", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem: new CachedInputFileSystem(fs, 4000),
 			extensions: [".js", ".json", ".node"],
@@ -264,12 +318,15 @@ describe("simple", () => {
 				return;
 			}
 
-			expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+			assert.deepStrictEqual(
+				filename,
+				path.join(__dirname, "..", "lib", "index.js"),
+			);
 			done();
 		});
 	});
 
-	it("should resolve via the Resolver.resolve method with resolve context", (done) => {
+	it("should resolve via the Resolver.resolve method with resolve context", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem: new CachedInputFileSystem(fs, 4000),
 			extensions: [".js", ".json", ".node"],
@@ -281,12 +338,15 @@ describe("simple", () => {
 				return;
 			}
 
-			expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+			assert.deepStrictEqual(
+				filename,
+				path.join(__dirname, "..", "lib", "index.js"),
+			);
 			done();
 		});
 	});
 
-	it("should resolve via the Resolver.resolve method with context", (done) => {
+	it("should resolve via the Resolver.resolve method with context", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem: new CachedInputFileSystem(fs, 4000),
 			extensions: [".js", ".json", ".node"],
@@ -298,12 +358,15 @@ describe("simple", () => {
 				return;
 			}
 
-			expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+			assert.deepStrictEqual(
+				filename,
+				path.join(__dirname, "..", "lib", "index.js"),
+			);
 			done();
 		});
 	});
 
-	it("should resolve via the Resolver.resolve method with context and resolve context", (done) => {
+	it("should resolve via the Resolver.resolve method with context and resolve context", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem: new CachedInputFileSystem(fs, 4000),
 			extensions: [".js", ".json", ".node"],
@@ -315,7 +378,10 @@ describe("simple", () => {
 				return;
 			}
 
-			expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+			assert.deepStrictEqual(
+				filename,
+				path.join(__dirname, "..", "lib", "index.js"),
+			);
 			done();
 		});
 	});
@@ -329,7 +395,10 @@ describe("simple", () => {
 
 		const filename = resolver.resolveSync(__dirname, "../lib/index");
 
-		expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+		assert.deepStrictEqual(
+			filename,
+			path.join(__dirname, "..", "lib", "index.js"),
+		);
 	});
 
 	it("should resolve via the Resolver.resolveSync method with resolve context", () => {
@@ -341,7 +410,10 @@ describe("simple", () => {
 
 		const filename = resolver.resolveSync(__dirname, "../lib/index", {});
 
-		expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+		assert.deepStrictEqual(
+			filename,
+			path.join(__dirname, "..", "lib", "index.js"),
+		);
 	});
 
 	it("should resolve via the Resolver.resolveSync method with context", () => {
@@ -353,7 +425,10 @@ describe("simple", () => {
 
 		const filename = resolver.resolveSync({}, __dirname, "../lib/index");
 
-		expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+		assert.deepStrictEqual(
+			filename,
+			path.join(__dirname, "..", "lib", "index.js"),
+		);
 	});
 
 	it("should resolve via the Resolver.resolveSync method with context and resolve context", () => {
@@ -365,7 +440,10 @@ describe("simple", () => {
 
 		const filename = resolver.resolveSync({}, __dirname, "../lib/index", {});
 
-		expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+		assert.deepStrictEqual(
+			filename,
+			path.join(__dirname, "..", "lib", "index.js"),
+		);
 	});
 
 	it("should resolve via the Resolver.resolvePromise method", async () => {
@@ -376,7 +454,10 @@ describe("simple", () => {
 
 		const filename = await resolver.resolvePromise(__dirname, "../lib/index");
 
-		expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+		assert.deepStrictEqual(
+			filename,
+			path.join(__dirname, "..", "lib", "index.js"),
+		);
 	});
 
 	it("should resolve via the Resolver.resolvePromise method with resolve context", async () => {
@@ -391,7 +472,10 @@ describe("simple", () => {
 			{},
 		);
 
-		expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+		assert.deepStrictEqual(
+			filename,
+			path.join(__dirname, "..", "lib", "index.js"),
+		);
 	});
 
 	it("should resolve via the Resolver.resolvePromise method with context", async () => {
@@ -406,7 +490,10 @@ describe("simple", () => {
 			"../lib/index",
 		);
 
-		expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+		assert.deepStrictEqual(
+			filename,
+			path.join(__dirname, "..", "lib", "index.js"),
+		);
 	});
 
 	it("should resolve via the Resolver.resolvePromise method with context and resolve context", async () => {
@@ -421,7 +508,10 @@ describe("simple", () => {
 			"../lib/index",
 		);
 
-		expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+		assert.deepStrictEqual(
+			filename,
+			path.join(__dirname, "..", "lib", "index.js"),
+		);
 	});
 
 	describe("API", () => {
@@ -433,61 +523,66 @@ describe("simple", () => {
 
 		it("getHook returns the wrapped hook for 'before*' names", () => {
 			const hook = resolver.getHook("beforeResolve");
-			expect(typeof hook.tapAsync).toBe("function");
+			assert.strictEqual(typeof hook.tapAsync, "function");
 		});
 
 		it("getHook returns the wrapped hook for 'after*' names", () => {
 			const hook = resolver.getHook("afterResolve");
-			expect(typeof hook.tapAsync).toBe("function");
+			assert.strictEqual(typeof hook.tapAsync, "function");
 		});
 
 		it("getHook throws on an unknown hook name", () => {
-			expect(() => resolver.getHook("doesNotExist")).toThrow(
-				"Hook doesNotExist doesn't exist",
+			assert.throws(
+				() => resolver.getHook("doesNotExist"),
+				(err) =>
+					err instanceof Error &&
+					err.message.includes("Hook doesNotExist doesn't exist"),
 			);
 		});
 
 		it("getHook returns the given hook instance as-is", () => {
 			const hook = resolver.hooks.resolve;
-			expect(resolver.getHook(hook)).toBe(hook);
+			assert.strictEqual(resolver.getHook(hook), hook);
 		});
 
 		it("ensureHook creates a hook when it does not exist", () => {
 			const hook = resolver.ensureHook("customCreatedHook");
-			expect(typeof hook.tapAsync).toBe("function");
+			assert.strictEqual(typeof hook.tapAsync, "function");
 			// Calling again should return the same hook.
 			const hook2 = resolver.ensureHook("customCreatedHook");
-			expect(hook2).toBe(hook);
+			assert.strictEqual(hook2, hook);
 		});
 
 		it("ensureHook wraps 'before*' and 'after*' names", () => {
-			expect(typeof resolver.ensureHook("beforeAnotherHook").tapAsync).toBe(
+			assert.strictEqual(
+				typeof resolver.ensureHook("beforeAnotherHook").tapAsync,
 				"function",
 			);
-			expect(typeof resolver.ensureHook("afterAnotherHook").tapAsync).toBe(
+			assert.strictEqual(
+				typeof resolver.ensureHook("afterAnotherHook").tapAsync,
 				"function",
 			);
 		});
 
 		it("isModule recognizes module paths", () => {
-			expect(resolver.isModule("foo")).toBe(true);
-			expect(resolver.isModule("./foo")).toBe(false);
-			expect(resolver.isModule("/foo")).toBe(false);
+			assert.strictEqual(resolver.isModule("foo"), true);
+			assert.strictEqual(resolver.isModule("./foo"), false);
+			assert.strictEqual(resolver.isModule("/foo"), false);
 		});
 
 		it("isPrivate recognizes internal paths", () => {
-			expect(resolver.isPrivate("#foo")).toBe(true);
-			expect(resolver.isPrivate("./foo")).toBe(false);
+			assert.strictEqual(resolver.isPrivate("#foo"), true);
+			assert.strictEqual(resolver.isPrivate("./foo"), false);
 		});
 
 		it("isDirectory recognizes paths ending in /", () => {
-			expect(resolver.isDirectory("/foo/")).toBe(true);
-			expect(resolver.isDirectory("/foo")).toBe(false);
+			assert.strictEqual(resolver.isDirectory("/foo/"), true);
+			assert.strictEqual(resolver.isDirectory("/foo"), false);
 		});
 
 		it("join and normalize delegate to util/path", () => {
-			expect(resolver.join("/a", "b")).toBe("/a/b");
-			expect(resolver.normalize("/a/./b")).toBe("/a/b");
+			assert.strictEqual(resolver.join("/a", "b"), "/a/b");
+			assert.strictEqual(resolver.normalize("/a/./b"), "/a/b");
 		});
 
 		it("throws when resolveSync is used on a non-synchronous filesystem", () => {
@@ -495,28 +590,33 @@ describe("simple", () => {
 				fileSystem: nodeFileSystem,
 				extensions: [".js"],
 			});
-			expect(() => asyncResolver.resolveSync({}, fixtures, "./a")).toThrow(
-				"Cannot 'resolveSync' because the fileSystem is not sync. Use 'resolve'!",
+			assert.throws(
+				() => asyncResolver.resolveSync({}, fixtures, "./a"),
+				(err) =>
+					err instanceof Error &&
+					err.message.includes(
+						"Cannot 'resolveSync' because the fileSystem is not sync. Use 'resolve'!",
+					),
 			);
 		});
 
-		it("resolves when context is omitted", (done) => {
+		it("resolves when context is omitted", (t, done) => {
 			resolver.resolve(fixtures, "./a", (err, result) => {
 				if (err) return done(err);
-				expect(typeof result).toBe("string");
+				assert.strictEqual(typeof result, "string");
 				done();
 			});
 		});
 
-		it("resolves when context is omitted (with resolveContext)", (done) => {
+		it("resolves when context is omitted (with resolveContext)", (t, done) => {
 			resolver.resolve(fixtures, "./a", {}, (err, result) => {
 				if (err) return done(err);
-				expect(typeof result).toBe("string");
+				assert.strictEqual(typeof result, "string");
 				done();
 			});
 		});
 
-		it("reports an error when the path argument is not a string", (done) => {
+		it("reports an error when the path argument is not a string", (t, done) => {
 			resolver.resolve(
 				{},
 				// @ts-expect-error for tests
@@ -524,16 +624,17 @@ describe("simple", () => {
 				"./a",
 				{},
 				(err) => {
-					expect(err).toBeInstanceOf(Error);
-					expect(/** @type {Error} */ (err).message).toMatch(
-						"path argument is not a string",
+					assert.ok(err instanceof Error);
+					assert.ok(
+						err /** @type {Error} */.message
+							.includes("path argument is not a string"),
 					);
 					done();
 				},
 			);
 		});
 
-		it("reports an error when the request argument is not a string", (done) => {
+		it("reports an error when the request argument is not a string", (t, done) => {
 			resolver.resolve(
 				{},
 				fixtures,
@@ -541,24 +642,25 @@ describe("simple", () => {
 				null,
 				{},
 				(err) => {
-					expect(err).toBeInstanceOf(Error);
-					expect(/** @type {Error} */ (err).message).toMatch(
-						"request argument is not a string",
+					assert.ok(err instanceof Error);
+					assert.ok(
+						err /** @type {Error} */.message
+							.includes("request argument is not a string"),
 					);
 					done();
 				},
 			);
 		});
 
-		it("resolves when resolveContext is omitted", (done) => {
+		it("resolves when resolveContext is omitted", (t, done) => {
 			resolver.resolve({}, fixtures, "./a", (err, result) => {
 				if (err) return done(err);
-				expect(typeof result).toBe("string");
+				assert.strictEqual(typeof result, "string");
 				done();
 			});
 		});
 
-		it("resolves when resolveContext is null", (done) => {
+		it("resolves when resolveContext is null", (t, done) => {
 			resolver.resolve(
 				{},
 				fixtures,
@@ -567,20 +669,25 @@ describe("simple", () => {
 				null,
 				(err, result) => {
 					if (err) return done(err);
-					expect(typeof result).toBe("string");
+					assert.strictEqual(typeof result, "string");
 					done();
 				},
 			);
 		});
 
 		it("throws when callback is not a function", () => {
-			expect(() => {
-				// @ts-expect-error for tests
-				resolver.resolve({}, fixtures, "./a", {});
-			}).toThrow("callback argument is not a function");
+			assert.throws(
+				() => {
+					// @ts-expect-error for tests
+					resolver.resolve({}, fixtures, "./a", {});
+				},
+				(err) =>
+					err instanceof Error &&
+					err.message.includes("callback argument is not a function"),
+			);
 		});
 
-		it("invokes the noResolve hook on resolution failure", (done) => {
+		it("invokes the noResolve hook on resolution failure", (t, done) => {
 			const customResolver = ResolverFactory.createResolver({
 				fileSystem: nodeFileSystem,
 				extensions: [".js"],
@@ -590,24 +697,25 @@ describe("simple", () => {
 				failed.push({ request, err });
 			});
 			customResolver.resolve({}, fixtures, "./does-not-exist", {}, (err) => {
-				expect(err).toBeTruthy();
-				expect(failed).toHaveLength(1);
-				expect(failed[0].err).toBe(err);
+				assert.ok(err);
+				assert.strictEqual(failed.length, 1);
+				assert.strictEqual(failed[0].err, err);
 				done();
 			});
 		});
 
-		it("populates error.details when a resolve fails", (done) => {
+		it("populates error.details when a resolve fails", (t, done) => {
 			resolver.resolve({}, fixtures, "./does-not-exist", {}, (err) => {
-				expect(err).toBeInstanceOf(Error);
-				expect(
+				assert.ok(err instanceof Error);
+				assert.notStrictEqual(
 					/** @type {Error & { details?: string }} */ (err).details,
-				).toBeDefined();
+					undefined,
+				);
 				done();
 			});
 		});
 
-		it("populates error.details when a resolve fails and log is present", (done) => {
+		it("populates error.details when a resolve fails and log is present", (t, done) => {
 			const log = [];
 			resolver.resolve(
 				{},
@@ -615,11 +723,12 @@ describe("simple", () => {
 				"./does-not-exist",
 				{ log: (m) => log.push(m) },
 				(err) => {
-					expect(err).toBeInstanceOf(Error);
-					expect(
+					assert.ok(err instanceof Error);
+					assert.notStrictEqual(
 						/** @type {Error & { details?: string }} */ (err).details,
-					).toBeDefined();
-					expect(log.length).toBeGreaterThan(0);
+						undefined,
+					);
+					assert.ok(log.length > 0);
 					done();
 				},
 			);

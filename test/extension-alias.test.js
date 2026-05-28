@@ -1,6 +1,9 @@
 "use strict";
 
+const assert = require("assert");
 const fs = require("fs");
+const { describe, it } = require("node:test");
+
 const path = require("path");
 
 const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
@@ -22,46 +25,49 @@ describe("extension-alias", () => {
 		},
 	});
 
-	it("should alias fully specified file", (done) => {
+	it("should alias fully specified file", (t, done) => {
 		resolver.resolve({}, fixture, "./index.js", {}, (err, result) => {
 			if (err) return done(err);
-			expect(result).toEqual(path.resolve(fixture, "index.ts"));
+			assert.deepStrictEqual(result, path.resolve(fixture, "index.ts"));
 			done();
 		});
 	});
 
-	it("should alias fully specified file when there are two alternatives", (done) => {
+	it("should alias fully specified file when there are two alternatives", (t, done) => {
 		resolver.resolve({}, fixture, "./dir/index.js", {}, (err, result) => {
 			if (err) return done(err);
-			expect(result).toEqual(path.resolve(fixture, "dir", "index.ts"));
+			assert.deepStrictEqual(result, path.resolve(fixture, "dir", "index.ts"));
 			done();
 		});
 	});
 
-	it("should also allow the second alternative", (done) => {
+	it("should also allow the second alternative", (t, done) => {
 		resolver.resolve({}, fixture, "./dir2/index.js", {}, (err, result) => {
 			if (err) return done(err);
-			expect(result).toEqual(path.resolve(fixture, "dir2", "index.js"));
+			assert.deepStrictEqual(result, path.resolve(fixture, "dir2", "index.js"));
 			done();
 		});
 	});
 
-	it("should support alias option without an array", (done) => {
+	it("should support alias option without an array", (t, done) => {
 		resolver.resolve({}, fixture, "./dir2/index.mjs", {}, (err, result) => {
 			if (err) return done(err);
-			expect(result).toEqual(path.resolve(fixture, "dir2", "index.mts"));
+			assert.deepStrictEqual(
+				result,
+				path.resolve(fixture, "dir2", "index.mts"),
+			);
 			done();
 		});
 	});
 
-	it("should not allow to fallback to the original extension or add extensions", (done) => {
+	it("should not allow to fallback to the original extension or add extensions", (t, done) => {
 		resolver.resolve({}, fixture, "./index.mjs", {}, (err, _result) => {
-			expect(err).toBeInstanceOf(Error);
+			assert.ok(err instanceof Error);
 			done();
 		});
 	});
 
-	it("should try multiple extension aliases in order and logs each failure", (done) => {
+	it("should try multiple extension aliases in order and logs each failure", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem: nodeFileSystem,
 			extensionAlias: { ".js": [".missing1", ".missing2", ".js"] },
@@ -74,12 +80,14 @@ describe("extension-alias", () => {
 			{ log: (m) => log.push(m) },
 			(err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.join(path.join(__dirname, "fixtures"), "a.js"),
 				);
-				expect(
+				assert.strictEqual(
 					log.some((l) => l.includes("Failed to alias from extension alias")),
-				).toBe(true);
+					true,
+				);
 				done();
 			},
 		);
@@ -92,32 +100,32 @@ describe("extension-alias", () => {
 			"imports-field-extension-alias",
 		);
 
-		it("should apply extension alias to paths resolved via imports field", (done) => {
+		it("should apply extension alias to paths resolved via imports field", (t, done) => {
 			resolver.resolve({}, importsFixture, "#foo", {}, (err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(path.resolve(importsFixture, "foo.ts"));
+				assert.deepStrictEqual(result, path.resolve(importsFixture, "foo.ts"));
 				done();
 			});
 		});
 
-		it("should fall back to later alternatives when first alias does not exist", (done) => {
+		it("should fall back to later alternatives when first alias does not exist", (t, done) => {
 			resolver.resolve({}, importsFixture, "#bar", {}, (err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(path.resolve(importsFixture, "bar.js"));
+				assert.deepStrictEqual(result, path.resolve(importsFixture, "bar.js"));
 				done();
 			});
 		});
 
-		it("should support single-string alias (no array) via imports field", (done) => {
+		it("should support single-string alias (no array) via imports field", (t, done) => {
 			resolver.resolve({}, importsFixture, "#only", {}, (err, _result) => {
 				// ".mjs": ".mts" is a strict mapping with no fallback, so this
 				// should error because only.mts does not exist
-				expect(err).toBeInstanceOf(Error);
+				assert.ok(err instanceof Error);
 				done();
 			});
 		});
 
-		it("should not fall back to the original extension via imports field (strict alias)", (done) => {
+		it("should not fall back to the original extension via imports field (strict alias)", (t, done) => {
 			const strictResolver = ResolverFactory.createResolver({
 				extensions: [".js"],
 				fileSystem: nodeFileSystem,
@@ -125,7 +133,7 @@ describe("extension-alias", () => {
 			});
 			strictResolver.resolve({}, importsFixture, "#bar", {}, (err, _result) => {
 				// bar.ts does not exist and we explicitly disallow fallback
-				expect(err).toBeInstanceOf(Error);
+				assert.ok(err instanceof Error);
 				done();
 			});
 		});
@@ -138,7 +146,7 @@ describe("extension-alias", () => {
 			"exports-field-extension-alias-opt-in",
 		);
 
-		it("should not apply extension alias to exports-field targets by default (Node.js-aligned)", (done) => {
+		it("should not apply extension alias to exports-field targets by default (Node.js-aligned)", (t, done) => {
 			const defaultResolver = ResolverFactory.createResolver({
 				extensions: [".js"],
 				extensionAlias: { ".js": [".ts", ".js"] },
@@ -153,7 +161,8 @@ describe("extension-alias", () => {
 				{},
 				(err, result) => {
 					if (err) return done(err);
-					expect(result).toEqual(
+					assert.deepStrictEqual(
+						result,
 						path.resolve(exportsFixture, "./node_modules/pkg/dist/string.js"),
 					);
 					done();
@@ -161,7 +170,7 @@ describe("extension-alias", () => {
 			);
 		});
 
-		it("should prefer the TS source over the exports-declared JS target when the option is enabled", (done) => {
+		it("should prefer the TS source over the exports-declared JS target when the option is enabled", (t, done) => {
 			const tsResolver = ResolverFactory.createResolver({
 				extensions: [".js"],
 				extensionAlias: { ".js": [".ts", ".js"] },
@@ -177,7 +186,8 @@ describe("extension-alias", () => {
 				{},
 				(err, result) => {
 					if (err) return done(err);
-					expect(result).toEqual(
+					assert.deepStrictEqual(
+						result,
 						path.resolve(exportsFixture, "./node_modules/pkg/dist/string.ts"),
 					);
 					done();
@@ -196,18 +206,24 @@ describe("extension-alias", () => {
 			},
 		});
 
-		it("directory", (done) => {
+		it("directory", (t, done) => {
 			resolver.resolve({}, fixture, "./dir2", {}, (err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(path.resolve(fixture, "dir2", "index.js"));
+				assert.deepStrictEqual(
+					result,
+					path.resolve(fixture, "dir2", "index.js"),
+				);
 				done();
 			});
 		});
 
-		it("file", (done) => {
+		it("file", (t, done) => {
 			resolver.resolve({}, fixture, "./dir2/index", {}, (err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(path.resolve(fixture, "dir2", "index.js"));
+				assert.deepStrictEqual(
+					result,
+					path.resolve(fixture, "dir2", "index.js"),
+				);
 				done();
 			});
 		});

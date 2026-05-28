@@ -1,5 +1,8 @@
 "use strict";
 
+const assert = require("assert");
+const { describe, it } = require("node:test");
+
 const path = require("path");
 const resolve = require("../");
 
@@ -72,22 +75,23 @@ describe("missing", () => {
 		],
 	];
 	for (const testCase of testCases) {
-		it(`should tell about missing file when trying to resolve ${testCase[1]}`, (done) => {
+		it(`should tell about missing file when trying to resolve ${testCase[1]}`, (t, done) => {
 			const missingDependencies = new Set();
 			/**
 			 * @param {Error | null} _err err
 			 * @param {string} _filename _filename
 			 */
 			function callback(_err, _filename) {
-				expect([...missingDependencies].sort()).toEqual(
-					expect.arrayContaining(testCase[2].sort()),
-				);
+				const actual = [...missingDependencies].sort();
+				for (const dep of testCase[2]) {
+					assert.ok(actual.includes(dep));
+				}
 				done();
 			}
 			resolve(testCase[0], testCase[1], { missingDependencies }, callback);
 		});
 
-		it(`should report error details exactly once when trying to resolve ${testCase[1]}`, (done) => {
+		it(`should report error details exactly once when trying to resolve ${testCase[1]}`, (t, done) => {
 			/**
 			 * @param {Error & { details: string } | null} err err
 			 * @param {string} _filename _filename
@@ -97,8 +101,9 @@ describe("missing", () => {
 					const details = err.details.split("\n");
 					const firstDetail = details.shift();
 
-					expect(firstDetail).toContain(testCase[1]);
-					expect(details).not.toContain(firstDetail);
+					assert.ok(firstDetail !== undefined);
+					assert.ok(firstDetail.includes(testCase[1]));
+					assert.ok(!details.includes(firstDetail));
 				}
 
 				done();

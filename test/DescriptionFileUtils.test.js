@@ -1,5 +1,8 @@
 "use strict";
 
+const assert = require("assert");
+const { describe, it } = require("node:test");
+
 /* eslint-disable jsdoc/reject-any-type */
 
 // Pure-function tests for helpers exported by DescriptionFileUtils, matching
@@ -9,50 +12,54 @@ const DescriptionFileUtils = require("../lib/DescriptionFileUtils");
 
 describe("DescriptionFileUtils.cdUp", () => {
 	it("returns null for '/'", () => {
-		expect(DescriptionFileUtils.cdUp("/")).toBeNull();
+		assert.strictEqual(DescriptionFileUtils.cdUp("/"), null);
 	});
 
 	it("returns null for inputs without separators", () => {
 		// cspell:ignore noslash
-		expect(DescriptionFileUtils.cdUp("noslash")).toBeNull();
+		assert.strictEqual(DescriptionFileUtils.cdUp("noslash"), null);
 	});
 
 	it("returns '/' when stripping the last directory", () => {
-		expect(DescriptionFileUtils.cdUp("/foo")).toBe("/");
+		assert.strictEqual(DescriptionFileUtils.cdUp("/foo"), "/");
 	});
 
 	it("descends one level for posix paths", () => {
-		expect(DescriptionFileUtils.cdUp("/a/b/c")).toBe("/a/b");
+		assert.strictEqual(DescriptionFileUtils.cdUp("/a/b/c"), "/a/b");
 	});
 
 	it("descends one level for windows paths", () => {
-		expect(DescriptionFileUtils.cdUp("C:\\a\\b\\c")).toBe("C:\\a\\b");
+		assert.strictEqual(DescriptionFileUtils.cdUp("C:\\a\\b\\c"), "C:\\a\\b");
 	});
 });
 
 describe("DescriptionFileUtils.getField", () => {
 	it("returns undefined for empty content", () => {
-		expect(
+		assert.strictEqual(
 			DescriptionFileUtils.getField(/** @type {any} */ (null), "x"),
-		).toBeUndefined();
+			undefined,
+		);
 	});
 
 	it("walks an array field path", () => {
 		const data = { a: { b: { c: 42 } } };
-		expect(
+		assert.strictEqual(
 			DescriptionFileUtils.getField(/** @type {any} */ (data), ["a", "b", "c"]),
-		).toBe(42);
+			42,
+		);
 	});
 
 	it("returns null when the path is broken mid-traversal", () => {
-		expect(
+		assert.strictEqual(
 			DescriptionFileUtils.getField(/** @type {any} */ ({ a: 1 }), ["a", "b"]),
-		).toBeNull();
+			null,
+		);
 	});
 
 	it("returns the field value for a string field", () => {
-		expect(
+		assert.strictEqual(
 			DescriptionFileUtils.getField(/** @type {any} */ ({ name: "x" }), "name"),
-		).toBe("x");
+			"x",
+		);
 	});
 });

@@ -1,5 +1,8 @@
 "use strict";
 
+const assert = require("assert");
+const { beforeEach, describe, it } = require("node:test");
+
 const path = require("path");
 const resolve = require("../");
 
@@ -75,13 +78,13 @@ describe("unsafe-cache", () => {
 			});
 		});
 
-		it("should cache request", (done) => {
+		it("should cache request", (t, done) => {
 			cachedResolve(
 				path.join(__dirname, "fixtures"),
 				"m2/b",
 				(err, _result) => {
 					if (err) return done(err);
-					expect(Object.keys(cache)).toHaveLength(1);
+					assert.strictEqual(Object.keys(cache).length, 1);
 					for (const key of Object.keys(cache)) {
 						cache[key] = {
 							path: "yep",
@@ -92,7 +95,7 @@ describe("unsafe-cache", () => {
 						"m2/b",
 						(err, result) => {
 							if (err) return done(err);
-							expect(result).toBe("yep");
+							assert.strictEqual(result, "yep");
 							done();
 						},
 					);
@@ -100,14 +103,14 @@ describe("unsafe-cache", () => {
 			);
 		});
 
-		it("should not return from cache if context does not match", (done) => {
+		it("should not return from cache if context does not match", (t, done) => {
 			cachedResolve(
 				context,
 				path.join(__dirname, "fixtures"),
 				"m2/b",
 				(err, _result) => {
 					if (err) return done(err);
-					expect(Object.keys(cache)).toHaveLength(1);
+					assert.strictEqual(Object.keys(cache).length, 1);
 					for (const key of Object.keys(cache)) {
 						cache[key] = {
 							path: "yep",
@@ -119,7 +122,7 @@ describe("unsafe-cache", () => {
 						"m2/b",
 						(err, result) => {
 							if (err) return done(err);
-							expect(result).not.toBe("yep");
+							assert.notStrictEqual(result, "yep");
 							done();
 						},
 					);
@@ -127,13 +130,13 @@ describe("unsafe-cache", () => {
 			);
 		});
 
-		it("should not return from cache if query does not match", (done) => {
+		it("should not return from cache if query does not match", (t, done) => {
 			cachedResolve(
 				path.join(__dirname, "fixtures"),
 				"m2/b?query",
 				(err, _result) => {
 					if (err) return done(err);
-					expect(Object.keys(cache)).toHaveLength(1);
+					assert.strictEqual(Object.keys(cache).length, 1);
 					for (const key of Object.keys(cache)) {
 						cache[key] = {
 							path: "yep",
@@ -144,7 +147,7 @@ describe("unsafe-cache", () => {
 						"m2/b?query2",
 						(err, result) => {
 							if (err) return done(err);
-							expect(result).not.toBe("yep");
+							assert.notStrictEqual(result, "yep");
 							done();
 						},
 					);
@@ -162,14 +165,14 @@ describe("unsafe-cache", () => {
 			});
 		});
 
-		it("should cache request", (done) => {
+		it("should cache request", (t, done) => {
 			cachedResolve(
 				context,
 				path.join(__dirname, "fixtures"),
 				"m2/b",
 				(err, _result) => {
 					if (err) return done(err);
-					expect(Object.keys(cache)).toHaveLength(1);
+					assert.strictEqual(Object.keys(cache).length, 1);
 					for (const key of Object.keys(cache)) {
 						cache[key] = {
 							path: "yep",
@@ -181,7 +184,7 @@ describe("unsafe-cache", () => {
 						"m2/b",
 						(err, result) => {
 							if (err) return done(err);
-							expect(result).toBe("yep");
+							assert.strictEqual(result, "yep");
 							done();
 						},
 					);
@@ -189,14 +192,14 @@ describe("unsafe-cache", () => {
 			);
 		});
 
-		it("should return from cache even if context does not match", (done) => {
+		it("should return from cache even if context does not match", (t, done) => {
 			cachedResolve(
 				context,
 				path.join(__dirname, "fixtures"),
 				"m2/b",
 				(err, _result) => {
 					if (err) return done(err);
-					expect(Object.keys(cache)).toHaveLength(1);
+					assert.strictEqual(Object.keys(cache).length, 1);
 					for (const key of Object.keys(cache)) {
 						cache[key] = {
 							path: "yep",
@@ -208,7 +211,7 @@ describe("unsafe-cache", () => {
 						"m2/b",
 						(err, result) => {
 							if (err) return done(err);
-							expect(result).toBe("yep");
+							assert.strictEqual(result, "yep");
 							done();
 						},
 					);
@@ -226,33 +229,55 @@ describe("unsafe-cache", () => {
 		});
 
 		it("should keep bare specifier cache keys tied to the lookup directory", () => {
-			expect(cachedResolve(deepContext, "react")).toBe(rootReactTarget);
+			assert.strictEqual(cachedResolve(deepContext, "react"), rootReactTarget);
 			poisonCache("cache-hit");
-			expect(cachedResolve(shallowContext, "react")).toBe(rootReactTarget);
+			assert.strictEqual(
+				cachedResolve(shallowContext, "react"),
+				rootReactTarget,
+			);
 		});
 
 		it("should reuse cached results for relative requests inside one package", () => {
-			expect(cachedResolve(deepContext, "../../shared")).toBe(rootSharedTarget);
+			assert.strictEqual(
+				cachedResolve(deepContext, "../../shared"),
+				rootSharedTarget,
+			);
 			poisonCache("cache-hit");
-			expect(cachedResolve(shallowContext, "../shared")).toBe("cache-hit");
+			assert.strictEqual(
+				cachedResolve(shallowContext, "../shared"),
+				"cache-hit",
+			);
 		});
 
 		it("should not reuse cached results across package boundaries", () => {
-			expect(cachedResolve(deepContext, "react")).toBe(rootReactTarget);
+			assert.strictEqual(cachedResolve(deepContext, "react"), rootReactTarget);
 			poisonCache("cache-hit");
-			expect(cachedResolve(nestedContext, "react")).toBe(nestedReactTarget);
+			assert.strictEqual(
+				cachedResolve(nestedContext, "react"),
+				nestedReactTarget,
+			);
 		});
 
 		it("should not reuse cached bare specifiers when a nested node_modules shadows the package root", () => {
-			expect(cachedResolve(shallowContext, "react")).toBe(rootReactTarget);
+			assert.strictEqual(
+				cachedResolve(shallowContext, "react"),
+				rootReactTarget,
+			);
 			poisonCache("cache-hit");
-			expect(cachedResolve(shadowedContext, "react")).toBe(shadowedReactTarget);
+			assert.strictEqual(
+				cachedResolve(shadowedContext, "react"),
+				shadowedReactTarget,
+			);
 		});
 
 		it("should keep relative requests distinct from bare specifiers", () => {
-			expect(cachedResolve(deepContext, "../../shared")).toBe(rootSharedTarget);
+			assert.strictEqual(
+				cachedResolve(deepContext, "../../shared"),
+				rootSharedTarget,
+			);
 			poisonCache("cache-hit");
-			expect(cachedResolve(shallowContext, "shared")).toBe(
+			assert.strictEqual(
+				cachedResolve(shallowContext, "shared"),
 				rootSharedPackageTarget,
 			);
 		});
@@ -261,7 +286,7 @@ describe("unsafe-cache", () => {
 	describe("unsafe-cache more tests", () => {
 		const fixtures = path.join(__dirname, "fixtures");
 
-		it("passes through without caching when cachePredicate returns false", (done) => {
+		it("passes through without caching when cachePredicate returns false", (t, done) => {
 			const cache = {};
 			const cachedResolve = resolve.create({
 				// @ts-expect-error for tests
@@ -270,13 +295,13 @@ describe("unsafe-cache", () => {
 			});
 			cachedResolve(fixtures, "./a.js", (err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(path.join(fixtures, "a.js"));
-				expect(Object.keys(cache)).toHaveLength(0);
+				assert.deepStrictEqual(result, path.join(fixtures, "a.js"));
+				assert.strictEqual(Object.keys(cache).length, 0);
 				done();
 			});
 		});
 
-		it("returns a poisoned cache entry on a re-resolve (non-array branch)", (done) => {
+		it("returns a poisoned cache entry on a re-resolve (non-array branch)", (t, done) => {
 			const cache = {};
 			const cachedResolve = resolve.create({
 				// @ts-expect-error for tests
@@ -289,7 +314,7 @@ describe("unsafe-cache", () => {
 				}
 				cachedResolve(fixtures, "./a.js", (err2, result) => {
 					if (err2) return done(err2);
-					expect(result).toBe("poisoned");
+					assert.strictEqual(result, "poisoned");
 					done();
 				});
 			});

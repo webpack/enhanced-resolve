@@ -1,5 +1,8 @@
 "use strict";
 
+const assert = require("assert");
+const { describe, it } = require("node:test");
+
 const { parseIdentifier } = require("../lib/util/identifier");
 
 /**
@@ -17,7 +20,7 @@ describe("identifier", () => {
 
 				if (!parsed) throw new Error("should not be null");
 
-				expect(parsed).toEqual(expected);
+				assert.deepStrictEqual(parsed, expected);
 			});
 		}
 	}
@@ -190,11 +193,11 @@ describe("identifier", () => {
 
 	describe("parse identifier. malformed inputs", () => {
 		it("returns null for a single null-byte input (regex no-match)", () => {
-			expect(parseIdentifier("\0")).toBeNull();
+			assert.strictEqual(parseIdentifier("\0"), null);
 		});
 
 		it("returns null for an empty input", () => {
-			expect(parseIdentifier("")).toBeNull();
+			assert.strictEqual(parseIdentifier(""), null);
 		});
 	});
 });

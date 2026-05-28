@@ -1,6 +1,9 @@
 "use strict";
 
+const assert = require("assert");
 const fs = require("fs");
+const { describe, it } = require("node:test");
+
 const path = require("path");
 const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
 const ResolverFactory = require("../lib/ResolverFactory");
@@ -44,34 +47,34 @@ describe("roots", () => {
 		resolveToContext: true,
 	});
 
-	it("should respect roots option", (done) => {
+	it("should respect roots option", (t, done) => {
 		resolver.resolve({}, fixtures, "/fixtures/b.js", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(path.resolve(fixtures, "b.js"));
+			assert.deepStrictEqual(result, path.resolve(fixtures, "b.js"));
 			done();
 		});
 	});
 
-	it("should try another root option, if it exists", (done) => {
+	it("should try another root option, if it exists", (t, done) => {
 		resolver.resolve({}, fixtures, "/b.js", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(path.resolve(fixtures, "b.js"));
+			assert.deepStrictEqual(result, path.resolve(fixtures, "b.js"));
 			done();
 		});
 	});
 
-	it("should respect extension", (done) => {
+	it("should respect extension", (t, done) => {
 		resolver.resolve({}, fixtures, "/fixtures/b", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(path.resolve(fixtures, "b.js"));
+			assert.deepStrictEqual(result, path.resolve(fixtures, "b.js"));
 			done();
 		});
 	});
 
-	it("should resolve in directory", (done) => {
+	it("should resolve in directory", (t, done) => {
 		resolver.resolve(
 			{},
 			fixtures,
@@ -80,7 +83,8 @@ describe("roots", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.resolve(fixtures, "extensions/dir/index.js"),
 				);
 				done();
@@ -88,16 +92,16 @@ describe("roots", () => {
 		);
 	});
 
-	it("should respect aliases", (done) => {
+	it("should respect aliases", (t, done) => {
 		resolver.resolve({}, fixtures, "foo/b", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(path.resolve(fixtures, "b.js"));
+			assert.deepStrictEqual(result, path.resolve(fixtures, "b.js"));
 			done();
 		});
 	});
 
-	it("should support roots options with resolveToContext", (done) => {
+	it("should support roots options with resolveToContext", (t, done) => {
 		contextResolver.resolve(
 			{},
 			fixtures,
@@ -106,21 +110,21 @@ describe("roots", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(path.resolve(fixtures, "lib"));
+				assert.deepStrictEqual(result, path.resolve(fixtures, "lib"));
 				done();
 			},
 		);
 	});
 
-	it("should not work with relative path", (done) => {
+	it("should not work with relative path", (t, done) => {
 		resolver.resolve({}, fixtures, "fixtures/b.js", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
-			expect(err).toBeInstanceOf(Error);
+			assert.ok(err instanceof Error);
 			done();
 		});
 	});
 
-	it("should resolve an absolute path (prefer absolute)", (done) => {
+	it("should resolve an absolute path (prefer absolute)", (t, done) => {
 		resolverPreferAbsolute.resolve(
 			{},
 			fixtures,
@@ -129,34 +133,34 @@ describe("roots", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(path.resolve(fixtures, "b.js"));
+				assert.deepStrictEqual(result, path.resolve(fixtures, "b.js"));
 				done();
 			},
 		);
 	});
 
-	it("should throw an error for empty requests (no root rewriting)", (done) => {
+	it("should throw an error for empty requests (no root rewriting)", (t, done) => {
 		// Empty request should produce an error, not a root rewrite.
 		resolver.resolve({}, fixtures, "", {}, (err) => {
-			expect(err).toBeInstanceOf(Error);
+			assert.ok(err instanceof Error);
 			done();
 		});
 	});
 
-	it("should work falls through for relative requests (no root rewriting)", (done) => {
+	it("should work falls through for relative requests (no root rewriting)", (t, done) => {
 		// Relative request resolves normally (not via roots).
 		resolver.resolve({}, fixtures, "./a.js", {}, (err, result) => {
 			if (err) return done(err);
-			expect(result).toEqual(path.join(fixtures, "a.js"));
+			assert.deepStrictEqual(result, path.join(fixtures, "a.js"));
 			done();
 		});
 	});
 
-	it("should rewrites absolute-style requests against roots", (done) => {
+	it("should rewrites absolute-style requests against roots", (t, done) => {
 		// Absolute request "/a.js" should be rewritten to roots[0] + /a.js
 		resolver.resolve({}, fixtures, "/a.js", {}, (err, result) => {
 			if (err) return done(err);
-			expect(result).toEqual(path.join(fixtures, "a.js"));
+			assert.deepStrictEqual(result, path.join(fixtures, "a.js"));
 			done();
 		});
 	});

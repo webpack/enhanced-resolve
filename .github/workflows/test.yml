@@ -29,55 +29,34 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        node-version: [10.x, 12.x, 14.x, 16.x, 18.x, 20.x, 22.x, 24.x, 25.x]
+        node-version: [18.x, 20.x, 22.x, 24.x, 25.x]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-
-      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
-        id: calculate_architecture
-        with:
-          result-encoding: string
-          script: |
-            if ('${{ matrix.os }}' === 'macos-latest' && ('${{ matrix['node-version'] }}' === '10.x' || '${{ matrix['node-version'] }}' === '12.x' || '${{ matrix['node-version'] }}' === '14.x')) {
-              return "x64"
-            } else {
-              return ''
-            }
 
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: ${{ matrix.node-version }}
-          architecture: ${{ steps.calculate_architecture.outputs.result }}
-          # Legacy Node (10-16) reinstalls deps after dropping/bypassing
-          # package-lock.json, so there's no lockfile for setup-node's npm
-          # cache to key on.
-          cache: ${{ (matrix.node-version == '10.x' || matrix.node-version == '12.x' || matrix.node-version == '14.x' || matrix.node-version == '16.x') && '' || 'npm' }}
-
-      - name: Install dependencies
-        shell: bash
-        run: |
-          rm -f package-lock.json
-
-          npm config set progress false
-
-          if [ "${{ matrix.node-version }}" = "10.x" ]; then
-            yarn add -D typescript@^4 jest@^27 memfs@^3 --ignore-scripts --ignore-engines
-          else
-            npm install -g npm@7
-            npm install -D typescript@^4 jest@^27 memfs@^3 --ignore-scripts --no-audit --prefer-offline --no-save --no-package-lock
-          fi
-        if: matrix.node-version == '10.x' || matrix.node-version == '12.x' || matrix.node-version == '14.x' || matrix.node-version == '16.x'
+          cache: npm
 
       - name: Install dependencies
         run: npm ci
-        if: matrix.node-version != '10.x' && matrix.node-version != '12.x' && matrix.node-version != '14.x' && matrix.node-version != '16.x'
+
+      # The built-in coverage lcov reporter and `--test-coverage-include` are
+      # only available on Node.js 22+, so older versions run the suite without
+      # collecting coverage.
+      - name: Run tests
+        if: matrix.node-version == '18.x' || matrix.node-version == '20.x'
+        run: npm run test:only
 
       - name: Run tests with coverage
-        run: npm run test:coverage -- --ci
+        if: matrix.node-version != '18.x' && matrix.node-version != '20.x'
+        run: npm run test:coverage
 
       - uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
+        if: matrix.node-version != '18.x' && matrix.node-version != '20.x'
         with:
+          files: ./coverage/lcov.info
           flags: integration
           token: ${{ secrets.CODECOV_TOKEN }}

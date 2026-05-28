@@ -1,6 +1,9 @@
 "use strict";
 
+const assert = require("assert");
 const fs = require("fs");
+const { describe, it } = require("node:test");
+
 const path = require("path");
 const { CachedInputFileSystem, ResolverFactory } = require("../");
 
@@ -14,33 +17,36 @@ const resolver = ResolverFactory.createResolver({
 });
 
 describe("scoped-packages", () => {
-	it("main field should work", (done) => {
+	it("main field should work", (t, done) => {
 		resolver.resolve({}, fixture, "@scope/pack1", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(
+			assert.deepStrictEqual(
+				result,
 				path.resolve(fixture, "./node_modules/@scope/pack1/main.js"),
 			);
 			done();
 		});
 	});
 
-	it("browser field should work", (done) => {
+	it("browser field should work", (t, done) => {
 		resolver.resolve({}, fixture, "@scope/pack2", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(
+			assert.deepStrictEqual(
+				result,
 				path.resolve(fixture, "./node_modules/@scope/pack2/main.js"),
 			);
 			done();
 		});
 	});
 
-	it("folder request should work", (done) => {
+	it("folder request should work", (t, done) => {
 		resolver.resolve({}, fixture, "@scope/pack2/lib", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(
+			assert.deepStrictEqual(
+				result,
 				path.resolve(fixture, "./node_modules/@scope/pack2/lib/index.js"),
 			);
 			done();

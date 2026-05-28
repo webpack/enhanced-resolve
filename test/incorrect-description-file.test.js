@@ -1,6 +1,9 @@
 "use strict";
 
+const assert = require("assert");
 const fs = require("fs");
+const { describe, it } = require("node:test");
+
 const path = require("path");
 const { CachedInputFileSystem, ResolverFactory } = require("../");
 
@@ -21,7 +24,7 @@ describe("incorrect description file", () => {
 		fileSystem: nodeFileSystem,
 	});
 
-	it("should not resolve main in incorrect description file #1", (done) => {
+	it("should not resolve main in incorrect description file #1", (t, done) => {
 		let called = false;
 		const ctx = {
 			fileDependencies: new Set(),
@@ -31,14 +34,17 @@ describe("incorrect description file", () => {
 		};
 		resolver.resolve({}, p("pack1"), ".", ctx, (err, _result) => {
 			if (!err) return done(new Error("No error"));
-			expect(err).toBeInstanceOf(Error);
-			expect(ctx.fileDependencies.has(p("pack1", "package.json"))).toBe(true);
-			expect(called).toBe(true);
+			assert.ok(err instanceof Error);
+			assert.strictEqual(
+				ctx.fileDependencies.has(p("pack1", "package.json")),
+				true,
+			);
+			assert.strictEqual(called, true);
 			done();
 		});
 	});
 
-	it("should not resolve main in incorrect description file #2", (done) => {
+	it("should not resolve main in incorrect description file #2", (t, done) => {
 		let called = false;
 		const ctx = {
 			fileDependencies: new Set(),
@@ -48,16 +54,19 @@ describe("incorrect description file", () => {
 		};
 		resolver.resolve({}, p("pack2"), ".", ctx, (err, _result) => {
 			if (!err) return done(new Error("No error"));
-			expect(ctx.fileDependencies.has(p("pack2", "package.json"))).toBe(true);
-			expect(called).toBe(true);
+			assert.strictEqual(
+				ctx.fileDependencies.has(p("pack2", "package.json")),
+				true,
+			);
+			assert.strictEqual(called, true);
 			done();
 		});
 	});
 
-	it("should not resolve main in incorrect description file #3", (done) => {
+	it("should not resolve main in incorrect description file #3", (t, done) => {
 		resolver.resolve({}, p("pack2"), ".", {}, (err, _result) => {
 			if (!err) return done(new Error("No error"));
-			expect(err).toBeInstanceOf(Error);
+			assert.ok(err instanceof Error);
 			done();
 		});
 	});
