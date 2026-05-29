@@ -625,10 +625,7 @@ describe("simple", () => {
 				{},
 				(err) => {
 					assert.ok(err instanceof Error);
-					assert.ok(
-						err /** @type {Error} */.message
-							.includes("path argument is not a string"),
-					);
+					assert.ok(err.message.includes("path argument is not a string"));
 					done();
 				},
 			);
@@ -643,10 +640,7 @@ describe("simple", () => {
 				{},
 				(err) => {
 					assert.ok(err instanceof Error);
-					assert.ok(
-						err /** @type {Error} */.message
-							.includes("request argument is not a string"),
-					);
+					assert.ok(err.message.includes("request argument is not a string"));
 					done();
 				},
 			);
