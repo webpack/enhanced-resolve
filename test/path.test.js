@@ -1,5 +1,7 @@
 "use strict";
 
+const path = require("path");
+
 const {
 	PathType,
 	createCachedBasename,
@@ -27,6 +29,10 @@ describe("util/path getType", () => {
 		expect(getType("a")).toBe(PathType.Normal);
 	});
 
+	it("classifies win32 relative two-character inputs", () => {
+		expect(getType(".\\")).toBe(PathType.Relative);
+	});
+
 	it("classifies two-character inputs", () => {
 		expect(getType("..")).toBe(PathType.Relative);
 		expect(getType("./")).toBe(PathType.Relative);
@@ -37,6 +43,12 @@ describe("util/path getType", () => {
 		expect(getType("c:")).toBe(PathType.AbsoluteWin);
 		expect(getType("ab")).toBe(PathType.Normal);
 		expect(getType("1:")).toBe(PathType.Normal);
+	});
+
+	it("classifies win32 relative longer inputs", () => {
+		expect(getType(".\\a")).toBe(PathType.Relative);
+		expect(getType("..\\a")).toBe(PathType.Relative);
+		expect(getType("..\\..\\src")).toBe(PathType.Relative);
 	});
 
 	it("classifies longer inputs", () => {
@@ -99,6 +111,12 @@ describe("util/path normalize", () => {
 		expect(normalize("./a/../b")).toBe("./b");
 	});
 
+	it("normalizes win32 relative paths to posix", () => {
+		expect(normalize(".\\a\\b")).toBe("./a/b");
+		expect(normalize("..\\a")).toBe("../a");
+		expect(normalize("..\\..\\src\\shared")).toBe("../../src/shared");
+	});
+
 	it("normalizes posix absolute paths", () => {
 		expect(normalize("/a/b/../c")).toBe("/a/c");
 	});
@@ -138,6 +156,11 @@ describe("util/path join", () => {
 
 	it("joins rooted windows-style paths", () => {
 		expect(join("C:\\a", "b")).toBe("C:\\a\\b");
+	});
+
+	it("joins win32 relative requests onto win32 roots", () => {
+		expect(join("C:\\project\\app", "..\\..\\src")).toBe("C:\\src");
+		expect(join("C:\\project", ".\\src")).toBe("C:\\project\\src");
 	});
 
 	it("joins DOS device paths with win32 semantics", () => {
@@ -254,6 +277,14 @@ describe("util/path isRelativeRequest", () => {
 		expect(isRelativeRequest("../foo")).toBe(true);
 	});
 
+	it("returns true for win32 relative requests", () => {
+		expect(isRelativeRequest(".\\")).toBe(true);
+		expect(isRelativeRequest(".\\foo")).toBe(true);
+		expect(isRelativeRequest("..\\")).toBe(true);
+		expect(isRelativeRequest("..\\foo")).toBe(true);
+		expect(isRelativeRequest("..\\..\\src")).toBe(true);
+	});
+
 	it("returns false for bare specifiers and absolute paths", () => {
 		expect(isRelativeRequest("")).toBe(false);
 		expect(isRelativeRequest("foo")).toBe(false);
@@ -351,4 +382,47 @@ describe("util/path join fallbacks for special rootPath types", () => {
 		// posixNormalize(rootPath) ("#x"), not relative, so prefixed with "./".
 		expect(join("#x", "./foo")).toBe("./#x");
 	});
+});
+
+describe("util/path win32 relative paths from path.relative()", () => {
+	const isWin32 = process.platform === "win32";
+
+	if (isWin32) {
+		it("should produce backslash paths from path.relative() on win32", () => {
+			const rel = path.relative("C:\\project\\app", "C:\\project\\src");
+			expect(rel).toContain("\\");
+			expect(getType(rel)).toBe(PathType.Relative);
+			expect(isRelativeRequest(rel)).toBe(true);
+			expect(normalize(rel)).toBe("../src");
+		});
+
+		it("should handle multi-level win32 relative paths", () => {
+			const rel = path.relative(
+				"C:\\project\\packages\\app",
+				"C:\\project\\src\\shared",
+			);
+			expect(rel).toContain("\\");
+			expect(getType(rel)).toBe(PathType.Relative);
+			expect(normalize(rel)).toBe("../../src/shared");
+		});
+	} else {
+		it("should handle win32-style paths on any platform", () => {
+			// Use path.win32.relative() to simulate Windows behavior on non-Windows
+			const rel = path.win32.relative("C:\\project\\app", "C:\\project\\src");
+			expect(rel).toBe("..\\src");
+			expect(getType(rel)).toBe(PathType.Relative);
+			expect(isRelativeRequest(rel)).toBe(true);
+			expect(normalize(rel)).toBe("../src");
+		});
+
+		it("should handle multi-level win32 relative paths on any platform", () => {
+			const rel = path.win32.relative(
+				"C:\\project\\packages\\app",
+				"C:\\project\\src\\shared",
+			);
+			expect(rel).toBe("..\\..\\src\\shared");
+			expect(getType(rel)).toBe(PathType.Relative);
+			expect(normalize(rel)).toBe("../../src/shared");
+		});
+	}
 });
