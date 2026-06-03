@@ -115,14 +115,22 @@ describe("restrictions", () => {
 			restrictions: [buildModules],
 		});
 
-		resolver.resolve({}, fixture, "exports-pck", {}, (err, result) => {
-			if (err) return done(err);
-			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(
-				path.resolve(buildModules, "exports-pck/lib/index.js"),
-			);
-			done();
-		});
+		resolver.resolve(
+			{},
+			fixture,
+			"exports-pck",
+			{},
+			(err, result, resolveRequest) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(
+					path.resolve(buildModules, "exports-pck/lib/index.js"),
+				);
+				// the internal carrier must not leak onto the result
+				expect(resolveRequest).not.toHaveProperty("__restrictionsMarker");
+				done();
+			},
+		);
 	});
 
 	it("should still throw when an exports target has no in-restriction fallback", (done) => {
