@@ -133,6 +133,24 @@ describe("restrictions", () => {
 		);
 	});
 
+	it("should fall back when an exports target fails a RegExp restriction", (done) => {
+		const buildModules = path.resolve(fixture, "build/node_modules");
+		const resolver = ResolverFactory.createResolver({
+			fileSystem: nodeFileSystem,
+			modules: ["node_modules", buildModules],
+			restrictions: [/[\\/]build[\\/]node_modules[\\/]/],
+		});
+
+		resolver.resolve({}, fixture, "exports-pck", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) return done(new Error("No result"));
+			expect(result).toEqual(
+				path.resolve(buildModules, "exports-pck/lib/index.js"),
+			);
+			done();
+		});
+	});
+
 	it("should not leak the internal marker when restrictions are not configured", (done) => {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem: nodeFileSystem,
