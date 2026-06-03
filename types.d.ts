@@ -85,6 +85,11 @@ declare interface BaseResolveRequest {
 	 * inner relative path for internal usage
 	 */
 	__innerRequest_relativePath?: string;
+
+	/**
+	 * internal: shared marker `RestrictionsPlugin` flips when it filters out an existing target, letting `ExportsFieldPlugin` fall back instead of erroring
+	 */
+	__restrictionsMarker?: { blocked: boolean };
 }
 declare interface BasenameCacheEntry {
 	/**

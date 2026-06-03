@@ -107,6 +107,86 @@ describe("restrictions", () => {
 		);
 	});
 
+	it("should fall back to the next modules entry when an exports target is outside the restriction", (done) => {
+		const buildModules = path.resolve(fixture, "build/node_modules");
+		const resolver = ResolverFactory.createResolver({
+			fileSystem: nodeFileSystem,
+			modules: ["node_modules", buildModules],
+			restrictions: [buildModules],
+		});
+
+		resolver.resolve(
+			{},
+			fixture,
+			"exports-pck",
+			{},
+			(err, result, resolveRequest) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				expect(result).toEqual(
+					path.resolve(buildModules, "exports-pck/lib/index.js"),
+				);
+				// the internal carrier must not leak onto the result
+				expect(resolveRequest).not.toHaveProperty("__restrictionsMarker");
+				done();
+			},
+		);
+	});
+
+	it("should fall back when an exports target fails a RegExp restriction", (done) => {
+		const buildModules = path.resolve(fixture, "build/node_modules");
+		const resolver = ResolverFactory.createResolver({
+			fileSystem: nodeFileSystem,
+			modules: ["node_modules", buildModules],
+			restrictions: [/[\\/]build[\\/]node_modules[\\/]/],
+		});
+
+		resolver.resolve({}, fixture, "exports-pck", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) return done(new Error("No result"));
+			expect(result).toEqual(
+				path.resolve(buildModules, "exports-pck/lib/index.js"),
+			);
+			done();
+		});
+	});
+
+	it("should not leak the internal marker when restrictions are not configured", (done) => {
+		const resolver = ResolverFactory.createResolver({
+			fileSystem: nodeFileSystem,
+			modules: ["node_modules"],
+		});
+
+		resolver.resolve(
+			{},
+			fixture,
+			"exports-pck",
+			{},
+			(err, result, resolveRequest) => {
+				if (err) return done(err);
+				expect(result).toEqual(
+					path.resolve(fixture, "node_modules/exports-pck/lib/index.js"),
+				);
+				expect(resolveRequest).not.toHaveProperty("__restrictionsMarker");
+				done();
+			},
+		);
+	});
+
+	it("should still throw when an exports target has no in-restriction fallback", (done) => {
+		const resolver = ResolverFactory.createResolver({
+			fileSystem: nodeFileSystem,
+			modules: ["node_modules"],
+			restrictions: [path.resolve(fixture, "build/node_modules")],
+		});
+
+		resolver.resolve({}, fixture, "exports-pck", {}, (err, result) => {
+			if (!err) return done(new Error(`expect error, got ${result}`));
+			expect(err).toBeInstanceOf(Error);
+			done();
+		});
+	});
+
 	it("should throw an error when the path is outside a string restriction", (done) => {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem: nodeFileSystem,
