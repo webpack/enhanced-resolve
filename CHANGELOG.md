@@ -1,5 +1,11 @@
 # enhanced-resolve
 
+## 5.22.2
+
+### Patch Changes
+
+- Fall back to the next `modules` entry when a package `exports` target is filtered out by `restrictions`, instead of throwing. (by [@alexander-akait](https://github.com/alexander-akait) in [#600](https://github.com/webpack/enhanced-resolve/pull/600))
+
 ## 5.22.1
 
 ### Patch Changes
