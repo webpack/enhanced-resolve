@@ -133,6 +133,28 @@ describe("restrictions", () => {
 		);
 	});
 
+	it("should not leak the internal marker when restrictions are not configured", (done) => {
+		const resolver = ResolverFactory.createResolver({
+			fileSystem: nodeFileSystem,
+			modules: ["node_modules"],
+		});
+
+		resolver.resolve(
+			{},
+			fixture,
+			"exports-pck",
+			{},
+			(err, result, resolveRequest) => {
+				if (err) return done(err);
+				expect(result).toEqual(
+					path.resolve(fixture, "node_modules/exports-pck/lib/index.js"),
+				);
+				expect(resolveRequest).not.toHaveProperty("__restrictionsMarker");
+				done();
+			},
+		);
+	});
+
 	it("should still throw when an exports target has no in-restriction fallback", (done) => {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem: nodeFileSystem,
