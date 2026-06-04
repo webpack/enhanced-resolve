@@ -11,14 +11,12 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-permissions:
-  contents: read
-  id-token: write # Required for OIDC authentication with CodSpeed
-
 jobs:
   benchmark:
     runs-on: ubuntu-latest
     permissions:
+      contents: read
+      id-token: write # Required for OIDC authentication with CodSpeed
       pull-requests: write
     strategy:
       fail-fast: false
