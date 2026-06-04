@@ -50,7 +50,10 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           architecture: ${{ steps.calculate_architecture.outputs.result }}
-          cache: npm
+          # Legacy Node (10-16) reinstalls deps after dropping/bypassing
+          # package-lock.json, so there's no lockfile for setup-node's npm
+          # cache to key on.
+          cache: ${{ (matrix.node-version == '10.x' || matrix.node-version == '12.x' || matrix.node-version == '14.x' || matrix.node-version == '16.x') && '' || 'npm' }}
 
       - name: Install dependencies
         shell: bash
