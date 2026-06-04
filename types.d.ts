@@ -1697,6 +1697,15 @@ declare abstract class Resolver {
 	dirname(path: string): string;
 	basename(path: string, suffix?: string): string;
 }
+
+/**
+ * Singly-linked stack entry that also exposes a Set-like API
+ * (`has`, `size`, iteration). Each `doResolve` call prepends a new
+ * `StackEntry` that points at the previous tip via `.parent`, so pushing
+ * is O(1) in time and memory. Recursion detection walks the linked list
+ * (O(n)) but the stack is typically shallow, so this is cheaper overall
+ * than cloning a `Set` per call.
+ */
 declare abstract class StackEntry {
 	name?: string;
 	path: string | false;
@@ -1742,6 +1751,21 @@ declare abstract class StackEntry {
 	 * at the formatted form.
 	 */
 	toString(): string;
+
+	/**
+	 * Iterate entries from oldest (root) to newest (tip), matching how a
+	 * `Set` that was populated in insertion order would iterate. Pre-seeded
+	 * legacy `Set<string>` entries come first so error-message output stays
+	 * ordered oldest-to-newest.
+	 * Yields each entry as its formatted `toString()` form. Plugins written
+	 * against the pre-5.21 `Set<string>` shape — e.g.
+	 * `[...resolveContext.stack].find(a => a.includes("module:"))` — keep
+	 * working unchanged because each yielded value is a plain string with
+	 * all of `String.prototype` available natively. Resolves that never
+	 * iterate the stack pay nothing; iteration costs one `toString()`
+	 * allocation per stack frame.
+	 */
+	[Symbol.iterator](): IterableIterator<string>;
 }
 declare interface Stat {
 	(
