@@ -58,19 +58,27 @@ export default function register(bench, { fixtureDir }) {
 			});
 		});
 
-	// Three passes per iteration so cache hits dominate the hot case.
+	// Three passes per iteration so cache hits dominate the hot case. REPEAT
+	// amplifies total allocation above CodSpeed's memory-mode noise floor
+	// without changing the 3-pass cache-hit pattern.
+	const REPEAT = 20;
+
 	bench.add("unsafe-cache: ON, 3x repeat", async () => {
-		for (let pass = 0; pass < 3; pass++) {
-			for (const req of requests) {
-				await resolveWith(cachedResolver, req);
+		for (let r = 0; r < REPEAT; r++) {
+			for (let pass = 0; pass < 3; pass++) {
+				for (const req of requests) {
+					await resolveWith(cachedResolver, req);
+				}
 			}
 		}
 	});
 
 	bench.add("unsafe-cache: OFF, 3x repeat", async () => {
-		for (let pass = 0; pass < 3; pass++) {
-			for (const req of requests) {
-				await resolveWith(uncachedResolver, req);
+		for (let r = 0; r < REPEAT; r++) {
+			for (let pass = 0; pass < 3; pass++) {
+				for (const req of requests) {
+					await resolveWith(uncachedResolver, req);
+				}
 			}
 		}
 	});

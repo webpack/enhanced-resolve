@@ -37,6 +37,10 @@ export default function register(bench, { fixtureDir }) {
 		path.join(fixtureDir, "assets/data/schema"),
 	];
 
+	// Warm resolves allocate only a few KB, below CodSpeed's memory-mode noise
+	// floor; repeat the batch so measured allocation clears it.
+	const REPEAT = 20;
+
 	const resolve = (req) =>
 		new Promise((resolve, reject) => {
 			resolver.resolve({}, from, req, {}, (err, result) => {
@@ -47,8 +51,10 @@ export default function register(bench, { fixtureDir }) {
 		});
 
 	bench.add("prefer-absolute: absolute paths (warm)", async () => {
-		for (const req of requests) {
-			await resolve(req);
+		for (let r = 0; r < REPEAT; r++) {
+			for (const req of requests) {
+				await resolve(req);
+			}
 		}
 	});
 }

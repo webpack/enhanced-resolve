@@ -57,6 +57,10 @@ export default function register(bench, { fixtureDir }) {
 
 	const requests = names.map((n) => `./linked/${n}`);
 
+	// Warm resolves allocate only a few KB, below CodSpeed's memory-mode noise
+	// floor; repeat the batch so measured allocation clears it.
+	const REPEAT = 20;
+
 	const resolveWith = (resolver, req) =>
 		new Promise((resolve, reject) => {
 			resolver.resolve({}, fixtureDir, req, {}, (err, result) => {
@@ -67,14 +71,18 @@ export default function register(bench, { fixtureDir }) {
 		});
 
 	bench.add("symlinks: follow symlinks=true (warm)", async () => {
-		for (const req of requests) {
-			await resolveWith(symlinkResolver, req);
+		for (let r = 0; r < REPEAT; r++) {
+			for (const req of requests) {
+				await resolveWith(symlinkResolver, req);
+			}
 		}
 	});
 
 	bench.add("symlinks: symlinks=false (warm)", async () => {
-		for (const req of requests) {
-			await resolveWith(noSymlinkResolver, req);
+		for (let r = 0; r < REPEAT; r++) {
+			for (const req of requests) {
+				await resolveWith(noSymlinkResolver, req);
+			}
 		}
 	});
 }
