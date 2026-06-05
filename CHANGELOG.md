@@ -1,5 +1,11 @@
 # enhanced-resolve
 
+## 5.23.0
+
+### Minor Changes
+
+- Allow the path-like resolve options `roots`, `modules`, `alias`/`fallback` targets, `restrictions`, and `tsconfig` (the config file, `configFile`, `baseUrl`, and `references`) to accept file `URL` instances (such as `new URL("./dir/", import.meta.url)`), converting them to filesystem paths. Plain strings are still treated as literal paths, matching Node's `fs`. (by [@alexander-akait](https://github.com/alexander-akait) in [#604](https://github.com/webpack/enhanced-resolve/pull/604))
+
 ## 5.22.2
 
 ### Patch Changes
