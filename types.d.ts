@@ -20,10 +20,6 @@ declare interface AliasOption {
 	name: string;
 	onlyModule?: boolean;
 }
-type AliasOptionNewRequest = string | false | string[];
-declare interface AliasOptions {
-	[index: string]: AliasOptionNewRequest;
-}
 type BaseFileSystem = FileSystem & SyncFileSystem;
 declare interface BaseResolveRequest {
 	/**
@@ -146,10 +142,10 @@ declare class CachedInputFileSystem {
 		what?:
 			| string
 			| number
-			| Buffer
 			| URL_url
-			| (string | number | Buffer | URL_url)[]
-			| Set<string | number | Buffer | URL_url>,
+			| Buffer
+			| (string | number | URL_url | Buffer)[]
+			| Set<string | number | URL_url | Buffer>,
 		options?: { exact?: boolean },
 	): void;
 }
@@ -839,8 +835,8 @@ declare interface PathCacheFunctions {
 	 */
 	basename: BasenameCacheEntry;
 }
-type PathLike = string | Buffer | URL_url;
-type PathOrFileDescriptor = string | number | Buffer | URL_url;
+type PathLike = string | URL_url | Buffer;
+type PathOrFileDescriptor = string | number | URL_url | Buffer;
 type Plugin =
 	| undefined
 	| null
@@ -1437,12 +1433,12 @@ declare interface ResolveOptionsResolverFactoryObject_2 {
 	/**
 	 * A list of module alias configurations or an object which maps key to value
 	 */
-	alias?: AliasOptions | AliasOption[];
+	alias?: UserAliasOptions | UserAliasOptionEntry[];
 
 	/**
 	 * A list of module alias configurations or an object which maps key to value, applied only after modules option
 	 */
-	fallback?: AliasOptions | AliasOption[];
+	fallback?: UserAliasOptions | UserAliasOptionEntry[];
 
 	/**
 	 * An object which maps extension to extension aliases
@@ -1520,9 +1516,9 @@ declare interface ResolveOptionsResolverFactoryObject_2 {
 	resolver?: Resolver;
 
 	/**
-	 * A list of directories to resolve modules from, can be absolute path or folder name
+	 * A list of directories to resolve modules from, can be absolute path, folder name, or a `file:` `URL` instance
 	 */
-	modules?: string | string[];
+	modules?: string | URL_url | (string | URL_url)[];
 
 	/**
 	 * A list of main fields in description files
@@ -1549,9 +1545,9 @@ declare interface ResolveOptionsResolverFactoryObject_2 {
 	pnpApi?: null | PnpApi;
 
 	/**
-	 * A list of root paths
+	 * A list of root paths, each an absolute path or a `file:` `URL` instance
 	 */
-	roots?: string[];
+	roots?: (string | URL_url)[];
 
 	/**
 	 * The request is already fully specified and no extensions or directories are resolved for it
@@ -1564,9 +1560,9 @@ declare interface ResolveOptionsResolverFactoryObject_2 {
 	resolveToContext?: boolean;
 
 	/**
-	 * A list of resolve restrictions
+	 * A list of resolve restrictions, each an absolute path, a `file:` `URL` instance, or a RegExp
 	 */
-	restrictions?: (string | RegExp)[];
+	restrictions?: (string | RegExp | URL_url)[];
 
 	/**
 	 * Use only the sync constraints of the file system calls
@@ -1584,9 +1580,9 @@ declare interface ResolveOptionsResolverFactoryObject_2 {
 	preferAbsolute?: boolean;
 
 	/**
-	 * TypeScript config file path or config object with configFile and references
+	 * TypeScript config file path (or `file:` `URL` instance) or config object with configFile and references
 	 */
-	tsconfig?: string | boolean | TsconfigOptions;
+	tsconfig?: string | boolean | URL_url | UserTsconfigOptions;
 }
 type ResolveRequest = BaseResolveRequest & Partial<ParsedIdentifier>;
 declare abstract class Resolver {
@@ -1941,6 +1937,35 @@ declare interface TsconfigReference {
 	path: string;
 }
 declare interface URL_url extends URL_Import {}
+declare interface UserAliasOptionEntry {
+	alias: UserAliasOptionNewRequest;
+	name: string;
+	onlyModule?: boolean;
+}
+type UserAliasOptionNewRequest =
+	| string
+	| false
+	| URL_url
+	| (string | URL_url)[];
+declare interface UserAliasOptions {
+	[index: string]: UserAliasOptionNewRequest;
+}
+declare interface UserTsconfigOptions {
+	/**
+	 * A path, or `file:` `URL` instance, pointing at the tsconfig file
+	 */
+	configFile?: string | URL_url;
+
+	/**
+	 * References to other tsconfig files. 'auto' inherits from TypeScript config, or an array of relative/absolute paths or `file:` `URL` instances
+	 */
+	references?: (string | URL_url)[] | "auto";
+
+	/**
+	 * Override baseUrl from tsconfig.json with a path or `file:` `URL` instance
+	 */
+	baseUrl?: string | URL_url;
+}
 declare interface WriteOnlySet<T> {
 	add: (item: T) => void;
 }
