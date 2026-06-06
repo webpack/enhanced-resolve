@@ -1213,21 +1213,21 @@ declare interface ResolveContext {
 declare interface ResolveFunction {
 	(
 		context: Context,
-		path: string,
-		request: string,
+		path: string | URL_url,
+		request: string | URL_url,
 		resolveContext?: ResolveContext,
 	): string | false;
 	(
-		path: string,
-		request: string,
+		path: string | URL_url,
+		request: string | URL_url,
 		resolveContext?: ResolveContext,
 	): string | false;
 }
 declare interface ResolveFunctionAsync {
 	(
 		context: Context,
-		path: string,
-		request: string,
+		path: string | URL_url,
+		request: string | URL_url,
 		resolveContext: ResolveContext,
 		callback: (
 			err: null | ErrorWithDetail,
@@ -1237,8 +1237,8 @@ declare interface ResolveFunctionAsync {
 	): void;
 	(
 		context: Context,
-		path: string,
-		request: string,
+		path: string | URL_url,
+		request: string | URL_url,
 		callback: (
 			err: null | ErrorWithDetail,
 			res?: string | false,
@@ -1246,8 +1246,8 @@ declare interface ResolveFunctionAsync {
 		) => void,
 	): void;
 	(
-		path: string,
-		request: string,
+		path: string | URL_url,
+		request: string | URL_url,
 		resolveContext: ResolveContext,
 		callback: (
 			err: null | ErrorWithDetail,
@@ -1256,8 +1256,8 @@ declare interface ResolveFunctionAsync {
 		) => void,
 	): void;
 	(
-		path: string,
-		request: string,
+		path: string | URL_url,
+		request: string | URL_url,
 		callback: (
 			err: null | ErrorWithDetail,
 			res?: string | false,
@@ -1268,13 +1268,13 @@ declare interface ResolveFunctionAsync {
 declare interface ResolveFunctionPromise {
 	(
 		context: Context,
-		path: string,
-		request: string,
+		path: string | URL_url,
+		request: string | URL_url,
 		resolveContext?: ResolveContext,
 	): Promise<string | false>;
 	(
-		path: string,
-		request: string,
+		path: string | URL_url,
+		request: string | URL_url,
 		resolveContext?: ResolveContext,
 	): Promise<string | false>;
 }
@@ -1613,30 +1613,30 @@ declare abstract class Resolver {
 		null | ResolveRequest
 	>;
 	resolveSync(
-		path: string,
-		request: string,
+		path: string | URL_url,
+		request: string | URL_url,
 		resolveContext?: ResolveContext,
 	): string | false;
 	resolveSync(
 		context: Context,
-		path: string,
-		request: string,
+		path: string | URL_url,
+		request: string | URL_url,
 		resolveContext?: ResolveContext,
 	): string | false;
 	resolvePromise(
-		path: string,
-		request: string,
+		path: string | URL_url,
+		request: string | URL_url,
 		resolveContext?: ResolveContext,
 	): Promise<string | false>;
 	resolvePromise(
 		context: Context,
-		path: string,
-		request: string,
+		path: string | URL_url,
+		request: string | URL_url,
 		resolveContext?: ResolveContext,
 	): Promise<string | false>;
 	resolve(
-		path: string,
-		request: string,
+		path: string | URL_url,
+		request: string | URL_url,
 		callback: (
 			err: null | ErrorWithDetail,
 			res?: string | false,
@@ -1644,8 +1644,8 @@ declare abstract class Resolver {
 		) => void,
 	): void;
 	resolve(
-		path: string,
-		request: string,
+		path: string | URL_url,
+		request: string | URL_url,
 		resolveContext: ResolveContext,
 		callback: (
 			err: null | ErrorWithDetail,
@@ -1655,8 +1655,8 @@ declare abstract class Resolver {
 	): void;
 	resolve(
 		context: Context,
-		path: string,
-		request: string,
+		path: string | URL_url,
+		request: string | URL_url,
 		callback: (
 			err: null | ErrorWithDetail,
 			res?: string | false,
@@ -1665,8 +1665,8 @@ declare abstract class Resolver {
 	): void;
 	resolve(
 		context: Context,
-		path: string,
-		request: string,
+		path: string | URL_url,
+		request: string | URL_url,
 		resolveContext: ResolveContext,
 		callback: (
 			err: null | ErrorWithDetail,
@@ -1971,8 +1971,8 @@ declare interface WriteOnlySet<T> {
 }
 declare function exports(
 	context: Context,
-	path: string,
-	request: string,
+	path: string | URL_url,
+	request: string | URL_url,
 	resolveContext: ResolveContext,
 	callback: (
 		err: null | ErrorWithDetail,
@@ -1982,8 +1982,8 @@ declare function exports(
 ): void;
 declare function exports(
 	context: Context,
-	path: string,
-	request: string,
+	path: string | URL_url,
+	request: string | URL_url,
 	callback: (
 		err: null | ErrorWithDetail,
 		res?: string | false,
@@ -1991,8 +1991,8 @@ declare function exports(
 	) => void,
 ): void;
 declare function exports(
-	path: string,
-	request: string,
+	path: string | URL_url,
+	request: string | URL_url,
 	resolveContext: ResolveContext,
 	callback: (
 		err: null | ErrorWithDetail,
@@ -2001,8 +2001,8 @@ declare function exports(
 	) => void,
 ): void;
 declare function exports(
-	path: string,
-	request: string,
+	path: string | URL_url,
+	request: string | URL_url,
 	callback: (
 		err: null | ErrorWithDetail,
 		res?: string | false,
