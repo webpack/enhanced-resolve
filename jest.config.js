@@ -1,10 +1,6 @@
 "use strict";
 
 module.exports = {
-	prettierPath: require.resolve("prettier-2"),
 	moduleFileExtensions: ["js", "mjs", "cjs", "ts"],
-	snapshotFormat: {
-		escapeString: true,
-		printBasicPrototype: true,
-	},
+	setupFiles: ["<rootDir>/test/polyfill-text-encoding.js"],
 };

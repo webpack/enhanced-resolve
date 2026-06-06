@@ -114,7 +114,38 @@ describe("fallback", () => {
 			(err, result) => {
 				if (err) return done(err);
 				expect(result).toBe("/a/dir/index");
-				expect(log).toMatchSnapshot();
+				expect(log).toEqual([
+					"resolve 'aliasA/dir' in '/'",
+					"  Parsed request is a module",
+					"  No description file found in / or above",
+					"  resolve as module",
+					"    looking for modules in /",
+					"      /aliasA doesn't exist",
+					"  aliased with mapping 'aliasA': 'a' to 'a/dir'",
+					"    Parsed request is a module",
+					"    No description file found in / or above",
+					"    resolve as module",
+					"      looking for modules in /",
+					"        existing directory /a",
+					"          No description file found in /a or above",
+					"          No description file found in /a or above",
+					"          no extension",
+					"            /a/dir is not a file",
+					"          .js",
+					"            /a/dir.js doesn't exist",
+					"          .json",
+					"            /a/dir.json doesn't exist",
+					"          .node",
+					"            /a/dir.node doesn't exist",
+					"          as directory",
+					"            existing directory /a/dir",
+					"              No description file found in /a/dir or above",
+					"              using path: /a/dir/index",
+					"                No description file found in /a/dir or above",
+					"                no extension",
+					"                  existing file: /a/dir/index",
+					"                    reporting result /a/dir/index",
+				]);
 				done();
 			},
 		);

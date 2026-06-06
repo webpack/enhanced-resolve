@@ -12,7 +12,10 @@
   "main": "lib/index.js",
   "browser": {
     "process": "./lib/util/process-browser.js",
-    "module": "./lib/util/module-browser.js"
+    "module": "./lib/util/module-browser.js",
+    "path": "./lib/util/path-browser.js",
+    "url": "./lib/util/url-browser.js",
+    "graceful-fs": "./lib/util/graceful-fs-browser.js"
   },
   "types": "types.d.ts",
   "files": [
@@ -40,6 +43,7 @@
     "test:only": "jest",
     "test:watch": "npm run test:only -- --watch",
     "test:coverage": "npm run test:only -- --collectCoverageFrom=\"lib/**/*.js\" --coverage",
+    "test:browser": "node --experimental-vm-modules test/smoke/browser-run.cjs",
     "version": "changeset version",
     "release": "changeset publish",
     "benchmark": "node --max-old-space-size=4096 --hash-seed=1 --random-seed=1 --no-opt --predictable --predictable-gc-schedule --interpreted-frames-native-stack --allow-natives-syntax --expose-gc --no-concurrent-sweeping ./benchmark/run.mjs"
@@ -72,10 +76,10 @@
     "lint-staged": "^17.0.4",
     "memfs": "^4.56.11",
     "prettier": "^3.7.4",
-    "prettier-2": "npm:prettier@^2",
-    "tooling": "webpack/tooling#v1.26.3",
     "tinybench": "^6.0.0",
-    "typescript": "^6.0.2"
+    "tooling": "webpack/tooling#v1.26.3",
+    "typescript": "^6.0.2",
+    "webpack": "^5.107.2"
   },
   "engines": {
     "node": ">=10.13.0"

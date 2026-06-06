@@ -2665,7 +2665,19 @@ describe("exportsFieldPlugin", () => {
 				);
 				expect(
 					log.map((line) => line.replace(fixture, "...").replace(/\\/g, "/")),
-				).toMatchSnapshot();
+				).toEqual([
+					"resolve 'exports-field/dist/browser.js' in '...'",
+					"  Parsed request is a module",
+					"  using description file: .../package.json (relative path: .)",
+					"    resolve as module",
+					"      looking for modules in .../node_modules",
+					"        existing directory .../node_modules/exports-field",
+					"          using description file: .../node_modules/exports-field/package.json (relative path: .)",
+					"            using exports field: ./lib/browser.js",
+					"              using description file: .../node_modules/exports-field/package.json (relative path: ./lib/browser.js)",
+					"                existing file: .../node_modules/exports-field/lib/browser.js",
+					"                  reporting result .../node_modules/exports-field/lib/browser.js",
+				]);
 				done();
 			},
 		);

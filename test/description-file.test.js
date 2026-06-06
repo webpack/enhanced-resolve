@@ -45,7 +45,10 @@ describe("description file (readFile fallback)", () => {
 			(err) => {
 				expect(err).toBeInstanceOf(Error);
 				expect(/** @type {Error} */ (err).message).toMatch(
-					/No content in file|Unexpected end of JSON|Can't resolve/,
+					// JSON.parse("") differs by engine: V8 (node/deno) says
+					// "Unexpected end of JSON input", JavaScriptCore (bun) says
+					// "JSON Parse error: Unexpected EOF".
+					/No content in file|Unexpected end of JSON|JSON Parse error|Can't resolve/,
 				);
 				done();
 			},
