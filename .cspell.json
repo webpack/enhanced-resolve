@@ -50,7 +50,10 @@
     "readlink",
     "extensionless",
     "ENOENT",
-    "hardlinks"
+    "hardlinks",
+    "hardlink",
+    "hardlinks",
+    "hardlinked"
   ],
   "ignorePaths": [
     "package.json",

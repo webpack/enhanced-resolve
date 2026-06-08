@@ -1365,6 +1365,11 @@ declare interface ResolveOptionsResolverFactoryObject_1 {
 	symlinks: boolean;
 
 	/**
+	 * hardlinks
+	 */
+	hardlinks: boolean;
+
+	/**
 	 * resolver
 	 */
 	resolver?: Resolver;
@@ -1509,6 +1514,11 @@ declare interface ResolveOptionsResolverFactoryObject_2 {
 	 * Resolve symlinks to their symlinked location
 	 */
 	symlinks?: boolean;
+
+	/**
+	 * Deduplicate hardlinked files by resolving them to the same path based on filesystem inode
+	 */
+	hardlinks?: boolean;
 
 	/**
 	 * A prepared Resolver to which the plugins are attached
