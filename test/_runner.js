@@ -62,7 +62,7 @@ if (typeof jest === "undefined") {
 					return fn.call(this, {}, done);
 				}
 			: fn;
-	const named = (g) => (name, fn) => g(name, wrap(fn));
+	const named = (register) => (name, fn) => register(name, wrap(fn));
 
 	module.exports = {
 		describe: global.describe,

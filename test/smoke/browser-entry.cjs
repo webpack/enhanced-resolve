@@ -45,35 +45,35 @@ function createMemoryAsyncFs(fileMap) {
 	});
 
 	/**
-	 * @param {string} p path
+	 * @param {string} pth path
 	 * @param {string} code error code
 	 * @returns {Error} an errno error
 	 */
-	const fsError = (p, code) => {
-		const err = /** @type {NodeJS.ErrnoException} */ (new Error(`${code}: ${p}`));
+	const fsError = (pth, code) => {
+		const err = /** @type {NodeJS.ErrnoException} */ (new Error(`${code}: ${pth}`));
 		err.code = code;
-		err.path = p;
+		err.path = pth;
 		return err;
 	};
 
-	const statImpl = (p) => {
-		if (files.has(p)) return makeStats(true);
-		if (dirs.has(p)) return makeStats(false);
-		throw fsError(p, "ENOENT");
+	const statImpl = (pth) => {
+		if (files.has(pth)) return makeStats(true);
+		if (dirs.has(pth)) return makeStats(false);
+		throw fsError(pth, "ENOENT");
 	};
 
-	const readFileImpl = (p) => {
-		if (!files.has(p)) throw fsError(p, "ENOENT");
+	const readFileImpl = (pth) => {
+		if (!files.has(pth)) throw fsError(pth, "ENOENT");
 		// Return Uint8Array (not a Node Buffer) to mirror a browser FS and
 		// exercise the runtime-agnostic decode path in lib/util/fs.js.
-		return new TextEncoder().encode(/** @type {string} */ (files.get(p)));
+		return new TextEncoder().encode(/** @type {string} */ (files.get(pth)));
 	};
 
-	const readdirImpl = (p) => {
-		const prefix = p === "/" ? "/" : `${p}/`;
+	const readdirImpl = (pth) => {
+		const prefix = pth === "/" ? "/" : `${pth}/`;
 		const names = new Set();
 		for (const entry of [...files.keys(), ...dirs]) {
-			if (entry.startsWith(prefix) && entry !== p) {
+			if (entry.startsWith(prefix) && entry !== pth) {
 				const [seg] = entry.slice(prefix.length).split("/");
 				if (seg) names.add(seg);
 			}
@@ -81,9 +81,9 @@ function createMemoryAsyncFs(fileMap) {
 		return [...names];
 	};
 
-	const readlinkImpl = (p) => {
+	const readlinkImpl = (pth) => {
 		// Nothing is a symlink in this FS.
-		throw fsError(p, "EINVAL");
+		throw fsError(pth, "EINVAL");
 	};
 
 	// Wrap a synchronous implementation as an async, callback-style fs method
@@ -110,7 +110,7 @@ function createMemoryAsyncFs(fileMap) {
 		readFile: toAsync(readFileImpl),
 		readdir: toAsync(readdirImpl),
 		readlink: toAsync(readlinkImpl),
-		realpath: toAsync((p) => p),
+		realpath: toAsync((pth) => pth),
 	};
 }
 

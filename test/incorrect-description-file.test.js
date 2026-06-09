@@ -14,7 +14,7 @@ const nodeFileSystem = new CachedInputFileSystem(fs, 4000);
  * @param {string[]} args args
  * @returns {string} paths
  */
-function p(...args) {
+function pp(...args) {
 	return path.join(fixtures, ...args);
 }
 
@@ -32,11 +32,11 @@ describe("incorrect description file", () => {
 				called = true;
 			},
 		};
-		resolver.resolve({}, p("pack1"), ".", ctx, (err, _result) => {
+		resolver.resolve({}, pp("pack1"), ".", ctx, (err, _result) => {
 			if (!err) return done(new Error("No error"));
 			assert.ok(err instanceof Error);
 			assert.strictEqual(
-				ctx.fileDependencies.has(p("pack1", "package.json")),
+				ctx.fileDependencies.has(pp("pack1", "package.json")),
 				true,
 			);
 			assert.strictEqual(called, true);
@@ -52,10 +52,10 @@ describe("incorrect description file", () => {
 				called = true;
 			},
 		};
-		resolver.resolve({}, p("pack2"), ".", ctx, (err, _result) => {
+		resolver.resolve({}, pp("pack2"), ".", ctx, (err, _result) => {
 			if (!err) return done(new Error("No error"));
 			assert.strictEqual(
-				ctx.fileDependencies.has(p("pack2", "package.json")),
+				ctx.fileDependencies.has(pp("pack2", "package.json")),
 				true,
 			);
 			assert.strictEqual(called, true);
@@ -64,7 +64,7 @@ describe("incorrect description file", () => {
 	});
 
 	it("should not resolve main in incorrect description file #3", (t, done) => {
-		resolver.resolve({}, p("pack2"), ".", {}, (err, _result) => {
+		resolver.resolve({}, pp("pack2"), ".", {}, (err, _result) => {
 			if (!err) return done(new Error("No error"));
 			assert.ok(err instanceof Error);
 			done();

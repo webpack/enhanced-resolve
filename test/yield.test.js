@@ -526,7 +526,7 @@ describe("should resolve all aliases", () => {
 								assert.strictEqual(Array.isArray(cache[cacheId]), true);
 								assert.deepStrictEqual(
 									/** @type {ResolveRequest[]} */
-									(cache[cacheId]).map((o) => o.path),
+									(cache[cacheId]).map((req) => req.path),
 									makeFixturePaths(["/a/foo/b", "/a/foo-2/b"]),
 								);
 								done();
@@ -569,7 +569,7 @@ describe("should resolve all aliases", () => {
 							assert.strictEqual(Array.isArray(cache[cacheId]), true);
 							assert.deepStrictEqual(
 								/** @type {ResolveRequest[]} */
-								(cache[cacheId]).map((o) => o.path),
+								(cache[cacheId]).map((req) => req.path),
 								[false],
 							);
 							done();

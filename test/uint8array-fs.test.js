@@ -42,19 +42,19 @@ describe("Uint8Array file system", () => {
 		isSocket: () => false,
 	});
 
-	const enoent = (p) => {
+	const enoent = (pth) => {
 		const err = /** @type {NodeJS.ErrnoException} */ (
-			new Error(`ENOENT: ${p}`)
+			new Error(`ENOENT: ${pth}`)
 		);
 		err.code = "ENOENT";
 		return err;
 	};
 
 	const statSync = (arg) => {
-		const p = String(arg);
-		if (files.has(p)) return stat(true);
-		if (dirs.has(p)) return stat(false);
-		throw enoent(p);
+		const pth = String(arg);
+		if (files.has(pth)) return stat(true);
+		if (dirs.has(pth)) return stat(false);
+		throw enoent(pth);
 	};
 
 	const fileSystem = {
@@ -69,9 +69,9 @@ describe("Uint8Array file system", () => {
 		readdirSync: () => [],
 		// The crux of the test: return a Uint8Array, never a Node Buffer.
 		readFileSync: (arg) => {
-			const p = String(arg);
-			if (!files.has(p)) throw enoent(p);
-			return new TextEncoder().encode(files.get(p));
+			const pth = String(arg);
+			if (!files.has(pth)) throw enoent(pth);
+			return new TextEncoder().encode(files.get(pth));
 		},
 	};
 

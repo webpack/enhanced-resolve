@@ -57,8 +57,8 @@ describe("fileURLToPath", () => {
 	it("round-trips pathToFileURL on the host platform", () => {
 		// Build a host-absolute path so the round-trip is correct on Windows
 		// (drive letter) as well as POSIX, using the host-default platform branch.
-		const p = path.resolve("a b", "c");
-		assert.strictEqual(fileURLToPath(pathToFileURL(p)), p);
+		const pth = path.resolve("a b", "c");
+		assert.strictEqual(fileURLToPath(pathToFileURL(pth)), pth);
 	});
 
 	it("throws for a non-file: scheme", () => {

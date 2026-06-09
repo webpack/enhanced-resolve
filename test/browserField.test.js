@@ -13,7 +13,7 @@ const browserModule = path.join(__dirname, "fixtures", "browser-module");
  * @param {string[]} args args
  * @returns {string} path
  */
-function p(...args) {
+function pp(...args) {
 	return path.join(browserModule, ...args);
 }
 
@@ -34,7 +34,7 @@ describe("browserField", () => {
 	});
 
 	it("should ignore", (t, done) => {
-		resolver.resolve({}, p(), "./lib/ignore", {}, (err, result) => {
+		resolver.resolve({}, pp(), "./lib/ignore", {}, (err, result) => {
 			if (err) throw err;
 			assert.strictEqual(result, false);
 			done();
@@ -42,71 +42,74 @@ describe("browserField", () => {
 	});
 
 	it("should ignore #2", () => {
-		assert.strictEqual(resolver.resolveSync({}, p(), "./lib/ignore"), false);
-		assert.strictEqual(resolver.resolveSync({}, p(), "./lib/ignore.js"), false);
-		assert.strictEqual(resolver.resolveSync({}, p("lib"), "./ignore"), false);
+		assert.strictEqual(resolver.resolveSync({}, pp(), "./lib/ignore"), false);
 		assert.strictEqual(
-			resolver.resolveSync({}, p("lib"), "./ignore.js"),
+			resolver.resolveSync({}, pp(), "./lib/ignore.js"),
+			false,
+		);
+		assert.strictEqual(resolver.resolveSync({}, pp("lib"), "./ignore"), false);
+		assert.strictEqual(
+			resolver.resolveSync({}, pp("lib"), "./ignore.js"),
 			false,
 		);
 	});
 
 	it("should replace a file", () => {
 		assert.deepStrictEqual(
-			resolver.resolveSync({}, p(), "./lib/replaced"),
-			p("lib", "browser.js"),
+			resolver.resolveSync({}, pp(), "./lib/replaced"),
+			pp("lib", "browser.js"),
 		);
 		assert.deepStrictEqual(
-			resolver.resolveSync({}, p(), "./lib/replaced.js"),
-			p("lib", "browser.js"),
+			resolver.resolveSync({}, pp(), "./lib/replaced.js"),
+			pp("lib", "browser.js"),
 		);
 		assert.deepStrictEqual(
-			resolver.resolveSync({}, p("lib"), "./replaced"),
-			p("lib", "browser.js"),
+			resolver.resolveSync({}, pp("lib"), "./replaced"),
+			pp("lib", "browser.js"),
 		);
 		assert.deepStrictEqual(
-			resolver.resolveSync({}, p("lib"), "./replaced.js"),
-			p("lib", "browser.js"),
+			resolver.resolveSync({}, pp("lib"), "./replaced.js"),
+			pp("lib", "browser.js"),
 		);
 	});
 
 	it("should replace a module with a file", () => {
 		assert.deepStrictEqual(
-			resolver.resolveSync({}, p(), "module-a"),
-			p("browser", "module-a.js"),
+			resolver.resolveSync({}, pp(), "module-a"),
+			pp("browser", "module-a.js"),
 		);
 		assert.deepStrictEqual(
-			resolver.resolveSync({}, p("lib"), "module-a"),
-			p("browser", "module-a.js"),
+			resolver.resolveSync({}, pp("lib"), "module-a"),
+			pp("browser", "module-a.js"),
 		);
 	});
 
 	it("should replace a module with a module", () => {
 		assert.deepStrictEqual(
-			resolver.resolveSync({}, p(), "module-b"),
-			p("node_modules", "module-c.js"),
+			resolver.resolveSync({}, pp(), "module-b"),
+			pp("node_modules", "module-c.js"),
 		);
 		assert.deepStrictEqual(
-			resolver.resolveSync({}, p("lib"), "module-b"),
-			p("node_modules", "module-c.js"),
+			resolver.resolveSync({}, pp("lib"), "module-b"),
+			pp("node_modules", "module-c.js"),
 		);
 	});
 
 	it("should resolve in nested property", () => {
 		assert.deepStrictEqual(
-			resolver.resolveSync({}, p(), "./lib/main1.js"),
-			p("lib", "main.js"),
+			resolver.resolveSync({}, pp(), "./lib/main1.js"),
+			pp("lib", "main.js"),
 		);
 		assert.deepStrictEqual(
-			resolver.resolveSync({}, p(), "./lib/main2.js"),
-			p("lib", "browser.js"),
+			resolver.resolveSync({}, pp(), "./lib/main2.js"),
+			pp("lib", "browser.js"),
 		);
 	});
 
 	it("should check only alias field properties", () => {
 		assert.deepStrictEqual(
-			resolver.resolveSync({}, p(), "./toString"),
-			p("lib", "toString.js"),
+			resolver.resolveSync({}, pp(), "./toString"),
+			pp("lib", "toString.js"),
 		);
 	});
 
