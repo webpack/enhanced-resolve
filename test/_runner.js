@@ -11,9 +11,11 @@
 // is no longer reachable, and the `assert.match`/`doesNotMatch` polyfills
 // (needed only on Node.js < 13.6) become dead code.
 
-// Bridge between `node:test` and jest so a single test source runs on:
+// Bridge between `node:test` and jest-compatible runners so a single test
+// source runs on:
 //   - Node.js 18+ via the built-in `node --test` runner.
 //   - Legacy Node.js (10-16) via jest, which doesn't ship `node:test`.
+//   - Bun via its built-in jest-compatible runner.
 // The runtime is auto-detected by the presence of jest's `jest` global.
 
 const assert = require("assert");
@@ -55,7 +57,7 @@ if (typeof jest === "undefined") {
 } else {
 	// jest's callback-style test function takes `(done)`; node:test passes
 	// `(t, done)`. The migrated tests use the node:test shape, so wrap to
-	// inject a throwaway `t` when jest invokes the function.
+	// inject a throwaway `t` when the jest-compatible runner invokes them.
 	const wrap = (fn) =>
 		typeof fn === "function" && fn.length >= 2
 			? function bridged(done) {
@@ -64,20 +66,30 @@ if (typeof jest === "undefined") {
 			: fn;
 	const named = (register) => (name, fn) => register(name, wrap(fn));
 
+	// jest in Node.js attaches its helpers to `global`; Bun exposes them
+	// only through the `bun:test` module (Bun defines the `jest` compat global
+	// but does *not* mirror jest's helpers on `global`). Source from the
+	// place that actually has them.
+	const source =
+		typeof Bun === "undefined"
+			? global
+			: // eslint-disable-next-line import/no-unresolved
+				require("bun:test");
+
 	module.exports = {
 		// `describe.skip` is the only host-level skip the suite uses
-		// (dos-device-paths on non-Windows), and jest, bun and node:test all
-		// expose `.skip` on the `describe` object itself, so passing the
-		// runtime's `describe` through unchanged is enough. `it`/`test` are
-		// only wrapped to bridge the `(t, done)` callback signature; no
-		// `.skip`/`.only` is exposed because the suite does not use them
-		// (and bun, in particular, does not put `.skip` on `global.it`).
-		describe: global.describe,
-		it: named(global.it),
-		test: named(global.test),
-		before: global.beforeAll,
-		after: global.afterAll,
-		beforeEach: global.beforeEach,
-		afterEach: global.afterEach,
+		// (dos-device-paths on non-Windows). jest, Bun and node:test all
+		// expose `.skip` on the `describe` object itself, so passing it
+		// through unchanged is enough. `it`/`test` are only wrapped to bridge
+		// the `(t, done)` callback signature; no `.skip`/`.only` is exposed
+		// because the suite does not use them (and Bun does not put `.skip`
+		// on its `it` global).
+		describe: source.describe,
+		it: named(source.it),
+		test: named(source.test),
+		before: source.beforeAll,
+		after: source.afterAll,
+		beforeEach: source.beforeEach,
+		afterEach: source.afterEach,
 	};
 }
