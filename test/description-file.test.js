@@ -49,7 +49,7 @@ describe("description file (readFile fallback)", () => {
 				assert.ok(err instanceof Error);
 				assert.match(
 					/** @type {Error} */ (err).message,
-					/No content in file|Unexpected end of JSON|Can't resolve/,
+					/No content in file|Unexpected end of JSON|Unexpected EOF|Can't resolve/,
 				);
 				done();
 			},
