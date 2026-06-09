@@ -2,7 +2,8 @@
 
 const fs = require("fs");
 const path = require("path");
-const { pathToFileURL } = require("url");
+const { fileURLToPath, pathToFileURL } = require("url");
+const enhancedResolve = require("../lib");
 const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
 const ResolverFactory = require("../lib/ResolverFactory");
 const { toPath } = require("../lib/util/path");
@@ -204,6 +205,117 @@ describe("file: URL path options", () => {
 			expect(toPath("file:foo")).toBe("file:foo");
 			expect(toPath("file:///abs")).toBe("file:///abs");
 			expect(toPath(modulesDir)).toBe(modulesDir);
+		});
+	});
+});
+
+describe("file: URL resolve context and request", () => {
+	const fixtures = path.resolve(__dirname, "fixtures");
+	const bFile = path.resolve(fixtures, "b.js");
+	const fileSystem = new CachedInputFileSystem(fs, 4000);
+
+	const resolver = ResolverFactory.createResolver({
+		extensions: [".js"],
+		fileSystem,
+	});
+
+	describe("context (path) argument", () => {
+		it("should accept a URL instance as the context path", (done) => {
+			resolver.resolve(
+				{},
+				pathToFileURL(fixtures),
+				"./b.js",
+				{},
+				(err, result) => {
+					if (err) return done(err);
+					expect(result).toEqual(bFile);
+					done();
+				},
+			);
+		});
+
+		it("should accept a URL context when the context object is omitted", (done) => {
+			resolver.resolve(pathToFileURL(fixtures), "./b.js", {}, (err, result) => {
+				if (err) return done(err);
+				expect(result).toEqual(bFile);
+				done();
+			});
+		});
+
+		it("should still reject a non-string, non-URL context path", (done) => {
+			// @ts-expect-error for tests
+			resolver.resolve({}, 42, "./b.js", {}, (err) => {
+				expect(err).toBeInstanceOf(Error);
+				expect(/** @type {Error} */ (err).message).toMatch(
+					/path argument is not a string/,
+				);
+				done();
+			});
+		});
+	});
+
+	describe("request argument", () => {
+		it("should accept a file: URL instance as the request", (done) => {
+			resolver.resolve(
+				{},
+				fixtures,
+				pathToFileURL(bFile),
+				{},
+				(err, result) => {
+					if (err) return done(err);
+					expect(result).toEqual(bFile);
+					done();
+				},
+			);
+		});
+
+		it("should still reject a non-string, non-URL request", (done) => {
+			// @ts-expect-error for tests
+			resolver.resolve({}, fixtures, 42, {}, (err) => {
+				expect(err).toBeInstanceOf(Error);
+				expect(/** @type {Error} */ (err).message).toMatch(
+					/request argument is not a string/,
+				);
+				done();
+			});
+		});
+	});
+
+	// With both arguments as URL instances the pair mirrors `new URL(request,
+	// context)` — request is the first param, context the base — so an absolute
+	// `file:` request wins over the context base, exactly like the URL constructor.
+	describe("both context and request as URL", () => {
+		it("should resolve a URL request against a URL context like new URL()", (done) => {
+			const contextURL = pathToFileURL(fixtures);
+			const requestURL = pathToFileURL(bFile);
+			resolver.resolve({}, contextURL, requestURL, {}, (err, result) => {
+				if (err) return done(err);
+				expect(result).toEqual(bFile);
+				expect(result).toEqual(fileURLToPath(new URL(requestURL, contextURL)));
+				done();
+			});
+		});
+	});
+
+	describe("high-level resolve API", () => {
+		it("resolve should accept a URL context with the context object omitted", (done) => {
+			enhancedResolve(pathToFileURL(fixtures), "./b.js", (err, result) => {
+				if (err) return done(err);
+				expect(result).toEqual(bFile);
+				done();
+			});
+		});
+
+		it("resolveSync should accept a URL context", () => {
+			expect(enhancedResolve.sync(pathToFileURL(fixtures), "./b.js")).toEqual(
+				bFile,
+			);
+		});
+
+		it("resolvePromise should accept a URL context", async () => {
+			await expect(
+				enhancedResolve.promise(pathToFileURL(fixtures), "./b.js"),
+			).resolves.toEqual(bFile);
 		});
 	});
 });
