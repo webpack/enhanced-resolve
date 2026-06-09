@@ -24,6 +24,10 @@ jobs:
       - run: npm ci
 
       - run: npm run lint
+  # TODO: drop this entire job once `engines.node` is bumped to >= 18.
+  # Removing the job also makes `jest.config.js`, `test/_runner.js`'s jest
+  # branch, and `test/polyfill-text-encoding.js` dead code.
+  #
   # The `node:test` based suite needs Node.js 18+. The library itself still
   # supports Node.js >= 10.13, so legacy versions run the same test files
   # under jest, which the test runner shim (`test/_runner.js`) bridges to

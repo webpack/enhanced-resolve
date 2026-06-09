@@ -6,6 +6,11 @@
 
 "use strict";
 
+// TODO: drop this file once `engines.node` is bumped to >= 18. The test
+// files can then `require("node:test")` directly, the jest bridge below
+// is no longer reachable, and the `assert.match`/`doesNotMatch` polyfills
+// (needed only on Node.js < 13.6) become dead code.
+
 // Bridge between `node:test` and jest so a single test source runs on:
 //   - Node.js 18+ via the built-in `node --test` runner.
 //   - Legacy Node.js (10-16) via jest, which doesn't ship `node:test`.

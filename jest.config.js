@@ -1,5 +1,8 @@
 "use strict";
 
+// TODO: drop this file together with `test/_runner.js`'s jest branch once
+// `engines.node` is bumped to >= 18 and the `legacy-test` CI job goes away.
+
 // Jest config is only consumed by the legacy CI matrix (Node.js < 18) where
 // `node:test` is not available. Modern runs use `node --test` via
 // scripts/test.js and ignore this file.
