@@ -62,14 +62,90 @@ All of the following are exposed from `require("enhanced-resolve")`.
 
 #### `resolve(context?, path, request, resolveContext?, callback)`
 
-Async Node-style resolver using the built-in defaults (`conditionNames: ["node"]`, `extensions: [".js", ".json", ".node"]`). `context` is optional; when omitted, a built-in Node context is used.
+Async Node-style resolver using the built-in defaults (`conditionNames: ["node"]`, `extensions: [".js", ".json", ".node"]`). Both `context` and `resolveContext` are optional, so the function accepts four shapes:
+
+```js
+resolve(context, path, request, resolveContext, callback);
+resolve(context, path, request, callback);
+resolve(path, request, resolveContext, callback);
+resolve(path, request, callback); // most common
+```
+
+##### Arguments — what each one is and when to pass it
+
+| Argument         | Required | What it is                                                                                                                                                                                                                                           | When to pass it                                                                                                               |
+| ---------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `context`        | no       | Extra info about _who_ is requesting, e.g. `{ environments: ["node+es3+es5+process+native"] }`. Plugins can read arbitrary keys off it. When omitted, a built-in Node context is used.                                                               | Pass it only when a plugin you use reads from it. Most callers omit it.                                                       |
+| `path`           | yes      | The absolute directory to resolve **from** (the "lookup start path").                                                                                                                                                                                | Always.                                                                                                                       |
+| `request`        | yes      | The string to resolve — a relative request (`./utils`), a bare module (`lodash/merge`), an alias, etc.                                                                                                                                               | Always.                                                                                                                       |
+| `resolveContext` | no       | A collector object the resolver writes into / reads from: `fileDependencies`, `contextDependencies`, `missingDependencies` (`Set`s it fills in), `log` (a function it calls for trace output).                                                       | Pass it when you need to know which files/dirs were touched (e.g. to set up a watcher) or want a log of the resolution steps. |
+| `callback`       | yes      | `(err, result, resolveRequest) => void`. `result` is the resolved absolute path (or `false` if the request resolves to an ignored module). `resolveRequest` is the full request object with `path`, `query`, `fragment`, `descriptionFilePath`, etc. | Always.                                                                                                                       |
+
+##### Minimal form — just `path`, `request`, `callback`
 
 ```js
 const resolve = require("enhanced-resolve");
 
 resolve(__dirname, "./utils", (err, result) => {
-	// result === "/abs/path/to/utils.js"
+	if (err) throw err;
+	result; // === "/abs/path/to/utils.js"
 });
+```
+
+##### Inspecting the full result via the third callback argument
+
+```js
+resolve(__dirname, "./utils?query#frag", (err, result, resolveRequest) => {
+	result; // === "/abs/path/to/utils.js?query#frag" — path with query/fragment appended
+	resolveRequest.path; // === "/abs/path/to/utils.js" (the bare path, no query/fragment)
+	resolveRequest.query; // === "?query"  (empty string if the request has none)
+	resolveRequest.fragment; // === "#frag"   (empty string if the request has none)
+	resolveRequest.descriptionFilePath; // path to the nearest package.json, if any
+});
+```
+
+##### With `resolveContext` — collect dependencies and a log
+
+Pass a `resolveContext` when you need the resolver to report back _what it looked at_. The `Set`s you provide are filled in during resolution, and `log` is called with each step:
+
+```js
+const fileDependencies = new Set();
+const missingDependencies = new Set();
+const contextDependencies = new Set();
+const logs = [];
+
+resolve(
+	__dirname,
+	"./utils",
+	{
+		fileDependencies, // files that were read/checked
+		missingDependencies, // paths that were probed but didn't exist
+		contextDependencies, // directories that were read
+		log: (msg) => logs.push(msg), // trace of each resolution step
+	},
+	(err, result) => {
+		result; // === "/abs/path/to/utils.js"
+		fileDependencies; // Set { ".../utils.js", ".../package.json", ... }
+		missingDependencies; // Set { ".../utils", ".../utils.json", ... } (candidates tried)
+		// `fileDependencies` / `missingDependencies` are exactly what you'd feed
+		// a file watcher so a rebuild re-runs when any of them changes.
+	},
+);
+```
+
+##### With a custom `context`
+
+Pass a `context` when a plugin reads from it. The default resolver only uses `environments`, but custom plugins may key off anything you put here:
+
+```js
+resolve(
+	{ environments: ["node+es3+es5+process+native"] }, // context
+	__dirname,
+	"./utils",
+	(err, result) => {
+		result; // === "/abs/path/to/utils.js"
+	},
+);
 ```
 
 #### `resolve.sync(context?, path, request, resolveContext?) => string | false`
