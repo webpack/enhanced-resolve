@@ -52,44 +52,41 @@ if (typeof assert.doesNotMatch !== "function") {
 	};
 }
 
-if (typeof jest === "undefined") {
+// Adapt a jest-shaped helper bag (jest's globals or `bun:test`) to the
+// node:test surface the test files use. jest-style callbacks take `(done)`;
+// node:test passes `(t, done)`, so wrap to inject a throwaway `t` when the
+// jest-compatible runner invokes the test function. `describe` is passed
+// through unchanged so `describe.skip` keeps working on every runtime
+// (the only host-level skip the suite uses).
+const wrap = (fn) =>
+	typeof fn === "function" && fn.length >= 2
+		? function bridged(done) {
+				return fn.call(this, {}, done);
+			}
+		: fn;
+const named = (register) => (name, fn) => register(name, wrap(fn));
+const bridge = (source) => ({
+	describe: source.describe,
+	it: named(source.it),
+	test: named(source.test),
+	before: source.beforeAll,
+	after: source.afterAll,
+	beforeEach: source.beforeEach,
+	afterEach: source.afterEach,
+});
+
+// Pick the source of the test helpers based on the runtime:
+//   - Bun: always use `bun:test`. Bun ships its own (partial) `node:test`
+//     implementation that throws on top-level `describe()` calls in some
+//     setups; `bun:test` is the supported entry point.
+//   - jest (no `Bun` global, `jest` global is in scope): use jest's helpers,
+//     which jest attaches to `global`. This is the legacy-Node and Deno path.
+//   - Otherwise: the Node.js built-in `node:test`.
+if (typeof Bun !== "undefined") {
+	// eslint-disable-next-line import/no-unresolved
+	module.exports = bridge(require("bun:test"));
+} else if (typeof jest === "undefined") {
 	module.exports = require("node:test");
 } else {
-	// jest's callback-style test function takes `(done)`; node:test passes
-	// `(t, done)`. The migrated tests use the node:test shape, so wrap to
-	// inject a throwaway `t` when the jest-compatible runner invokes them.
-	const wrap = (fn) =>
-		typeof fn === "function" && fn.length >= 2
-			? function bridged(done) {
-					return fn.call(this, {}, done);
-				}
-			: fn;
-	const named = (register) => (name, fn) => register(name, wrap(fn));
-
-	// jest in Node.js attaches its helpers to `global`; Bun exposes them
-	// only through the `bun:test` module (Bun defines the `jest` compat global
-	// but does *not* mirror jest's helpers on `global`). Source from the
-	// place that actually has them.
-	const source =
-		typeof Bun === "undefined"
-			? global
-			: // eslint-disable-next-line import/no-unresolved
-				require("bun:test");
-
-	module.exports = {
-		// `describe.skip` is the only host-level skip the suite uses
-		// (dos-device-paths on non-Windows). jest, Bun and node:test all
-		// expose `.skip` on the `describe` object itself, so passing it
-		// through unchanged is enough. `it`/`test` are only wrapped to bridge
-		// the `(t, done)` callback signature; no `.skip`/`.only` is exposed
-		// because the suite does not use them (and Bun does not put `.skip`
-		// on its `it` global).
-		describe: source.describe,
-		it: named(source.it),
-		test: named(source.test),
-		before: source.beforeAll,
-		after: source.afterAll,
-		beforeEach: source.beforeEach,
-		afterEach: source.afterEach,
-	};
+	module.exports = bridge(global);
 }
