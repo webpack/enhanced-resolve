@@ -22,4 +22,14 @@ export default defineConfig([
 			"n/no-process-exit": "off",
 		},
 	},
+	{
+		// Cross-runtime smoke scripts run standalone on node/bun/deno and in a
+		// browser sandbox; relax the library-grade JSDoc typing rules for them.
+		files: ["test/smoke/**/*"],
+		rules: {
+			"jsdoc/no-restricted-syntax": "off",
+			"jsdoc/reject-any-type": "off",
+			"unicorn/prefer-native-coercion-functions": "off",
+		},
+	},
 ]);

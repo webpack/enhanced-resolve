@@ -1396,7 +1396,23 @@ describe("importsFieldPlugin", () => {
 				);
 				expect(
 					log.map((line) => line.replace(fixture, "...").replace(/\\/g, "/")),
-				).toMatchSnapshot();
+				).toEqual([
+					"resolve '#a/dist/index.js' in '...'",
+					"  using description file: .../package.json (relative path: .)",
+					"    resolve as internal import",
+					"      using imports field: a/dist/index.js",
+					"        Parsed request is a module",
+					"        using description file: .../package.json (relative path: .)",
+					"          resolve as module",
+					"            looking for modules in .../node_modules",
+					"              existing directory .../node_modules/a",
+					"                using description file: .../node_modules/a/package.json (relative path: .)",
+					"                  using exports field: ./lib/index.js",
+					"                    using description file: .../node_modules/a/package.json (relative path: ./lib/index.js)",
+					"                      no extension",
+					"                        existing file: .../node_modules/a/lib/index.js",
+					"                          reporting result .../node_modules/a/lib/index.js",
+				]);
 				done();
 			},
 		);
