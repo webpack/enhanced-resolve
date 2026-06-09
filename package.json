@@ -37,6 +37,7 @@
     "fix": "npm run fix:code && npm run fix:special",
     "fix:code": "npm run lint:code -- --fix",
     "fix:special": "node node_modules/tooling/inherit-types --write && node node_modules/tooling/generate-types --write",
+    "type-report": "rimraf coverage && npm run cover:types && npm run cover:report && open-cli coverage/lcov-report/index.html",
     "pretest": "npm run lint",
     "test": "npm run test:only",
     "test:only": "node scripts/test.js",
