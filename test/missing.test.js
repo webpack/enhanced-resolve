@@ -1,10 +1,10 @@
 "use strict";
 
 const assert = require("assert");
-const { describe, it } = require("node:test");
 
 const path = require("path");
 const resolve = require("../");
+const { describe, it } = require("./_runner");
 
 describe("missing", () => {
 	/**

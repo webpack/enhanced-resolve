@@ -1,10 +1,13 @@
 "use strict";
 
+const assert = require("assert");
+const fs = require("fs");
+
 /* eslint-disable jsdoc/reject-any-type */
 
-const fs = require("fs");
 const path = require("path");
 const { CachedInputFileSystem, ResolverFactory } = require("../");
+const { describe, it } = require("./_runner");
 
 const fixtures = path.join(__dirname, "fixtures");
 const nodeFileSystem = new CachedInputFileSystem(fs, 4000);
@@ -32,7 +35,7 @@ function fsWithoutReadJson() {
 }
 
 describe("description file (readFile fallback)", () => {
-	it("surfaces 'No content in file' when the description file is empty", (done) => {
+	it("surfaces 'No content in file' when the description file is empty", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem: fsWithoutReadJson(),
 			extensions: [".js"],
@@ -43,19 +46,17 @@ describe("description file (readFile fallback)", () => {
 			".",
 			{},
 			(err) => {
-				expect(err).toBeInstanceOf(Error);
-				expect(/** @type {Error} */ (err).message).toMatch(
-					// JSON.parse("") differs by engine: V8 (node/deno) says
-					// "Unexpected end of JSON input", JavaScriptCore (bun) says
-					// "JSON Parse error: Unexpected EOF".
-					/No content in file|Unexpected end of JSON|JSON Parse error|Can't resolve/,
+				assert.ok(err instanceof Error);
+				assert.match(
+					/** @type {Error} */ (err).message,
+					/No content in file|Unexpected end of JSON|Can't resolve/,
 				);
 				done();
 			},
 		);
 	});
 
-	it("surfaces a parse error when the description file contains invalid JSON", (done) => {
+	it("surfaces a parse error when the description file contains invalid JSON", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem: fsWithoutReadJson(),
 			extensions: [".js"],
@@ -66,20 +67,23 @@ describe("description file (readFile fallback)", () => {
 			".",
 			{},
 			(err) => {
-				expect(err).toBeInstanceOf(Error);
+				assert.ok(err instanceof Error);
 				done();
 			},
 		);
 	});
 
-	it("resolves through the readFile path when readJson is not available", (done) => {
+	it("resolves through the readFile path when readJson is not available", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem: fsWithoutReadJson(),
 			extensions: [".js"],
 		});
 		resolver.resolve({}, fixtures, "m1/a", {}, (err, result) => {
 			if (err) return done(err);
-			expect(result).toEqual(path.join(fixtures, "node_modules/m1/a.js"));
+			assert.deepStrictEqual(
+				result,
+				path.join(fixtures, "node_modules/m1/a.js"),
+			);
 			done();
 		});
 	});
@@ -88,7 +92,7 @@ describe("description file (readFile fallback)", () => {
 describe("self-reference resolution", () => {
 	const selfPkg = path.join(fixtures, "self-reference-pkg");
 
-	it("resolves a package's own name via the exports field", (done) => {
+	it("resolves a package's own name via the exports field", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem: nodeFileSystem,
 			conditionNames: ["node"],
@@ -96,12 +100,12 @@ describe("self-reference resolution", () => {
 		});
 		resolver.resolve({}, selfPkg, "self-pkg", {}, (err, result) => {
 			if (err) return done(err);
-			expect(result).toEqual(path.join(selfPkg, "index.js"));
+			assert.deepStrictEqual(result, path.join(selfPkg, "index.js"));
 			done();
 		});
 	});
 
-	it("resolves a sub-path via self-reference + exports", (done) => {
+	it("resolves a sub-path via self-reference + exports", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem: nodeFileSystem,
 			conditionNames: ["node"],
@@ -109,12 +113,12 @@ describe("self-reference resolution", () => {
 		});
 		resolver.resolve({}, selfPkg, "self-pkg/sub", {}, (err, result) => {
 			if (err) return done(err);
-			expect(result).toEqual(path.join(selfPkg, "sub.js"));
+			assert.deepStrictEqual(result, path.join(selfPkg, "sub.js"));
 			done();
 		});
 	});
 
-	it("falls through when the request is not the package name", (done) => {
+	it("falls through when the request is not the package name", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem: nodeFileSystem,
 			extensions: [".js"],
@@ -123,14 +127,14 @@ describe("self-reference resolution", () => {
 		});
 		resolver.resolve({}, selfPkg, "./index", {}, (err, result) => {
 			if (err) return done(err);
-			expect(result).toEqual(path.join(selfPkg, "index.js"));
+			assert.deepStrictEqual(result, path.join(selfPkg, "index.js"));
 			done();
 		});
 	});
 });
 
 describe("self-reference negative case", () => {
-	it("does not self-reference when the package name doesn't match the request prefix", (done) => {
+	it("does not self-reference when the package name doesn't match the request prefix", (t, done) => {
 		const selfPkg = path.join(fixtures, "self-reference-pkg");
 		const resolver = ResolverFactory.createResolver({
 			extensions: [".js"],
@@ -139,7 +143,7 @@ describe("self-reference negative case", () => {
 			fileSystem: nodeFileSystem,
 		});
 		resolver.resolve({}, selfPkg, "other-pkg", {}, (err) => {
-			expect(err).toBeInstanceOf(Error);
+			assert.ok(err instanceof Error);
 			done();
 		});
 	});

@@ -1,10 +1,10 @@
 "use strict";
 
 const assert = require("assert");
-const { describe, it } = require("node:test");
 
 const { Volume } = require("memfs");
 const { ResolverFactory } = require("../");
+const { describe, it } = require("./_runner");
 
 describe("fullSpecified", () => {
 	const fileSystem = Volume.fromJSON(

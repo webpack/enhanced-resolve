@@ -1,10 +1,10 @@
 "use strict";
 
 const assert = require("assert");
-const { describe, it } = require("node:test");
 
 const getPaths = require("../lib/getPaths");
 const { getPathsCached } = require("../lib/getPaths");
+const { describe, it } = require("./_runner");
 
 /**
  * @type {[string, { paths: string[], segments: string[] }][]}

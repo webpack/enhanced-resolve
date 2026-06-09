@@ -1,9 +1,8 @@
 "use strict";
 
 const assert = require("assert");
-const { describe, it } = require("node:test");
-
 const { CachedInputFileSystem } = require("../");
+const { describe, it } = require("./_runner");
 
 describe("pr-53", () => {
 	it("should allow to readJsonSync in CachedInputFileSystem", () => {

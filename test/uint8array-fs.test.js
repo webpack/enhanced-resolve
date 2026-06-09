@@ -1,6 +1,8 @@
 "use strict";
 
+const assert = require("assert");
 const ResolverFactory = require("../lib/ResolverFactory");
+const { describe, it } = require("./_runner");
 
 // Regression test: a file system that returns Uint8Array (as a browser/Deno FS
 // would) instead of a Node Buffer must still have its package.json description
@@ -82,13 +84,15 @@ describe("Uint8Array file system", () => {
 	});
 
 	it("resolves a package main field read from a Uint8Array package.json", () => {
-		expect(resolver.resolveSync({}, "/app", "pkg")).toBe(
+		assert.strictEqual(
+			resolver.resolveSync({}, "/app", "pkg"),
 			"/app/node_modules/pkg/lib/main.js",
 		);
 	});
 
 	it("resolves an exports subpath read from a Uint8Array package.json", () => {
-		expect(resolver.resolveSync({}, "/app", "pkg/feature")).toBe(
+		assert.strictEqual(
+			resolver.resolveSync({}, "/app", "pkg/feature"),
 			"/app/node_modules/pkg/lib/feature.js",
 		);
 	});

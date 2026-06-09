@@ -1,11 +1,11 @@
 "use strict";
 
 const assert = require("assert");
-const { afterEach, beforeEach, describe, it } = require("node:test");
 
 const path = require("path");
 const url = require("url");
 const { CachedInputFileSystem } = require("../");
+const { afterEach, beforeEach, describe, it } = require("./_runner");
 
 describe("cachedInputFileSystem OperationMergerBackend ('stat' and 'statSync')", () => {
 	let fs;

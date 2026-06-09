@@ -2,12 +2,12 @@
 
 const assert = require("assert");
 const fs = require("fs");
-const { describe, test } = require("node:test");
 
 /* eslint-disable jsdoc/reject-any-type */
 
 const path = require("path");
 const { ResolverFactory } = require("../");
+const { describe, test } = require("./_runner");
 
 // DOS device paths (`\\?\…`, `\\.\…`) are Windows-only constructs. The real
 // resolver tests below hit the actual filesystem through those prefixes, so

@@ -1,11 +1,11 @@
 "use strict";
 
 const assert = require("assert");
-const { describe, it } = require("node:test");
 
 const path = require("path");
 const url = require("url");
 const resolve = require("../");
+const { describe, it } = require("./_runner");
 
 const fixtures = path.join(__dirname, "fixtures");
 

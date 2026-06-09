@@ -24,12 +24,21 @@ export default defineConfig([
 	},
 	{
 		// Cross-runtime smoke scripts run standalone on node/bun/deno and in a
-		// browser sandbox; relax the library-grade JSDoc typing rules for them.
+		// browser sandbox; relax library-grade rules and the `engines.node`
+		// version checks (these files target newer runtimes by design). Mirrors
+		// the relaxations the shared config used to apply via the jest plugin.
 		files: ["test/smoke/**/*"],
 		rules: {
 			"jsdoc/no-restricted-syntax": "off",
 			"jsdoc/reject-any-type": "off",
+			"jsdoc/no-blank-blocks": "off",
+			"jsdoc/require-jsdoc": "off",
 			"unicorn/prefer-native-coercion-functions": "off",
+			"n/no-unsupported-features/es-builtins": "off",
+			"n/no-unsupported-features/es-syntax": "off",
+			"n/no-unsupported-features/node-builtins": "off",
+			"id-length": "off",
+			"no-console": "off",
 		},
 	},
 	{

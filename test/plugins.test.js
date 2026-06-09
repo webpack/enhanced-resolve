@@ -2,7 +2,6 @@
 
 const assert = require("assert");
 const fs = require("fs");
-const { describe, it } = require("node:test");
 
 const path = require("path");
 const {
@@ -10,6 +9,7 @@ const {
 	CloneBasenamePlugin,
 	ResolverFactory,
 } = require("../");
+const { describe, it } = require("./_runner");
 
 describe("plugins", () => {
 	it("should resolve with the CloneBasenamePlugin", (t, done) => {

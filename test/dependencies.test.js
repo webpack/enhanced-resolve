@@ -1,10 +1,10 @@
 "use strict";
 
 const assert = require("assert");
-const { beforeEach, describe, it } = require("node:test");
 
 const { Volume } = require("memfs");
 const resolve = require("../");
+const { beforeEach, describe, it } = require("./_runner");
 
 describe("dependencies", () => {
 	let resolver;

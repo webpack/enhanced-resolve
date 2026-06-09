@@ -1,8 +1,6 @@
 "use strict";
 
 const assert = require("assert");
-const { describe, it } = require("node:test");
-
 const {
 	PathType,
 	createCachedBasename,
@@ -17,6 +15,7 @@ const {
 	join,
 	normalize,
 } = require("../lib/util/path");
+const { describe, it } = require("./_runner");
 
 describe("util/path getType", () => {
 	it("returns Empty for the empty string", () => {

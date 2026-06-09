@@ -2,10 +2,10 @@
 
 const assert = require("assert");
 const fs = require("fs");
-const { describe, it } = require("node:test");
 
 const path = require("path");
 const { CachedInputFileSystem, ResolverFactory } = require("../");
+const { describe, it } = require("./_runner");
 
 const fixtures = path.join(__dirname, "fixtures", "incorrect-package");
 const nodeFileSystem = new CachedInputFileSystem(fs, 4000);

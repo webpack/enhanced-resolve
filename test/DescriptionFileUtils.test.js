@@ -1,14 +1,14 @@
 "use strict";
 
 const assert = require("assert");
-const { describe, it } = require("node:test");
+const DescriptionFileUtils = require("../lib/DescriptionFileUtils");
+const { describe, it } = require("./_runner");
 
 /* eslint-disable jsdoc/reject-any-type */
 
 // Pure-function tests for helpers exported by DescriptionFileUtils, matching
 // the style of test/getPaths.test.js and test/identifier.test.js for lib/
 // modules whose helpers are difficult to exercise end-to-end.
-const DescriptionFileUtils = require("../lib/DescriptionFileUtils");
 
 describe("DescriptionFileUtils.cdUp", () => {
 	it("returns null for '/'", () => {

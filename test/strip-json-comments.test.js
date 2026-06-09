@@ -1,11 +1,10 @@
 "use strict";
 
 const assert = require("assert");
-const { describe, it } = require("node:test");
+const stripJsonComments = require("../lib/util/strip-json-comments");
+const { describe, it } = require("./_runner");
 
 /* eslint-disable jsdoc/reject-any-type */
-
-const stripJsonComments = require("../lib/util/strip-json-comments");
 
 describe("util/strip-json-comments", () => {
 	it("throws when given a non-string", () => {

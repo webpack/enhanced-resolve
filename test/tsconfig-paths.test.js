@@ -2,12 +2,12 @@
 
 const assert = require("assert");
 const fs = require("fs");
-const { describe, it } = require("node:test");
 
 const path = require("path");
 
 const { ResolverFactory } = require("../");
 const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
+const { describe, it } = require("./_runner");
 
 const fileSystem = new CachedInputFileSystem(fs, 4000);
 

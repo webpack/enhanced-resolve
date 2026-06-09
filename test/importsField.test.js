@@ -1,10 +1,13 @@
 "use strict";
 
+const assert = require("assert");
 const fs = require("fs");
+
 const path = require("path");
 const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
 const ResolverFactory = require("../lib/ResolverFactory");
 const { processImportsField } = require("../lib/util/entrypoints");
+const { describe, it } = require("./_runner");
 
 /** @typedef {import("../lib/util/entrypoints").ImportsField} ImportsField */
 
@@ -1224,19 +1227,23 @@ describe("process imports field", () => {
 	for (const testCase of testCases) {
 		it(testCase.name, () => {
 			if (testCase.expect instanceof Error) {
-				expect(() =>
-					processImportsField(testCase.suite[0])(
-						testCase.suite[1],
-						new Set(testCase.suite[2]),
-					),
-				).toThrow(testCase.expect.message);
+				const { message } = testCase.expect;
+				assert.throws(
+					() =>
+						processImportsField(testCase.suite[0])(
+							testCase.suite[1],
+							new Set(testCase.suite[2]),
+						),
+					(err) => err instanceof Error && err.message.includes(message),
+				);
 			} else {
-				expect(
+				assert.deepStrictEqual(
 					processImportsField(testCase.suite[0])(
 						testCase.suite[1],
 						new Set(testCase.suite[2]),
 					)[0],
-				).toEqual(testCase.expect);
+					testCase.expect,
+				);
 			}
 		});
 	}
@@ -1252,16 +1259,16 @@ describe("importsFieldPlugin", () => {
 		conditionNames: ["webpack"],
 	});
 
-	it("should resolve using imports field instead of self-referencing", (done) => {
+	it("should resolve using imports field instead of self-referencing", (t, done) => {
 		resolver.resolve({}, fixture, "#imports-field", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(path.resolve(fixture, "b.js"));
+			assert.deepStrictEqual(result, path.resolve(fixture, "b.js"));
 			done();
 		});
 	});
 
-	it("should resolve using imports field instead of self-referencing for a subpath", (done) => {
+	it("should resolve using imports field instead of self-referencing for a subpath", (t, done) => {
 		resolver.resolve(
 			{},
 			path.resolve(fixture, "dir"),
@@ -1270,24 +1277,25 @@ describe("importsFieldPlugin", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(path.resolve(fixture, "b.js"));
+				assert.deepStrictEqual(result, path.resolve(fixture, "b.js"));
 				done();
 			},
 		);
 	});
 
-	it("should disallow resolve out of package scope", (done) => {
+	it("should disallow resolve out of package scope", (t, done) => {
 		resolver.resolve({}, fixture, "#b", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
-			expect(err).toBeInstanceOf(Error);
-			expect(err.message).toMatch(
+			assert.ok(err instanceof Error);
+			assert.match(
+				err.message,
 				/Invalid "imports" target "\.\.\/b\.js" defined for "#b"/,
 			);
 			done();
 		});
 	});
 
-	it("field name #1", (done) => {
+	it("field name #1", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			extensions: [".js"],
 			fileSystem: nodeFileSystem,
@@ -1299,12 +1307,12 @@ describe("importsFieldPlugin", () => {
 		resolver.resolve({}, fixture, "#imports-field", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(path.resolve(fixture, "b.js"));
+			assert.deepStrictEqual(result, path.resolve(fixture, "b.js"));
 			done();
 		});
 	});
 
-	it("field name #2", (done) => {
+	it("field name #2", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			extensions: [".js"],
 			fileSystem: nodeFileSystem,
@@ -1316,50 +1324,57 @@ describe("importsFieldPlugin", () => {
 		resolver.resolve({}, fixture, "#b", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(path.resolve(fixture, "a.js"));
+			assert.deepStrictEqual(result, path.resolve(fixture, "a.js"));
 			done();
 		});
 	});
 
-	it("should resolve package #1", (done) => {
+	it("should resolve package #1", (t, done) => {
 		resolver.resolve({}, fixture, "#a/dist/main.js", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(
+			assert.deepStrictEqual(
+				result,
 				path.resolve(fixture, "node_modules/a/lib/main.js"),
 			);
 			done();
 		});
 	});
 
-	it("should resolve package #2", (done) => {
+	it("should resolve package #2", (t, done) => {
 		resolver.resolve({}, fixture, "#a", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
-			expect(err).toBeInstanceOf(Error);
-			expect(err.message).toMatch(/is not imported from package/);
+			assert.ok(err instanceof Error);
+			assert.match(err.message, /is not imported from package/);
 			done();
 		});
 	});
 
-	it("should resolve package #3", (done) => {
+	it("should resolve package #3", (t, done) => {
 		resolver.resolve({}, fixture, "#ccc/index.js", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(path.resolve(fixture, "node_modules/c/index.js"));
+			assert.deepStrictEqual(
+				result,
+				path.resolve(fixture, "node_modules/c/index.js"),
+			);
 			done();
 		});
 	});
 
-	it("should resolve package #4", (done) => {
+	it("should resolve package #4", (t, done) => {
 		resolver.resolve({}, fixture, "#c", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(path.resolve(fixture, "node_modules/c/index.js"));
+			assert.deepStrictEqual(
+				result,
+				path.resolve(fixture, "node_modules/c/index.js"),
+			);
 			done();
 		});
 	});
 
-	it("should resolve absolute path as an imports field target", (done) => {
+	it("should resolve absolute path as an imports field target", (t, done) => {
 		const tmpdirPrefix = path.join(fixture, "node_modules/absolute-tmp-");
 		fs.mkdtemp(tmpdirPrefix, (err, dir) => {
 			if (err) done(err);
@@ -1375,13 +1390,13 @@ describe("importsFieldPlugin", () => {
 				fs.rmdirSync(dir);
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(file);
+				assert.deepStrictEqual(result, file);
 				done();
 			});
 		});
 	});
 
-	it("should log the correct info", (done) => {
+	it("should log the correct info", (t, done) => {
 		const log = [];
 		resolver.resolve(
 			{},
@@ -1391,34 +1406,36 @@ describe("importsFieldPlugin", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.join(fixture, "node_modules/a/lib/index.js"),
 				);
-				expect(
+				assert.deepStrictEqual(
 					log.map((line) => line.replace(fixture, "...").replace(/\\/g, "/")),
-				).toEqual([
-					"resolve '#a/dist/index.js' in '...'",
-					"  using description file: .../package.json (relative path: .)",
-					"    resolve as internal import",
-					"      using imports field: a/dist/index.js",
-					"        Parsed request is a module",
-					"        using description file: .../package.json (relative path: .)",
-					"          resolve as module",
-					"            looking for modules in .../node_modules",
-					"              existing directory .../node_modules/a",
-					"                using description file: .../node_modules/a/package.json (relative path: .)",
-					"                  using exports field: ./lib/index.js",
-					"                    using description file: .../node_modules/a/package.json (relative path: ./lib/index.js)",
-					"                      no extension",
-					"                        existing file: .../node_modules/a/lib/index.js",
-					"                          reporting result .../node_modules/a/lib/index.js",
-				]);
+					[
+						"resolve '#a/dist/index.js' in '...'",
+						"  using description file: .../package.json (relative path: .)",
+						"    resolve as internal import",
+						"      using imports field: a/dist/index.js",
+						"        Parsed request is a module",
+						"        using description file: .../package.json (relative path: .)",
+						"          resolve as module",
+						"            looking for modules in .../node_modules",
+						"              existing directory .../node_modules/a",
+						"                using description file: .../node_modules/a/package.json (relative path: .)",
+						"                  using exports field: ./lib/index.js",
+						"                    using description file: .../node_modules/a/package.json (relative path: ./lib/index.js)",
+						"                      no extension",
+						"                        existing file: .../node_modules/a/lib/index.js",
+						"                          reporting result .../node_modules/a/lib/index.js",
+					],
+				);
 				done();
 			},
 		);
 	});
 
-	it("should resolve with wildcard pattern", (done) => {
+	it("should resolve with wildcard pattern", (t, done) => {
 		const fixture = path.resolve(
 			__dirname,
 			"./fixtures/imports-exports-wildcard/node_modules/m/",
@@ -1426,52 +1443,57 @@ describe("importsFieldPlugin", () => {
 		resolver.resolve({}, fixture, "#internal/i.js", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(path.resolve(fixture, "./src/internal/i.js"));
+			assert.deepStrictEqual(
+				result,
+				path.resolve(fixture, "./src/internal/i.js"),
+			);
 			done();
 		});
 	});
 
-	it("resolver should respect query parameters #1", (done) => {
+	it("resolver should respect query parameters #1", (t, done) => {
 		resolver.resolve({}, fixture, "#a/dist/main.js?foo", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(
+			assert.deepStrictEqual(
+				result,
 				path.resolve(fixture, "node_modules/a/lib/main.js?foo"),
 			);
 			done();
 		});
 	});
 
-	it("resolver should respect query parameters #2. Direct matching", (done) => {
+	it("resolver should respect query parameters #2. Direct matching", (t, done) => {
 		resolver.resolve({}, fixture, "#imports-field?foo", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
-			expect(err).toBeInstanceOf(Error);
-			expect(err.message).toMatch(/is not imported from package/);
+			assert.ok(err instanceof Error);
+			assert.match(err.message, /is not imported from package/);
 			done();
 		});
 	});
 
-	it("resolver should respect fragment parameters #1", (done) => {
+	it("resolver should respect fragment parameters #1", (t, done) => {
 		resolver.resolve({}, fixture, "#a/dist/main.js#foo", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(
+			assert.deepStrictEqual(
+				result,
 				path.resolve(fixture, "node_modules/a/lib/main.js#foo"),
 			);
 			done();
 		});
 	});
 
-	it("resolver should respect fragment parameters #2. Direct matching", (done) => {
+	it("resolver should respect fragment parameters #2. Direct matching", (t, done) => {
 		resolver.resolve({}, fixture, "#imports-field#foo", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
-			expect(err).toBeInstanceOf(Error);
-			expect(err.message).toMatch(/is not imported from package/);
+			assert.ok(err instanceof Error);
+			assert.match(err.message, /is not imported from package/);
 			done();
 		});
 	});
 
-	it("resolver should respect query and fragment parameters together", (done) => {
+	it("resolver should respect query and fragment parameters together", (t, done) => {
 		resolver.resolve(
 			{},
 			fixture,
@@ -1480,7 +1502,8 @@ describe("importsFieldPlugin", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.resolve(fixture, "node_modules/a/lib/main.js?foo=bar#frag"),
 				);
 				done();
@@ -1488,208 +1511,216 @@ describe("importsFieldPlugin", () => {
 		);
 	});
 
-	it("should work and throw an error on invalid imports #1", (done) => {
+	it("should work and throw an error on invalid imports #1", (t, done) => {
 		// Note: #/ patterns are now allowed per Node.js PR #60864
 		// #/dep will now try to resolve but fail because there's no mapping
 		resolver.resolve({}, fixture, "#/dep", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
-			expect(err).toBeInstanceOf(Error);
-			expect(err.message).toMatch(/is not imported from package/);
+			assert.ok(err instanceof Error);
+			assert.match(err.message, /is not imported from package/);
 			done();
 		});
 	});
 
-	it("should work and throw an error on invalid imports #2", (done) => {
+	it("should work and throw an error on invalid imports #2", (t, done) => {
 		resolver.resolve({}, fixture, "#dep/", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
-			expect(err).toBeInstanceOf(Error);
-			expect(err.message).toMatch(
+			assert.ok(err instanceof Error);
+			assert.match(
+				err.message,
 				/Resolving to directories is not possible with the imports field \(request was #dep\/\)/,
 			);
 			done();
 		});
 	});
 
-	it("should work with invalid imports #1", (done) => {
+	it("should work with invalid imports #1", (t, done) => {
 		resolver.resolve({}, fixture1, "#dep", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toBe(`${path.resolve(fixture1, "./a.js")}?foo=../`);
+			assert.strictEqual(result, `${path.resolve(fixture1, "./a.js")}?foo=../`);
 			done();
 		});
 	});
 
-	it("should work with invalid imports #2", (done) => {
+	it("should work with invalid imports #2", (t, done) => {
 		resolver.resolve({}, fixture1, "#dep/foo/a.js", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toBe(`${path.resolve(fixture1, "./a.js")}?foo=../#../`);
+			assert.strictEqual(
+				result,
+				`${path.resolve(fixture1, "./a.js")}?foo=../#../`,
+			);
 			done();
 		});
 	});
 
-	it("should work with invalid imports #3", (done) => {
+	it("should work with invalid imports #3", (t, done) => {
 		resolver.resolve({}, fixture1, "#dep/bar", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
-			expect(err).toBeInstanceOf(Error);
-			expect(err.message).toMatch(/Can't resolve '#dep\/bar' in/);
+			assert.ok(err instanceof Error);
+			assert.match(err.message, /Can't resolve '#dep\/bar' in/);
 			done();
 		});
 	});
 
-	it("should work with invalid imports #4", (done) => {
+	it("should work with invalid imports #4", (t, done) => {
 		resolver.resolve({}, fixture1, "#dep/baz", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
-			expect(err).toBeInstanceOf(Error);
-			expect(err.message).toMatch(/Can't resolve '#dep\/baz' in/);
+			assert.ok(err instanceof Error);
+			assert.match(err.message, /Can't resolve '#dep\/baz' in/);
 			done();
 		});
 	});
 
-	it("should work with invalid imports #5", (done) => {
+	it("should work with invalid imports #5", (t, done) => {
 		resolver.resolve({}, fixture1, "#dep/baz-multi", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
-			expect(err).toBeInstanceOf(Error);
-			expect(err.message).toMatch(/Can't resolve '#dep\/baz-multi' in/);
+			assert.ok(err instanceof Error);
+			assert.match(err.message, /Can't resolve '#dep\/baz-multi' in/);
 			done();
 		});
 	});
 
-	it("should work with invalid imports #6", (done) => {
+	it("should work with invalid imports #6", (t, done) => {
 		resolver.resolve({}, fixture1, "#dep/baz-multi", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
-			expect(err).toBeInstanceOf(Error);
-			expect(err.message).toMatch(/Can't resolve '#dep\/baz-multi' in/);
+			assert.ok(err instanceof Error);
+			assert.match(err.message, /Can't resolve '#dep\/baz-multi' in/);
 			done();
 		});
 	});
 
-	it("should work with invalid imports #7", (done) => {
+	it("should work with invalid imports #7", (t, done) => {
 		resolver.resolve({}, fixture1, "#dep/pattern/a.js", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
-			expect(err).toBeInstanceOf(Error);
-			expect(err.message).toMatch(/Can't resolve '#dep\/pattern\/a.js' in/);
+			assert.ok(err instanceof Error);
+			assert.match(err.message, /Can't resolve '#dep\/pattern\/a.js' in/);
 			done();
 		});
 	});
 
-	it("should work with invalid imports #8", (done) => {
+	it("should work with invalid imports #8", (t, done) => {
 		resolver.resolve({}, fixture1, "#dep/array", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(path.resolve(fixture1, "./a.js"));
+			assert.deepStrictEqual(result, path.resolve(fixture1, "./a.js"));
 			done();
 		});
 	});
 
-	it("should work with invalid imports #9", (done) => {
+	it("should work with invalid imports #9", (t, done) => {
 		resolver.resolve({}, fixture1, "#dep/array2", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
-			expect(err).toBeInstanceOf(Error);
-			expect(err.message).toMatch(/Can't resolve '#dep\/array2' in/);
+			assert.ok(err instanceof Error);
+			assert.match(err.message, /Can't resolve '#dep\/array2' in/);
 			done();
 		});
 	});
 
-	it("should work with invalid imports #10", (done) => {
+	it("should work with invalid imports #10", (t, done) => {
 		resolver.resolve({}, fixture1, "#dep/array3", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(path.resolve(fixture1, "./a.js"));
+			assert.deepStrictEqual(result, path.resolve(fixture1, "./a.js"));
 			done();
 		});
 	});
 
-	it("should work with invalid imports #11", (done) => {
+	it("should work with invalid imports #11", (t, done) => {
 		resolver.resolve({}, fixture1, "#dep/empty", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
-			expect(err).toBeInstanceOf(Error);
-			expect(err.message).toMatch(/Can't resolve '#dep\/empty' in/);
+			assert.ok(err instanceof Error);
+			assert.match(err.message, /Can't resolve '#dep\/empty' in/);
 			done();
 		});
 	});
 
-	it("should work with invalid imports #12", (done) => {
+	it("should work with invalid imports #12", (t, done) => {
 		resolver.resolve({}, fixture1, "#dep/with-bad", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(path.resolve(fixture1, "./a.js"));
+			assert.deepStrictEqual(result, path.resolve(fixture1, "./a.js"));
 			done();
 		});
 	});
 
-	it("should work with invalid imports #13", (done) => {
+	it("should work with invalid imports #13", (t, done) => {
 		resolver.resolve({}, fixture1, "#dep/with-bad2", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(path.resolve(fixture1, "./a.js"));
+			assert.deepStrictEqual(result, path.resolve(fixture1, "./a.js"));
 			done();
 		});
 	});
 
-	it("should work with invalid imports #14", (done) => {
+	it("should work with invalid imports #14", (t, done) => {
 		resolver.resolve({}, fixture1, "#timezones/pdt.mjs", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
-			expect(err).toBeInstanceOf(Error);
-			expect(err.message).toMatch(/Expecting folder to folder mapping/);
+			assert.ok(err instanceof Error);
+			assert.match(err.message, /Expecting folder to folder mapping/);
 			done();
 		});
 	});
 
-	it("should work with invalid imports #15", (done) => {
+	it("should work with invalid imports #15", (t, done) => {
 		resolver.resolve({}, fixture1, "#dep/multi1", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
-			expect(err).toBeInstanceOf(Error);
-			expect(err.message).toMatch(
+			assert.ok(err instanceof Error);
+			assert.match(
+				err.message,
 				/Invalid "imports" target "\.\.\/\.\.\/test\/foo" defined for "#dep\/multi1"/,
 			);
 			done();
 		});
 	});
 
-	it("should work with invalid imports #16", (done) => {
+	it("should work with invalid imports #16", (t, done) => {
 		resolver.resolve({}, fixture1, "#dep/multi2", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
-			expect(err).toBeInstanceOf(Error);
-			expect(err.message).toMatch(
+			assert.ok(err instanceof Error);
+			assert.match(
+				err.message,
 				/Invalid "imports" target "\.\.\/\.\.\/test" defined for "#dep\/multi2"/,
 			);
 			done();
 		});
 	});
 
-	it("should work with invalid imports #17", (done) => {
+	it("should work with invalid imports #17", (t, done) => {
 		resolver.resolve({}, fixture1, "#dep/multi1", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
-			expect(err).toBeInstanceOf(Error);
-			expect(err.message).toMatch(
+			assert.ok(err instanceof Error);
+			assert.match(
+				err.message,
 				/Invalid "imports" target "\.\.\/\.\.\/test\/foo" defined for "#dep\/multi1"/,
 			);
 			done();
 		});
 	});
 
-	it("should work with invalid imports #18", (done) => {
+	it("should work with invalid imports #18", (t, done) => {
 		resolver.resolve({}, fixture1, "#dep/multi2", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
-			expect(err).toBeInstanceOf(Error);
-			expect(err.message).toMatch(
+			assert.ok(err instanceof Error);
+			assert.match(
+				err.message,
 				/Invalid "imports" target "\.\.\/\.\.\/test" defined for "#dep\/multi2"/,
 			);
 			done();
 		});
 	});
 
-	it("should work and resolve with array imports", (done) => {
+	it("should work and resolve with array imports", (t, done) => {
 		resolver.resolve({}, fixture1, "#dep/multi", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(path.resolve(fixture1, "./a.js"));
+			assert.deepStrictEqual(result, path.resolve(fixture1, "./a.js"));
 			done();
 		});
 	});
 
-	it("should work and resolve an imports-field key to a real file", (done) => {
+	it("should work and resolve an imports-field key to a real file", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			extensions: [".js"],
 			conditionNames: ["node"],
@@ -1706,7 +1737,8 @@ describe("importsFieldPlugin", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.join(
 						path.join(__dirname, "fixtures"),
 						"imports-field-error-trigger/resolved.js",
@@ -1717,7 +1749,7 @@ describe("importsFieldPlugin", () => {
 		);
 	});
 
-	it("should throw errors for # requests without a description file in scope", (done) => {
+	it("should throw errors for # requests without a description file in scope", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			extensions: [".js"],
 			conditionNames: ["node"],
@@ -1725,7 +1757,7 @@ describe("importsFieldPlugin", () => {
 			fileSystem: nodeFileSystem,
 		});
 		resolver.resolve({}, "/tmp", "#not-in-scope", {}, (err) => {
-			expect(err).toBeInstanceOf(Error);
+			assert.ok(err instanceof Error);
 			done();
 		});
 	});
@@ -1741,23 +1773,23 @@ describe("importsFieldPlugin", () => {
 			"imports-field-chained",
 		);
 
-		it("should fail to resolve #a when it maps to #b (another import specifier)", (done) => {
+		it("should fail to resolve #a when it maps to #b (another import specifier)", (t, done) => {
 			resolver.resolve({}, chainedFixture, "#a", {}, (err, result) => {
 				if (!err) {
 					return done(
 						new Error(`expected error for chained imports, got ${result}`),
 					);
 				}
-				expect(err).toBeInstanceOf(Error);
+				assert.ok(err instanceof Error);
 				done();
 			});
 		});
 
-		it("should still resolve #b to ./the.js directly", (done) => {
+		it("should still resolve #b to ./the.js directly", (t, done) => {
 			resolver.resolve({}, chainedFixture, "#b", {}, (err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(path.resolve(chainedFixture, "the.js"));
+				assert.deepStrictEqual(result, path.resolve(chainedFixture, "the.js"));
 				done();
 			});
 		});
@@ -1773,7 +1805,7 @@ describe("importsFieldPlugin", () => {
 			"imports-slash-pattern",
 		);
 
-		it("should resolve #/utils.js using #/* pattern", (done) => {
+		it("should resolve #/utils.js using #/* pattern", (t, done) => {
 			resolver.resolve(
 				{},
 				slashPatternFixture,
@@ -1782,7 +1814,8 @@ describe("importsFieldPlugin", () => {
 				(err, result) => {
 					if (err) return done(err);
 					if (!result) return done(new Error("No result"));
-					expect(result).toEqual(
+					assert.deepStrictEqual(
+						result,
 						path.resolve(slashPatternFixture, "src/utils.js"),
 					);
 					done();
@@ -1790,7 +1823,7 @@ describe("importsFieldPlugin", () => {
 			);
 		});
 
-		it("should resolve #/nested/deep.js using #/* pattern", (done) => {
+		it("should resolve #/nested/deep.js using #/* pattern", (t, done) => {
 			resolver.resolve(
 				{},
 				slashPatternFixture,
@@ -1799,7 +1832,8 @@ describe("importsFieldPlugin", () => {
 				(err, result) => {
 					if (err) return done(err);
 					if (!result) return done(new Error("No result"));
-					expect(result).toEqual(
+					assert.deepStrictEqual(
+						result,
 						path.resolve(slashPatternFixture, "src/nested/deep.js"),
 					);
 					done();

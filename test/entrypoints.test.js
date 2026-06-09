@@ -1,12 +1,11 @@
 "use strict";
 
 const assert = require("assert");
-const { describe, it } = require("node:test");
-
 const {
 	processExportsField,
 	processImportsField,
 } = require("../lib/util/entrypoints");
+const { describe, it } = require("./_runner");
 
 describe("util/entrypoints processExportsField", () => {
 	it("throws when the request ends with '/' (file required)", () => {

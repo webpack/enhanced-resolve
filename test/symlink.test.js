@@ -2,11 +2,11 @@
 
 const assert = require("assert");
 const fs = require("fs");
-const { afterEach, beforeEach, describe, it } = require("node:test");
 
 const { platform } = require("os");
 const path = require("path");
 const resolve = require("../");
+const { afterEach, beforeEach, describe, it } = require("./_runner");
 
 const tempPath = path.join(__dirname, "temp");
 

@@ -1,9 +1,8 @@
 "use strict";
 
 const assert = require("assert");
-const { describe, it } = require("node:test");
-
 const { forEachBail } = require("../");
+const { describe, it } = require("./_runner");
 
 describe("forEachBail", () => {
 	it("should iterate correctly", (t, done) => {

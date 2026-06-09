@@ -1,9 +1,8 @@
 "use strict";
 
 const assert = require("assert");
-const { describe, it } = require("node:test");
-
 const { parseIdentifier } = require("../lib/util/identifier");
+const { describe, it } = require("./_runner");
 
 /**
  * @typedef {{ input: string, expected: [string, string, string] }} TestSuite

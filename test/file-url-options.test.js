@@ -1,5 +1,7 @@
 "use strict";
 
+const assert = require("assert");
+
 const fs = require("fs");
 const path = require("path");
 const { fileURLToPath, pathToFileURL } = require("url");
@@ -7,6 +9,7 @@ const enhancedResolve = require("../lib");
 const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
 const ResolverFactory = require("../lib/ResolverFactory");
 const { toPath } = require("../lib/util/path");
+const { describe, it } = require("./_runner");
 
 describe("file: URL path options", () => {
 	const fixtures = path.resolve(__dirname, "fixtures");
@@ -21,75 +24,75 @@ describe("file: URL path options", () => {
 		});
 
 	describe("roots", () => {
-		it("should accept a URL instance", (done) => {
+		it("should accept a URL instance", (t, done) => {
 			const resolver = makeResolver({ roots: [pathToFileURL(fixtures)] });
 			resolver.resolve({}, fixtures, "/b.js", {}, (err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(path.resolve(fixtures, "b.js"));
+				assert.deepStrictEqual(result, path.resolve(fixtures, "b.js"));
 				done();
 			});
 		});
 	});
 
 	describe("modules", () => {
-		it("should accept a URL instance", (done) => {
+		it("should accept a URL instance", (t, done) => {
 			const resolver = makeResolver({ modules: [pathToFileURL(modulesDir)] });
 			resolver.resolve({}, fixtures, "m1/a", {}, (err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(path.resolve(modulesDir, "m1/a.js"));
+				assert.deepStrictEqual(result, path.resolve(modulesDir, "m1/a.js"));
 				done();
 			});
 		});
 
-		it("should accept a single URL instance", (done) => {
+		it("should accept a single URL instance", (t, done) => {
 			const resolver = makeResolver({ modules: pathToFileURL(modulesDir) });
 			resolver.resolve({}, fixtures, "m1/a", {}, (err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(path.resolve(modulesDir, "m1/a.js"));
+				assert.deepStrictEqual(result, path.resolve(modulesDir, "m1/a.js"));
 				done();
 			});
 		});
 
-		it("should keep folder-name entries untouched", (done) => {
+		it("should keep folder-name entries untouched", (t, done) => {
 			const resolver = makeResolver({ modules: ["node_modules"] });
 			resolver.resolve({}, fixtures, "m1/a", {}, (err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(path.resolve(modulesDir, "m1/a.js"));
+				assert.deepStrictEqual(result, path.resolve(modulesDir, "m1/a.js"));
 				done();
 			});
 		});
 	});
 
 	describe("alias", () => {
-		it("should accept a URL instance as the target", (done) => {
+		it("should accept a URL instance as the target", (t, done) => {
 			const resolver = makeResolver({
 				alias: { "@": pathToFileURL(fixtures) },
 			});
 			resolver.resolve({}, fixtures, "@/b.js", {}, (err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(path.resolve(fixtures, "b.js"));
+				assert.deepStrictEqual(result, path.resolve(fixtures, "b.js"));
 				done();
 			});
 		});
 
-		it("should accept a URL instance in an array target", (done) => {
+		it("should accept a URL instance in an array target", (t, done) => {
 			const resolver = makeResolver({
 				alias: { "@": [pathToFileURL(modulesDir), pathToFileURL(fixtures)] },
 			});
 			resolver.resolve({}, fixtures, "@/b.js", {}, (err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(path.resolve(fixtures, "b.js"));
+				assert.deepStrictEqual(result, path.resolve(fixtures, "b.js"));
 				done();
 			});
 		});
 
-		it("should accept array-form entries with a URL target", (done) => {
+		it("should accept array-form entries with a URL target", (t, done) => {
 			const resolver = makeResolver({
 				alias: [{ name: "@", alias: pathToFileURL(fixtures) }],
 			});
 			resolver.resolve({}, fixtures, "@/b.js", {}, (err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(path.resolve(fixtures, "b.js"));
+				assert.deepStrictEqual(result, path.resolve(fixtures, "b.js"));
 				done();
 			});
 		});
@@ -97,47 +100,47 @@ describe("file: URL path options", () => {
 		// A `file:` string target is not converted here (strings stay literal),
 		// but the rewritten request still resolves because the request side
 		// (`parseIdentifier`) converts `file:` request strings.
-		it("should still resolve a file: string target via request parsing", (done) => {
+		it("should still resolve a file: string target via request parsing", (t, done) => {
 			const resolver = makeResolver({
 				alias: { "@": String(pathToFileURL(fixtures)) },
 			});
 			resolver.resolve({}, fixtures, "@/b.js", {}, (err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(path.resolve(fixtures, "b.js"));
+				assert.deepStrictEqual(result, path.resolve(fixtures, "b.js"));
 				done();
 			});
 		});
 	});
 
 	describe("restrictions", () => {
-		it("should accept a URL instance", (done) => {
+		it("should accept a URL instance", (t, done) => {
 			const resolver = makeResolver({
 				restrictions: [pathToFileURL(fixtures)],
 			});
 			resolver.resolve({}, fixtures, "./b.js", {}, (err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(path.resolve(fixtures, "b.js"));
+				assert.deepStrictEqual(result, path.resolve(fixtures, "b.js"));
 				done();
 			});
 		});
 
-		it("should keep RegExp entries untouched", (done) => {
+		it("should keep RegExp entries untouched", (t, done) => {
 			const resolver = makeResolver({ restrictions: [/\.js$/] });
 			resolver.resolve({}, fixtures, "./b.js", {}, (err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(path.resolve(fixtures, "b.js"));
+				assert.deepStrictEqual(result, path.resolve(fixtures, "b.js"));
 				done();
 			});
 		});
 
 		// A `file:` string restriction stays literal, so no real path is ever
 		// "inside" it and resolution is blocked — use a URL instance or a path.
-		it("should treat a file: string restriction as a literal path", (done) => {
+		it("should treat a file: string restriction as a literal path", (t, done) => {
 			const resolver = makeResolver({
 				restrictions: [String(pathToFileURL(fixtures))],
 			});
 			resolver.resolve({}, fixtures, "./b.js", {}, (err) => {
-				expect(err).toBeInstanceOf(Error);
+				assert.ok(err instanceof Error);
 				done();
 			});
 		});
@@ -147,7 +150,7 @@ describe("file: URL path options", () => {
 		const tsconfigDir = path.resolve(fixtures, "tsconfig-paths", "base");
 		const tsconfigFile = path.join(tsconfigDir, "tsconfig.json");
 
-		it("should accept a URL instance as the config file", (done) => {
+		it("should accept a URL instance as the config file", (t, done) => {
 			const resolver = ResolverFactory.createResolver({
 				fileSystem,
 				extensions: [".ts", ".tsx"],
@@ -162,7 +165,8 @@ describe("file: URL path options", () => {
 				{},
 				(err, result) => {
 					if (err) return done(err);
-					expect(result).toEqual(
+					assert.deepStrictEqual(
+						result,
 						path.join(tsconfigDir, "src", "components", "button.ts"),
 					);
 					done();
@@ -170,7 +174,7 @@ describe("file: URL path options", () => {
 			);
 		});
 
-		it("should accept a URL instance as options.configFile", (done) => {
+		it("should accept a URL instance as options.configFile", (t, done) => {
 			const resolver = ResolverFactory.createResolver({
 				fileSystem,
 				extensions: [".ts", ".tsx"],
@@ -185,7 +189,8 @@ describe("file: URL path options", () => {
 				{},
 				(err, result) => {
 					if (err) return done(err);
-					expect(result).toEqual(
+					assert.deepStrictEqual(
+						result,
 						path.join(tsconfigDir, "src", "components", "button.ts"),
 					);
 					done();
@@ -196,15 +201,15 @@ describe("file: URL path options", () => {
 
 	describe("toPath", () => {
 		it("should convert a file: URL instance to a path", () => {
-			expect(toPath(pathToFileURL(modulesDir))).toBe(modulesDir);
+			assert.strictEqual(toPath(pathToFileURL(modulesDir)), modulesDir);
 		});
 
 		// A string is always a literal path (matches Node fs, nodejs/node#17658),
 		// so a directory literally named `file:` is never mistaken for a URL.
 		it("should leave strings untouched, including `file:`-prefixed ones", () => {
-			expect(toPath("file:foo")).toBe("file:foo");
-			expect(toPath("file:///abs")).toBe("file:///abs");
-			expect(toPath(modulesDir)).toBe(modulesDir);
+			assert.strictEqual(toPath("file:foo"), "file:foo");
+			assert.strictEqual(toPath("file:///abs"), "file:///abs");
+			assert.strictEqual(toPath(modulesDir), modulesDir);
 		});
 	});
 });
@@ -220,7 +225,7 @@ describe("file: URL resolve context and request", () => {
 	});
 
 	describe("context (path) argument", () => {
-		it("should accept a URL instance as the context path", (done) => {
+		it("should accept a URL instance as the context path", (t, done) => {
 			resolver.resolve(
 				{},
 				pathToFileURL(fixtures),
@@ -228,25 +233,26 @@ describe("file: URL resolve context and request", () => {
 				{},
 				(err, result) => {
 					if (err) return done(err);
-					expect(result).toEqual(bFile);
+					assert.deepStrictEqual(result, bFile);
 					done();
 				},
 			);
 		});
 
-		it("should accept a URL context when the context object is omitted", (done) => {
+		it("should accept a URL context when the context object is omitted", (t, done) => {
 			resolver.resolve(pathToFileURL(fixtures), "./b.js", {}, (err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(bFile);
+				assert.deepStrictEqual(result, bFile);
 				done();
 			});
 		});
 
-		it("should still reject a non-string, non-URL context path", (done) => {
+		it("should still reject a non-string, non-URL context path", (t, done) => {
 			// @ts-expect-error for tests
 			resolver.resolve({}, 42, "./b.js", {}, (err) => {
-				expect(err).toBeInstanceOf(Error);
-				expect(/** @type {Error} */ (err).message).toMatch(
+				assert.ok(err instanceof Error);
+				assert.match(
+					/** @type {Error} */ (err).message,
 					/path argument is not a string/,
 				);
 				done();
@@ -255,7 +261,7 @@ describe("file: URL resolve context and request", () => {
 	});
 
 	describe("request argument", () => {
-		it("should accept a file: URL instance as the request", (done) => {
+		it("should accept a file: URL instance as the request", (t, done) => {
 			resolver.resolve(
 				{},
 				fixtures,
@@ -263,17 +269,18 @@ describe("file: URL resolve context and request", () => {
 				{},
 				(err, result) => {
 					if (err) return done(err);
-					expect(result).toEqual(bFile);
+					assert.deepStrictEqual(result, bFile);
 					done();
 				},
 			);
 		});
 
-		it("should still reject a non-string, non-URL request", (done) => {
+		it("should still reject a non-string, non-URL request", (t, done) => {
 			// @ts-expect-error for tests
 			resolver.resolve({}, fixtures, 42, {}, (err) => {
-				expect(err).toBeInstanceOf(Error);
-				expect(/** @type {Error} */ (err).message).toMatch(
+				assert.ok(err instanceof Error);
+				assert.match(
+					/** @type {Error} */ (err).message,
 					/request argument is not a string/,
 				);
 				done();
@@ -285,37 +292,42 @@ describe("file: URL resolve context and request", () => {
 	// context)` — request is the first param, context the base — so an absolute
 	// `file:` request wins over the context base, exactly like the URL constructor.
 	describe("both context and request as URL", () => {
-		it("should resolve a URL request against a URL context like new URL()", (done) => {
+		it("should resolve a URL request against a URL context like new URL()", (t, done) => {
 			const contextURL = pathToFileURL(fixtures);
 			const requestURL = pathToFileURL(bFile);
 			resolver.resolve({}, contextURL, requestURL, {}, (err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(bFile);
-				expect(result).toEqual(fileURLToPath(new URL(requestURL, contextURL)));
+				assert.deepStrictEqual(result, bFile);
+				assert.deepStrictEqual(
+					result,
+					fileURLToPath(new URL(requestURL, contextURL)),
+				);
 				done();
 			});
 		});
 	});
 
 	describe("high-level resolve API", () => {
-		it("resolve should accept a URL context with the context object omitted", (done) => {
+		it("resolve should accept a URL context with the context object omitted", (t, done) => {
 			enhancedResolve(pathToFileURL(fixtures), "./b.js", (err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(bFile);
+				assert.deepStrictEqual(result, bFile);
 				done();
 			});
 		});
 
 		it("resolveSync should accept a URL context", () => {
-			expect(enhancedResolve.sync(pathToFileURL(fixtures), "./b.js")).toEqual(
+			assert.deepStrictEqual(
+				enhancedResolve.sync(pathToFileURL(fixtures), "./b.js"),
 				bFile,
 			);
 		});
 
 		it("resolvePromise should accept a URL context", async () => {
-			await expect(
-				enhancedResolve.promise(pathToFileURL(fixtures), "./b.js"),
-			).resolves.toEqual(bFile);
+			assert.deepStrictEqual(
+				await enhancedResolve.promise(pathToFileURL(fixtures), "./b.js"),
+				bFile,
+			);
 		});
 	});
 });

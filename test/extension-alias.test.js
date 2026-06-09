@@ -2,12 +2,12 @@
 
 const assert = require("assert");
 const fs = require("fs");
-const { describe, it } = require("node:test");
 
 const path = require("path");
 
 const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
 const ResolverFactory = require("../lib/ResolverFactory");
+const { describe, it } = require("./_runner");
 
 /** @typedef {import("../lib/util/entrypoints").ImportsField} ImportsField */
 

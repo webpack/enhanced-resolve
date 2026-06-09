@@ -1,8 +1,11 @@
 "use strict";
 
+const assert = require("assert");
+
 const path = require("path");
 const { pathToFileURL } = require("url");
 const fileURLToPath = require("../lib/util/fileURLToPath");
+const { describe, it } = require("./_runner");
 
 describe("fileURLToPath", () => {
 	// Expected values are pinned literals (computed once from Node's reference
@@ -30,7 +33,7 @@ describe("fileURLToPath", () => {
 	describe("posix branch", () => {
 		for (const [input, expected] of posixCases) {
 			it(`converts ${input}`, () => {
-				expect(fileURLToPath(input, { windows: false })).toBe(expected);
+				assert.strictEqual(fileURLToPath(input, { windows: false }), expected);
 			});
 		}
 	});
@@ -38,55 +41,66 @@ describe("fileURLToPath", () => {
 	describe("windows branch", () => {
 		for (const [input, expected] of windowsCases) {
 			it(`converts ${input}`, () => {
-				expect(fileURLToPath(input, { windows: true })).toBe(expected);
+				assert.strictEqual(fileURLToPath(input, { windows: true }), expected);
 			});
 		}
 	});
 
 	it("accepts a URL instance", () => {
 		const url = new URL("file:///home/user/project");
-		expect(fileURLToPath(url, { windows: false })).toBe("/home/user/project");
+		assert.strictEqual(
+			fileURLToPath(url, { windows: false }),
+			"/home/user/project",
+		);
 	});
 
 	it("round-trips pathToFileURL on the host platform", () => {
 		// Build a host-absolute path so the round-trip is correct on Windows
 		// (drive letter) as well as POSIX, using the host-default platform branch.
 		const p = path.resolve("a b", "c");
-		expect(fileURLToPath(pathToFileURL(p))).toBe(p);
+		assert.strictEqual(fileURLToPath(pathToFileURL(p)), p);
 	});
 
 	it("throws for a non-file: scheme", () => {
-		expect(() => fileURLToPath("http://example.com/x")).toThrow("scheme file");
+		assert.throws(
+			() => fileURLToPath("http://example.com/x"),
+			(err) => err instanceof Error && err.message.includes("scheme file"),
+		);
 	});
 
 	it("throws for an encoded slash in the posix branch", () => {
-		expect(() => fileURLToPath("file:///a%2fb", { windows: false })).toThrow(
+		assert.throws(
+			() => fileURLToPath("file:///a%2fb", { windows: false }),
 			/encoded \/ characters/,
 		);
 	});
 
 	it("throws for an encoded backslash in the windows branch", () => {
-		expect(() => fileURLToPath("file:///C:/a%5cb", { windows: true })).toThrow(
+		assert.throws(
+			() => fileURLToPath("file:///C:/a%5cb", { windows: true }),
 			/encoded \\ or \/ characters/,
 		);
 	});
 
 	it("throws for a non-absolute windows drive path", () => {
-		expect(() => fileURLToPath("file:///foo", { windows: true })).toThrow(
-			"must be absolute",
+		assert.throws(
+			() => fileURLToPath("file:///foo", { windows: true }),
+			(err) => err instanceof Error && err.message.includes("must be absolute"),
 		);
 	});
 
 	it("throws for a posix host that is not empty", () => {
-		expect(() => fileURLToPath("file://host/x", { windows: false })).toThrow(
+		assert.throws(
+			() => fileURLToPath("file://host/x", { windows: false }),
 			/host/,
 		);
 	});
 
 	it("decodes a UNC path with an ASCII host in the windows branch", () => {
-		expect(
+		assert.strictEqual(
 			fileURLToPath("file://server/share/file.js", { windows: true }),
-		).toBe("\\\\server\\share\\file.js");
+			"\\\\server\\share\\file.js",
+		);
 	});
 
 	// Documented deviation: Node runs UNC hosts through domainToUnicode
@@ -94,7 +108,8 @@ describe("fileURLToPath", () => {
 	// differing only for rare internationalized UNC hosts.
 	// cspell:ignore aagokeh
 	it("keeps a punycode UNC host as-is (deviation from Node)", () => {
-		expect(fileURLToPath("file://xn--h1aagokeh/a", { windows: true })).toBe(
+		assert.strictEqual(
+			fileURLToPath("file://xn--h1aagokeh/a", { windows: true }),
 			"\\\\xn--h1aagokeh\\a",
 		);
 	});

@@ -2,10 +2,10 @@
 
 const assert = require("assert");
 const fs = require("fs");
-const { after, before, beforeEach, describe, it } = require("node:test");
 
 const path = require("path");
 const { CachedInputFileSystem, ResolverFactory } = require("../");
+const { after, before, beforeEach, describe, it } = require("./_runner");
 
 const nodeFileSystem = new CachedInputFileSystem(fs, 4000);
 const fixture = path.resolve(__dirname, "fixtures", "pnp");

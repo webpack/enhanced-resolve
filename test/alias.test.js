@@ -1,10 +1,13 @@
 "use strict";
 
+const assert = require("assert");
 const fs = require("fs");
+
 const path = require("path");
 const { Volume } = require("memfs");
 const { ResolverFactory } = require("../");
 const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
+const { beforeEach, describe, it } = require("./_runner");
 
 const nodeFileSystem = new CachedInputFileSystem(fs, 4000);
 
@@ -58,94 +61,138 @@ describe("alias", () => {
 	});
 
 	it("should resolve a not aliased module", () => {
-		expect(resolver.resolveSync({}, "/", "a")).toBe("/a/index");
-		expect(resolver.resolveSync({}, "/", "a/index")).toBe("/a/index");
-		expect(resolver.resolveSync({}, "/", "a/dir")).toBe("/a/dir/index");
-		expect(resolver.resolveSync({}, "/", "a/dir/index")).toBe("/a/dir/index");
+		assert.strictEqual(resolver.resolveSync({}, "/", "a"), "/a/index");
+		assert.strictEqual(resolver.resolveSync({}, "/", "a/index"), "/a/index");
+		assert.strictEqual(resolver.resolveSync({}, "/", "a/dir"), "/a/dir/index");
+		assert.strictEqual(
+			resolver.resolveSync({}, "/", "a/dir/index"),
+			"/a/dir/index",
+		);
 	});
 
 	it("should resolve an aliased module", () => {
-		expect(resolver.resolveSync({}, "/", "aliasA")).toBe("/a/index");
-		expect(resolver.resolveSync({}, "/", "aliasA/index")).toBe("/a/index");
-		expect(resolver.resolveSync({}, "/", "aliasA/dir")).toBe("/a/dir/index");
-		expect(resolver.resolveSync({}, "/", "aliasA/dir/index")).toBe(
+		assert.strictEqual(resolver.resolveSync({}, "/", "aliasA"), "/a/index");
+		assert.strictEqual(
+			resolver.resolveSync({}, "/", "aliasA/index"),
+			"/a/index",
+		);
+		assert.strictEqual(
+			resolver.resolveSync({}, "/", "aliasA/dir"),
+			"/a/dir/index",
+		);
+		assert.strictEqual(
+			resolver.resolveSync({}, "/", "aliasA/dir/index"),
 			"/a/dir/index",
 		);
 	});
 
 	it('should resolve "#" alias', () => {
-		expect(resolver.resolveSync({}, "/", "#")).toBe("/c/dir/index");
-		expect(resolver.resolveSync({}, "/", "#/index")).toBe("/c/dir/index");
+		assert.strictEqual(resolver.resolveSync({}, "/", "#"), "/c/dir/index");
+		assert.strictEqual(
+			resolver.resolveSync({}, "/", "#/index"),
+			"/c/dir/index",
+		);
 	});
 
 	it('should resolve "@" alias', () => {
-		expect(resolver.resolveSync({}, "/", "@")).toBe("/c/dir/index");
-		expect(resolver.resolveSync({}, "/", "@/index")).toBe("/c/dir/index");
+		assert.strictEqual(resolver.resolveSync({}, "/", "@"), "/c/dir/index");
+		assert.strictEqual(
+			resolver.resolveSync({}, "/", "@/index"),
+			"/c/dir/index",
+		);
 	});
 
 	it("should resolve wildcard alias", () => {
-		expect(resolver.resolveSync({}, "/", "@a")).toBe("/a/index");
-		expect(resolver.resolveSync({}, "/", "@a/dir")).toBe("/a/dir/index");
-		expect(resolver.resolveSync({}, "/", "@e/dir/file")).toBe("/e/dir/file");
-		expect(resolver.resolveSync({}, "/", "@e/anotherDir")).toBe(
+		assert.strictEqual(resolver.resolveSync({}, "/", "@a"), "/a/index");
+		assert.strictEqual(resolver.resolveSync({}, "/", "@a/dir"), "/a/dir/index");
+		assert.strictEqual(
+			resolver.resolveSync({}, "/", "@e/dir/file"),
+			"/e/dir/file",
+		);
+		assert.strictEqual(
+			resolver.resolveSync({}, "/", "@e/anotherDir"),
 			"/e/anotherDir/index",
 		);
-		expect(resolver.resolveSync({}, "/", "@e/dir/file")).toBe("/e/dir/file");
+		assert.strictEqual(
+			resolver.resolveSync({}, "/", "@e/dir/file"),
+			"/e/dir/file",
+		);
 	});
 
 	it("should resolve an ignore module", () => {
-		expect(resolver.resolveSync({}, "/", "ignored")).toBe(false);
+		assert.strictEqual(resolver.resolveSync({}, "/", "ignored"), false);
 	});
 
 	it("should resolve a recursive aliased module", () => {
-		expect(resolver.resolveSync({}, "/", "recursive")).toBe(
+		assert.strictEqual(
+			resolver.resolveSync({}, "/", "recursive"),
 			"/recursive/dir/index",
 		);
-		expect(resolver.resolveSync({}, "/", "recursive/index")).toBe(
+		assert.strictEqual(
+			resolver.resolveSync({}, "/", "recursive/index"),
 			"/recursive/dir/index",
 		);
-		expect(resolver.resolveSync({}, "/", "recursive/dir")).toBe(
+		assert.strictEqual(
+			resolver.resolveSync({}, "/", "recursive/dir"),
 			"/recursive/dir/index",
 		);
-		expect(resolver.resolveSync({}, "/", "recursive/dir/index")).toBe(
+		assert.strictEqual(
+			resolver.resolveSync({}, "/", "recursive/dir/index"),
 			"/recursive/dir/index",
 		);
 	});
 
 	it("should resolve a file aliased module", () => {
-		expect(resolver.resolveSync({}, "/", "b")).toBe("/a/index");
-		expect(resolver.resolveSync({}, "/", "c")).toBe("/a/index");
+		assert.strictEqual(resolver.resolveSync({}, "/", "b"), "/a/index");
+		assert.strictEqual(resolver.resolveSync({}, "/", "c"), "/a/index");
 	});
 
 	it("should resolve a file aliased module with a query", () => {
-		expect(resolver.resolveSync({}, "/", "b?query")).toBe("/a/index?query");
-		expect(resolver.resolveSync({}, "/", "c?query")).toBe("/a/index?query");
+		assert.strictEqual(
+			resolver.resolveSync({}, "/", "b?query"),
+			"/a/index?query",
+		);
+		assert.strictEqual(
+			resolver.resolveSync({}, "/", "c?query"),
+			"/a/index?query",
+		);
 	});
 
 	it("should resolve a path in a file aliased module", () => {
-		expect(resolver.resolveSync({}, "/", "b/index")).toBe("/b/index");
-		expect(resolver.resolveSync({}, "/", "b/dir")).toBe("/b/dir/index");
-		expect(resolver.resolveSync({}, "/", "b/dir/index")).toBe("/b/dir/index");
-		expect(resolver.resolveSync({}, "/", "c/index")).toBe("/c/index");
-		expect(resolver.resolveSync({}, "/", "c/dir")).toBe("/c/dir/index");
-		expect(resolver.resolveSync({}, "/", "c/dir/index")).toBe("/c/dir/index");
+		assert.strictEqual(resolver.resolveSync({}, "/", "b/index"), "/b/index");
+		assert.strictEqual(resolver.resolveSync({}, "/", "b/dir"), "/b/dir/index");
+		assert.strictEqual(
+			resolver.resolveSync({}, "/", "b/dir/index"),
+			"/b/dir/index",
+		);
+		assert.strictEqual(resolver.resolveSync({}, "/", "c/index"), "/c/index");
+		assert.strictEqual(resolver.resolveSync({}, "/", "c/dir"), "/c/dir/index");
+		assert.strictEqual(
+			resolver.resolveSync({}, "/", "c/dir/index"),
+			"/c/dir/index",
+		);
 	});
 
 	it("should resolve a file aliased file", () => {
-		expect(resolver.resolveSync({}, "/", "d")).toBe("/c/index");
-		expect(resolver.resolveSync({}, "/", "d/dir/index")).toBe("/c/dir/index");
+		assert.strictEqual(resolver.resolveSync({}, "/", "d"), "/c/index");
+		assert.strictEqual(
+			resolver.resolveSync({}, "/", "d/dir/index"),
+			"/c/dir/index",
+		);
 	});
 
 	it("should resolve a file in multiple aliased dirs", () => {
-		expect(resolver.resolveSync({}, "/", "multiAlias/dir/file")).toBe(
+		assert.strictEqual(
+			resolver.resolveSync({}, "/", "multiAlias/dir/file"),
 			"/e/dir/file",
 		);
-		expect(resolver.resolveSync({}, "/", "multiAlias/anotherDir")).toBe(
+		assert.strictEqual(
+			resolver.resolveSync({}, "/", "multiAlias/anotherDir"),
 			"/e/anotherDir/index",
 		);
 	});
 
-	it("should log the correct info", (done) => {
+	it("should log the correct info", (t, done) => {
 		const log = [];
 		resolver.resolve(
 			{},
@@ -155,8 +202,8 @@ describe("alias", () => {
 			(err, result) => {
 				if (err) return done(err);
 
-				expect(result).toBe("/a/dir/index");
-				expect(log).toEqual([
+				assert.strictEqual(result, "/a/dir/index");
+				assert.deepStrictEqual(log, [
 					"resolve 'aliasA/dir' in '/'",
 					"  Parsed request is a module",
 					"  No description file found in / or above",
@@ -191,7 +238,7 @@ describe("alias", () => {
 		);
 	});
 
-	it("should work with absolute paths", (done) => {
+	it("should work with absolute paths", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			alias: {
 				[path.resolve(__dirname, "fixtures", "foo")]: false,
@@ -202,7 +249,7 @@ describe("alias", () => {
 
 		resolver.resolve({}, __dirname, "foo/index", {}, (err, result) => {
 			if (err) done(err);
-			expect(result).toBe(false);
+			assert.strictEqual(result, false);
 			done();
 		});
 	});
@@ -216,14 +263,23 @@ describe("alias", () => {
 	// char-code screen ever diverges from the startsWith comparison
 	// these resolves silently fall through to the original target.
 	it("should not skip absolute path aliasing", () => {
-		expect(resolver.resolveSync({}, "/", "/d/dir")).toBe("/c/dir/index");
-		expect(resolver.resolveSync({}, "/", "/d/dir/index")).toBe("/c/dir/index");
-		expect(resolver.resolveSync({}, "/", "d/dir/index")).toBe("/c/dir/index");
-		expect(resolver.resolveSync({}, "/", "d")).toBe("/c/index");
+		assert.strictEqual(resolver.resolveSync({}, "/", "/d/dir"), "/c/dir/index");
+		assert.strictEqual(
+			resolver.resolveSync({}, "/", "/d/dir/index"),
+			"/c/dir/index",
+		);
+		assert.strictEqual(
+			resolver.resolveSync({}, "/", "d/dir/index"),
+			"/c/dir/index",
+		);
+		assert.strictEqual(resolver.resolveSync({}, "/", "d"), "/c/index");
 	});
 
 	it("should resolve a wildcard alias with multiple targets correctly", () => {
-		expect(resolver.resolveSync({}, "/", "shared/b")).toBe("/src/components/b");
+		assert.strictEqual(
+			resolver.resolveSync({}, "/", "shared/b"),
+			"/src/components/b",
+		);
 	});
 
 	// Absolute-path aliasing — OS-native (posix on Linux CI, backslash
@@ -252,7 +308,7 @@ describe("alias", () => {
 			fileSystem: nodeFileSystem,
 		});
 
-		it("aliases a raw absolute subpath request (raw-resolve hook)", (done) => {
+		it("aliases a raw absolute subpath request (raw-resolve hook)", (t, done) => {
 			// path.join uses the OS-native separator, so on windows this
 			// is `...\\imaginary-foo\\index` and exercises the backslash
 			// fallback; on linux it is `.../imaginary-foo/index`.
@@ -263,21 +319,21 @@ describe("alias", () => {
 				{},
 				(err, result) => {
 					if (err) return done(err);
-					expect(result).toBe(expectedIndex);
+					assert.strictEqual(result, expectedIndex);
 					done();
 				},
 			);
 		});
 
-		it("aliases a request that equals the alias name (exact equality)", (done) => {
+		it("aliases a request that equals the alias name (exact equality)", (t, done) => {
 			absResolver.resolve({}, fixturesDir, aliasName, {}, (err, result) => {
 				if (err) return done(err);
-				expect(result).toBe(expectedIndex);
+				assert.strictEqual(result, expectedIndex);
 				done();
 			});
 		});
 
-		it("aliases after JoinRequestPlugin normalizes the path (file hook)", (done) => {
+		it("aliases after JoinRequestPlugin normalizes the path (file hook)", (t, done) => {
 			// A relative request hits `JoinRequestPlugin` first, which
 			// turns it into `request.path` with `request.request` set to
 			// `undefined`. That hits the `absolutePath`-only branch of
@@ -289,20 +345,20 @@ describe("alias", () => {
 				{},
 				(err, result) => {
 					if (err) return done(err);
-					expect(result).toBe(expectedIndex);
+					assert.strictEqual(result, expectedIndex);
 					done();
 				},
 			);
 		});
 
-		it("does not fire for a different absolute prefix sharing the same head", (done) => {
+		it("does not fire for a different absolute prefix sharing the same head", (t, done) => {
 			// `imaginary-food` shares `imaginary-foo` as a prefix but
 			// not `imaginary-foo<sep>`. The alias must not fire, and
 			// since `imaginary-food` does not exist, the resolve fails.
 			const requestPath = path.join(fixturesDir, "imaginary-food", "index");
 			absResolver.resolve({}, fixturesDir, requestPath, {}, (err, result) => {
-				expect(err).toBeInstanceOf(Error);
-				expect(result).toBeFalsy();
+				assert.ok(err instanceof Error);
+				assert.ok(!result);
 				done();
 			});
 		});
@@ -352,13 +408,15 @@ describe("alias", () => {
 				"/default-theme/Hello.js": "",
 			});
 
-			expect(resolver.resolveSync({}, "/", "theme/Hello")).toBe(
+			assert.strictEqual(
+				resolver.resolveSync({}, "/", "theme/Hello"),
 				"/fancy-theme/Hello.js",
 			);
 
 			fileSystem.unlinkSync("/fancy-theme/Hello.js");
 
-			expect(resolver.resolveSync({}, "/", "theme/Hello")).toBe(
+			assert.strictEqual(
+				resolver.resolveSync({}, "/", "theme/Hello"),
 				"/default-theme/Hello.js",
 			);
 		});
@@ -368,19 +426,21 @@ describe("alias", () => {
 				"/default-theme/Hello.js": "",
 			});
 
-			expect(resolver.resolveSync({}, "/", "theme/Hello")).toBe(
+			assert.strictEqual(
+				resolver.resolveSync({}, "/", "theme/Hello"),
 				"/default-theme/Hello.js",
 			);
 
 			fileSystem.mkdirSync("/fancy-theme");
 			fileSystem.writeFileSync("/fancy-theme/Hello.js", "");
 
-			expect(resolver.resolveSync({}, "/", "theme/Hello")).toBe(
+			assert.strictEqual(
+				resolver.resolveSync({}, "/", "theme/Hello"),
 				"/fancy-theme/Hello.js",
 			);
 		});
 
-		it("reports a missing-higher-priority path as a missing dependency so watchers can invalidate", (done) => {
+		it("reports a missing-higher-priority path as a missing dependency so watchers can invalidate", (t, done) => {
 			const { resolver } = createThemeResolver({
 				"/default-theme/Hello.js": "",
 			});
@@ -395,12 +455,18 @@ describe("alias", () => {
 				{ fileDependencies, missingDependencies },
 				(err, result) => {
 					if (err) return done(err);
-					expect(result).toBe("/default-theme/Hello.js");
+					assert.strictEqual(result, "/default-theme/Hello.js");
 					// The winning file is tracked so that deletions invalidate.
-					expect(fileDependencies.has("/default-theme/Hello.js")).toBe(true);
+					assert.strictEqual(
+						fileDependencies.has("/default-theme/Hello.js"),
+						true,
+					);
 					// The non-existent higher-priority file is tracked so that
 					// its creation triggers a re-resolve (see issue #250).
-					expect(missingDependencies.has("/fancy-theme/Hello.js")).toBe(true);
+					assert.strictEqual(
+						missingDependencies.has("/fancy-theme/Hello.js"),
+						true,
+					);
 					done();
 				},
 			);

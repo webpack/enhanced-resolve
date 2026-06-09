@@ -2,11 +2,11 @@
 
 const assert = require("assert");
 const fs = require("fs");
-const { describe, it } = require("node:test");
 
 const path = require("path");
 const { CachedInputFileSystem, ResolverFactory } = require("../");
 const { dirname, join } = require("../lib/util/path");
+const { describe, it } = require("./_runner");
 
 describe("Resolver join/dirname cache", () => {
 	describe("when unsafeCache is enabled", () => {

@@ -2,10 +2,10 @@
 
 const assert = require("assert");
 const fs = require("fs");
-const { beforeEach, describe, it } = require("node:test");
 
 const path = require("path");
 const { ResolverFactory } = require("../");
+const { beforeEach, describe, it } = require("./_runner");
 
 const browserModule = path.join(__dirname, "fixtures", "browser-module");
 
