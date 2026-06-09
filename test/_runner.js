@@ -65,15 +65,16 @@ if (typeof jest === "undefined") {
 	const named = (register) => (name, fn) => register(name, wrap(fn));
 
 	module.exports = {
+		// `describe.skip` is the only host-level skip the suite uses
+		// (dos-device-paths on non-Windows), and jest, bun and node:test all
+		// expose `.skip` on the `describe` object itself, so passing the
+		// runtime's `describe` through unchanged is enough. `it`/`test` are
+		// only wrapped to bridge the `(t, done)` callback signature; no
+		// `.skip`/`.only` is exposed because the suite does not use them
+		// (and bun, in particular, does not put `.skip` on `global.it`).
 		describe: global.describe,
-		it: Object.assign(named(global.it), {
-			skip: named(global.it.skip),
-			only: named(global.it.only),
-		}),
-		test: Object.assign(named(global.test), {
-			skip: named(global.test.skip),
-			only: named(global.test.only),
-		}),
+		it: named(global.it),
+		test: named(global.test),
 		before: global.beforeAll,
 		after: global.afterAll,
 		beforeEach: global.beforeEach,
