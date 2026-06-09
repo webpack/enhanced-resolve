@@ -60,28 +60,30 @@ myResolve("/some/path/to/folder", "ts-module", (err, result) => {
 
 All of the following are exposed from `require("enhanced-resolve")`.
 
-#### `resolve(context?, path, request, resolveContext?, callback)`
+#### `resolve(context?, parent, specifier, resolveContext?, callback)`
 
 Async Node-style resolver using the built-in defaults (`conditionNames: ["node"]`, `extensions: [".js", ".json", ".node"]`). Both `context` and `resolveContext` are optional, so the function accepts four shapes:
 
 ```js
-resolve(context, path, request, resolveContext, callback);
-resolve(context, path, request, callback);
-resolve(path, request, resolveContext, callback);
-resolve(path, request, callback); // most common
+resolve(context, parent, specifier, resolveContext, callback);
+resolve(context, parent, specifier, callback);
+resolve(parent, specifier, resolveContext, callback);
+resolve(parent, specifier, callback); // most common
 ```
+
+The `parent` / `specifier` naming mirrors the ECMAScript resolution terms (as in `import.meta.resolve(specifier, parent)`): `parent` is the location you resolve **from**, and `specifier` is the string being resolved.
 
 ##### Arguments — what each one is and when to pass it
 
 | Argument         | Required | What it is                                                                                                                                                                                                                                           | When to pass it                                                                                                               |
 | ---------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | `context`        | no       | Extra info about _who_ is requesting, e.g. `{ environments: ["node+es3+es5+process+native"] }`. Plugins can read arbitrary keys off it. When omitted, a built-in Node context is used.                                                               | Pass it only when a plugin you use reads from it. Most callers omit it.                                                       |
-| `path`           | yes      | The absolute directory to resolve **from** (the "lookup start path").                                                                                                                                                                                | Always.                                                                                                                       |
-| `request`        | yes      | The string to resolve — a relative request (`./utils`), a bare module (`lodash/merge`), an alias, etc.                                                                                                                                               | Always.                                                                                                                       |
+| `parent`         | yes      | The absolute directory to resolve **from** — the location the `specifier` is relative to (the ECMAScript "parent", historically called the "lookup start path").                                                                                     | Always.                                                                                                                       |
+| `specifier`      | yes      | The string to resolve — a relative specifier (`./utils`), a bare module (`lodash/merge`), an alias, etc. (the ECMAScript "specifier", historically called the "request").                                                                            | Always.                                                                                                                       |
 | `resolveContext` | no       | A collector object the resolver writes into / reads from: `fileDependencies`, `contextDependencies`, `missingDependencies` (`Set`s it fills in), `log` (a function it calls for trace output).                                                       | Pass it when you need to know which files/dirs were touched (e.g. to set up a watcher) or want a log of the resolution steps. |
 | `callback`       | yes      | `(err, result, resolveRequest) => void`. `result` is the resolved absolute path (or `false` if the request resolves to an ignored module). `resolveRequest` is the full request object with `path`, `query`, `fragment`, `descriptionFilePath`, etc. | Always.                                                                                                                       |
 
-##### Minimal form — just `path`, `request`, `callback`
+##### Minimal form — just `parent`, `specifier`, `callback`
 
 ```js
 const resolve = require("enhanced-resolve");
@@ -148,7 +150,7 @@ resolve(
 );
 ```
 
-#### `resolve.sync(context?, path, request, resolveContext?) => string | false`
+#### `resolve.sync(context?, parent, specifier, resolveContext?) => string | false`
 
 Synchronous variant. Throws on failure, returns `false` when the resolve yields no result.
 
@@ -156,7 +158,7 @@ Synchronous variant. Throws on failure, returns `false` when the resolve yields 
 const file = resolve.sync(__dirname, "./utils");
 ```
 
-#### `resolve.promise(context?, path, request, resolveContext?) => Promise<string | false>`
+#### `resolve.promise(context?, parent, specifier, resolveContext?) => Promise<string | false>`
 
 Promise variant of `resolve`.
 
@@ -196,7 +198,7 @@ const file = await resolveTsPromise(__dirname, "./component");
 
 #### `ResolverFactory.createResolver(options) => Resolver`
 
-Lower-level factory. Returns a `Resolver` whose `resolve`, `resolveSync`, and `resolvePromise` methods accept `(context, path, request, resolveContext, [callback])`. Use this when you need a reusable resolver instance or access to its `hooks` (see the [Plugins](#plugins) section). `fileSystem` is required here — the high-level `resolve.create` defaults it for you.
+Lower-level factory. Returns a `Resolver` whose `resolve`, `resolveSync`, and `resolvePromise` methods accept `(context, parent, specifier, resolveContext, [callback])`. Use this when you need a reusable resolver instance or access to its `hooks` (see the [Plugins](#plugins) section). `fileSystem` is required here — the high-level `resolve.create` defaults it for you.
 
 ```js
 const fs = require("fs");
@@ -279,15 +281,15 @@ const myResolver = ResolverFactory.createResolver({
 
 // resolve a file with the new resolver
 const context = {};
-const lookupStartPath = "/Users/webpack/some/root/dir";
-const request = "./path/to-look-up.js";
+const parent = "/Users/webpack/some/root/dir"; // directory to resolve from
+const specifier = "./path/to-look-up.js"; // string to resolve
 const resolveContext = {};
 
 // callback
 myResolver.resolve(
 	context,
-	lookupStartPath,
-	request,
+	parent,
+	specifier,
 	resolveContext,
 	(err /* Error */, filepath /* string */) => {
 		// Do something with the path
@@ -298,8 +300,8 @@ myResolver.resolve(
 try {
 	const filepath = await myResolver.resolvePromise(
 		context,
-		lookupStartPath,
-		request,
+		parent,
+		specifier,
 		resolveContext,
 	);
 	// Do something with the path
@@ -308,7 +310,7 @@ try {
 }
 
 // sync (requires a sync fileSystem, e.g. the default Node.js one)
-const filepath = myResolver.resolveSync(context, lookupStartPath, request);
+const filepath = myResolver.resolveSync(context, parent, specifier);
 ```
 
 #### Resolver Options
