@@ -1,5 +1,17 @@
 # enhanced-resolve
 
+## 5.24.0
+
+### Minor Changes
+
+- Allow the `context` path and `request` arguments of `resolve` (and `resolveSync`/`resolvePromise`) to accept `file:` `URL` instances, converting them to filesystem paths. Plain strings stay literal paths, matching Node's `fs`. (by [@alexander-akait](https://github.com/alexander-akait) in [#607](https://github.com/webpack/enhanced-resolve/pull/607))
+
+### Patch Changes
+
+- Make the resolver runtime-agnostic so it works in browsers, Deno and Bun as well as Node. File contents are decoded without assuming a Node `Buffer`, and browser shims are provided for the `path`, `url` and `graceful-fs` builtins (Node, Deno and Bun keep using the native ones) so the package bundles for the browser — supply your own `fileSystem` there. (by [@alexander-akait](https://github.com/alexander-akait) in [#606](https://github.com/webpack/enhanced-resolve/pull/606))
+
+- Rename the positional `resolve`/`resolveSync`/`resolvePromise` parameters to `parent`/`specifier` (from `path`/`request`) for ESM-aligned naming and document them in the README. Purely cosmetic — arguments are positional, so there is no behavior or API change. (by [@alexander-akait](https://github.com/alexander-akait) in [#611](https://github.com/webpack/enhanced-resolve/pull/611))
+
 ## 5.23.0
 
 ### Minor Changes
