@@ -1,7 +1,9 @@
 "use strict";
 
+const assert = require("assert");
 const fs = require("fs");
 const { CachedInputFileSystem, ResolverFactory } = require("../");
+const { describe, it } = require("./_runner");
 
 const nodeFileSystem = new CachedInputFileSystem(fs, 4000);
 
@@ -11,7 +13,7 @@ describe("mainFields normalization", () => {
 			fileSystem: nodeFileSystem,
 			mainFields: ["main"],
 		});
-		expect(r.options.mainFields).toEqual([
+		assert.deepStrictEqual(r.options.mainFields, [
 			{ name: ["main"], forceRelative: true },
 		]);
 	});
@@ -21,7 +23,7 @@ describe("mainFields normalization", () => {
 			fileSystem: nodeFileSystem,
 			mainFields: [["browser", "main"]],
 		});
-		expect(r.options.mainFields).toEqual([
+		assert.deepStrictEqual(r.options.mainFields, [
 			{ name: ["browser", "main"], forceRelative: true },
 		]);
 	});
@@ -31,7 +33,7 @@ describe("mainFields normalization", () => {
 			fileSystem: nodeFileSystem,
 			mainFields: [{ name: "main", forceRelative: false }],
 		});
-		expect(r.options.mainFields).toEqual([
+		assert.deepStrictEqual(r.options.mainFields, [
 			{ name: ["main"], forceRelative: false },
 		]);
 	});
@@ -41,7 +43,7 @@ describe("mainFields normalization", () => {
 			fileSystem: nodeFileSystem,
 			mainFields: [{ name: ["a", "b"], forceRelative: true }],
 		});
-		expect(r.options.mainFields).toEqual([
+		assert.deepStrictEqual(r.options.mainFields, [
 			{ name: ["a", "b"], forceRelative: true },
 		]);
 	});

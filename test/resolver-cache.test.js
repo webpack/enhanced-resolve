@@ -1,9 +1,12 @@
 "use strict";
 
+const assert = require("assert");
 const fs = require("fs");
+
 const path = require("path");
 const { CachedInputFileSystem, ResolverFactory } = require("../");
 const { dirname, join } = require("../lib/util/path");
+const { describe, it } = require("./_runner");
 
 describe("Resolver join/dirname cache", () => {
 	describe("when unsafeCache is enabled", () => {
@@ -21,7 +24,7 @@ describe("Resolver join/dirname cache", () => {
 				unsafeCache: true,
 			});
 
-			expect(resolver1.pathCache).toBe(resolver2.pathCache);
+			assert.strictEqual(resolver1.pathCache, resolver2.pathCache);
 		});
 
 		it("should use independent caches for different fileSystems", () => {
@@ -39,7 +42,7 @@ describe("Resolver join/dirname cache", () => {
 				unsafeCache: true,
 			});
 
-			expect(resolver1.pathCache).not.toBe(resolver2.pathCache);
+			assert.notStrictEqual(resolver1.pathCache, resolver2.pathCache);
 		});
 
 		it("should produce correct results", () => {
@@ -51,14 +54,19 @@ describe("Resolver join/dirname cache", () => {
 				unsafeCache: true,
 			});
 
-			expect(resolver.join("/a/b", "c")).toBe(join("/a/b", "c"));
-			expect(resolver.dirname("/a/b/c")).toBe(dirname("/a/b/c"));
-			expect(resolver.basename("/a/b/c")).toBe(path.basename("/a/b/c"));
-			expect(resolver.basename("/a/b/c.ext", ".ext")).toBe(
+			assert.strictEqual(resolver.join("/a/b", "c"), join("/a/b", "c"));
+			assert.strictEqual(resolver.dirname("/a/b/c"), dirname("/a/b/c"));
+			assert.strictEqual(resolver.basename("/a/b/c"), path.basename("/a/b/c"));
+			assert.strictEqual(
+				resolver.basename("/a/b/c.ext", ".ext"),
 				path.basename("/a/b/c.ext", ".ext"),
 			);
-			expect(resolver.basename("/a/b/c.ext")).toBe(path.basename("/a/b/c.ext"));
-			expect(resolver.basename("/a/b/c.ext", ".other")).toBe(
+			assert.strictEqual(
+				resolver.basename("/a/b/c.ext"),
+				path.basename("/a/b/c.ext"),
+			);
+			assert.strictEqual(
+				resolver.basename("/a/b/c.ext", ".other"),
 				path.basename("/a/b/c.ext", ".other"),
 			);
 		});
@@ -76,22 +84,22 @@ describe("Resolver join/dirname cache", () => {
 			resolver.dirname("/a/b/c");
 			resolver.basename("/a/b/c");
 
-			expect(resolver.pathCache.join.cache.size).toBeGreaterThan(0);
-			expect(resolver.pathCache.dirname.cache.size).toBeGreaterThan(0);
-			expect(resolver.pathCache.basename.cache.size).toBeGreaterThan(0);
+			assert.ok(resolver.pathCache.join.cache.size > 0);
+			assert.ok(resolver.pathCache.dirname.cache.size > 0);
+			assert.ok(resolver.pathCache.basename.cache.size > 0);
 
 			resolver.pathCache.join.cache.clear();
 			resolver.pathCache.dirname.cache.clear();
 			resolver.pathCache.basename.cache.clear();
 
-			expect(resolver.pathCache.join.cache.size).toBe(0);
-			expect(resolver.pathCache.dirname.cache.size).toBe(0);
-			expect(resolver.pathCache.basename.cache.size).toBe(0);
+			assert.strictEqual(resolver.pathCache.join.cache.size, 0);
+			assert.strictEqual(resolver.pathCache.dirname.cache.size, 0);
+			assert.strictEqual(resolver.pathCache.basename.cache.size, 0);
 
 			// Still works after clearing
-			expect(resolver.join("/a/b", "c")).toBe(join("/a/b", "c"));
-			expect(resolver.dirname("/a/b/c")).toBe(dirname("/a/b/c"));
-			expect(resolver.basename("/a/b/c")).toBe(path.basename("/a/b/c"));
+			assert.strictEqual(resolver.join("/a/b", "c"), join("/a/b", "c"));
+			assert.strictEqual(resolver.dirname("/a/b/c"), dirname("/a/b/c"));
+			assert.strictEqual(resolver.basename("/a/b/c"), path.basename("/a/b/c"));
 		});
 
 		it("should clear only join cache when calling pathCache.join.clear()", () => {
@@ -109,9 +117,9 @@ describe("Resolver join/dirname cache", () => {
 
 			resolver.pathCache.join.cache.clear();
 
-			expect(resolver.pathCache.join.cache.size).toBe(0);
-			expect(resolver.pathCache.dirname.cache.size).toBeGreaterThan(0);
-			expect(resolver.pathCache.basename.cache.size).toBeGreaterThan(0);
+			assert.strictEqual(resolver.pathCache.join.cache.size, 0);
+			assert.ok(resolver.pathCache.dirname.cache.size > 0);
+			assert.ok(resolver.pathCache.basename.cache.size > 0);
 		});
 
 		it("should clear only dirname cache when calling pathCache.dirname.clear()", () => {
@@ -129,9 +137,9 @@ describe("Resolver join/dirname cache", () => {
 
 			resolver.pathCache.dirname.cache.clear();
 
-			expect(resolver.pathCache.join.cache.size).toBeGreaterThan(0);
-			expect(resolver.pathCache.dirname.cache.size).toBe(0);
-			expect(resolver.pathCache.basename.cache.size).toBeGreaterThan(0);
+			assert.ok(resolver.pathCache.join.cache.size > 0);
+			assert.strictEqual(resolver.pathCache.dirname.cache.size, 0);
+			assert.ok(resolver.pathCache.basename.cache.size > 0);
 		});
 
 		it("should clear only dirname cache when calling pathCache.basename.clear()", () => {
@@ -149,9 +157,9 @@ describe("Resolver join/dirname cache", () => {
 
 			resolver.pathCache.basename.cache.clear();
 
-			expect(resolver.pathCache.join.cache.size).toBeGreaterThan(0);
-			expect(resolver.pathCache.dirname.cache.size).toBeGreaterThan(0);
-			expect(resolver.pathCache.basename.cache.size).toBe(0);
+			assert.ok(resolver.pathCache.join.cache.size > 0);
+			assert.ok(resolver.pathCache.dirname.cache.size > 0);
+			assert.strictEqual(resolver.pathCache.basename.cache.size, 0);
 		});
 	});
 
@@ -168,7 +176,7 @@ describe("Resolver join/dirname cache", () => {
 				extensions: [".js"],
 			});
 
-			expect(resolver1.pathCache).toBe(resolver2.pathCache);
+			assert.strictEqual(resolver1.pathCache, resolver2.pathCache);
 		});
 	});
 });

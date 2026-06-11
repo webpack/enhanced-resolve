@@ -1,5 +1,6 @@
 "use strict";
 
+const assert = require("assert");
 const {
 	PathType,
 	createCachedBasename,
@@ -14,103 +15,108 @@ const {
 	join,
 	normalize,
 } = require("../lib/util/path");
+const { describe, it } = require("./_runner");
 
 describe("util/path getType", () => {
 	it("returns Empty for the empty string", () => {
-		expect(getType("")).toBe(PathType.Empty);
+		assert.strictEqual(getType(""), PathType.Empty);
 	});
 
 	it("classifies single-character inputs", () => {
-		expect(getType(".")).toBe(PathType.Relative);
-		expect(getType("/")).toBe(PathType.AbsolutePosix);
-		expect(getType("#")).toBe(PathType.Internal);
-		expect(getType("a")).toBe(PathType.Normal);
+		assert.strictEqual(getType("."), PathType.Relative);
+		assert.strictEqual(getType("/"), PathType.AbsolutePosix);
+		assert.strictEqual(getType("#"), PathType.Internal);
+		assert.strictEqual(getType("a"), PathType.Normal);
 	});
 
 	it("classifies two-character inputs", () => {
-		expect(getType("..")).toBe(PathType.Relative);
-		expect(getType("./")).toBe(PathType.Relative);
-		expect(getType(".x")).toBe(PathType.Normal);
-		expect(getType("/a")).toBe(PathType.AbsolutePosix);
-		expect(getType("#a")).toBe(PathType.Internal);
-		expect(getType("C:")).toBe(PathType.AbsoluteWin);
-		expect(getType("c:")).toBe(PathType.AbsoluteWin);
-		expect(getType("ab")).toBe(PathType.Normal);
-		expect(getType("1:")).toBe(PathType.Normal);
+		assert.strictEqual(getType(".."), PathType.Relative);
+		assert.strictEqual(getType("./"), PathType.Relative);
+		assert.strictEqual(getType(".x"), PathType.Normal);
+		assert.strictEqual(getType("/a"), PathType.AbsolutePosix);
+		assert.strictEqual(getType("#a"), PathType.Internal);
+		assert.strictEqual(getType("C:"), PathType.AbsoluteWin);
+		assert.strictEqual(getType("c:"), PathType.AbsoluteWin);
+		assert.strictEqual(getType("ab"), PathType.Normal);
+		assert.strictEqual(getType("1:"), PathType.Normal);
 	});
 
 	it("classifies longer inputs", () => {
-		expect(getType("./a")).toBe(PathType.Relative);
-		expect(getType("../a")).toBe(PathType.Relative);
-		expect(getType(".a")).toBe(PathType.Normal);
-		expect(getType("..a")).toBe(PathType.Normal);
-		expect(getType(".a/")).toBe(PathType.Normal);
-		expect(getType("/abc")).toBe(PathType.AbsolutePosix);
-		expect(getType("#foo")).toBe(PathType.Internal);
-		expect(getType("C:\\foo")).toBe(PathType.AbsoluteWin);
-		expect(getType("c:/foo")).toBe(PathType.AbsoluteWin);
-		expect(getType("foo")).toBe(PathType.Normal);
-		expect(getType("9:/foo")).toBe(PathType.Normal);
-		expect(getType("C:foo")).toBe(PathType.Normal);
+		assert.strictEqual(getType("./a"), PathType.Relative);
+		assert.strictEqual(getType("../a"), PathType.Relative);
+		assert.strictEqual(getType(".a"), PathType.Normal);
+		assert.strictEqual(getType("..a"), PathType.Normal);
+		assert.strictEqual(getType(".a/"), PathType.Normal);
+		assert.strictEqual(getType("/abc"), PathType.AbsolutePosix);
+		assert.strictEqual(getType("#foo"), PathType.Internal);
+		assert.strictEqual(getType("C:\\foo"), PathType.AbsoluteWin);
+		assert.strictEqual(getType("c:/foo"), PathType.AbsoluteWin);
+		assert.strictEqual(getType("foo"), PathType.Normal);
+		assert.strictEqual(getType("9:/foo"), PathType.Normal);
+		assert.strictEqual(getType("C:foo"), PathType.Normal);
 	});
 
 	it("classifies DOS device paths as Windows-absolute", () => {
 		// Win32 file namespace (\\?\)
-		expect(getType("\\\\?\\C:\\foo")).toBe(PathType.AbsoluteWin);
-		expect(getType("\\\\?\\C:\\foo\\bar")).toBe(PathType.AbsoluteWin);
-		expect(getType("\\\\?\\UNC\\server\\share")).toBe(PathType.AbsoluteWin);
-		expect(getType("\\\\?\\Volume{abc}\\f")).toBe(PathType.AbsoluteWin);
+		assert.strictEqual(getType("\\\\?\\C:\\foo"), PathType.AbsoluteWin);
+		assert.strictEqual(getType("\\\\?\\C:\\foo\\bar"), PathType.AbsoluteWin);
+		assert.strictEqual(
+			getType("\\\\?\\UNC\\server\\share"),
+			PathType.AbsoluteWin,
+		);
+		assert.strictEqual(getType("\\\\?\\Volume{abc}\\f"), PathType.AbsoluteWin);
 		// Win32 device namespace (\\.\)
-		expect(getType("\\\\.\\C:\\foo")).toBe(PathType.AbsoluteWin);
-		expect(getType("\\\\.\\PhysicalDrive0")).toBe(PathType.AbsoluteWin);
+		assert.strictEqual(getType("\\\\.\\C:\\foo"), PathType.AbsoluteWin);
+		assert.strictEqual(getType("\\\\.\\PhysicalDrive0"), PathType.AbsoluteWin);
 		// Bare prefix still counts — the filesystem will reject it, but
 		// classifying it as Windows-absolute keeps downstream calls on
 		// `path.win32` instead of silently falling back to posix.
-		expect(getType("\\\\?\\")).toBe(PathType.AbsoluteWin);
-		expect(getType("\\\\.\\")).toBe(PathType.AbsoluteWin);
+		assert.strictEqual(getType("\\\\?\\"), PathType.AbsoluteWin);
+		assert.strictEqual(getType("\\\\.\\"), PathType.AbsoluteWin);
 	});
 
 	it("does not classify non-DOS backslash paths as Windows-absolute", () => {
 		// Plain UNC (\\server\share) is not a DOS device path — don't
 		// misclassify it (its handling is out of scope of this change).
-		expect(getType("\\\\server\\share")).toBe(PathType.Normal);
+		assert.strictEqual(getType("\\\\server\\share"), PathType.Normal);
 		// Too short to match a DOS device prefix.
-		expect(getType("\\\\?")).toBe(PathType.Normal);
-		expect(getType("\\\\.")).toBe(PathType.Normal);
+		assert.strictEqual(getType("\\\\?"), PathType.Normal);
+		assert.strictEqual(getType("\\\\."), PathType.Normal);
 		// Second char must also be a backslash.
-		expect(getType("\\?\\C:\\foo")).toBe(PathType.Normal);
+		assert.strictEqual(getType("\\?\\C:\\foo"), PathType.Normal);
 		// Forward-slash variants aren't equivalent — Windows won't normalize
 		// a DOS device path expressed with `/`.
-		expect(getType("//?/C:/foo")).toBe(PathType.AbsolutePosix);
+		assert.strictEqual(getType("//?/C:/foo"), PathType.AbsolutePosix);
 	});
 });
 
 describe("util/path normalize", () => {
 	it("returns the input when empty", () => {
-		expect(normalize("")).toBe("");
+		assert.strictEqual(normalize(""), "");
 	});
 
 	it("normalizes Windows absolute paths", () => {
-		expect(normalize("C:\\foo\\..\\bar")).toBe("C:\\bar");
+		assert.strictEqual(normalize("C:\\foo\\..\\bar"), "C:\\bar");
 	});
 
 	it("keeps relative paths relative", () => {
-		expect(normalize("./a/b")).toBe("./a/b");
-		expect(normalize("./a/../b")).toBe("./b");
+		assert.strictEqual(normalize("./a/b"), "./a/b");
+		assert.strictEqual(normalize("./a/../b"), "./b");
 	});
 
 	it("normalizes posix absolute paths", () => {
-		expect(normalize("/a/b/../c")).toBe("/a/c");
+		assert.strictEqual(normalize("/a/b/../c"), "/a/c");
 	});
 
 	it("normalizes normal paths through posix normalize", () => {
-		expect(normalize("a/b/../c")).toBe("a/c");
+		assert.strictEqual(normalize("a/b/../c"), "a/c");
 	});
 
 	it("normalizes DOS device paths via win32", () => {
-		expect(normalize("\\\\?\\C:\\foo\\..\\bar")).toBe("\\\\?\\C:\\bar");
-		expect(normalize("\\\\.\\C:\\foo\\..\\bar")).toBe("\\\\.\\C:\\bar");
-		expect(normalize("\\\\?\\UNC\\server\\share\\a\\..\\b")).toBe(
+		assert.strictEqual(normalize("\\\\?\\C:\\foo\\..\\bar"), "\\\\?\\C:\\bar");
+		assert.strictEqual(normalize("\\\\.\\C:\\foo\\..\\bar"), "\\\\.\\C:\\bar");
+		assert.strictEqual(
+			normalize("\\\\?\\UNC\\server\\share\\a\\..\\b"),
 			"\\\\?\\UNC\\server\\share\\b",
 		);
 	});
@@ -118,50 +124,51 @@ describe("util/path normalize", () => {
 
 describe("util/path join", () => {
 	it("returns normalized rootPath when no request is given", () => {
-		expect(join("/a/b", "")).toBe("/a/b");
-		expect(join("/a/b", undefined)).toBe("/a/b");
+		assert.strictEqual(join("/a/b", ""), "/a/b");
+		assert.strictEqual(join("/a/b", undefined), "/a/b");
 	});
 
 	it("uses an absolute posix request as-is", () => {
-		expect(join("/a/b", "/c/d")).toBe("/c/d");
+		assert.strictEqual(join("/a/b", "/c/d"), "/c/d");
 	});
 
 	it("uses an absolute windows request as-is", () => {
-		expect(join("/a/b", "C:\\c\\d")).toBe("C:\\c\\d");
+		assert.strictEqual(join("/a/b", "C:\\c\\d"), "C:\\c\\d");
 	});
 
 	it("joins rooted posix-style paths", () => {
-		expect(join("/a/b", "./c")).toBe("/a/b/c");
-		expect(join("a/b", "c")).toBe("a/b/c");
-		expect(join("./a", "b")).toBe("a/b");
+		assert.strictEqual(join("/a/b", "./c"), "/a/b/c");
+		assert.strictEqual(join("a/b", "c"), "a/b/c");
+		assert.strictEqual(join("./a", "b"), "a/b");
 	});
 
 	it("joins rooted windows-style paths", () => {
-		expect(join("C:\\a", "b")).toBe("C:\\a\\b");
+		assert.strictEqual(join("C:\\a", "b"), "C:\\a\\b");
 	});
 
 	it("joins DOS device paths with win32 semantics", () => {
-		expect(join("\\\\?\\C:\\a", "b")).toBe("\\\\?\\C:\\a\\b");
-		expect(join("\\\\.\\C:\\a", "b")).toBe("\\\\.\\C:\\a\\b");
+		assert.strictEqual(join("\\\\?\\C:\\a", "b"), "\\\\?\\C:\\a\\b");
+		assert.strictEqual(join("\\\\.\\C:\\a", "b"), "\\\\.\\C:\\a\\b");
 		// Absolute DOS device request wins over any root.
-		expect(join("/posix/root", "\\\\?\\C:\\c")).toBe("\\\\?\\C:\\c");
+		assert.strictEqual(join("/posix/root", "\\\\?\\C:\\c"), "\\\\?\\C:\\c");
 	});
 });
 
 describe("util/path dirname", () => {
 	it("computes posix dirname for posix paths", () => {
-		expect(dirname("/a/b/c")).toBe("/a/b");
-		expect(dirname("a/b")).toBe("a");
+		assert.strictEqual(dirname("/a/b/c"), "/a/b");
+		assert.strictEqual(dirname("a/b"), "a");
 	});
 
 	it("computes windows dirname for windows absolute paths", () => {
-		expect(dirname("C:\\foo\\bar")).toBe("C:\\foo");
+		assert.strictEqual(dirname("C:\\foo\\bar"), "C:\\foo");
 	});
 
 	it("computes windows dirname for DOS device paths", () => {
-		expect(dirname("\\\\?\\C:\\foo\\bar")).toBe("\\\\?\\C:\\foo");
-		expect(dirname("\\\\.\\C:\\foo\\bar")).toBe("\\\\.\\C:\\foo");
-		expect(dirname("\\\\?\\UNC\\server\\share\\a\\b")).toBe(
+		assert.strictEqual(dirname("\\\\?\\C:\\foo\\bar"), "\\\\?\\C:\\foo");
+		assert.strictEqual(dirname("\\\\.\\C:\\foo\\bar"), "\\\\.\\C:\\foo");
+		assert.strictEqual(
+			dirname("\\\\?\\UNC\\server\\share\\a\\b"),
 			"\\\\?\\UNC\\server\\share\\a",
 		);
 	});
@@ -172,8 +179,8 @@ describe("util/path cachedJoin", () => {
 		const cachedJoin = createCachedJoin().fn;
 		const a = cachedJoin("/root", "a/b");
 		const b = cachedJoin("/root", "a/b");
-		expect(a).toBe(b);
-		expect(a).toBe("/root/a/b");
+		assert.strictEqual(a, b);
+		assert.strictEqual(a, "/root/a/b");
 	});
 
 	it("keeps separate caches per root", () => {
@@ -181,8 +188,8 @@ describe("util/path cachedJoin", () => {
 		const a = cachedJoin("/x", "req");
 		const b = cachedJoin("/y", "req");
 		const a2 = cachedJoin("/x", "req");
-		expect(a).toBe(a2);
-		expect(a).not.toBe(b);
+		assert.strictEqual(a, a2);
+		assert.notStrictEqual(a, b);
 	});
 });
 
@@ -191,8 +198,8 @@ describe("util/path cachedDirname", () => {
 		const cachedDirname = createCachedDirname().fn;
 		const a = cachedDirname("/cached/a/b");
 		const b = cachedDirname("/cached/a/b");
-		expect(a).toBe(b);
-		expect(a).toBe("/cached/a");
+		assert.strictEqual(a, b);
+		assert.strictEqual(a, "/cached/a");
 	});
 });
 
@@ -201,16 +208,16 @@ describe("util/path cachedBasename", () => {
 		const cachedBasename = createCachedBasename().fn;
 		const a = cachedBasename("/cached/a/b");
 		const b = cachedBasename("/cached/a/b");
-		expect(a).toBe(b);
-		expect(a).toBe("b");
+		assert.strictEqual(a, b);
+		assert.strictEqual(a, "b");
 	});
 
 	it("returns the same value on cache hit with suffix", () => {
 		const cachedBasename = createCachedBasename().fn;
 		const a = cachedBasename("/cached/a/b.ext", ".ext");
 		const b = cachedBasename("/cached/a/b.ext", ".ext");
-		expect(a).toBe(b);
-		expect(a).toBe("b");
+		assert.strictEqual(a, b);
+		assert.strictEqual(a, "b");
 	});
 
 	it("keeps separate caches per root", () => {
@@ -218,8 +225,8 @@ describe("util/path cachedBasename", () => {
 		const a = cachedBasename("/x");
 		const b = cachedBasename("/y");
 		const a2 = cachedBasename("/x");
-		expect(a).toBe(a2);
-		expect(a).not.toBe(b);
+		assert.strictEqual(a, a2);
+		assert.notStrictEqual(a, b);
 	});
 
 	it("keeps separate caches per root with suffix", () => {
@@ -227,8 +234,8 @@ describe("util/path cachedBasename", () => {
 		const a = cachedBasename("/x.ext", ".ext");
 		const b = cachedBasename("/y.ext", ".ext");
 		const a2 = cachedBasename("/x.ext", ".ext");
-		expect(a).toBe(a2);
-		expect(a).not.toBe(b);
+		assert.strictEqual(a, a2);
+		assert.notStrictEqual(a, b);
 	});
 });
 
@@ -236,95 +243,95 @@ describe("util/path isRelativeRequest", () => {
 	// Must match the legacy /^\.\.?(?:\/|$)/ regex exactly, since the helper
 	// replaced it in several hot paths. Verify each branch individually.
 	it("returns true for exactly '.'", () => {
-		expect(isRelativeRequest(".")).toBe(true);
+		assert.strictEqual(isRelativeRequest("."), true);
 	});
 
 	it("returns true for exactly '..'", () => {
-		expect(isRelativeRequest("..")).toBe(true);
+		assert.strictEqual(isRelativeRequest(".."), true);
 	});
 
 	it("returns true for './' and './foo/bar'", () => {
-		expect(isRelativeRequest("./")).toBe(true);
-		expect(isRelativeRequest("./foo")).toBe(true);
-		expect(isRelativeRequest("./foo/bar")).toBe(true);
+		assert.strictEqual(isRelativeRequest("./"), true);
+		assert.strictEqual(isRelativeRequest("./foo"), true);
+		assert.strictEqual(isRelativeRequest("./foo/bar"), true);
 	});
 
 	it("returns true for '../' and '../foo'", () => {
-		expect(isRelativeRequest("../")).toBe(true);
-		expect(isRelativeRequest("../foo")).toBe(true);
+		assert.strictEqual(isRelativeRequest("../"), true);
+		assert.strictEqual(isRelativeRequest("../foo"), true);
 	});
 
 	it("returns false for bare specifiers and absolute paths", () => {
-		expect(isRelativeRequest("")).toBe(false);
-		expect(isRelativeRequest("foo")).toBe(false);
-		expect(isRelativeRequest("/abs")).toBe(false);
-		expect(isRelativeRequest("#imports")).toBe(false);
-		expect(isRelativeRequest("C:\\win")).toBe(false);
+		assert.strictEqual(isRelativeRequest(""), false);
+		assert.strictEqual(isRelativeRequest("foo"), false);
+		assert.strictEqual(isRelativeRequest("/abs"), false);
+		assert.strictEqual(isRelativeRequest("#imports"), false);
+		assert.strictEqual(isRelativeRequest("C:\\win"), false);
 	});
 
 	it("returns false for dotted names that are not relative requests", () => {
 		// ".foo" is a normal specifier (hidden-file-style), not a relative request.
-		expect(isRelativeRequest(".foo")).toBe(false);
+		assert.strictEqual(isRelativeRequest(".foo"), false);
 		// "..foo" likewise — only "..", "../..." are relative.
-		expect(isRelativeRequest("..foo")).toBe(false);
+		assert.strictEqual(isRelativeRequest("..foo"), false);
 	});
 });
 
 describe("util/path isSubPath", () => {
 	it("returns true for a child under parent", () => {
-		expect(isSubPath("/a/b", "/a/b/c")).toBe(true);
+		assert.strictEqual(isSubPath("/a/b", "/a/b/c"), true);
 	});
 
 	it("returns false for a sibling that starts with the parent name", () => {
-		expect(isSubPath("/app", "/app-other/file")).toBe(false);
+		assert.strictEqual(isSubPath("/app", "/app-other/file"), false);
 	});
 
 	it("handles parents that already end with a slash", () => {
-		expect(isSubPath("/a/b/", "/a/b/c")).toBe(true);
+		assert.strictEqual(isSubPath("/a/b/", "/a/b/c"), true);
 	});
 
 	it("handles parents that already end with a backslash", () => {
-		expect(isSubPath("C:\\a\\b\\", "C:\\a\\b\\c")).toBe(true);
+		assert.strictEqual(isSubPath("C:\\a\\b\\", "C:\\a\\b\\c"), true);
 	});
 
 	it("handles Windows-style children when the parent is not separator-terminated", () => {
-		expect(isSubPath("C:\\a", "C:\\a\\b")).toBe(true);
+		assert.strictEqual(isSubPath("C:\\a", "C:\\a\\b"), true);
 	});
 
 	it("returns false when child and parent are equal (without trailing separator)", () => {
 		// A path is not a subpath of itself — there has to be a separator
 		// after the parent prefix.
-		expect(isSubPath("/a/b", "/a/b")).toBe(false);
+		assert.strictEqual(isSubPath("/a/b", "/a/b"), false);
 	});
 
 	it("returns true when child equals a parent that already ends with a separator", () => {
 		// `/a/b/` IS considered a "prefix" of `/a/b/` — startsWith is true
 		// and the old implementation agreed. Lock it in so later refactors
 		// don't silently regress.
-		expect(isSubPath("/a/b/", "/a/b/")).toBe(true);
+		assert.strictEqual(isSubPath("/a/b/", "/a/b/"), true);
 	});
 
 	it("returns false when parent is longer than child", () => {
-		expect(isSubPath("/a/b/c", "/a/b")).toBe(false);
+		assert.strictEqual(isSubPath("/a/b/c", "/a/b"), false);
 	});
 
 	it("returns true for an empty parent only when the child starts with a separator", () => {
 		// Matches the old `normalize("" + "/") === "/"` fallback semantics.
-		expect(isSubPath("", "/a/b")).toBe(true);
-		expect(isSubPath("", "C:\\a")).toBe(false);
-		expect(isSubPath("", "foo")).toBe(false);
-		expect(isSubPath("", "")).toBe(false);
+		assert.strictEqual(isSubPath("", "/a/b"), true);
+		assert.strictEqual(isSubPath("", "C:\\a"), false);
+		assert.strictEqual(isSubPath("", "foo"), false);
+		assert.strictEqual(isSubPath("", ""), false);
 	});
 });
 
 describe("util/path exported regexes", () => {
 	it("deprecatedInvalidSegmentRegEx matches .. segments", () => {
-		expect(deprecatedInvalidSegmentRegEx.test("/foo/../bar")).toBe(true);
+		assert.strictEqual(deprecatedInvalidSegmentRegEx.test("/foo/../bar"), true);
 	});
 
 	it("invalidSegmentRegEx matches node_modules segments", () => {
-		expect(invalidSegmentRegEx.test("/foo/node_modules/bar")).toBe(true);
-		expect(invalidSegmentRegEx.test("/foo/../bar")).toBe(true);
+		assert.strictEqual(invalidSegmentRegEx.test("/foo/node_modules/bar"), true);
+		assert.strictEqual(invalidSegmentRegEx.test("/foo/../bar"), true);
 	});
 });
 
@@ -332,23 +339,23 @@ describe("util/path join fallbacks for special rootPath types", () => {
 	it("falls back when rootPath is Empty and request is Relative", () => {
 		// rootPath empty → falls into the last switch. Relative request returns
 		// posixNormalize("") === "." which is itself relative, returned as-is.
-		expect(join("", "./foo")).toBe(".");
+		assert.strictEqual(join("", "./foo"), ".");
 	});
 
 	it("falls back when rootPath is Empty and request is a Normal name", () => {
 		// Normal request: falls through to posixNormalize(rootPath) === "."
-		expect(join("", "foo")).toBe(".");
+		assert.strictEqual(join("", "foo"), ".");
 	});
 
 	it("falls back when rootPath is Internal (#...) and request is Normal", () => {
 		// rootPath "#x" (Internal) and request "foo" (Normal): falls through to
 		// posixNormalize(rootPath).
-		expect(join("#x", "foo")).toBe("#x");
+		assert.strictEqual(join("#x", "foo"), "#x");
 	});
 
 	it("falls back when rootPath is Internal (#...) and request is Relative", () => {
 		// rootPath "#x" (Internal) and request "./foo" (Relative): returns
 		// posixNormalize(rootPath) ("#x"), not relative, so prefixed with "./".
-		expect(join("#x", "./foo")).toBe("./#x");
+		assert.strictEqual(join("#x", "./foo"), "./#x");
 	});
 });

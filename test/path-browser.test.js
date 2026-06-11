@@ -1,7 +1,10 @@
 "use strict";
 
+const assert = require("assert");
+
 const nodePath = require("path");
 const pathBrowser = require("../lib/util/path-browser");
+const { describe, it } = require("./_runner");
 
 // The browser shim must behave exactly like Node's `path` for the subset the
 // resolver relies on. Parity is asserted directly against Node's real module.
@@ -88,7 +91,8 @@ describe("path-browser shim", () => {
 	describe("posix.normalize", () => {
 		for (const input of posixCases) {
 			it(`matches Node for ${JSON.stringify(input)}`, () => {
-				expect(pathBrowser.posix.normalize(input)).toBe(
+				assert.strictEqual(
+					pathBrowser.posix.normalize(input),
 					nodePath.posix.normalize(input),
 				);
 			});
@@ -98,7 +102,8 @@ describe("path-browser shim", () => {
 	describe("win32.normalize", () => {
 		for (const input of win32Cases) {
 			it(`matches Node for ${JSON.stringify(input)}`, () => {
-				expect(pathBrowser.win32.normalize(input)).toBe(
+				assert.strictEqual(
+					pathBrowser.win32.normalize(input),
 					nodePath.win32.normalize(input),
 				);
 			});
@@ -108,7 +113,7 @@ describe("path-browser shim", () => {
 	describe("win32.normalize device paths and colon guard (pinned to Node 22)", () => {
 		for (const [input, expected] of win32Pinned) {
 			it(`normalizes ${JSON.stringify(input)}`, () => {
-				expect(pathBrowser.win32.normalize(input)).toBe(expected);
+				assert.strictEqual(pathBrowser.win32.normalize(input), expected);
 			});
 		}
 	});
@@ -116,7 +121,8 @@ describe("path-browser shim", () => {
 	describe("posix.dirname", () => {
 		for (const input of posixCases) {
 			it(`matches Node for ${JSON.stringify(input)}`, () => {
-				expect(pathBrowser.posix.dirname(input)).toBe(
+				assert.strictEqual(
+					pathBrowser.posix.dirname(input),
 					nodePath.posix.dirname(input),
 				);
 			});
@@ -126,7 +132,8 @@ describe("path-browser shim", () => {
 	describe("win32.dirname", () => {
 		for (const input of win32Cases) {
 			it(`matches Node for ${JSON.stringify(input)}`, () => {
-				expect(pathBrowser.win32.dirname(input)).toBe(
+				assert.strictEqual(
+					pathBrowser.win32.dirname(input),
 					nodePath.win32.dirname(input),
 				);
 			});
@@ -148,7 +155,8 @@ describe("path-browser shim", () => {
 		];
 		for (const [input, suffix] of cases) {
 			it(`matches Node for ${JSON.stringify(input)} / ${JSON.stringify(suffix)}`, () => {
-				expect(pathBrowser.basename(input, suffix)).toBe(
+				assert.strictEqual(
+					pathBrowser.basename(input, suffix),
 					nodePath.posix.basename(input, suffix),
 				);
 			});
@@ -161,7 +169,10 @@ describe("path-browser shim", () => {
 	// shim's own output so any unintended change is caught.
 	describe("win32.normalize reserved device name (documented divergence)", () => {
 		it("does not special-case \\\\.\\COM1:", () => {
-			expect(pathBrowser.win32.normalize("\\\\.\\COM1:")).toBe("\\\\.\\COM1:");
+			assert.strictEqual(
+				pathBrowser.win32.normalize("\\\\.\\COM1:"),
+				"\\\\.\\COM1:",
+			);
 		});
 	});
 });

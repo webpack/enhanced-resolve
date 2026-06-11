@@ -1,10 +1,13 @@
 "use strict";
 
+const assert = require("assert");
 const fs = require("fs");
+
 const path = require("path");
 const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
 const ResolverFactory = require("../lib/ResolverFactory");
 const { processExportsField } = require("../lib/util/entrypoints");
+const { describe, it } = require("./_runner");
 
 /** @typedef {import("../lib/util/entrypoints").ExportsField} ExportsField */
 
@@ -2158,20 +2161,23 @@ describe("process exports field", () => {
 	for (const testCase of testCases) {
 		it(testCase.name, () => {
 			if (testCase.expect instanceof Error) {
-				expect(() => {
-					// eslint-disable-next-line no-unused-expressions
-					processExportsField(testCase.suite[0])(
-						testCase.suite[1],
-						new Set(testCase.suite[2]),
-					)[0];
-				}).toThrow(testCase.expect.message);
+				const { message } = testCase.expect;
+				assert.throws(
+					() =>
+						processExportsField(testCase.suite[0])(
+							testCase.suite[1],
+							new Set(testCase.suite[2]),
+						),
+					(err) => err instanceof Error && err.message.includes(message),
+				);
 			} else {
-				expect(
+				assert.deepStrictEqual(
 					processExportsField(testCase.suite[0])(
 						testCase.suite[1],
 						new Set(testCase.suite[2]),
 					)[0],
-				).toEqual(testCase.expect);
+					testCase.expect,
+				);
 			}
 		});
 	}
@@ -2193,18 +2199,19 @@ describe("exportsFieldPlugin", () => {
 		conditionNames: ["webpack"],
 	});
 
-	it("resolve root using exports field, not a main field", (done) => {
+	it("resolve root using exports field, not a main field", (t, done) => {
 		resolver.resolve({}, fixture, "exports-field", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(
+			assert.deepStrictEqual(
+				result,
 				path.resolve(fixture, "node_modules/exports-field/x.js"),
 			);
 			done();
 		});
 	});
 
-	it("resolve using exports field, not a browser field #1", (done) => {
+	it("resolve using exports field, not a browser field #1", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			aliasFields: ["browser"],
 			conditionNames: ["custom"],
@@ -2220,7 +2227,8 @@ describe("exportsFieldPlugin", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.resolve(fixture, "node_modules/exports-field/lib/lib2/main.js"),
 				);
 				done();
@@ -2228,7 +2236,7 @@ describe("exportsFieldPlugin", () => {
 		);
 	});
 
-	it("resolve using exports field and a browser alias field #2", (done) => {
+	it("resolve using exports field and a browser alias field #2", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			aliasFields: ["browser"],
 			conditionNames: ["node"],
@@ -2244,7 +2252,8 @@ describe("exportsFieldPlugin", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.resolve(fixture2, "node_modules/exports-field/lib/browser.js"),
 				);
 				done();
@@ -2252,7 +2261,7 @@ describe("exportsFieldPlugin", () => {
 		);
 	});
 
-	it("throw error if extension not provided", (done) => {
+	it("throw error if extension not provided", (t, done) => {
 		resolver.resolve(
 			{},
 			fixture2,
@@ -2260,17 +2269,17 @@ describe("exportsFieldPlugin", () => {
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
-				expect(err).toBeInstanceOf(Error);
+				assert.ok(err instanceof Error);
 				// exports field maps ./dist/main -> ./lib/main, but ./lib/main (no ext) doesn't exist.
 				// Resolution stops at the exports field level with a "Package path" error
 				// (no fallback to parent node_modules per issue #399 fix).
-				expect(err.message).toMatch(/Package path/);
+				assert.match(err.message, /Package path/);
 				done();
 			},
 		);
 	});
 
-	it("throw error if extension not provided #2", (done) => {
+	it("throw error if extension not provided #2", (t, done) => {
 		resolver.resolve(
 			{},
 			fixture2,
@@ -2278,14 +2287,14 @@ describe("exportsFieldPlugin", () => {
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
-				expect(err).toBeInstanceOf(Error);
-				expect(err.message).toMatch(/Package path/);
+				assert.ok(err instanceof Error);
+				assert.match(err.message, /Package path/);
 				done();
 			},
 		);
 	});
 
-	it("should resolve extension without fullySpecified", (done) => {
+	it("should resolve extension without fullySpecified", (t, done) => {
 		commonjsResolver.resolve(
 			{},
 			fixture2,
@@ -2294,7 +2303,8 @@ describe("exportsFieldPlugin", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.resolve(fixture2, "node_modules/exports-field/lib/main.js"),
 				);
 				done();
@@ -2302,7 +2312,7 @@ describe("exportsFieldPlugin", () => {
 		);
 	});
 
-	it("resolver should respect condition names", (done) => {
+	it("resolver should respect condition names", (t, done) => {
 		resolver.resolve(
 			{},
 			fixture,
@@ -2311,7 +2321,8 @@ describe("exportsFieldPlugin", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.resolve(fixture, "node_modules/exports-field/lib/main.js"),
 				);
 				done();
@@ -2319,7 +2330,7 @@ describe("exportsFieldPlugin", () => {
 		);
 	});
 
-	it("resolver should respect fallback", (done) => {
+	it("resolver should respect fallback", (t, done) => {
 		resolver.resolve(
 			{},
 			fixture2,
@@ -2328,7 +2339,8 @@ describe("exportsFieldPlugin", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.resolve(fixture2, "node_modules/exports-field/lib/browser.js"),
 				);
 				done();
@@ -2336,7 +2348,7 @@ describe("exportsFieldPlugin", () => {
 		);
 	});
 
-	it("resolver should respect query parameters #1", (done) => {
+	it("resolver should respect query parameters #1", (t, done) => {
 		resolver.resolve(
 			{},
 			fixture2,
@@ -2345,7 +2357,8 @@ describe("exportsFieldPlugin", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.resolve(
 						fixture2,
 						"node_modules/exports-field/lib/browser.js?foo",
@@ -2356,16 +2369,16 @@ describe("exportsFieldPlugin", () => {
 		);
 	});
 
-	it("resolver should respect query parameters #2. Direct matching", (done) => {
+	it("resolver should respect query parameters #2. Direct matching", (t, done) => {
 		resolver.resolve({}, fixture2, "exports-field?foo", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
-			expect(err).toBeInstanceOf(Error);
-			expect(err.message).toMatch(/"\.\/\?foo" is not exported/);
+			assert.ok(err instanceof Error);
+			assert.match(err.message, /"\.\/\?foo" is not exported/);
 			done();
 		});
 	});
 
-	it("resolver should respect fragment parameters #1", (done) => {
+	it("resolver should respect fragment parameters #1", (t, done) => {
 		resolver.resolve(
 			{},
 			fixture2,
@@ -2374,7 +2387,8 @@ describe("exportsFieldPlugin", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.resolve(
 						fixture2,
 						"node_modules/exports-field/lib/browser.js#foo",
@@ -2385,16 +2399,16 @@ describe("exportsFieldPlugin", () => {
 		);
 	});
 
-	it("resolver should respect fragment parameters #2. Direct matching", (done) => {
+	it("resolver should respect fragment parameters #2. Direct matching", (t, done) => {
 		resolver.resolve({}, fixture2, "exports-field#foo", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
-			expect(err).toBeInstanceOf(Error);
-			expect(err.message).toMatch(/"\.\/#foo" is not exported/);
+			assert.ok(err instanceof Error);
+			assert.match(err.message, /"\.\/#foo" is not exported/);
 			done();
 		});
 	});
 
-	it("resolver should respect query and fragment parameters together", (done) => {
+	it("resolver should respect query and fragment parameters together", (t, done) => {
 		resolver.resolve(
 			{},
 			fixture2,
@@ -2403,7 +2417,8 @@ describe("exportsFieldPlugin", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.resolve(
 						fixture2,
 						"node_modules/exports-field/lib/browser.js?foo=bar#frag",
@@ -2414,7 +2429,7 @@ describe("exportsFieldPlugin", () => {
 		);
 	});
 
-	it("relative path should work, if relative path as request is used", (done) => {
+	it("relative path should work, if relative path as request is used", (t, done) => {
 		resolver.resolve(
 			{},
 			fixture,
@@ -2423,7 +2438,8 @@ describe("exportsFieldPlugin", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.resolve(fixture, "node_modules/exports-field/lib/main.js"),
 				);
 				done();
@@ -2431,7 +2447,7 @@ describe("exportsFieldPlugin", () => {
 		);
 	});
 
-	it("relative path should not work with exports field", (done) => {
+	it("relative path should not work with exports field", (t, done) => {
 		resolver.resolve(
 			{},
 			fixture,
@@ -2439,14 +2455,14 @@ describe("exportsFieldPlugin", () => {
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
-				expect(err).toBeInstanceOf(Error);
-				expect(err.message).toMatch(/Can't resolve/);
+				assert.ok(err instanceof Error);
+				assert.match(err.message, /Can't resolve/);
 				done();
 			},
 		);
 	});
 
-	it("backtracking should not work for request", (done) => {
+	it("backtracking should not work for request", (t, done) => {
 		resolver.resolve(
 			{},
 			fixture,
@@ -2454,8 +2470,9 @@ describe("exportsFieldPlugin", () => {
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
-				expect(err).toBeInstanceOf(Error);
-				expect(err.message).toMatch(
+				assert.ok(err instanceof Error);
+				assert.match(
+					err.message,
 					/Invalid "exports" target "\.\/lib\/lib2\/\.\.\/\.\.\/\.\.\/a\.js" defined for "\.\/dist\/"/,
 				);
 				done();
@@ -2463,7 +2480,7 @@ describe("exportsFieldPlugin", () => {
 		);
 	});
 
-	it("backtracking should not work for exports field target", (done) => {
+	it("backtracking should not work for exports field target", (t, done) => {
 		resolver.resolve(
 			{},
 			fixture,
@@ -2471,8 +2488,9 @@ describe("exportsFieldPlugin", () => {
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
-				expect(err).toBeInstanceOf(Error);
-				expect(err.message).toMatch(
+				assert.ok(err instanceof Error);
+				assert.match(
+					err.message,
 					/Invalid "exports" target "\.\/\.\.\/\.\.\/a\.js" defined for "\.\/dist\/a\.js"/,
 				);
 				done();
@@ -2480,16 +2498,16 @@ describe("exportsFieldPlugin", () => {
 		);
 	});
 
-	it("self-resolving root", (done) => {
+	it("self-resolving root", (t, done) => {
 		resolver.resolve({}, fixture, "@exports-field/core", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(path.resolve(fixture, "./a.js"));
+			assert.deepStrictEqual(result, path.resolve(fixture, "./a.js"));
 			done();
 		});
 	});
 
-	it("not exported error", (done) => {
+	it("not exported error", (t, done) => {
 		resolver.resolve(
 			{},
 			fixture,
@@ -2497,8 +2515,9 @@ describe("exportsFieldPlugin", () => {
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
-				expect(err).toBeInstanceOf(Error);
-				expect(err.message).toMatch(
+				assert.ok(err instanceof Error);
+				assert.match(
+					err.message,
 					/not exported under the condition "webpack" from package/,
 				);
 				done();
@@ -2506,7 +2525,7 @@ describe("exportsFieldPlugin", () => {
 		);
 	});
 
-	it("field name path #1", (done) => {
+	it("field name path #1", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			aliasFields: ["browser"],
 			exportsFields: [["exportsField", "exports"]],
@@ -2517,14 +2536,15 @@ describe("exportsFieldPlugin", () => {
 		resolver.resolve({}, fixture3, "exports-field", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(
+			assert.deepStrictEqual(
+				result,
 				path.resolve(fixture3, "node_modules/exports-field/main.js"),
 			);
 			done();
 		});
 	});
 
-	it("field name path #2", (done) => {
+	it("field name path #2", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			aliasFields: ["browser"],
 			exportsFields: [["exportsField", "exports"], "exports"],
@@ -2535,14 +2555,15 @@ describe("exportsFieldPlugin", () => {
 		resolver.resolve({}, fixture3, "exports-field", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(
+			assert.deepStrictEqual(
+				result,
 				path.resolve(fixture3, "node_modules/exports-field/main.js"),
 			);
 			done();
 		});
 	});
 
-	it("field name path #3", (done) => {
+	it("field name path #3", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			aliasFields: ["browser"],
 			exportsFields: ["exports", ["exportsField", "exports"]],
@@ -2553,14 +2574,15 @@ describe("exportsFieldPlugin", () => {
 		resolver.resolve({}, fixture3, "exports-field", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(
+			assert.deepStrictEqual(
+				result,
 				path.resolve(fixture3, "node_modules/exports-field/main.js"),
 			);
 			done();
 		});
 	});
 
-	it("field name path #4", (done) => {
+	it("field name path #4", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			aliasFields: ["browser"],
 			exportsFields: [["exports"]],
@@ -2571,14 +2593,15 @@ describe("exportsFieldPlugin", () => {
 		resolver.resolve({}, fixture2, "exports-field", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(
+			assert.deepStrictEqual(
+				result,
 				path.resolve(fixture2, "node_modules/exports-field/index.js"),
 			);
 			done();
 		});
 	});
 
-	it("field name path #5", (done) => {
+	it("field name path #5", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			aliasFields: ["browser"],
 			exportsFields: ["ex", ["exportsField", "exports"]],
@@ -2589,52 +2612,54 @@ describe("exportsFieldPlugin", () => {
 		resolver.resolve({}, fixture3, "exports-field", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(
+			assert.deepStrictEqual(
+				result,
 				path.resolve(fixture3, "node_modules/exports-field/index"),
 			);
 			done();
 		});
 	});
 
-	it("request ending with slash #1", (done) => {
+	it("request ending with slash #1", (t, done) => {
 		resolver.resolve({}, fixture, "exports-field/", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
-			expect(err).toBeInstanceOf(Error);
-			expect(err.message).toMatch(/Resolving to directories is not possible/);
+			assert.ok(err instanceof Error);
+			assert.match(err.message, /Resolving to directories is not possible/);
 			done();
 		});
 	});
 
-	it("request ending with slash #2", (done) => {
+	it("request ending with slash #2", (t, done) => {
 		resolver.resolve({}, fixture, "exports-field/dist/", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
-			expect(err).toBeInstanceOf(Error);
-			expect(err.message).toMatch(/Resolving to directories is not possible/);
+			assert.ok(err instanceof Error);
+			assert.match(err.message, /Resolving to directories is not possible/);
 			done();
 		});
 	});
 
-	it("request ending with slash #3", (done) => {
+	it("request ending with slash #3", (t, done) => {
 		resolver.resolve({}, fixture, "exports-field/lib/", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
-			expect(err).toBeInstanceOf(Error);
-			expect(err.message).toMatch(/Resolving to directories is not possible/);
+			assert.ok(err instanceof Error);
+			assert.match(err.message, /Resolving to directories is not possible/);
 			done();
 		});
 	});
 
-	it("should throw error if target is invalid", (done) => {
+	it("should throw error if target is invalid", (t, done) => {
 		resolver.resolve({}, fixture4, "exports-field", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
-			expect(err).toBeInstanceOf(Error);
-			expect(err.message).toMatch(
+			assert.ok(err instanceof Error);
+			assert.match(
+				err.message,
 				/Invalid "exports" target "\.\/a\/\.\.\/b\/\.\.\/\.\.\/pack1\/index\.js" defined for "\."/,
 			);
 			done();
 		});
 	});
 
-	it("throw error if exports field is invalid", (done) => {
+	it("throw error if exports field is invalid", (t, done) => {
 		resolver.resolve(
 			{},
 			fixture,
@@ -2642,15 +2667,15 @@ describe("exportsFieldPlugin", () => {
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
-				expect(err).toBeInstanceOf(Error);
-				expect(err.message).toMatch(/should be relative path/);
-				expect(err.message).toMatch(/umd/);
+				assert.ok(err instanceof Error);
+				assert.match(err.message, /should be relative path/);
+				assert.match(err.message, /umd/);
 				done();
 			},
 		);
 	});
 
-	it("should log the correct info", (done) => {
+	it("should log the correct info", (t, done) => {
 		const log = [];
 		resolver.resolve(
 			{},
@@ -2660,30 +2685,32 @@ describe("exportsFieldPlugin", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.resolve(fixture, "node_modules/exports-field/lib/browser.js"),
 				);
-				expect(
+				assert.deepStrictEqual(
 					log.map((line) => line.replace(fixture, "...").replace(/\\/g, "/")),
-				).toEqual([
-					"resolve 'exports-field/dist/browser.js' in '...'",
-					"  Parsed request is a module",
-					"  using description file: .../package.json (relative path: .)",
-					"    resolve as module",
-					"      looking for modules in .../node_modules",
-					"        existing directory .../node_modules/exports-field",
-					"          using description file: .../node_modules/exports-field/package.json (relative path: .)",
-					"            using exports field: ./lib/browser.js",
-					"              using description file: .../node_modules/exports-field/package.json (relative path: ./lib/browser.js)",
-					"                existing file: .../node_modules/exports-field/lib/browser.js",
-					"                  reporting result .../node_modules/exports-field/lib/browser.js",
-				]);
+					[
+						"resolve 'exports-field/dist/browser.js' in '...'",
+						"  Parsed request is a module",
+						"  using description file: .../package.json (relative path: .)",
+						"    resolve as module",
+						"      looking for modules in .../node_modules",
+						"        existing directory .../node_modules/exports-field",
+						"          using description file: .../node_modules/exports-field/package.json (relative path: .)",
+						"            using exports field: ./lib/browser.js",
+						"              using description file: .../node_modules/exports-field/package.json (relative path: ./lib/browser.js)",
+						"                existing file: .../node_modules/exports-field/lib/browser.js",
+						"                  reporting result .../node_modules/exports-field/lib/browser.js",
+					],
+				);
 				done();
 			},
 		);
 	});
 
-	it("should resolve with wildcard pattern #1", (done) => {
+	it("should resolve with wildcard pattern #1", (t, done) => {
 		const fixture = path.resolve(
 			__dirname,
 			"./fixtures/imports-exports-wildcard/",
@@ -2692,14 +2719,15 @@ describe("exportsFieldPlugin", () => {
 		resolver.resolve({}, fixture, "m/features/f.js", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(
+			assert.deepStrictEqual(
+				result,
 				path.resolve(fixture, "./node_modules/m/src/features/f.js"),
 			);
 			done();
 		});
 	});
 
-	it("should resolve with wildcard pattern #2", (done) => {
+	it("should resolve with wildcard pattern #2", (t, done) => {
 		const fixture = path.resolve(
 			__dirname,
 			"./fixtures/imports-exports-wildcard/",
@@ -2708,14 +2736,15 @@ describe("exportsFieldPlugin", () => {
 		resolver.resolve({}, fixture, "m/features/y/y.js", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(
+			assert.deepStrictEqual(
+				result,
 				path.resolve(fixture, "./node_modules/m/src/features/y/y.js"),
 			);
 			done();
 		});
 	});
 
-	it("should resolve with wildcard pattern #3", (done) => {
+	it("should resolve with wildcard pattern #3", (t, done) => {
 		const fixture = path.resolve(
 			__dirname,
 			"./fixtures/imports-exports-wildcard/",
@@ -2724,14 +2753,15 @@ describe("exportsFieldPlugin", () => {
 		resolver.resolve({}, fixture, "m/features/y/y.js", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(
+			assert.deepStrictEqual(
+				result,
 				path.resolve(fixture, "./node_modules/m/src/features/y/y.js"),
 			);
 			done();
 		});
 	});
 
-	it("should resolve with wildcard pattern #4", (done) => {
+	it("should resolve with wildcard pattern #4", (t, done) => {
 		const fixture = path.resolve(
 			__dirname,
 			"./fixtures/imports-exports-wildcard/",
@@ -2745,7 +2775,8 @@ describe("exportsFieldPlugin", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.resolve(fixture, "./node_modules/m/src/features/y/y.js"),
 				);
 				done();
@@ -2753,7 +2784,7 @@ describe("exportsFieldPlugin", () => {
 		);
 	});
 
-	it("should resolve with wildcard pattern #5", (done) => {
+	it("should resolve with wildcard pattern #5", (t, done) => {
 		const fixture = path.resolve(
 			__dirname,
 			"./fixtures/imports-exports-wildcard/",
@@ -2762,14 +2793,15 @@ describe("exportsFieldPlugin", () => {
 		resolver.resolve({}, fixture, "m/middle/nested/f.js", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(
+			assert.deepStrictEqual(
+				result,
 				path.resolve(fixture, "./node_modules/m/src/middle/nested/f.js"),
 			);
 			done();
 		});
 	});
 
-	it("should resolve with wildcard pattern #6", (done) => {
+	it("should resolve with wildcard pattern #6", (t, done) => {
 		const fixture = path.resolve(
 			__dirname,
 			"./fixtures/imports-exports-wildcard/",
@@ -2783,7 +2815,8 @@ describe("exportsFieldPlugin", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.resolve(fixture, "./node_modules/m/src/middle-1/nested/f.js"),
 				);
 				done();
@@ -2791,7 +2824,7 @@ describe("exportsFieldPlugin", () => {
 		);
 	});
 
-	it("should resolve with wildcard pattern #7", (done) => {
+	it("should resolve with wildcard pattern #7", (t, done) => {
 		const fixture = path.resolve(
 			__dirname,
 			"./fixtures/imports-exports-wildcard/",
@@ -2805,7 +2838,8 @@ describe("exportsFieldPlugin", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.resolve(fixture, "./node_modules/m/src/middle-2/nested/f.js"),
 				);
 				done();
@@ -2813,7 +2847,7 @@ describe("exportsFieldPlugin", () => {
 		);
 	});
 
-	it("should resolve with wildcard pattern #8", (done) => {
+	it("should resolve with wildcard pattern #8", (t, done) => {
 		const fixture = path.resolve(
 			__dirname,
 			"./fixtures/imports-exports-wildcard/",
@@ -2822,7 +2856,8 @@ describe("exportsFieldPlugin", () => {
 		resolver.resolve({}, fixture, "m/middle-3/nested/f", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(
+			assert.deepStrictEqual(
+				result,
 				path.resolve(
 					fixture,
 					"./node_modules/m/src/middle-3/nested/f/nested/f.js",
@@ -2832,7 +2867,7 @@ describe("exportsFieldPlugin", () => {
 		});
 	});
 
-	it("should resolve with wildcard pattern #9", (done) => {
+	it("should resolve with wildcard pattern #9", (t, done) => {
 		const fixture = path.resolve(
 			__dirname,
 			"./fixtures/imports-exports-wildcard/",
@@ -2841,14 +2876,15 @@ describe("exportsFieldPlugin", () => {
 		resolver.resolve({}, fixture, "m/middle-4/f/nested", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(
+			assert.deepStrictEqual(
+				result,
 				path.resolve(fixture, "./node_modules/m/src/middle-4/f/f.js"),
 			);
 			done();
 		});
 	});
 
-	it("should resolve with wildcard pattern #10", (done) => {
+	it("should resolve with wildcard pattern #10", (t, done) => {
 		const fixture = path.resolve(
 			__dirname,
 			"./fixtures/imports-exports-wildcard/",
@@ -2857,14 +2893,15 @@ describe("exportsFieldPlugin", () => {
 		resolver.resolve({}, fixture, "m/middle-5/f$/$", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(
+			assert.deepStrictEqual(
+				result,
 				path.resolve(fixture, "./node_modules/m/src/middle-5/f$/$.js"),
 			);
 			done();
 		});
 	});
 
-	it("should throw error if target is 'null'", (done) => {
+	it("should throw error if target is 'null'", (t, done) => {
 		const fixture = path.resolve(
 			__dirname,
 			"./fixtures/imports-exports-wildcard/",
@@ -2877,8 +2914,9 @@ describe("exportsFieldPlugin", () => {
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
-				expect(err).toBeInstanceOf(Error);
-				expect(err.message).toMatch(
+				assert.ok(err instanceof Error);
+				assert.match(
+					err.message,
 					/"\.\/features\/internal\/file\.js" is not exported/,
 				);
 				done();
@@ -2886,7 +2924,7 @@ describe("exportsFieldPlugin", () => {
 		);
 	});
 
-	it("should resolve with the `extensionAlias` option", (done) => {
+	it("should resolve with the `extensionAlias` option", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			extensions: [".js"],
 			extensionAlias: {
@@ -2904,14 +2942,15 @@ describe("exportsFieldPlugin", () => {
 		resolver.resolve({}, fixture, "@org/pkg/string.js", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(
+			assert.deepStrictEqual(
+				result,
 				path.resolve(fixture, "./node_modules/@org/pkg/dist/string.js"),
 			);
 			done();
 		});
 	});
 
-	it("should resolve with the `extensionAlias` option #2", (done) => {
+	it("should resolve with the `extensionAlias` option #2", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			extensions: [".js"],
 			extensionAlias: {
@@ -2929,14 +2968,15 @@ describe("exportsFieldPlugin", () => {
 		resolver.resolve({}, fixture, "pkg/string.js", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(
+			assert.deepStrictEqual(
+				result,
 				path.resolve(fixture, "./node_modules/pkg/dist/string.js"),
 			);
 			done();
 		});
 	});
 
-	it("should resolve with the `extensionAlias` option #3", (done) => {
+	it("should resolve with the `extensionAlias` option #3", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			extensions: [".js"],
 			extensionAlias: {
@@ -2954,14 +2994,15 @@ describe("exportsFieldPlugin", () => {
 		resolver.resolve({}, fixture, "pkg/string.js", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(
+			assert.deepStrictEqual(
+				result,
 				path.resolve(fixture, "./node_modules/pkg/dist/string.js"),
 			);
 			done();
 		});
 	});
 
-	it("should throw error with the `extensionAlias` option", (done) => {
+	it("should throw error with the `extensionAlias` option", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			extensions: [".js"],
 			extensionAlias: {
@@ -2978,13 +3019,13 @@ describe("exportsFieldPlugin", () => {
 
 		resolver.resolve({}, fixture, "pkg/string.js", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
-			expect(err).toBeInstanceOf(Error);
-			expect(err.message).toMatch(/"\.\/string\.ts" is not exported/);
+			assert.ok(err instanceof Error);
+			assert.match(err.message, /"\.\/string\.ts" is not exported/);
 			done();
 		});
 	});
 
-	it("should throw error with the `extensionAlias` option #2", (done) => {
+	it("should throw error with the `extensionAlias` option #2", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			extensions: [".js"],
 			extensionAlias: {
@@ -3001,13 +3042,13 @@ describe("exportsFieldPlugin", () => {
 
 		resolver.resolve({}, fixture, "pkg/string.js", {}, (err, result) => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
-			expect(err).toBeInstanceOf(Error);
-			expect(err.message).toMatch(/"\.\/string\.ts" is not exported/);
+			assert.ok(err instanceof Error);
+			assert.match(err.message, /"\.\/string\.ts" is not exported/);
 			done();
 		});
 	});
 
-	it("invalid package target #1", (done) => {
+	it("invalid package target #1", (t, done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3016,13 +3057,16 @@ describe("exportsFieldPlugin", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toBe(`${path.resolve(fixture5, "./a.js")}?foo=../`);
+				assert.strictEqual(
+					result,
+					`${path.resolve(fixture5, "./a.js")}?foo=../`,
+				);
 				done();
 			},
 		);
 	});
 
-	it("invalid package target #2", (done) => {
+	it("invalid package target #2", (t, done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3031,13 +3075,16 @@ describe("exportsFieldPlugin", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toBe(`${path.resolve(fixture5, "./a.js")}?foo=../#../`);
+				assert.strictEqual(
+					result,
+					`${path.resolve(fixture5, "./a.js")}?foo=../#../`,
+				);
 				done();
 			},
 		);
 	});
 
-	it("invalid package target #3", (done) => {
+	it("invalid package target #3", (t, done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3045,8 +3092,9 @@ describe("exportsFieldPlugin", () => {
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
-				expect(err).toBeInstanceOf(Error);
-				expect(err.message).toMatch(
+				assert.ok(err instanceof Error);
+				assert.match(
+					err.message,
 					/Invalid "exports" target "-bad-specifier-" defined for "\.\/bar"/,
 				);
 				done();
@@ -3054,7 +3102,7 @@ describe("exportsFieldPlugin", () => {
 		);
 	});
 
-	it("invalid package target #4", (done) => {
+	it("invalid package target #4", (t, done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3062,8 +3110,9 @@ describe("exportsFieldPlugin", () => {
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
-				expect(err).toBeInstanceOf(Error);
-				expect(err.message).toMatch(
+				assert.ok(err instanceof Error);
+				assert.match(
+					err.message,
 					/Invalid "exports" target "foo" defined for "\.\/baz-multi"/,
 				);
 				done();
@@ -3071,7 +3120,7 @@ describe("exportsFieldPlugin", () => {
 		);
 	});
 
-	it("invalid package target #5", (done) => {
+	it("invalid package target #5", (t, done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3080,13 +3129,13 @@ describe("exportsFieldPlugin", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(path.resolve(fixture5, "./a.js"));
+				assert.deepStrictEqual(result, path.resolve(fixture5, "./a.js"));
 				done();
 			},
 		);
 	});
 
-	it("invalid package target #6", (done) => {
+	it("invalid package target #6", (t, done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3095,13 +3144,13 @@ describe("exportsFieldPlugin", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(path.resolve(fixture5, "./a.js"));
+				assert.deepStrictEqual(result, path.resolve(fixture5, "./a.js"));
 				done();
 			},
 		);
 	});
 
-	it("invalid package target #7", (done) => {
+	it("invalid package target #7", (t, done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3110,13 +3159,13 @@ describe("exportsFieldPlugin", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(path.resolve(fixture5, "./a.js"));
+				assert.deepStrictEqual(result, path.resolve(fixture5, "./a.js"));
 				done();
 			},
 		);
 	});
 
-	it("invalid package target #8", (done) => {
+	it("invalid package target #8", (t, done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3124,8 +3173,9 @@ describe("exportsFieldPlugin", () => {
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
-				expect(err).toBeInstanceOf(Error);
-				expect(err.message).toMatch(
+				assert.ok(err instanceof Error);
+				assert.match(
+					err.message,
 					/Invalid "exports" target "\/b\/index\.mjs" defined for "\.\/utils\//,
 				);
 				done();
@@ -3133,7 +3183,7 @@ describe("exportsFieldPlugin", () => {
 		);
 	});
 
-	it("invalid package target #9", (done) => {
+	it("invalid package target #9", (t, done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3141,8 +3191,9 @@ describe("exportsFieldPlugin", () => {
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
-				expect(err).toBeInstanceOf(Error);
-				expect(err.message).toMatch(
+				assert.ok(err instanceof Error);
+				assert.match(
+					err.message,
 					/Invalid "exports" target "\/a\/index.mjs" defined for "\.\/utils1\/"/,
 				);
 				done();
@@ -3150,7 +3201,7 @@ describe("exportsFieldPlugin", () => {
 		);
 	});
 
-	it("invalid package target #10", (done) => {
+	it("invalid package target #10", (t, done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3158,8 +3209,9 @@ describe("exportsFieldPlugin", () => {
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
-				expect(err).toBeInstanceOf(Error);
-				expect(err.message).toMatch(
+				assert.ok(err instanceof Error);
+				assert.match(
+					err.message,
 					/Invalid "exports" target "\.\.\/this\/index" defined for "\.\/utils2\/"/,
 				);
 				done();
@@ -3167,7 +3219,7 @@ describe("exportsFieldPlugin", () => {
 		);
 	});
 
-	it("invalid package target #11", (done) => {
+	it("invalid package target #11", (t, done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3175,8 +3227,9 @@ describe("exportsFieldPlugin", () => {
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
-				expect(err).toBeInstanceOf(Error);
-				expect(err.message).toMatch(
+				assert.ok(err instanceof Error);
+				assert.match(
+					err.message,
 					/Invalid "exports" target "\.\.\/this\/index" defined for "\.\/utils3\/\*"/,
 				);
 				done();
@@ -3184,7 +3237,7 @@ describe("exportsFieldPlugin", () => {
 		);
 	});
 
-	it("invalid package target #12", (done) => {
+	it("invalid package target #12", (t, done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3192,8 +3245,9 @@ describe("exportsFieldPlugin", () => {
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
-				expect(err).toBeInstanceOf(Error);
-				expect(err.message).toMatch(
+				assert.ok(err instanceof Error);
+				assert.match(
+					err.message,
 					/Invalid "exports" target "\.\.\/src\/index" defined for "\.\/utils4\/\*"/,
 				);
 				done();
@@ -3201,7 +3255,7 @@ describe("exportsFieldPlugin", () => {
 		);
 	});
 
-	it("invalid package target #13", (done) => {
+	it("invalid package target #13", (t, done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3209,8 +3263,9 @@ describe("exportsFieldPlugin", () => {
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
-				expect(err).toBeInstanceOf(Error);
-				expect(err.message).toMatch(
+				assert.ok(err instanceof Error);
+				assert.match(
+					err.message,
 					/Invalid "exports" target "\.\.\/src\/index" defined for "\.\/utils5\/"/,
 				);
 				done();
@@ -3218,7 +3273,7 @@ describe("exportsFieldPlugin", () => {
 		);
 	});
 
-	it("invalid package target #14", (done) => {
+	it("invalid package target #14", (t, done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3226,8 +3281,9 @@ describe("exportsFieldPlugin", () => {
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
-				expect(err).toBeInstanceOf(Error);
-				expect(err.message).toMatch(
+				assert.ok(err instanceof Error);
+				assert.match(
+					err.message,
 					/Invalid "exports" target "\." defined for "\.\/\*"/,
 				);
 				done();
@@ -3235,7 +3291,7 @@ describe("exportsFieldPlugin", () => {
 		);
 	});
 
-	it("invalid package target #15", (done) => {
+	it("invalid package target #15", (t, done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3243,12 +3299,13 @@ describe("exportsFieldPlugin", () => {
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
-				expect(err).toBeInstanceOf(Error);
+				assert.ok(err instanceof Error);
 				// exports maps ./non-existent.js -> ["-bad-specifier-", "./non-existent.js", "./a.js"]
 				// The first valid target (./non-existent.js) doesn't exist, so the paths array is
 				// abandoned (issue #400) and resolution fails with a "Package path" error
 				// (no fallback to parent node_modules per issue #399 fix).
-				expect(err.message).toMatch(
+				assert.match(
+					err.message,
 					/Package path \.\/non-existent\.js.*no valid target file was found/,
 				);
 				done();
@@ -3256,7 +3313,7 @@ describe("exportsFieldPlugin", () => {
 		);
 	});
 
-	it("invalid package target #16", (done) => {
+	it("invalid package target #16", (t, done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3264,8 +3321,9 @@ describe("exportsFieldPlugin", () => {
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
-				expect(err).toBeInstanceOf(Error);
-				expect(err.message).toMatch(
+				assert.ok(err instanceof Error);
+				assert.match(
+					err.message,
 					/Invalid "exports" target "\.\.\/\.\.\/test\/foo" defined for "\.\/dep\/multi1"/,
 				);
 				done();
@@ -3273,7 +3331,7 @@ describe("exportsFieldPlugin", () => {
 		);
 	});
 
-	it("invalid package target #17", (done) => {
+	it("invalid package target #17", (t, done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3281,8 +3339,9 @@ describe("exportsFieldPlugin", () => {
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
-				expect(err).toBeInstanceOf(Error);
-				expect(err.message).toMatch(
+				assert.ok(err instanceof Error);
+				assert.match(
+					err.message,
 					/Invalid "exports" target "\.\.\/\.\.\/test" defined for "\.\/dep\/multi2"/,
 				);
 				done();
@@ -3290,7 +3349,7 @@ describe("exportsFieldPlugin", () => {
 		);
 	});
 
-	it("invalid package target #18", (done) => {
+	it("invalid package target #18", (t, done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3298,8 +3357,9 @@ describe("exportsFieldPlugin", () => {
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
-				expect(err).toBeInstanceOf(Error);
-				expect(err.message).toMatch(
+				assert.ok(err instanceof Error);
+				assert.match(
+					err.message,
 					/Invalid "exports" target "\.\/c\/\.\.\/b\/\.\.\/\.\.\/pack1\/index\.js" defined for "\.\/dep\/multi4"/,
 				);
 				done();
@@ -3307,7 +3367,7 @@ describe("exportsFieldPlugin", () => {
 		);
 	});
 
-	it("invalid package target #19", (done) => {
+	it("invalid package target #19", (t, done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3315,8 +3375,9 @@ describe("exportsFieldPlugin", () => {
 			{},
 			(err, result) => {
 				if (!err) return done(new Error(`expect error, got ${result}`));
-				expect(err).toBeInstanceOf(Error);
-				expect(err.message).toMatch(
+				assert.ok(err instanceof Error);
+				assert.match(
+					err.message,
 					/Invalid "exports" target "\.\/a\/\.\.\/b\/\.\.\/\.\.\/pack1\/index\.js" defined for "\.\/dep\/multi5"/,
 				);
 				done();
@@ -3324,7 +3385,7 @@ describe("exportsFieldPlugin", () => {
 		);
 	});
 
-	it("should resolve the valid thing in array of export #1", (done) => {
+	it("should resolve the valid thing in array of export #1", (t, done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3333,13 +3394,13 @@ describe("exportsFieldPlugin", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(path.resolve(fixture5, "./a.js"));
+				assert.deepStrictEqual(result, path.resolve(fixture5, "./a.js"));
 				done();
 			},
 		);
 	});
 
-	it("should resolve the valid thing in array of export #2", (done) => {
+	it("should resolve the valid thing in array of export #2", (t, done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3348,13 +3409,13 @@ describe("exportsFieldPlugin", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(path.resolve(fixture5, "./a.js"));
+				assert.deepStrictEqual(result, path.resolve(fixture5, "./a.js"));
 				done();
 			},
 		);
 	});
 
-	it("should resolve the valid thing in array of export #3", (done) => {
+	it("should resolve the valid thing in array of export #3", (t, done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3363,13 +3424,13 @@ describe("exportsFieldPlugin", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(path.resolve(fixture5, "./a.js"));
+				assert.deepStrictEqual(result, path.resolve(fixture5, "./a.js"));
 				done();
 			},
 		);
 	});
 
-	it("should resolve the valid thing in array of export #4", (done) => {
+	it("should resolve the valid thing in array of export #4", (t, done) => {
 		resolver.resolve(
 			{},
 			fixture5,
@@ -3378,7 +3439,7 @@ describe("exportsFieldPlugin", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(path.resolve(fixture5, "./a.js"));
+				assert.deepStrictEqual(result, path.resolve(fixture5, "./a.js"));
 				done();
 			},
 		);
@@ -3388,7 +3449,7 @@ describe("exportsFieldPlugin", () => {
 	// When workspace/node_modules/pkg has an exports field mapping ./src/index.js -> ./dist/index.js
 	// but ./dist/index.js does NOT exist, resolution should fail with an error
 	// and must NOT fall back to the root node_modules/pkg version.
-	it("should not fall back to parent node_modules when exports field maps to a missing file (issue #399)", (done) => {
+	it("should not fall back to parent node_modules when exports field maps to a missing file (issue #399)", (t, done) => {
 		const nestedResolver = ResolverFactory.createResolver({
 			extensions: [".js"],
 			fileSystem: new CachedInputFileSystem(fs, 4000),
@@ -3409,13 +3470,13 @@ describe("exportsFieldPlugin", () => {
 						),
 					);
 				}
-				expect(err).toBeInstanceOf(Error);
+				assert.ok(err instanceof Error);
 				done();
 			},
 		);
 	});
 
-	it("emits 'is not exported' error when no conditions match", (done) => {
+	it("emits 'is not exported' error when no conditions match", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			extensions: [".js"],
 			conditionNames: ["unknown-cond"],
@@ -3428,7 +3489,7 @@ describe("exportsFieldPlugin", () => {
 			"exports-field/index",
 			{},
 			(err) => {
-				expect(err).toBeInstanceOf(Error);
+				assert.ok(err instanceof Error);
 				done();
 			},
 		);

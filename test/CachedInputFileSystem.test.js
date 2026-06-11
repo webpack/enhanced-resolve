@@ -1,8 +1,11 @@
 "use strict";
 
+const assert = require("assert");
+
 const path = require("path");
 const url = require("url");
 const { CachedInputFileSystem } = require("../");
+const { afterEach, beforeEach, describe, it } = require("./_runner");
 
 describe("cachedInputFileSystem OperationMergerBackend ('stat' and 'statSync')", () => {
 	let fs;
@@ -40,39 +43,39 @@ describe("cachedInputFileSystem OperationMergerBackend ('stat' and 'statSync')",
 		fs.purge();
 	});
 
-	it("should join accesses", (done) => {
+	it("should join accesses", (t, done) => {
 		fs.stat("a", (err, result) => {
-			expect(result).toBeDefined();
+			assert.notStrictEqual(result, undefined);
 			result.a = true;
 		});
 		fs.stat("a", (err, result) => {
-			expect(result).toBeDefined();
-			expect(result.a).toBeDefined();
+			assert.notStrictEqual(result, undefined);
+			assert.notStrictEqual(result.a, undefined);
 			done();
 		});
 	});
 
-	it("should not join accesses with options", (done) => {
+	it("should not join accesses with options", (t, done) => {
 		fs.stat("a", (err, result) => {
-			expect(result).toBeDefined();
+			assert.notStrictEqual(result, undefined);
 			result.a = true;
-			expect(result.path).toBe("a");
-			expect(result.options).toBeUndefined();
+			assert.strictEqual(result.path, "a");
+			assert.strictEqual(result.options, undefined);
 		});
 		fs.stat("a", { options: true }, (err, result) => {
-			expect(result).toBeDefined();
-			expect(result.a).toBeUndefined();
-			expect(result.path).toBe("a");
-			expect(result.options).toMatchObject({ options: true });
+			assert.notStrictEqual(result, undefined);
+			assert.strictEqual(result.a, undefined);
+			assert.strictEqual(result.path, "a");
+			assert.strictEqual(result.options.options, true);
 			done();
 		});
 	});
 
-	it("should not cache accesses", (done) => {
+	it("should not cache accesses", (t, done) => {
 		fs.stat("a", (err, result) => {
 			result.a = true;
 			fs.stat("a", (err, result) => {
-				expect(result.a).toBeUndefined();
+				assert.strictEqual(result.a, undefined);
 				done();
 			});
 		});
@@ -83,7 +86,7 @@ describe("cachedInputFileSystem OperationMergerBackend ('stat' and 'statSync')",
 		result.a = true;
 		const result2 = fs.statSync("a");
 
-		expect(result2.a).toBeUndefined();
+		assert.strictEqual(result2.a, undefined);
 	});
 });
 
@@ -123,42 +126,42 @@ describe("cachedInputFileSystem OperationMergerBackend ('lstat' and 'lstatSync')
 		fs.purge();
 	});
 
-	it("should join accesses", (done) => {
+	it("should join accesses", (t, done) => {
 		fs.lstat("a", (err, result) => {
-			expect(result).toBeDefined();
+			assert.notStrictEqual(result, undefined);
 			result.a = true;
 		});
 		fs.lstat("a", (err, result) => {
-			expect(result).toBeDefined();
-			expect(result.a).toBeDefined();
+			assert.notStrictEqual(result, undefined);
+			assert.notStrictEqual(result.a, undefined);
 			done();
 		});
 	});
 
-	it("should not join accesses with options", (done) => {
+	it("should not join accesses with options", (t, done) => {
 		fs.lstat("a", (err, result) => {
-			expect(result).toBeDefined();
+			assert.notStrictEqual(result, undefined);
 
 			result.a = true;
 
-			expect(result).toBeDefined();
-			expect(result.path).toBe("a");
-			expect(result.options).toBeUndefined();
+			assert.notStrictEqual(result, undefined);
+			assert.strictEqual(result.path, "a");
+			assert.strictEqual(result.options, undefined);
 		});
 		fs.lstat("a", { options: true }, (err, result) => {
-			expect(result).toBeDefined();
-			expect(result.a).toBeUndefined();
-			expect(result.path).toBe("a");
-			expect(result.options).toMatchObject({ options: true });
+			assert.notStrictEqual(result, undefined);
+			assert.strictEqual(result.a, undefined);
+			assert.strictEqual(result.path, "a");
+			assert.strictEqual(result.options.options, true);
 			done();
 		});
 	});
 
-	it("should not cache accesses", (done) => {
+	it("should not cache accesses", (t, done) => {
 		fs.lstat("a", (err, result) => {
 			result.a = true;
 			fs.lstat("a", (err, result) => {
-				expect(result.a).toBeUndefined();
+				assert.strictEqual(result.a, undefined);
 				done();
 			});
 		});
@@ -169,7 +172,7 @@ describe("cachedInputFileSystem OperationMergerBackend ('lstat' and 'lstatSync')
 		result.a = true;
 		const result2 = fs.lstatSync("a");
 
-		expect(result2.a).toBeUndefined();
+		assert.strictEqual(result2.a, undefined);
 	});
 });
 
@@ -209,42 +212,42 @@ describe("cachedInputFileSystem OperationMergerBackend ('realpath' and 'realpath
 		fs.purge();
 	});
 
-	it("should join accesses", (done) => {
+	it("should join accesses", (t, done) => {
 		fs.realpath("a", (err, result) => {
-			expect(result).toBeDefined();
+			assert.notStrictEqual(result, undefined);
 			result.a = true;
 		});
 		fs.realpath("a", (err, result) => {
-			expect(result).toBeDefined();
-			expect(result.a).toBeDefined();
+			assert.notStrictEqual(result, undefined);
+			assert.notStrictEqual(result.a, undefined);
 			done();
 		});
 	});
 
-	it("should not join accesses with options", (done) => {
+	it("should not join accesses with options", (t, done) => {
 		fs.realpath("a", (err, result) => {
-			expect(result).toBeDefined();
+			assert.notStrictEqual(result, undefined);
 
 			result.a = true;
 
-			expect(result).toBeDefined();
-			expect(result.path).toBe("a");
-			expect(result.options).toBeUndefined();
+			assert.notStrictEqual(result, undefined);
+			assert.strictEqual(result.path, "a");
+			assert.strictEqual(result.options, undefined);
 		});
 		fs.realpath("a", { options: true }, (err, result) => {
-			expect(result).toBeDefined();
-			expect(result.a).toBeUndefined();
-			expect(result.path).toBe("a");
-			expect(result.options).toMatchObject({ options: true });
+			assert.notStrictEqual(result, undefined);
+			assert.strictEqual(result.a, undefined);
+			assert.strictEqual(result.path, "a");
+			assert.strictEqual(result.options.options, true);
 			done();
 		});
 	});
 
-	it("should not cache accesses", (done) => {
+	it("should not cache accesses", (t, done) => {
 		fs.realpath("a", (err, result) => {
 			result.a = true;
 			fs.realpath("a", (err, result) => {
-				expect(result.a).toBeUndefined();
+				assert.strictEqual(result.a, undefined);
 				done();
 			});
 		});
@@ -255,7 +258,7 @@ describe("cachedInputFileSystem OperationMergerBackend ('realpath' and 'realpath
 		result.a = true;
 		const result2 = fs.realpathSync("a");
 
-		expect(result2.a).toBeUndefined();
+		assert.strictEqual(result2.a, undefined);
 	});
 });
 
@@ -298,61 +301,61 @@ describe("cachedInputFileSystem CacheBackend", () => {
 		fs.purge();
 	});
 
-	it("should join accesses", (done) => {
+	it("should join accesses", (t, done) => {
 		fs.stat("a", (err, result) => {
 			result.a = true;
 		});
 		fs.stat("a", (err, result) => {
-			expect(result.a).toBeDefined();
+			assert.notStrictEqual(result.a, undefined);
 			done();
 		});
 	});
 
-	it("should not call callback twice when combining sync and async calls", (done) => {
+	it("should not call callback twice when combining sync and async calls", (t, done) => {
 		let called = false;
 		fs.stat("a", (err, result) => {
 			if (called) return done(new Error("callback was called twice"));
 			called = true;
-			expect(result).toBeDefined();
+			assert.notStrictEqual(result, undefined);
 			result.a = true;
 			done();
 		});
 		const syncResult = fs.statSync("a");
 
-		expect(syncResult).toBeDefined();
-		expect(syncResult.a).toBeDefined();
+		assert.notStrictEqual(syncResult, undefined);
+		assert.notStrictEqual(syncResult.a, undefined);
 	});
 
-	it("should not join accesses with options", (done) => {
+	it("should not join accesses with options", (t, done) => {
 		fs.stat("a", (err, result) => {
 			result.a = true;
-			expect(result.path).toBe("a");
-			expect(result.options).toBeUndefined();
+			assert.strictEqual(result.path, "a");
+			assert.strictEqual(result.options, undefined);
 		});
 		fs.stat("a", { options: true }, (err, result) => {
-			expect(result.a).toBeUndefined();
-			expect(result.path).toBe("a");
-			expect(result.options).toMatchObject({ options: true });
+			assert.strictEqual(result.a, undefined);
+			assert.strictEqual(result.path, "a");
+			assert.strictEqual(result.options.options, true);
 			done();
 		});
 	});
 
-	it("should cache accesses", (done) => {
+	it("should cache accesses", (t, done) => {
 		fs.stat("a", (err, result) => {
 			result.a = true;
 			let sync = true;
 			fs.stat("a", (err, result) => {
-				expect(result.a).toBeDefined();
-				expect(sync).toBe(true);
+				assert.notStrictEqual(result.a, undefined);
+				assert.strictEqual(sync, true);
 				setTimeout(() => {
 					fs.stat("a", (err, result) => {
-						expect(result.a).toBeUndefined();
+						assert.strictEqual(result.a, undefined);
 						result.b = true;
 						let sync2 = true;
 						fs.stat("a", (err, result) => {
-							expect(result.b).toBeDefined();
-							expect(result.a).toBeUndefined();
-							expect(sync2).toBe(true);
+							assert.notStrictEqual(result.b, undefined);
+							assert.strictEqual(result.a, undefined);
+							assert.strictEqual(sync2, true);
 							done();
 						});
 						setTimeout(() => {
@@ -371,26 +374,26 @@ describe("cachedInputFileSystem CacheBackend", () => {
 		const result = fs.statSync("a");
 		result.a = true;
 		const result2 = fs.statSync("a");
-		expect(result2.a).toBeDefined();
+		assert.notStrictEqual(result2.a, undefined);
 		const result3 = fs.statSync("a", { options: true });
-		expect(result3.a).toBeUndefined();
-		expect(result3.options).toMatchObject({ options: true });
+		assert.strictEqual(result3.a, undefined);
+		assert.strictEqual(result3.options.options, true);
 	});
 
-	it("should recover after passive periods", (done) => {
+	it("should recover after passive periods", (t, done) => {
 		fs.stat("a", (err, result) => {
 			result.a = true;
 			setTimeout(() => {
 				fs.stat("a", (err, result) => {
-					expect(result.a).toBeDefined();
+					assert.notStrictEqual(result.a, undefined);
 					setTimeout(() => {
 						fs.stat("a", (err, result) => {
-							expect(result.a).toBeUndefined();
+							assert.strictEqual(result.a, undefined);
 							result.b = true;
 							setTimeout(() => {
 								fs.stat("a", (err, result) => {
-									expect(result.b).toBeDefined();
-									expect(result.a).toBeUndefined();
+									assert.notStrictEqual(result.b, undefined);
+									assert.strictEqual(result.a, undefined);
 									done();
 								});
 							}, 500);
@@ -401,17 +404,17 @@ describe("cachedInputFileSystem CacheBackend", () => {
 		});
 	});
 
-	it("should restart after timeout", (done) => {
+	it("should restart after timeout", (t, done) => {
 		fs.stat("a", (err, result) => {
 			result.a = true;
 			setTimeout(() => {
 				fs.stat("a", (err, result) => {
-					expect(result.a).toBeUndefined();
+					assert.strictEqual(result.a, undefined);
 					result.b = true;
 					setTimeout(() => {
 						fs.stat("a", (err, result) => {
-							expect(result.b).toBeDefined();
-							expect(result.a).toBeUndefined();
+							assert.notStrictEqual(result.b, undefined);
+							assert.strictEqual(result.a, undefined);
 							done();
 						});
 					}, 50);
@@ -420,36 +423,36 @@ describe("cachedInputFileSystem CacheBackend", () => {
 		});
 	});
 
-	it("should cache undefined value", (done) => {
+	it("should cache undefined value", (t, done) => {
 		fs.stat(undefined, (_err, result) => {
-			expect(result).toBeUndefined();
+			assert.strictEqual(result, undefined);
 			fs.purge("a");
 			fs.purge();
 			done();
 		});
 	});
 
-	it("should purge readdir correctly", (done) => {
+	it("should purge readdir correctly", (t, done) => {
 		fs.readdir("/test/path", (err, r) => {
-			expect(r[0]).toBe("0");
+			assert.strictEqual(r[0], "0");
 			fs.purge(["/test/path/sub/path"]);
 			fs.readdir("/test/path", (err, r) => {
-				expect(r[0]).toBe("0");
+				assert.strictEqual(r[0], "0");
 				fs.purge(["/test/path/sub"]);
 				fs.readdir("/test/path", (err, r) => {
-					expect(r[0]).toBe("1");
+					assert.strictEqual(r[0], "1");
 					fs.purge(["/test/path"]);
 					fs.readdir("/test/path", (err, r) => {
-						expect(r[0]).toBe("2");
+						assert.strictEqual(r[0], "2");
 						fs.purge([url.pathToFileURL("/test/path")]);
 						fs.readdir("/test/path", (err, r) => {
-							expect(r[0]).toBe("2");
+							assert.strictEqual(r[0], "2");
 							fs.purge(Buffer.from("/test/path"));
 							fs.readdir("/test/path", (err, r) => {
-								expect(r[0]).toBe("3");
+								assert.strictEqual(r[0], "3");
 								fs.purge([Buffer.from("/test/path")]);
 								fs.readdir("/test/path", (err, r) => {
-									expect(r[0]).toBe("4");
+									assert.strictEqual(r[0], "4");
 									done();
 								});
 							});
@@ -460,53 +463,53 @@ describe("cachedInputFileSystem CacheBackend", () => {
 		});
 	});
 
-	it("should not clear the entire cache when purging falsy keys 0 or ''", (done) => {
+	it("should not clear the entire cache when purging falsy keys 0 or ''", (t, done) => {
 		// number 0 (a valid fd) and "" are valid cache keys per the signature;
 		// passing them must not be confused with the no-arg "clear all" form.
 		fs.stat("/test/path", (err, r1) => {
 			r1.cached = true;
 			fs.purge(0);
 			fs.stat("/test/path", (err, r2) => {
-				expect(r2.cached).toBe(true);
+				assert.strictEqual(r2.cached, true);
 				fs.purge("");
 				fs.stat("/test/path", (err, r3) => {
 					// Empty string is a prefix of every key, so prefix-purge still clears
 					// everything — but only because of the prefix semantics, not because
 					// "" was misclassified as "no argument".
-					expect(r3.cached).toBeUndefined();
+					assert.strictEqual(r3.cached, undefined);
 					done();
 				});
 			});
 		});
 	});
 
-	it("should not crash when options is null", (done) => {
+	it("should not crash when options is null", (t, done) => {
 		fs.stat("/test/path", (err, r1) => {
 			r1.cached = true;
-			expect(() => fs.purge("/test/path", null)).not.toThrow();
+			assert.doesNotThrow(() => fs.purge("/test/path", null));
 			fs.stat("/test/path", (err, r2) => {
 				// null is treated as "no options" — falls back to prefix purge
-				expect(r2.cached).toBeUndefined();
+				assert.strictEqual(r2.cached, undefined);
 				done();
 			});
 		});
 	});
 
-	it("should purge exact entries only when exact: true", (done) => {
+	it("should purge exact entries only when exact: true", (t, done) => {
 		fs.stat("/test/path", (err, r1) => {
-			expect(r1.path).toBe("/test/path");
+			assert.strictEqual(r1.path, "/test/path");
 			r1.cached = true;
 			fs.stat("/test/path/sub", (err, r2) => {
-				expect(r2.path).toBe("/test/path/sub");
+				assert.strictEqual(r2.path, "/test/path/sub");
 				r2.cached = true;
 				// Prefix purge with exact: true should NOT remove the child entry
 				fs.purge("/test/path", { exact: true });
 				fs.stat("/test/path", (err, r3) => {
 					// /test/path was the exact match, should be re-fetched (cached flag gone)
-					expect(r3.cached).toBeUndefined();
+					assert.strictEqual(r3.cached, undefined);
 					fs.stat("/test/path/sub", (err, r4) => {
 						// /test/path/sub should still be cached
-						expect(r4.cached).toBe(true);
+						assert.strictEqual(r4.cached, true);
 						done();
 					});
 				});
@@ -514,7 +517,7 @@ describe("cachedInputFileSystem CacheBackend", () => {
 		});
 	});
 
-	it("should purge an array exactly when exact: true", (done) => {
+	it("should purge an array exactly when exact: true", (t, done) => {
 		fs.stat("/test/path", (err, r1) => {
 			r1.cached = true;
 			fs.stat("/test/path/sub", (err, r2) => {
@@ -523,11 +526,11 @@ describe("cachedInputFileSystem CacheBackend", () => {
 					r3.cached = true;
 					fs.purge(["/test/path", "/other"], { exact: true });
 					fs.stat("/test/path", (err, r4) => {
-						expect(r4.cached).toBeUndefined();
+						assert.strictEqual(r4.cached, undefined);
 						fs.stat("/test/path/sub", (err, r5) => {
-							expect(r5.cached).toBe(true);
+							assert.strictEqual(r5.cached, true);
 							fs.stat("/other", (err, r6) => {
-								expect(r6.cached).toBeUndefined();
+								assert.strictEqual(r6.cached, undefined);
 								done();
 							});
 						});
@@ -537,16 +540,16 @@ describe("cachedInputFileSystem CacheBackend", () => {
 		});
 	});
 
-	it("should still prefix-purge when exact is not set or false", (done) => {
+	it("should still prefix-purge when exact is not set or false", (t, done) => {
 		fs.stat("/test/path", (err, r1) => {
 			r1.cached = true;
 			fs.stat("/test/path/sub", (err, r2) => {
 				r2.cached = true;
 				fs.purge("/test/path");
 				fs.stat("/test/path", (err, r3) => {
-					expect(r3.cached).toBeUndefined();
+					assert.strictEqual(r3.cached, undefined);
 					fs.stat("/test/path/sub", (err, r4) => {
-						expect(r4.cached).toBeUndefined();
+						assert.strictEqual(r4.cached, undefined);
 						done();
 					});
 				});
@@ -554,11 +557,11 @@ describe("cachedInputFileSystem CacheBackend", () => {
 		});
 	});
 
-	it("should purge readdir of the exact directory when exact: true", (done) => {
+	it("should purge readdir of the exact directory when exact: true", (t, done) => {
 		fs.readdir("/test/path", (err, r1) => {
-			expect(r1[0]).toBe("0");
+			assert.strictEqual(r1[0], "0");
 			fs.readdir("/test/path/sub", (err, r2) => {
-				expect(r2[0]).toBe("1");
+				assert.strictEqual(r2[0], "1");
 				// Without exact, purging the dir path strips to dirname and prefix-purges
 				// readdir for that parent — meaning readdir("/test/path") would NOT be evicted
 				// by purge("/test/path/sub") in legacy mode (parent is "/test/path/", child of
@@ -566,10 +569,10 @@ describe("cachedInputFileSystem CacheBackend", () => {
 				// the caller is naming the directory itself, so it should evict directly.
 				fs.purge("/test/path", { exact: true });
 				fs.readdir("/test/path", (err, r3) => {
-					expect(r3[0]).toBe("2");
+					assert.strictEqual(r3[0], "2");
 					// sibling readdir cache should still be intact
 					fs.readdir("/test/path/sub", (err, r4) => {
-						expect(r4[0]).toBe("1");
+						assert.strictEqual(r4[0], "1");
 						done();
 					});
 				});
@@ -577,21 +580,21 @@ describe("cachedInputFileSystem CacheBackend", () => {
 		});
 	});
 
-	it("should accept Buffer with exact: true", (done) => {
+	it("should accept Buffer with exact: true", (t, done) => {
 		fs.stat("/test/path", (err, r1) => {
 			r1.cached = true;
 			fs.stat("/test/path/sub", (err, r2) => {
 				r2.cached = true;
 				fs.purge(Buffer.from("/test/path"), { exact: true });
 				fs.stat("/test/path", (err, r3) => {
-					expect(r3.cached).toBeUndefined();
+					assert.strictEqual(r3.cached, undefined);
 					fs.stat("/test/path/sub", (err, r4) => {
-						expect(r4.cached).toBe(true);
+						assert.strictEqual(r4.cached, true);
 						fs.purge([Buffer.from("/test/path/sub")], {
 							exact: true,
 						});
 						fs.stat("/test/path/sub", (err, r5) => {
-							expect(r5.cached).toBeUndefined();
+							assert.strictEqual(r5.cached, undefined);
 							done();
 						});
 					});
@@ -600,11 +603,11 @@ describe("cachedInputFileSystem CacheBackend", () => {
 		});
 	});
 
-	it("should not stack overflow when resolving in an async loop", (done) => {
+	it("should not stack overflow when resolving in an async loop", (t, done) => {
 		let i = 10000;
 		const next = () => {
 			fs.stat(__dirname, (_err, result) => {
-				expect(result).toBeDefined();
+				assert.notStrictEqual(result, undefined);
 				if (i-- > 0) {
 					next();
 				} else {
@@ -652,17 +655,17 @@ describe("cachedInputFileSystem CacheBackend with Infinity duration", () => {
 	});
 
 	it("should not crash the constructor with Infinity", () => {
-		expect(fs).toBeDefined();
+		assert.notStrictEqual(fs, undefined);
 	});
 
-	it("should cache accesses forever", (done) => {
+	it("should cache accesses forever", (t, done) => {
 		fs.stat("a", (err, result) => {
 			result.a = true;
 			fs.stat("a", (err, result) => {
-				expect(result.a).toBeDefined();
+				assert.notStrictEqual(result.a, undefined);
 				setTimeout(() => {
 					fs.stat("a", (err, result) => {
-						expect(result.a).toBeDefined();
+						assert.notStrictEqual(result.a, undefined);
 						done();
 					});
 				}, 100);
@@ -674,7 +677,7 @@ describe("cachedInputFileSystem CacheBackend with Infinity duration", () => {
 		const result = fs.statSync("a");
 		result.a = true;
 		const result2 = fs.statSync("a");
-		expect(result2.a).toBeDefined();
+		assert.notStrictEqual(result2.a, undefined);
 	});
 });
 
@@ -687,52 +690,52 @@ describe("cachedInputFileSystem CacheBackend and Node.JS filesystem", () => {
 
 	const file = path.resolve(__dirname, "./fixtures/abc.txt");
 
-	it("should work with string async", (done) => {
+	it("should work with string async", (t, done) => {
 		fs.readFile(file, (err, r) => {
 			if (err) {
 				done(err);
 				return;
 			}
-			expect(r.toString()).toBe("abc");
+			assert.strictEqual(r.toString(), "abc");
 			done();
 		});
 	});
 
 	it("should work with string sync", () => {
 		const r = fs.readFileSync(file);
-		expect(r.toString()).toBe("abc");
+		assert.strictEqual(r.toString(), "abc");
 	});
 
-	it("should work with Buffer async", (done) => {
+	it("should work with Buffer async", (t, done) => {
 		fs.readFile(Buffer.from(file), (err, r) => {
 			if (err) {
 				done(err);
 				return;
 			}
-			expect(r.toString()).toBe("abc");
+			assert.strictEqual(r.toString(), "abc");
 			done();
 		});
 	});
 
 	it("should work with Buffer sync", () => {
 		const r = fs.readFileSync(Buffer.from(file));
-		expect(r.toString()).toBe("abc");
+		assert.strictEqual(r.toString(), "abc");
 	});
 
-	it("should work with URL async", (done) => {
+	it("should work with URL async", (t, done) => {
 		fs.readFile(url.pathToFileURL(file), (err, r) => {
 			if (err) {
 				done(err);
 				return;
 			}
-			expect(r.toString()).toBe("abc");
+			assert.strictEqual(r.toString(), "abc");
 			done();
 		});
 	});
 
 	it("should work with URL sync", () => {
 		const r = fs.readFileSync(url.pathToFileURL(file));
-		expect(r.toString()).toBe("abc");
+		assert.strictEqual(r.toString(), "abc");
 	});
 });
 
@@ -745,51 +748,51 @@ describe("cachedInputFileSystem OperationMergerBackend and Node.JS filesystem", 
 
 	const file = path.resolve(__dirname, "./fixtures/abc.txt");
 
-	it("should work with string async", (done) => {
+	it("should work with string async", (t, done) => {
 		fs.readFile(file, (err, r) => {
 			if (err) {
 				done(err);
 				return;
 			}
-			expect(r.toString()).toBe("abc");
+			assert.strictEqual(r.toString(), "abc");
 			done();
 		});
 	});
 
 	it("should work with string sync", () => {
 		const r = fs.readFileSync(file);
-		expect(r.toString()).toBe("abc");
+		assert.strictEqual(r.toString(), "abc");
 	});
 
-	it("should work with Buffer async", (done) => {
+	it("should work with Buffer async", (t, done) => {
 		fs.readFile(Buffer.from(file), (err, r) => {
 			if (err) {
 				done(err);
 				return;
 			}
-			expect(r.toString()).toBe("abc");
+			assert.strictEqual(r.toString(), "abc");
 			done();
 		});
 	});
 
 	it("should work with Buffer sync", () => {
 		const r = fs.readFileSync(Buffer.from(file));
-		expect(r.toString()).toBe("abc");
+		assert.strictEqual(r.toString(), "abc");
 	});
 
-	it("should work with URL async", (done) => {
+	it("should work with URL async", (t, done) => {
 		fs.readFile(url.pathToFileURL(file), (err, r) => {
 			if (err) {
 				done(err);
 				return;
 			}
-			expect(r.toString()).toBe("abc");
+			assert.strictEqual(r.toString(), "abc");
 			done();
 		});
 	});
 
 	it("should work with URL sync", () => {
 		const r = fs.readFileSync(url.pathToFileURL(file));
-		expect(r.toString()).toBe("abc");
+		assert.strictEqual(r.toString(), "abc");
 	});
 });

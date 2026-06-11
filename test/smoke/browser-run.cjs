@@ -53,6 +53,11 @@ function bundle() {
 	});
 }
 
+/**
+ * Bundle the entry, execute it in the web-globals VM sandbox and surface
+ * the sandbox result through this process's exit code.
+ * @returns {Promise<void>} resolves on success, rejects on smoke failure
+ */
 async function main() {
 	const code = await bundle();
 

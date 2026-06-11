@@ -1,9 +1,12 @@
 "use strict";
 
+const assert = require("assert");
 const fs = require("fs");
+
 const { platform } = require("os");
 const path = require("path");
 const resolve = require("../");
+const { afterEach, beforeEach, describe, it } = require("./_runner");
 
 const tempPath = path.join(__dirname, "temp");
 
@@ -210,19 +213,23 @@ describe("symlink", () => {
 				"with symlinked directory in context path and symlinked directory (chained)",
 			],
 		]) {
-			it(`should resolve symlink to itself ${pathToIt[2]}`, (done) => {
+			it(`should resolve symlink to itself ${pathToIt[2]}`, (t, done) => {
 				resolve(pathToIt[0], pathToIt[1], (err, filename) => {
 					if (err) return done(err);
-					expect(filename).toBeDefined();
-					expect(typeof filename).toBe("string");
-					expect(filename).toEqual(
+					assert.notStrictEqual(filename, undefined);
+					assert.strictEqual(typeof filename, "string");
+					assert.deepStrictEqual(
+						filename,
 						path.join(__dirname, "..", "lib", "index.js"),
 					);
 
 					resolveWithoutSymlinks(pathToIt[0], pathToIt[1], (err, filename) => {
 						if (err) return done(err);
-						expect(typeof filename).toBe("string");
-						expect(filename).toEqual(path.resolve(pathToIt[0], pathToIt[1]));
+						assert.strictEqual(typeof filename, "string");
+						assert.deepStrictEqual(
+							filename,
+							path.resolve(pathToIt[0], pathToIt[1]),
+						);
 						done();
 					});
 				});
@@ -230,18 +237,23 @@ describe("symlink", () => {
 
 			it(`should resolve symlink to itself sync ${pathToIt[2]}`, () => {
 				let filename = resolve.sync(pathToIt[0], pathToIt[1]);
-				expect(filename).toBeDefined();
-				expect(typeof filename).toBe("string");
-				expect(filename).toEqual(path.join(__dirname, "..", "lib", "index.js"));
+				assert.notStrictEqual(filename, undefined);
+				assert.strictEqual(typeof filename, "string");
+				assert.deepStrictEqual(
+					filename,
+					path.join(__dirname, "..", "lib", "index.js"),
+				);
 
 				filename = resolveSyncWithoutSymlinks(pathToIt[0], pathToIt[1]);
 
-				expect(typeof filename).toBe("string");
-				expect(filename).toEqual(path.resolve(pathToIt[0], pathToIt[1]));
+				assert.strictEqual(typeof filename, "string");
+				assert.deepStrictEqual(
+					filename,
+					path.resolve(pathToIt[0], pathToIt[1]),
+				);
 			});
 		}
 	} else {
-		// eslint-disable-next-line jest/expect-expect
 		it("cannot test symlinks because we have no permission to create them", () => {
 			// Nothing
 		});

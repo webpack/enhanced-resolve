@@ -1,10 +1,13 @@
 "use strict";
 
+const assert = require("assert");
 const fs = require("fs");
+
 const path = require("path");
 
 const { ResolverFactory } = require("../");
 const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
+const { describe, it } = require("./_runner");
 
 const fileSystem = new CachedInputFileSystem(fs, 4000);
 
@@ -52,7 +55,7 @@ const extendsUnscopedPkgDir = path.resolve(
 );
 
 describe("TsconfigPathsPlugin", () => {
-	it("resolves exact mapped path '@components/*' via tsconfig option (example)", (done) => {
+	it("resolves exact mapped path '@components/*' via tsconfig option (example)", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem,
 			extensions: [".ts", ".tsx"],
@@ -70,7 +73,8 @@ describe("TsconfigPathsPlugin", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.join(baseExampleDir, "src", "components", "button.ts"),
 				);
 				done();
@@ -78,7 +82,7 @@ describe("TsconfigPathsPlugin", () => {
 		);
 	});
 
-	it("when multiple patterns match a module specifier, the pattern with the longest matching prefix before any * token is used:", (done) => {
+	it("when multiple patterns match a module specifier, the pattern with the longest matching prefix before any * token is used:", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem,
 			extensions: [".ts", ".tsx"],
@@ -90,13 +94,15 @@ describe("TsconfigPathsPlugin", () => {
 		resolver.resolve({}, baseExampleDir, "longest/bar", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(
+			assert.deepStrictEqual(
+				result,
 				path.join(baseExampleDir, "src", "mapped", "longest", "three.ts"),
 			);
 			resolver.resolve({}, baseExampleDir, "longest/bar", {}, (err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.join(baseExampleDir, "src", "mapped", "longest", "three.ts"),
 				);
 				done();
@@ -104,7 +110,7 @@ describe("TsconfigPathsPlugin", () => {
 		});
 	});
 
-	it("resolves exact mapped path 'foo' via tsconfig option (example)", (done) => {
+	it("resolves exact mapped path 'foo' via tsconfig option (example)", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem,
 			extensions: [".ts", ".tsx"],
@@ -117,14 +123,15 @@ describe("TsconfigPathsPlugin", () => {
 		resolver.resolve({}, baseExampleDir, "foo", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(
+			assert.deepStrictEqual(
+				result,
 				path.join(baseExampleDir, "src", "mapped", "foo", "index.ts"),
 			);
 			done();
 		});
 	});
 
-	it("resolves wildcard mapped path 'bar/*' via tsconfig option (example)", (done) => {
+	it("resolves wildcard mapped path 'bar/*' via tsconfig option (example)", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem,
 			extensions: [".ts", ".tsx"],
@@ -137,14 +144,15 @@ describe("TsconfigPathsPlugin", () => {
 		resolver.resolve({}, baseExampleDir, "bar/file1", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(
+			assert.deepStrictEqual(
+				result,
 				path.join(baseExampleDir, "src", "mapped", "bar", "file1.ts"),
 			);
 			done();
 		});
 	});
 
-	it("resolves wildcard mapped path '*/old-file' to specific file via tsconfig option (example)", (done) => {
+	it("resolves wildcard mapped path '*/old-file' to specific file via tsconfig option (example)", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem,
 			extensions: [".ts", ".tsx"],
@@ -162,7 +170,8 @@ describe("TsconfigPathsPlugin", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.join(baseExampleDir, "src", "components", "new-file.ts"),
 				);
 				done();
@@ -170,7 +179,7 @@ describe("TsconfigPathsPlugin", () => {
 		);
 	});
 
-	it("falls through when no mapping exists (example)", (done) => {
+	it("falls through when no mapping exists (example)", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem,
 			extensions: [".ts", ".tsx"],
@@ -186,8 +195,8 @@ describe("TsconfigPathsPlugin", () => {
 			"does-not-exist",
 			{},
 			(err, result) => {
-				expect(err).toBeInstanceOf(Error);
-				expect(result).toBeUndefined();
+				assert.ok(err instanceof Error);
+				assert.strictEqual(result, undefined);
 				done();
 			},
 		);
@@ -203,15 +212,17 @@ describe("TsconfigPathsPlugin", () => {
 			useSyncFileSystemCalls: true,
 		});
 
-		expect(resolver.resolveSync({}, baseExampleDir, "@components/button")).toBe(
+		assert.strictEqual(
+			resolver.resolveSync({}, baseExampleDir, "@components/button"),
 			path.join(baseExampleDir, "src", "components", "button.ts"),
 		);
-		expect(resolver.resolveSync({}, baseExampleDir, "bar/file1")).toBe(
+		assert.strictEqual(
+			resolver.resolveSync({}, baseExampleDir, "bar/file1"),
 			path.join(baseExampleDir, "src", "mapped", "bar", "file1.ts"),
 		);
-		expect(() => {
+		assert.throws(() => {
 			resolver.resolveSync({}, baseExampleDir, "does-not-exist");
-		}).toThrow(/Can't resolve 'does-not-exist'/);
+		}, /Can't resolve 'does-not-exist'/);
 	});
 
 	it("resolveSync surfaces missing-tsconfig errors instead of fileSystem-not-sync", () => {
@@ -221,12 +232,12 @@ describe("TsconfigPathsPlugin", () => {
 			useSyncFileSystemCalls: true,
 		});
 
-		expect(() => {
+		assert.throws(() => {
 			resolver.resolveSync(process.cwd(), "test");
-		}).toThrow(/Can't resolve 'test'/);
+		}, /Can't resolve 'test'/);
 	});
 
-	it("resolves '@components/*' using extends from extendsExampleDir project", (done) => {
+	it("resolves '@components/*' using extends from extendsExampleDir project", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem,
 			extensions: [".ts", ".tsx"],
@@ -242,7 +253,8 @@ describe("TsconfigPathsPlugin", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.join(extendsExampleDir, "src", "components", "button.ts"),
 				);
 				done();
@@ -250,7 +262,7 @@ describe("TsconfigPathsPlugin", () => {
 		);
 	});
 
-	it("resolves '@utils/*' using extends from extendsExampleDir project", (done) => {
+	it("resolves '@utils/*' using extends from extendsExampleDir project", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem,
 			extensions: [".ts", ".tsx"],
@@ -267,7 +279,8 @@ describe("TsconfigPathsPlugin", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.join(extendsExampleDir, "src", "utils", "date.ts"),
 				);
 				done();
@@ -276,7 +289,7 @@ describe("TsconfigPathsPlugin", () => {
 	});
 
 	describe("Path wildcard patterns", () => {
-		it("resolves 'foo/*' wildcard pattern", (done) => {
+		it("resolves 'foo/*' wildcard pattern", (t, done) => {
 			const resolver = ResolverFactory.createResolver({
 				fileSystem,
 				extensions: [".ts", ".tsx"],
@@ -288,14 +301,15 @@ describe("TsconfigPathsPlugin", () => {
 			resolver.resolve({}, baseExampleDir, "foo/file1", {}, (err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result for foo"));
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.join(baseExampleDir, "src", "mapped", "bar", "file1.ts"),
 				);
 				done();
 			});
 		});
 
-		it("resolves '*' catch-all pattern to src/mapped/star/*", (done) => {
+		it("resolves '*' catch-all pattern to src/mapped/star/*", (t, done) => {
 			const resolver = ResolverFactory.createResolver({
 				fileSystem,
 				extensions: [".ts", ".tsx"],
@@ -313,7 +327,8 @@ describe("TsconfigPathsPlugin", () => {
 				(err, resultStar) => {
 					if (err) return done(err);
 					if (!resultStar) return done(new Error("No result for star/*"));
-					expect(resultStar).toEqual(
+					assert.deepStrictEqual(
+						resultStar,
 						path.join(
 							baseExampleDir,
 							"src",
@@ -328,7 +343,7 @@ describe("TsconfigPathsPlugin", () => {
 			);
 		});
 
-		it("resolves package with mainFields", (done) => {
+		it("resolves package with mainFields", (t, done) => {
 			const resolver = ResolverFactory.createResolver({
 				fileSystem,
 				extensions: [".ts", ".tsx"],
@@ -348,7 +363,8 @@ describe("TsconfigPathsPlugin", () => {
 					if (!result) {
 						return done(new Error("No result for main-field-package"));
 					}
-					expect(result).toEqual(
+					assert.deepStrictEqual(
+						result,
 						path.join(
 							baseExampleDir,
 							"src",
@@ -363,7 +379,7 @@ describe("TsconfigPathsPlugin", () => {
 			);
 		});
 
-		it("resolves package with browser field", (done) => {
+		it("resolves package with browser field", (t, done) => {
 			const resolver = ResolverFactory.createResolver({
 				fileSystem,
 				extensions: [".ts", ".tsx"],
@@ -383,7 +399,8 @@ describe("TsconfigPathsPlugin", () => {
 					if (!result) {
 						return done(new Error("No result for browser-field-package"));
 					}
-					expect(result).toEqual(
+					assert.deepStrictEqual(
+						result,
 						path.join(
 							baseExampleDir,
 							"src",
@@ -398,7 +415,7 @@ describe("TsconfigPathsPlugin", () => {
 			);
 		});
 
-		it("resolves package with default index.ts", (done) => {
+		it("resolves package with default index.ts", (t, done) => {
 			const resolver = ResolverFactory.createResolver({
 				fileSystem,
 				extensions: [".ts", ".tsx"],
@@ -418,7 +435,8 @@ describe("TsconfigPathsPlugin", () => {
 					if (!result) {
 						return done(new Error("No result for no-main-field-package"));
 					}
-					expect(result).toEqual(
+					assert.deepStrictEqual(
+						result,
 						path.join(
 							baseExampleDir,
 							"src",
@@ -434,7 +452,7 @@ describe("TsconfigPathsPlugin", () => {
 		});
 	});
 
-	it("should resolve paths when extending from npm package (node_modules)", (done) => {
+	it("should resolve paths when extending from npm package (node_modules)", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem,
 			extensions: [".ts", ".tsx"],
@@ -453,13 +471,13 @@ describe("TsconfigPathsPlugin", () => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
 				// Should resolve to utils or components based on the paths in react/tsconfig.json
-				expect(result).toMatch(/src[\\/](utils|components)[\\/]button\.ts$/);
+				assert.match(result, /src[\\/](utils|components)[\\/]button\.ts$/);
 				done();
 			},
 		);
 	});
 
-	it("should handle malformed tsconfig.json gracefully", (done) => {
+	it("should handle malformed tsconfig.json gracefully", (t, done) => {
 		const malformedExampleDir = path.resolve(
 			__dirname,
 			"fixtures",
@@ -482,8 +500,8 @@ describe("TsconfigPathsPlugin", () => {
 			"@components/button",
 			{},
 			(err, result) => {
-				expect(err).toBeInstanceOf(Error);
-				expect(result).toBeUndefined();
+				assert.ok(err instanceof Error);
+				assert.strictEqual(result, undefined);
 				done();
 			},
 		);
@@ -492,7 +510,7 @@ describe("TsconfigPathsPlugin", () => {
 	// eslint-disable-next-line no-template-curly-in-string
 	describe("${configDir} template variable support", () => {
 		// eslint-disable-next-line no-template-curly-in-string
-		it("should substitute ${configDir} in path mappings", (done) => {
+		it("should substitute ${configDir} in path mappings", (t, done) => {
 			const resolver = ResolverFactory.createResolver({
 				fileSystem,
 				extensions: [".ts", ".tsx"],
@@ -510,7 +528,8 @@ describe("TsconfigPathsPlugin", () => {
 				(err, result) => {
 					if (err) return done(err);
 					if (!result) return done(new Error("No result"));
-					expect(result).toEqual(
+					assert.deepStrictEqual(
+						result,
 						path.join(baseExampleDir, "src", "components", "button.ts"),
 					);
 					done();
@@ -519,7 +538,7 @@ describe("TsconfigPathsPlugin", () => {
 		});
 
 		// eslint-disable-next-line no-template-curly-in-string
-		it("should substitute ${configDir} in multiple path patterns", (done) => {
+		it("should substitute ${configDir} in multiple path patterns", (t, done) => {
 			const resolver = ResolverFactory.createResolver({
 				fileSystem,
 				extensions: [".ts", ".tsx"],
@@ -532,7 +551,8 @@ describe("TsconfigPathsPlugin", () => {
 			resolver.resolve({}, baseExampleDir, "@utils/date", {}, (err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.join(baseExampleDir, "src", "utils", "date.ts"),
 				);
 
@@ -540,7 +560,8 @@ describe("TsconfigPathsPlugin", () => {
 				resolver.resolve({}, baseExampleDir, "foo", {}, (err2, result2) => {
 					if (err2) return done(err2);
 					if (!result2) return done(new Error("No result for foo"));
-					expect(result2).toEqual(
+					assert.deepStrictEqual(
+						result2,
 						path.join(baseExampleDir, "src", "mapped", "foo", "index.ts"),
 					);
 					done();
@@ -549,7 +570,7 @@ describe("TsconfigPathsPlugin", () => {
 		});
 
 		// eslint-disable-next-line no-template-curly-in-string
-		it("should substitute ${configDir} in referenced projects", (done) => {
+		it("should substitute ${configDir} in referenced projects", (t, done) => {
 			const appDir = path.join(referencesProjectDir, "packages", "app");
 			const resolver = ResolverFactory.createResolver({
 				fileSystem,
@@ -566,13 +587,13 @@ describe("TsconfigPathsPlugin", () => {
 			resolver.resolve({}, appDir, "@app/index", {}, (err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(path.join(appDir, "src", "index.ts"));
+				assert.deepStrictEqual(result, path.join(appDir, "src", "index.ts"));
 				done();
 			});
 		});
 
 		// eslint-disable-next-line no-template-curly-in-string
-		it("should substitute ${configDir} in extends field", (done) => {
+		it("should substitute ${configDir} in extends field", (t, done) => {
 			const resolver = ResolverFactory.createResolver({
 				fileSystem,
 				extensions: [".ts", ".tsx"],
@@ -590,7 +611,8 @@ describe("TsconfigPathsPlugin", () => {
 				(err, result) => {
 					if (err) return done(err);
 					if (!result) return done(new Error("No result"));
-					expect(result).toEqual(
+					assert.deepStrictEqual(
+						result,
 						path.join(extendsExampleDir, "src", "components", "button.ts"),
 					);
 					done();
@@ -598,7 +620,7 @@ describe("TsconfigPathsPlugin", () => {
 			);
 		});
 
-		it("should handle circular extends without hanging", (done) => {
+		it("should handle circular extends without hanging", (t, done) => {
 			const aDir = path.join(extendsCircularDir, "a");
 			const resolver = ResolverFactory.createResolver({
 				fileSystem,
@@ -612,13 +634,13 @@ describe("TsconfigPathsPlugin", () => {
 			resolver.resolve({}, aDir, "@lib/foo", {}, (err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(path.join(aDir, "src", "lib", "foo.ts"));
+				assert.deepStrictEqual(result, path.join(aDir, "src", "lib", "foo.ts"));
 				done();
 			});
 		});
 
 		// eslint-disable-next-line no-template-curly-in-string
-		it("should substitute ${configDir} in references field", (done) => {
+		it("should substitute ${configDir} in references field", (t, done) => {
 			const sharedDir = path.join(referencesProjectDir, "packages", "shared");
 			const resolver = ResolverFactory.createResolver({
 				fileSystem,
@@ -635,7 +657,8 @@ describe("TsconfigPathsPlugin", () => {
 			resolver.resolve({}, sharedDir, "@shared/helper", {}, (err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.join(sharedDir, "src", "utils", "helper.ts"),
 				);
 				done();
@@ -643,7 +666,7 @@ describe("TsconfigPathsPlugin", () => {
 		});
 	});
 
-	it("should override baseUrl from tsconfig with option", (done) => {
+	it("should override baseUrl from tsconfig with option", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem,
 			extensions: [".ts", ".tsx"],
@@ -663,7 +686,8 @@ describe("TsconfigPathsPlugin", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.join(baseExampleDir, "src", "utils", "date.ts"),
 				);
 				done();
@@ -671,7 +695,7 @@ describe("TsconfigPathsPlugin", () => {
 		);
 	});
 
-	it("should use baseUrl from tsconfig when not overridden", (done) => {
+	it("should use baseUrl from tsconfig when not overridden", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem,
 			extensions: [".ts", ".tsx"],
@@ -692,7 +716,8 @@ describe("TsconfigPathsPlugin", () => {
 			(err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.join(baseExampleDir, "src", "utils", "date.ts"),
 				);
 				done();
@@ -701,7 +726,7 @@ describe("TsconfigPathsPlugin", () => {
 	});
 
 	describe("TypeScript Project References", () => {
-		it("should support tsconfig object format with configFile", (done) => {
+		it("should support tsconfig object format with configFile", (t, done) => {
 			const resolver = ResolverFactory.createResolver({
 				fileSystem,
 				extensions: [".ts", ".tsx"],
@@ -721,7 +746,8 @@ describe("TsconfigPathsPlugin", () => {
 				(err, result) => {
 					if (err) return done(err);
 					if (!result) return done(new Error("No result"));
-					expect(result).toEqual(
+					assert.deepStrictEqual(
+						result,
 						path.join(baseExampleDir, "src", "components", "button.ts"),
 					);
 					done();
@@ -729,7 +755,7 @@ describe("TsconfigPathsPlugin", () => {
 			);
 		});
 
-		it("should resolve own paths (without cross-project references)", (done) => {
+		it("should resolve own paths (without cross-project references)", (t, done) => {
 			const appDir = path.join(referencesProjectDir, "packages", "app");
 			const resolver = ResolverFactory.createResolver({
 				fileSystem,
@@ -746,17 +772,17 @@ describe("TsconfigPathsPlugin", () => {
 			resolver.resolve({}, appDir, "@app/index", {}, (err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(path.join(appDir, "src", "index.ts"));
+				assert.deepStrictEqual(result, path.join(appDir, "src", "index.ts"));
 
 				// @shared/* from app context should fail (not in app's paths)
 				resolver.resolve({}, appDir, "@shared/utils/helper", {}, (err2) => {
-					expect(err2).toBeInstanceOf(Error);
+					assert.ok(err2 instanceof Error);
 					done();
 				});
 			});
 		});
 
-		it("should resolve self-references within a referenced project", (done) => {
+		it("should resolve self-references within a referenced project", (t, done) => {
 			const appDir = path.join(referencesProjectDir, "packages", "app");
 			const sharedDir = path.join(referencesProjectDir, "packages", "shared");
 
@@ -775,14 +801,15 @@ describe("TsconfigPathsPlugin", () => {
 			resolver.resolve({}, sharedDir, "@shared/helper", {}, (err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.join(sharedDir, "src", "utils", "helper.ts"),
 				);
 				done();
 			});
 		});
 
-		it("should support explicit references array", (done) => {
+		it("should support explicit references array", (t, done) => {
 			const appDir = path.join(referencesProjectDir, "packages", "app");
 			const sharedSrcDir = path.join(
 				referencesProjectDir,
@@ -811,13 +838,16 @@ describe("TsconfigPathsPlugin", () => {
 				(err, result) => {
 					if (err) return done(err);
 					if (!result) return done(new Error("No result"));
-					expect(result).toEqual(path.join(sharedSrcDir, "utils", "helper.ts"));
+					assert.deepStrictEqual(
+						result,
+						path.join(sharedSrcDir, "utils", "helper.ts"),
+					);
 					done();
 				},
 			);
 		});
 
-		it("should not load references when references option is omitted", (done) => {
+		it("should not load references when references option is omitted", (t, done) => {
 			const appDir = path.join(referencesProjectDir, "packages", "app");
 			const resolver = ResolverFactory.createResolver({
 				fileSystem,
@@ -832,12 +862,12 @@ describe("TsconfigPathsPlugin", () => {
 
 			// @shared/* should fail because references are not loaded
 			resolver.resolve({}, appDir, "@shared/utils/helper", {}, (err) => {
-				expect(err).toBeInstanceOf(Error);
+				assert.ok(err instanceof Error);
 				done();
 			});
 		});
 
-		it("should handle nested references (when a referenced project has its own references)", (done) => {
+		it("should handle nested references (when a referenced project has its own references)", (t, done) => {
 			const appDir = path.join(referencesProjectDir, "packages", "app");
 			const utilsSrcDir = path.join(
 				referencesProjectDir,
@@ -862,13 +892,16 @@ describe("TsconfigPathsPlugin", () => {
 			resolver.resolve({}, utilsSrcDir, "@utils/date", {}, (err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(path.join(utilsSrcDir, "core", "date.ts"));
+				assert.deepStrictEqual(
+					result,
+					path.join(utilsSrcDir, "core", "date.ts"),
+				);
 				done();
 			});
 		});
 
 		describe("modules resolution with references", () => {
-			it("should resolve modules from main project's baseUrl", (done) => {
+			it("should resolve modules from main project's baseUrl", (t, done) => {
 				const appDir = path.join(referencesProjectDir, "packages", "app");
 				const resolver = ResolverFactory.createResolver({
 					fileSystem,
@@ -890,7 +923,8 @@ describe("TsconfigPathsPlugin", () => {
 					(err, result) => {
 						if (err) return done(err);
 						if (!result) return done(new Error("No result"));
-						expect(result).toEqual(
+						assert.deepStrictEqual(
+							result,
 							path.join(appDir, "src", "components", "Button.ts"),
 						);
 						done();
@@ -898,7 +932,7 @@ describe("TsconfigPathsPlugin", () => {
 				);
 			});
 
-			it("should resolve modules from referenced project's baseUrl (self-reference)", (done) => {
+			it("should resolve modules from referenced project's baseUrl (self-reference)", (t, done) => {
 				const appDir = path.join(referencesProjectDir, "packages", "app");
 				const sharedSrcDir = path.join(
 					referencesProjectDir,
@@ -927,7 +961,8 @@ describe("TsconfigPathsPlugin", () => {
 					(err, result) => {
 						if (err) return done(err);
 						if (!result) return done(new Error("No result"));
-						expect(result).toEqual(
+						assert.deepStrictEqual(
+							result,
 							path.join(sharedSrcDir, "utils", "helper.ts"),
 						);
 						done();
@@ -935,7 +970,7 @@ describe("TsconfigPathsPlugin", () => {
 				);
 			});
 
-			it("should resolve components from referenced project's baseUrl", (done) => {
+			it("should resolve components from referenced project's baseUrl", (t, done) => {
 				const appDir = path.join(referencesProjectDir, "packages", "app");
 				const sharedSrcDir = path.join(
 					referencesProjectDir,
@@ -964,7 +999,8 @@ describe("TsconfigPathsPlugin", () => {
 					(err, result) => {
 						if (err) return done(err);
 						if (!result) return done(new Error("No result"));
-						expect(result).toEqual(
+						assert.deepStrictEqual(
+							result,
 							path.join(sharedSrcDir, "components", "Input.ts"),
 						);
 						done();
@@ -972,7 +1008,7 @@ describe("TsconfigPathsPlugin", () => {
 				);
 			});
 
-			it("should use correct baseUrl based on request context", (done) => {
+			it("should use correct baseUrl based on request context", (t, done) => {
 				const appDir = path.join(referencesProjectDir, "packages", "app");
 				const sharedDir = path.join(referencesProjectDir, "packages", "shared");
 
@@ -991,7 +1027,7 @@ describe("TsconfigPathsPlugin", () => {
 				resolver.resolve({}, appDir, "src/index", {}, (err, result) => {
 					if (err) return done(err);
 					if (!result) return done(new Error("No result from app"));
-					expect(result).toEqual(path.join(appDir, "src", "index.ts"));
+					assert.deepStrictEqual(result, path.join(appDir, "src", "index.ts"));
 
 					// From shared context, 'utils/helper' should resolve to shared/src/utils/helper
 					resolver.resolve(
@@ -1002,7 +1038,8 @@ describe("TsconfigPathsPlugin", () => {
 						(err2, result2) => {
 							if (err2) return done(err2);
 							if (!result2) return done(new Error("No result from shared"));
-							expect(result2).toEqual(
+							assert.deepStrictEqual(
+								result2,
 								path.join(sharedDir, "src", "utils", "helper.ts"),
 							);
 							done();
@@ -1011,7 +1048,7 @@ describe("TsconfigPathsPlugin", () => {
 				});
 			});
 
-			it("should support explicit references with modules resolution", (done) => {
+			it("should support explicit references with modules resolution", (t, done) => {
 				const appDir = path.join(referencesProjectDir, "packages", "app");
 				const sharedSrcDir = path.join(
 					referencesProjectDir,
@@ -1040,7 +1077,8 @@ describe("TsconfigPathsPlugin", () => {
 					(err, result) => {
 						if (err) return done(err);
 						if (!result) return done(new Error("No result"));
-						expect(result).toEqual(
+						assert.deepStrictEqual(
+							result,
 							path.join(sharedSrcDir, "utils", "helper.ts"),
 						);
 						done();
@@ -1067,7 +1105,7 @@ describe("TsconfigPathsPlugin", () => {
 			);
 			const refDir = path.join(referencesPriorityDir, "ref");
 
-			it("resolves @lib/foo from the main context to main's target", (done) => {
+			it("resolves @lib/foo from the main context to main's target", (t, done) => {
 				const resolver = ResolverFactory.createResolver({
 					fileSystem,
 					extensions: [".ts", ".tsx"],
@@ -1087,7 +1125,8 @@ describe("TsconfigPathsPlugin", () => {
 					(err, result) => {
 						if (err) return done(err);
 						if (!result) return done(new Error("No result"));
-						expect(result).toEqual(
+						assert.deepStrictEqual(
+							result,
 							path.join(referencesPriorityDir, "main-lib", "foo.ts"),
 						);
 						done();
@@ -1095,7 +1134,7 @@ describe("TsconfigPathsPlugin", () => {
 				);
 			});
 
-			it("resolves @lib/foo from the reference context to the reference's target", (done) => {
+			it("resolves @lib/foo from the reference context to the reference's target", (t, done) => {
 				const resolver = ResolverFactory.createResolver({
 					fileSystem,
 					extensions: [".ts", ".tsx"],
@@ -1110,12 +1149,15 @@ describe("TsconfigPathsPlugin", () => {
 				resolver.resolve({}, refDir, "@lib/foo", {}, (err, result) => {
 					if (err) return done(err);
 					if (!result) return done(new Error("No result"));
-					expect(result).toEqual(path.join(refDir, "ref-lib", "foo.ts"));
+					assert.deepStrictEqual(
+						result,
+						path.join(refDir, "ref-lib", "foo.ts"),
+					);
 					done();
 				});
 			});
 
-			it("reference paths do not leak into a sibling/unrelated main lookup", (done) => {
+			it("reference paths do not leak into a sibling/unrelated main lookup", (t, done) => {
 				// When references are loaded but the request is made from the
 				// main context, the reference's alias target must not win over
 				// the main's target — even if the reference's target also exists.
@@ -1137,7 +1179,10 @@ describe("TsconfigPathsPlugin", () => {
 					{},
 					(err, result) => {
 						if (err) return done(err);
-						expect(result).not.toEqual(path.join(refDir, "ref-lib", "foo.ts"));
+						assert.notDeepStrictEqual(
+							result,
+							path.join(refDir, "ref-lib", "foo.ts"),
+						);
 						done();
 					},
 				);
@@ -1153,7 +1198,7 @@ describe("TsconfigPathsPlugin", () => {
 			"extends-deep-baseurl",
 		);
 
-		it("should resolve paths whose baseUrl comes from a grandparent extends in a non-sibling directory", (done) => {
+		it("should resolve paths whose baseUrl comes from a grandparent extends in a non-sibling directory", (t, done) => {
 			const appDir = path.join(deepBaseUrlDir, "packages", "app");
 			const resolver = ResolverFactory.createResolver({
 				fileSystem,
@@ -1166,7 +1211,8 @@ describe("TsconfigPathsPlugin", () => {
 			resolver.resolve({}, appDir, "@base/utils/format", {}, (err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.join(
 						deepBaseUrlDir,
 						"tsconfig-base",
@@ -1188,7 +1234,7 @@ describe("TsconfigPathsPlugin", () => {
 			"extends-pkg-entry",
 		);
 
-		it("should resolve paths inherited from a scoped npm package tsconfig (extends '@my-tsconfig/base')", (done) => {
+		it("should resolve paths inherited from a scoped npm package tsconfig (extends '@my-tsconfig/base')", (t, done) => {
 			const resolver = ResolverFactory.createResolver({
 				fileSystem,
 				extensions: [".ts", ".tsx"],
@@ -1200,7 +1246,8 @@ describe("TsconfigPathsPlugin", () => {
 			resolver.resolve({}, pkgEntryDir, "@pkg/util", {}, (err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.join(
 						pkgEntryDir,
 						"node_modules",
@@ -1215,7 +1262,7 @@ describe("TsconfigPathsPlugin", () => {
 		});
 	});
 
-	it("should not error when tsconfig is true but tsconfig.json does not exist", (done) => {
+	it("should not error when tsconfig is true but tsconfig.json does not exist", (t, done) => {
 		const noTsconfigDir = path.resolve(
 			__dirname,
 			"fixtures",
@@ -1235,12 +1282,15 @@ describe("TsconfigPathsPlugin", () => {
 		resolver.resolve({}, noTsconfigDir, "./src/index", {}, (err, result) => {
 			if (err) return done(err);
 			if (!result) return done(new Error("No result"));
-			expect(result).toEqual(path.join(noTsconfigDir, "src", "index.ts"));
+			assert.deepStrictEqual(
+				result,
+				path.join(noTsconfigDir, "src", "index.ts"),
+			);
 			done();
 		});
 	});
 
-	it("should error when tsconfig is an explicit path but the file does not exist", (done) => {
+	it("should error when tsconfig is an explicit path but the file does not exist", (t, done) => {
 		const noTsconfigDir = path.resolve(
 			__dirname,
 			"fixtures",
@@ -1258,9 +1308,12 @@ describe("TsconfigPathsPlugin", () => {
 
 		resolver.resolve({}, noTsconfigDir, "./src/index", {}, (err, result) => {
 			try {
-				expect(err).toBeTruthy();
-				expect(/** @type {NodeJS.ErrnoException} */ (err).code).toBe("ENOENT");
-				expect(result).toBeUndefined();
+				assert.ok(err);
+				assert.strictEqual(
+					/** @type {NodeJS.ErrnoException} */ (err).code,
+					"ENOENT",
+				);
+				assert.strictEqual(result, undefined);
 				done();
 			} catch (err_) {
 				done(err_);
@@ -1276,7 +1329,7 @@ describe("TsconfigPathsPlugin", () => {
 			"upward-traversal",
 		);
 
-		it("should find tsconfig.json in parent directory when resolving from subdirectory", (done) => {
+		it("should find tsconfig.json in parent directory when resolving from subdirectory", (t, done) => {
 			const resolver = ResolverFactory.createResolver({
 				fileSystem,
 				extensions: [".ts", ".tsx"],
@@ -1294,7 +1347,8 @@ describe("TsconfigPathsPlugin", () => {
 				(err, result) => {
 					if (err) return done(err);
 					if (!result) return done(new Error("No result"));
-					expect(result).toEqual(
+					assert.deepStrictEqual(
+						result,
 						path.join(upwardDir, "src", "utils", "helper.ts"),
 					);
 					done();
@@ -1302,7 +1356,7 @@ describe("TsconfigPathsPlugin", () => {
 			);
 		});
 
-		it("should still fall through when no tsconfig.json exists anywhere up", (done) => {
+		it("should still fall through when no tsconfig.json exists anywhere up", (t, done) => {
 			const noTsconfigDir = path.resolve(
 				__dirname,
 				"fixtures",
@@ -1321,7 +1375,10 @@ describe("TsconfigPathsPlugin", () => {
 			resolver.resolve({}, noTsconfigDir, "./src/index", {}, (err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(path.join(noTsconfigDir, "src", "index.ts"));
+				assert.deepStrictEqual(
+					result,
+					path.join(noTsconfigDir, "src", "index.ts"),
+				);
 				done();
 			});
 		});
@@ -1335,7 +1392,7 @@ describe("TsconfigPathsPlugin", () => {
 			"no-baseurl-upward",
 		);
 
-		it("should resolve node_modules package instead of matching a file at tsconfig root", (done) => {
+		it("should resolve node_modules package instead of matching a file at tsconfig root", (t, done) => {
 			const resolver = ResolverFactory.createResolver({
 				fileSystem,
 				extensions: [".ts", ".js", ".json"],
@@ -1357,7 +1414,8 @@ describe("TsconfigPathsPlugin", () => {
 				(err, result) => {
 					if (err) return done(err);
 					if (!result) return done(new Error("No result"));
-					expect(result).toEqual(
+					assert.deepStrictEqual(
+						result,
 						path.join(
 							noBaseUrlDir,
 							"subdir",
@@ -1380,7 +1438,7 @@ describe("TsconfigPathsPlugin", () => {
 			"jsonc-comments",
 		);
 
-		it("should parse tsconfig.json with line comments (//)", (done) => {
+		it("should parse tsconfig.json with line comments (//)", (t, done) => {
 			const resolver = ResolverFactory.createResolver({
 				fileSystem,
 				extensions: [".ts", ".tsx"],
@@ -1398,7 +1456,8 @@ describe("TsconfigPathsPlugin", () => {
 				(err, result) => {
 					if (err) return done(err);
 					if (!result) return done(new Error("No result"));
-					expect(result).toEqual(
+					assert.deepStrictEqual(
+						result,
 						path.join(jsoncExampleDir, "src", "components", "button.ts"),
 					);
 					done();
@@ -1406,7 +1465,7 @@ describe("TsconfigPathsPlugin", () => {
 			);
 		});
 
-		it("should parse tsconfig.json with block comments (/* */)", (done) => {
+		it("should parse tsconfig.json with block comments (/* */)", (t, done) => {
 			const resolver = ResolverFactory.createResolver({
 				fileSystem,
 				extensions: [".ts", ".tsx"],
@@ -1419,14 +1478,15 @@ describe("TsconfigPathsPlugin", () => {
 			resolver.resolve({}, jsoncExampleDir, "bar/index", {}, (err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.join(jsoncExampleDir, "src", "mapped", "bar", "index.ts"),
 				);
 				done();
 			});
 		});
 
-		it("should parse tsconfig.json with mixed comments", (done) => {
+		it("should parse tsconfig.json with mixed comments", (t, done) => {
 			const resolver = ResolverFactory.createResolver({
 				fileSystem,
 				extensions: [".ts", ".tsx"],
@@ -1439,7 +1499,8 @@ describe("TsconfigPathsPlugin", () => {
 			resolver.resolve({}, jsoncExampleDir, "foo", {}, (err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.join(jsoncExampleDir, "src", "mapped", "foo", "index.ts"),
 				);
 				done();
@@ -1448,7 +1509,7 @@ describe("TsconfigPathsPlugin", () => {
 	});
 
 	describe("bug: circular project references should not cause infinite recursion", () => {
-		it("should handle circular references without hanging or crashing", (done) => {
+		it("should handle circular references without hanging or crashing", (t, done) => {
 			const aDir = path.join(referencesCircularDir, "a");
 			const resolver = ResolverFactory.createResolver({
 				fileSystem,
@@ -1465,12 +1526,12 @@ describe("TsconfigPathsPlugin", () => {
 			resolver.resolve({}, aDir, "@a/index", {}, (err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(path.join(aDir, "src", "index.ts"));
+				assert.deepStrictEqual(result, path.join(aDir, "src", "index.ts"));
 				done();
 			});
 		});
 
-		it("should resolve paths from a circular-referenced project", (done) => {
+		it("should resolve paths from a circular-referenced project", (t, done) => {
 			const aDir = path.join(referencesCircularDir, "a");
 			const bDir = path.join(referencesCircularDir, "b");
 			const resolver = ResolverFactory.createResolver({
@@ -1488,7 +1549,7 @@ describe("TsconfigPathsPlugin", () => {
 			resolver.resolve({}, bDir, "@b/index", {}, (err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(path.join(bDir, "src", "index.ts"));
+				assert.deepStrictEqual(result, path.join(bDir, "src", "index.ts"));
 				done();
 			});
 		});
@@ -1502,7 +1563,7 @@ describe("TsconfigPathsPlugin", () => {
 			"scoped-pkg-fallthrough",
 		);
 
-		it("should resolve '@helper' via the '@*' mapping when the mapped path exists", (done) => {
+		it("should resolve '@helper' via the '@*' mapping when the mapped path exists", (t, done) => {
 			const resolver = ResolverFactory.createResolver({
 				fileSystem,
 				extensions: [".ts", ".tsx", ".js"],
@@ -1514,14 +1575,15 @@ describe("TsconfigPathsPlugin", () => {
 			resolver.resolve({}, scopedPkgDir, "@helper", {}, (err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.join(scopedPkgDir, "src", "helper", "index.ts"),
 				);
 				done();
 			});
 		});
 
-		it("should fall through to node_modules for '@sentry/react' when '@*' mapping does not resolve", (done) => {
+		it("should fall through to node_modules for '@sentry/react' when '@*' mapping does not resolve", (t, done) => {
 			const resolver = ResolverFactory.createResolver({
 				fileSystem,
 				extensions: [".ts", ".tsx", ".js"],
@@ -1533,7 +1595,8 @@ describe("TsconfigPathsPlugin", () => {
 			resolver.resolve({}, scopedPkgDir, "@sentry/react", {}, (err, result) => {
 				if (err) return done(err);
 				if (!result) return done(new Error("No result"));
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.join(
 						scopedPkgDir,
 						"node_modules",
@@ -1548,7 +1611,7 @@ describe("TsconfigPathsPlugin", () => {
 	});
 
 	describe("bug: unscoped npm package in extends field", () => {
-		it("should resolve paths inherited from an unscoped npm package tsconfig (extends 'my-base-config')", (done) => {
+		it("should resolve paths inherited from an unscoped npm package tsconfig (extends 'my-base-config')", (t, done) => {
 			const resolver = ResolverFactory.createResolver({
 				fileSystem,
 				extensions: [".ts", ".tsx"],
@@ -1565,7 +1628,8 @@ describe("TsconfigPathsPlugin", () => {
 				(err, result) => {
 					if (err) return done(err);
 					if (!result) return done(new Error("No result"));
-					expect(result).toEqual(
+					assert.deepStrictEqual(
+						result,
 						path.join(
 							extendsUnscopedPkgDir,
 							"node_modules",

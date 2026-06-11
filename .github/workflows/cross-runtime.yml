@@ -49,6 +49,13 @@ jobs:
         env:
           HUSKY: "0"
 
+      # jest is no longer a project dev-dep (the Node.js test runner is used
+      # instead), so install it ad-hoc just for this job. The bridge shim
+      # (`test/_runner.js`) adapts the suite to jest's globals exactly as it
+      # does on the legacy-test matrix.
+      - name: Install jest
+        run: npm install --no-save --no-package-lock --no-audit jest@^30
+
       - name: Use Deno
         uses: denoland/setup-deno@667a34cdef165d8d2b2e98dde39547c9daac7282 # v2.0.4
         with:

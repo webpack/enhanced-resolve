@@ -1,8 +1,11 @@
 "use strict";
 
+const assert = require("assert");
 const fs = require("fs");
+
 const path = require("path");
 const { ResolverFactory } = require("../");
+const { beforeEach, describe, it } = require("./_runner");
 
 const browserModule = path.join(__dirname, "fixtures", "browser-module");
 
@@ -10,7 +13,7 @@ const browserModule = path.join(__dirname, "fixtures", "browser-module");
  * @param {string[]} args args
  * @returns {string} path
  */
-function p(...args) {
+function pp(...args) {
 	return path.join(browserModule, ...args);
 }
 
@@ -30,66 +33,83 @@ describe("browserField", () => {
 		});
 	});
 
-	it("should ignore", (done) => {
-		resolver.resolve({}, p(), "./lib/ignore", {}, (err, result) => {
+	it("should ignore", (t, done) => {
+		resolver.resolve({}, pp(), "./lib/ignore", {}, (err, result) => {
 			if (err) throw err;
-			expect(result).toBe(false);
+			assert.strictEqual(result, false);
 			done();
 		});
 	});
 
 	it("should ignore #2", () => {
-		expect(resolver.resolveSync({}, p(), "./lib/ignore")).toBe(false);
-		expect(resolver.resolveSync({}, p(), "./lib/ignore.js")).toBe(false);
-		expect(resolver.resolveSync({}, p("lib"), "./ignore")).toBe(false);
-		expect(resolver.resolveSync({}, p("lib"), "./ignore.js")).toBe(false);
+		assert.strictEqual(resolver.resolveSync({}, pp(), "./lib/ignore"), false);
+		assert.strictEqual(
+			resolver.resolveSync({}, pp(), "./lib/ignore.js"),
+			false,
+		);
+		assert.strictEqual(resolver.resolveSync({}, pp("lib"), "./ignore"), false);
+		assert.strictEqual(
+			resolver.resolveSync({}, pp("lib"), "./ignore.js"),
+			false,
+		);
 	});
 
 	it("should replace a file", () => {
-		expect(resolver.resolveSync({}, p(), "./lib/replaced")).toEqual(
-			p("lib", "browser.js"),
+		assert.deepStrictEqual(
+			resolver.resolveSync({}, pp(), "./lib/replaced"),
+			pp("lib", "browser.js"),
 		);
-		expect(resolver.resolveSync({}, p(), "./lib/replaced.js")).toEqual(
-			p("lib", "browser.js"),
+		assert.deepStrictEqual(
+			resolver.resolveSync({}, pp(), "./lib/replaced.js"),
+			pp("lib", "browser.js"),
 		);
-		expect(resolver.resolveSync({}, p("lib"), "./replaced")).toEqual(
-			p("lib", "browser.js"),
+		assert.deepStrictEqual(
+			resolver.resolveSync({}, pp("lib"), "./replaced"),
+			pp("lib", "browser.js"),
 		);
-		expect(resolver.resolveSync({}, p("lib"), "./replaced.js")).toEqual(
-			p("lib", "browser.js"),
+		assert.deepStrictEqual(
+			resolver.resolveSync({}, pp("lib"), "./replaced.js"),
+			pp("lib", "browser.js"),
 		);
 	});
 
 	it("should replace a module with a file", () => {
-		expect(resolver.resolveSync({}, p(), "module-a")).toEqual(
-			p("browser", "module-a.js"),
+		assert.deepStrictEqual(
+			resolver.resolveSync({}, pp(), "module-a"),
+			pp("browser", "module-a.js"),
 		);
-		expect(resolver.resolveSync({}, p("lib"), "module-a")).toEqual(
-			p("browser", "module-a.js"),
+		assert.deepStrictEqual(
+			resolver.resolveSync({}, pp("lib"), "module-a"),
+			pp("browser", "module-a.js"),
 		);
 	});
 
 	it("should replace a module with a module", () => {
-		expect(resolver.resolveSync({}, p(), "module-b")).toEqual(
-			p("node_modules", "module-c.js"),
+		assert.deepStrictEqual(
+			resolver.resolveSync({}, pp(), "module-b"),
+			pp("node_modules", "module-c.js"),
 		);
-		expect(resolver.resolveSync({}, p("lib"), "module-b")).toEqual(
-			p("node_modules", "module-c.js"),
+		assert.deepStrictEqual(
+			resolver.resolveSync({}, pp("lib"), "module-b"),
+			pp("node_modules", "module-c.js"),
 		);
 	});
 
 	it("should resolve in nested property", () => {
-		expect(resolver.resolveSync({}, p(), "./lib/main1.js")).toEqual(
-			p("lib", "main.js"),
+		assert.deepStrictEqual(
+			resolver.resolveSync({}, pp(), "./lib/main1.js"),
+			pp("lib", "main.js"),
 		);
-		expect(resolver.resolveSync({}, p(), "./lib/main2.js")).toEqual(
-			p("lib", "browser.js"),
+		assert.deepStrictEqual(
+			resolver.resolveSync({}, pp(), "./lib/main2.js"),
+			pp("lib", "browser.js"),
 		);
 	});
 
 	it("should check only alias field properties", () => {
-		expect(resolver.resolveSync({}, p(), "./toString")).toEqual(
-			p("lib", "toString.js"),
+		assert.deepStrictEqual(
+			resolver.resolveSync({}, pp(), "./toString"),
+			pp("lib", "toString.js"),
 		);
 	});
 
@@ -99,7 +119,7 @@ describe("browserField", () => {
 		"alias-field-extras",
 	);
 
-	it("falls through when the browser alias value equals the inner request", (done) => {
+	it("falls through when the browser alias value equals the inner request", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			extensions: [".js"],
 			aliasFields: ["browser"],
@@ -112,13 +132,16 @@ describe("browserField", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(path.join(aliasFieldExtras, "self-alias.js"));
+				assert.deepStrictEqual(
+					result,
+					path.join(aliasFieldExtras, "self-alias.js"),
+				);
 				done();
 			},
 		);
 	});
 
-	it("falls through when a module alias value equals the inner request", (done) => {
+	it("falls through when a module alias value equals the inner request", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			extensions: [".js"],
 			aliasFields: ["browser"],
@@ -126,26 +149,27 @@ describe("browserField", () => {
 		});
 		resolver.resolve({}, aliasFieldExtras, "pkg", {}, (err, result) => {
 			if (err) return done(err);
-			expect(result).toEqual(
+			assert.deepStrictEqual(
+				result,
 				path.join(aliasFieldExtras, "node_modules/pkg/index.js"),
 			);
 			done();
 		});
 	});
 
-	it("propagates a resolution error when the browser alias target cannot be found", (done) => {
+	it("propagates a resolution error when the browser alias target cannot be found", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			extensions: [".js"],
 			aliasFields: ["browser"],
 			fileSystem: fs,
 		});
 		resolver.resolve({}, aliasFieldExtras, "./points-nowhere", {}, (err) => {
-			expect(err).toBeInstanceOf(Error);
+			assert.ok(err instanceof Error);
 			done();
 		});
 	});
 
-	it("leaves resolution untouched when the configured field does not exist", (done) => {
+	it("leaves resolution untouched when the configured field does not exist", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			extensions: [".js"],
 			aliasFields: ["nonexistentField"],
@@ -158,13 +182,13 @@ describe("browserField", () => {
 			{},
 			(err) => {
 				// Either resolves or errors — we just want to exercise the path.
-				expect(err === null || err instanceof Error).toBe(true);
+				assert.strictEqual(err === null || err instanceof Error, true);
 				done();
 			},
 		);
 	});
 
-	it("short-circuits when a browser field marks a path as false (directory ignore)", (done) => {
+	it("short-circuits when a browser field marks a path as false (directory ignore)", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			extensions: [".js"],
 			aliasFields: ["browser"],
@@ -177,7 +201,7 @@ describe("browserField", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				expect(result).toBe(false);
+				assert.strictEqual(result, false);
 				done();
 			},
 		);

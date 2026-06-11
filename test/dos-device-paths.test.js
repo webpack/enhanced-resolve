@@ -1,13 +1,13 @@
 "use strict";
 
-// eslint's jest plugin static-analyzes `describe` calls and doesn't recognize
-// `describeWin` below as one — disable `require-top-level-describe` for the
-// whole file rather than scatter per-test ignore comments.
-/* eslint-disable jest/require-top-level-describe, jsdoc/reject-any-type */
-
+const assert = require("assert");
 const fs = require("fs");
+
+/* eslint-disable jsdoc/reject-any-type */
+
 const path = require("path");
 const { ResolverFactory } = require("../");
+const { describe, test } = require("./_runner");
 
 // DOS device paths (`\\?\…`, `\\.\…`) are Windows-only constructs. The real
 // resolver tests below hit the actual filesystem through those prefixes, so
@@ -35,26 +35,30 @@ describeWin("DOS device path resolution (Windows)", () => {
 	});
 
 	test("resolves a relative request against a \\\\?\\ context", async () => {
-		await expect(resolver.resolvePromise({}, dosFixtures, "./a")).resolves.toBe(
+		assert.strictEqual(
+			await resolver.resolvePromise({}, dosFixtures, "./a"),
 			path.join(dosFixtures, "a.js"),
 		);
 	});
 
 	test("resolves a relative request to a subdirectory's index.js", async () => {
-		await expect(
-			resolver.resolvePromise({}, dosFixtures, "./foo"),
-		).resolves.toBe(path.join(dosFixtures, "foo", "index.js"));
+		assert.strictEqual(
+			await resolver.resolvePromise({}, dosFixtures, "./foo"),
+			path.join(dosFixtures, "foo", "index.js"),
+		);
 	});
 
 	test("resolves '.' to index.js in a \\\\?\\ context", async () => {
-		await expect(
-			resolver.resolvePromise({}, path.join(dosFixtures, "foo"), "."),
-		).resolves.toBe(path.join(dosFixtures, "foo", "index.js"));
+		assert.strictEqual(
+			await resolver.resolvePromise({}, path.join(dosFixtures, "foo"), "."),
+			path.join(dosFixtures, "foo", "index.js"),
+		);
 	});
 
 	test("resolves an absolute \\\\?\\ request regardless of context", async () => {
 		const request = path.join(dosFixtures, "a");
-		await expect(resolver.resolvePromise({}, fixtures, request)).resolves.toBe(
+		assert.strictEqual(
+			await resolver.resolvePromise({}, fixtures, request),
 			path.join(dosFixtures, "a.js"),
 		);
 	});
@@ -62,7 +66,8 @@ describeWin("DOS device path resolution (Windows)", () => {
 	test("resolves through the \\\\.\\ device namespace", async () => {
 		// The `\\.\` walk used to infinite-loop in `cdUp` once it reached
 		// the bare `\` root — this test proves it terminates.
-		await expect(resolver.resolvePromise({}, dotFixtures, "./a")).resolves.toBe(
+		assert.strictEqual(
+			await resolver.resolvePromise({}, dotFixtures, "./a"),
 			path.join(dotFixtures, "a.js"),
 		);
 	});
@@ -71,25 +76,28 @@ describeWin("DOS device path resolution (Windows)", () => {
 		// The literal `?` inside `\\?\` must not be mistaken for a query
 		// separator — the real query is the one trailing the path.
 		const request = `${path.join(dosFixtures, "a")}?foo=bar`;
-		await expect(resolver.resolvePromise({}, fixtures, request)).resolves.toBe(
+		assert.strictEqual(
+			await resolver.resolvePromise({}, fixtures, request),
 			`${path.join(dosFixtures, "a.js")}?foo=bar`,
 		);
 	});
 
 	test("preserves a fragment on a \\\\?\\ request", async () => {
 		const request = `${path.join(dosFixtures, "a")}#frag`;
-		await expect(resolver.resolvePromise({}, fixtures, request)).resolves.toBe(
+		assert.strictEqual(
+			await resolver.resolvePromise({}, fixtures, request),
 			`${path.join(dosFixtures, "a.js")}#frag`,
 		);
 	});
 
 	test("rejects a missing file under a DOS device context", async () => {
-		await expect(
+		await assert.rejects(
 			resolver.resolvePromise({}, dosFixtures, "./does-not-exist"),
-		).rejects.toThrow(/Can't resolve/);
+			/Can't resolve/,
+		);
 	});
 
-	test("locates the nearest package.json when resolving through \\\\?\\", (done) => {
+	test("locates the nearest package.json when resolving through \\\\?\\", (t, done) => {
 		// Uses the callback form because the `request` (third callback arg)
 		// carries `descriptionFilePath`, which the promise form drops.
 		resolver.resolve(
@@ -99,10 +107,11 @@ describeWin("DOS device path resolution (Windows)", () => {
 			{},
 			(err, result, request) => {
 				if (err) return done(err);
-				expect(result).toBe(path.join(dosFixtures, "foo", "index.js"));
+				assert.strictEqual(result, path.join(dosFixtures, "foo", "index.js"));
 				// The description-file walk must terminate — if `cdUp` didn't
 				// treat bare `\` as a root, this callback would never fire.
-				expect(/** @type {any} */ (request).descriptionFilePath).toBe(
+				assert.strictEqual(
+					/** @type {any} */ (request).descriptionFilePath,
 					path.join(dosFixtures, "foo", "package.json"),
 				);
 				done();

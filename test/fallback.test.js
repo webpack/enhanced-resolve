@@ -1,7 +1,10 @@
 "use strict";
 
+const assert = require("assert");
+
 const { Volume } = require("memfs");
 const { ResolverFactory } = require("../");
+const { beforeEach, describe, it } = require("./_runner");
 
 describe("fallback", () => {
 	let resolver;
@@ -46,65 +49,96 @@ describe("fallback", () => {
 	});
 
 	it("should resolve a not aliased module", () => {
-		expect(resolver.resolveSync({}, "/", "a")).toBe("/a/index");
-		expect(resolver.resolveSync({}, "/", "a/index")).toBe("/a/index");
-		expect(resolver.resolveSync({}, "/", "a/dir")).toBe("/a/dir/index");
-		expect(resolver.resolveSync({}, "/", "a/dir/index")).toBe("/a/dir/index");
+		assert.strictEqual(resolver.resolveSync({}, "/", "a"), "/a/index");
+		assert.strictEqual(resolver.resolveSync({}, "/", "a/index"), "/a/index");
+		assert.strictEqual(resolver.resolveSync({}, "/", "a/dir"), "/a/dir/index");
+		assert.strictEqual(
+			resolver.resolveSync({}, "/", "a/dir/index"),
+			"/a/dir/index",
+		);
 	});
 
 	it("should resolve an fallback module", () => {
-		expect(resolver.resolveSync({}, "/", "aliasA")).toBe("/a/index");
-		expect(resolver.resolveSync({}, "/", "aliasA/index")).toBe("/a/index");
-		expect(resolver.resolveSync({}, "/", "aliasA/dir")).toBe("/a/dir/index");
-		expect(resolver.resolveSync({}, "/", "aliasA/dir/index")).toBe(
+		assert.strictEqual(resolver.resolveSync({}, "/", "aliasA"), "/a/index");
+		assert.strictEqual(
+			resolver.resolveSync({}, "/", "aliasA/index"),
+			"/a/index",
+		);
+		assert.strictEqual(
+			resolver.resolveSync({}, "/", "aliasA/dir"),
+			"/a/dir/index",
+		);
+		assert.strictEqual(
+			resolver.resolveSync({}, "/", "aliasA/dir/index"),
 			"/a/dir/index",
 		);
 	});
 
 	it("should resolve an ignore module", () => {
-		expect(resolver.resolveSync({}, "/", "ignored")).toBe(false);
+		assert.strictEqual(resolver.resolveSync({}, "/", "ignored"), false);
 	});
 
 	it("should resolve a recursive aliased module", () => {
-		expect(resolver.resolveSync({}, "/", "recursive")).toBe("/recursive/index");
-		expect(resolver.resolveSync({}, "/", "recursive/index")).toBe(
+		assert.strictEqual(
+			resolver.resolveSync({}, "/", "recursive"),
 			"/recursive/index",
 		);
-		expect(resolver.resolveSync({}, "/", "recursive/dir")).toBe(
+		assert.strictEqual(
+			resolver.resolveSync({}, "/", "recursive/index"),
+			"/recursive/index",
+		);
+		assert.strictEqual(
+			resolver.resolveSync({}, "/", "recursive/dir"),
 			"/recursive/dir/index",
 		);
-		expect(resolver.resolveSync({}, "/", "recursive/dir/index")).toBe(
+		assert.strictEqual(
+			resolver.resolveSync({}, "/", "recursive/dir/index"),
 			"/recursive/dir/index",
 		);
-		expect(resolver.resolveSync({}, "/", "recursive/file")).toBe(
+		assert.strictEqual(
+			resolver.resolveSync({}, "/", "recursive/file"),
 			"/recursive/dir/file",
 		);
 	});
 
 	it("should resolve a file aliased module with a query", () => {
-		expect(resolver.resolveSync({}, "/", "b?query")).toBe("/b/index?query");
-		expect(resolver.resolveSync({}, "/", "c?query")).toBe("/c/index?query");
+		assert.strictEqual(
+			resolver.resolveSync({}, "/", "b?query"),
+			"/b/index?query",
+		);
+		assert.strictEqual(
+			resolver.resolveSync({}, "/", "c?query"),
+			"/c/index?query",
+		);
 	});
 
 	it("should resolve a path in a file aliased module", () => {
-		expect(resolver.resolveSync({}, "/", "b/index")).toBe("/b/index");
-		expect(resolver.resolveSync({}, "/", "b/dir")).toBe("/b/dir/index");
-		expect(resolver.resolveSync({}, "/", "b/dir/index")).toBe("/b/dir/index");
-		expect(resolver.resolveSync({}, "/", "c/index")).toBe("/c/index");
-		expect(resolver.resolveSync({}, "/", "c/dir")).toBe("/c/dir/index");
-		expect(resolver.resolveSync({}, "/", "c/dir/index")).toBe("/c/dir/index");
+		assert.strictEqual(resolver.resolveSync({}, "/", "b/index"), "/b/index");
+		assert.strictEqual(resolver.resolveSync({}, "/", "b/dir"), "/b/dir/index");
+		assert.strictEqual(
+			resolver.resolveSync({}, "/", "b/dir/index"),
+			"/b/dir/index",
+		);
+		assert.strictEqual(resolver.resolveSync({}, "/", "c/index"), "/c/index");
+		assert.strictEqual(resolver.resolveSync({}, "/", "c/dir"), "/c/dir/index");
+		assert.strictEqual(
+			resolver.resolveSync({}, "/", "c/dir/index"),
+			"/c/dir/index",
+		);
 	});
 
 	it("should resolve a file in multiple aliased dirs", () => {
-		expect(resolver.resolveSync({}, "/", "multiAlias/dir/file")).toBe(
+		assert.strictEqual(
+			resolver.resolveSync({}, "/", "multiAlias/dir/file"),
 			"/e/dir/file",
 		);
-		expect(resolver.resolveSync({}, "/", "multiAlias/anotherDir")).toBe(
+		assert.strictEqual(
+			resolver.resolveSync({}, "/", "multiAlias/anotherDir"),
 			"/e/anotherDir/index",
 		);
 	});
 
-	it("should log the correct info", (done) => {
+	it("should log the correct info", (t, done) => {
 		const log = [];
 		resolver.resolve(
 			{},
@@ -113,8 +147,8 @@ describe("fallback", () => {
 			{ log: (v) => log.push(v) },
 			(err, result) => {
 				if (err) return done(err);
-				expect(result).toBe("/a/dir/index");
-				expect(log).toEqual([
+				assert.strictEqual(result, "/a/dir/index");
+				assert.deepStrictEqual(log, [
 					"resolve 'aliasA/dir' in '/'",
 					"  Parsed request is a module",
 					"  No description file found in / or above",

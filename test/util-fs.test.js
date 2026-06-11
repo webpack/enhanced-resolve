@@ -1,11 +1,14 @@
 "use strict";
 
+const assert = require("assert");
+const { decodeText, readJson } = require("../lib/util/fs");
+const { describe, it } = require("./_runner");
+
 /* eslint-disable jsdoc/reject-any-type */
 
 // `readJson` is the JSONC loader used internally by TsconfigPathsPlugin.
 // The plugin always passes stripComments:true, so the readJson-fast path
 // and other branches have no integration callers and are tested directly.
-const { decodeText, readJson } = require("../lib/util/fs");
 
 /**
  * @param {any} fileSystem file system
@@ -34,7 +37,7 @@ describe("util/fs readJson", () => {
 			},
 		});
 		const result = await readJsonPromise(fileSystem, "/a/package.json");
-		expect(result).toEqual(content);
+		assert.deepStrictEqual(result, content);
 	});
 
 	it("rejects if readJson yields an error", async () => {
@@ -46,9 +49,10 @@ describe("util/fs readJson", () => {
 				callback(null, Buffer.from("{}"));
 			},
 		});
-		await expect(
+		await assert.rejects(
 			readJsonPromise(fileSystem, "/a/package.json"),
-		).rejects.toThrow("boom");
+			(err) => err instanceof Error && err.message.includes("boom"),
+		);
 	});
 
 	it("falls back to readFile when stripComments is true", async () => {
@@ -66,7 +70,7 @@ describe("util/fs readJson", () => {
 		const result = await readJsonPromise(fileSystem, "/a/tsconfig.json", {
 			stripComments: true,
 		});
-		expect(result).toEqual({ a: 1, b: [1, 2] });
+		assert.deepStrictEqual(result, { a: 1, b: [1, 2] });
 	});
 
 	it("falls back to readFile when readJson is unavailable", async () => {
@@ -76,7 +80,7 @@ describe("util/fs readJson", () => {
 			},
 		});
 		const result = await readJsonPromise(fileSystem, "/a/package.json");
-		expect(result).toEqual({ hello: "world" });
+		assert.deepStrictEqual(result, { hello: "world" });
 	});
 
 	it("decodes a Uint8Array (non-Node file system) result", async () => {
@@ -86,7 +90,7 @@ describe("util/fs readJson", () => {
 			},
 		});
 		const result = await readJsonPromise(fileSystem, "/a/package.json");
-		expect(result).toEqual({ hello: "world" });
+		assert.deepStrictEqual(result, { hello: "world" });
 	});
 
 	it("decodes a Uint8Array result when stripping comments", async () => {
@@ -103,7 +107,7 @@ describe("util/fs readJson", () => {
 		const result = await readJsonPromise(fileSystem, "/a/tsconfig.json", {
 			stripComments: true,
 		});
-		expect(result).toEqual({ a: 1, b: [1, 2] });
+		assert.deepStrictEqual(result, { a: 1, b: [1, 2] });
 	});
 
 	it("rejects when readFile errors", async () => {
@@ -112,9 +116,10 @@ describe("util/fs readJson", () => {
 				callback(new Error("read-fail"));
 			},
 		});
-		await expect(
+		await assert.rejects(
 			readJsonPromise(fileSystem, "/a/package.json"),
-		).rejects.toThrow("read-fail");
+			(err) => err instanceof Error && err.message.includes("read-fail"),
+		);
 	});
 
 	it("invokes the callback synchronously when the file system is synchronous", () => {
@@ -135,8 +140,8 @@ describe("util/fs readJson", () => {
 				sync = true;
 			},
 		);
-		expect(sync).toBe(true);
-		expect(result).toEqual({ sync: true });
+		assert.strictEqual(sync, true);
+		assert.deepStrictEqual(result, { sync: true });
 	});
 
 	// Regression: a file system may return a string from readFile (more likely
@@ -151,7 +156,7 @@ describe("util/fs readJson", () => {
 		const result = await readJsonPromise(fileSystem, "/a/tsconfig.json", {
 			stripComments: true,
 		});
-		expect(result).toEqual({ a: 1, b: [1, 2] });
+		assert.deepStrictEqual(result, { a: 1, b: [1, 2] });
 	});
 
 	it("parses string content without stripComments", async () => {
@@ -161,7 +166,7 @@ describe("util/fs readJson", () => {
 			},
 		});
 		const result = await readJsonPromise(fileSystem, "/a/package.json");
-		expect(result).toEqual({ hello: "world" });
+		assert.deepStrictEqual(result, { hello: "world" });
 	});
 
 	it("serves repeated stripComments reads of the same buffer from cache", async () => {
@@ -179,32 +184,35 @@ describe("util/fs readJson", () => {
 		const b = await readJsonPromise(fileSystem, "/a/tsconfig.json", {
 			stripComments: true,
 		});
-		expect(a).toEqual({ cached: true });
-		expect(b).toBe(a); // same cached object instance for the same buffer
-		expect(reads).toBe(2);
+		assert.deepStrictEqual(a, { cached: true });
+		assert.strictEqual(b, a); // same cached object instance for the same buffer
+		assert.strictEqual(reads, 2);
 	});
 });
 
 describe("util/fs decodeText", () => {
 	it("returns a string unchanged", () => {
-		expect(decodeText("日本語")).toBe("日本語");
+		assert.strictEqual(decodeText("日本語"), "日本語");
 	});
 
 	it("decodes a Node Buffer as utf-8", () => {
-		expect(decodeText(Buffer.from("日本語", "utf8"))).toBe("日本語");
+		assert.strictEqual(decodeText(Buffer.from("日本語", "utf8")), "日本語");
 	});
 
 	it("decodes a Uint8Array as utf-8", () => {
-		expect(decodeText(new TextEncoder().encode("日本語"))).toBe("日本語");
+		assert.strictEqual(
+			decodeText(new TextEncoder().encode("日本語")),
+			"日本語",
+		);
 	});
 
 	it("decodes an empty Uint8Array to an empty string", () => {
-		expect(decodeText(new Uint8Array(0))).toBe("");
+		assert.strictEqual(decodeText(new Uint8Array(0)), "");
 	});
 
 	it("decodes multi-byte characters across the buffer", () => {
 		const text = "中文 — emoji 😀 — π";
-		expect(decodeText(new TextEncoder().encode(text))).toBe(text);
+		assert.strictEqual(decodeText(new TextEncoder().encode(text)), text);
 	});
 
 	it("keeps a leading BOM identically for Buffer and Uint8Array", () => {
@@ -212,7 +220,7 @@ describe("util/fs decodeText", () => {
 		const fromBuffer = decodeText(Buffer.from(text, "utf8"));
 		const fromU8 = decodeText(new TextEncoder().encode(text));
 		// Both keep the BOM (matching Buffer.toString), so the two paths agree.
-		expect(fromBuffer).toBe(text);
-		expect(fromU8).toBe(fromBuffer);
+		assert.strictEqual(fromBuffer, text);
+		assert.strictEqual(fromU8, fromBuffer);
 	});
 });

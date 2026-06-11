@@ -1,7 +1,10 @@
 "use strict";
 
+const assert = require("assert");
+
 const getPaths = require("../lib/getPaths");
 const { getPathsCached } = require("../lib/getPaths");
+const { describe, it } = require("./_runner");
 
 /**
  * @type {[string, { paths: string[], segments: string[] }][]}
@@ -21,8 +24,8 @@ describe("get paths", () => {
 	for (const case_ of cases) {
 		it(case_[0], () => {
 			const { paths, segments } = getPaths(case_[0]);
-			expect(paths).toEqual(case_[1].paths);
-			expect(segments).toEqual(case_[1].segments);
+			assert.deepStrictEqual(paths, case_[1].paths);
+			assert.deepStrictEqual(segments, case_[1].segments);
 		});
 	}
 });
@@ -33,15 +36,19 @@ describe("getPathsCached", () => {
 		const a = getPathsCached(fs, "/a/b/c");
 		const b = getPathsCached(fs, "/a/b/c");
 		// Same cached object — paths/segments arrays are shared.
-		expect(a).toBe(b);
-		expect(a.paths).toBe(b.paths);
-		expect(a.segments).toBe(b.segments);
+		assert.strictEqual(a, b);
+		assert.strictEqual(a.paths, b.paths);
+		assert.strictEqual(a.segments, b.segments);
 	});
 
 	it("still returns correct values after cache miss", () => {
 		const fs = /** @type {import("../lib/Resolver").FileSystem} */ ({});
-		expect(getPathsCached(fs, "/a/b").paths).toEqual(["/a/b", "/a", "/"]);
-		expect(getPathsCached(fs, "/x/y/z").paths).toEqual([
+		assert.deepStrictEqual(getPathsCached(fs, "/a/b").paths, [
+			"/a/b",
+			"/a",
+			"/",
+		]);
+		assert.deepStrictEqual(getPathsCached(fs, "/x/y/z").paths, [
 			"/x/y/z",
 			"/x/y",
 			"/x",
@@ -53,9 +60,9 @@ describe("getPathsCached", () => {
 		const fs = /** @type {import("../lib/Resolver").FileSystem} */ ({});
 		const a = getPathsCached(fs, "/");
 		const b = getPathsCached(fs, "/");
-		expect(a).toBe(b);
-		expect(a.paths).toEqual(["/"]);
-		expect(a.segments).toEqual([""]);
+		assert.strictEqual(a, b);
+		assert.deepStrictEqual(a.paths, ["/"]);
+		assert.deepStrictEqual(a.segments, [""]);
 	});
 
 	it("keeps caches independent across filesystems", () => {
@@ -64,7 +71,7 @@ describe("getPathsCached", () => {
 		const first = getPathsCached(fsA, "/p/q");
 		const second = getPathsCached(fsB, "/p/q");
 		// Values equal but not the same object — separate cache namespaces.
-		expect(first).not.toBe(second);
-		expect(first.paths).toEqual(second.paths);
+		assert.notStrictEqual(first, second);
+		assert.deepStrictEqual(first.paths, second.paths);
 	});
 });

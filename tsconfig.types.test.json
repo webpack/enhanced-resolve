@@ -5,7 +5,7 @@
     "noImplicitThis": true,
     "alwaysStrict": true,
     "strictNullChecks": true,
-    "types": ["node", "jest"]
+    "types": ["node"]
   },
   "include": ["test/*.js"]
 }

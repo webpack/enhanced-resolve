@@ -1,8 +1,11 @@
 "use strict";
 
+const assert = require("assert");
 const fs = require("fs");
+
 const path = require("path");
 const { CachedInputFileSystem, ResolverFactory } = require("../");
+const { after, before, beforeEach, describe, it } = require("./_runner");
 
 const nodeFileSystem = new CachedInputFileSystem(fs, 4000);
 const fixture = path.resolve(__dirname, "fixtures", "pnp");
@@ -28,7 +31,7 @@ describe("pnp", () => {
 	let resolver;
 
 	if (isAdmin) {
-		beforeAll(() => {
+		before(() => {
 			fs.symlinkSync("dir", path.resolve(fixture, "pkg/symlink"), "dir");
 		});
 	}
@@ -79,29 +82,29 @@ describe("pnp", () => {
 	});
 
 	if (isAdmin) {
-		afterAll(() => {
+		after(() => {
 			fs.unlinkSync(path.resolve(fixture, "pkg/symlink"));
 		});
 	}
 
-	it("should resolve by going through the pnp api", (done) => {
+	it("should resolve by going through the pnp api", (t, done) => {
 		pnpApi.mocks.set("pkg", path.resolve(fixture, "pkg"));
 		resolver.resolve({}, __dirname, "pkg/dir/index.js", {}, (err, result) => {
 			if (err) return done(err);
-			expect(result).toEqual(path.resolve(fixture, "pkg/dir/index.js"));
+			assert.deepStrictEqual(result, path.resolve(fixture, "pkg/dir/index.js"));
 			done();
 		});
 	});
 
-	it("should not resolve a not fully specified request when fullySpecified is set", (done) => {
+	it("should not resolve a not fully specified request when fullySpecified is set", (t, done) => {
 		pnpApi.mocks.set("pkg", path.resolve(fixture, "pkg"));
 		resolver.resolve({}, __dirname, "pkg/dir/index", {}, (err, _result) => {
-			expect(err).toBeInstanceOf(Error);
+			assert.ok(err instanceof Error);
 			done();
 		});
 	});
 
-	it("should track dependency to the pnp api", (done) => {
+	it("should track dependency to the pnp api", (t, done) => {
 		pnpApi.mocks.set("pkg", path.resolve(fixture, "pkg"));
 		pnpApi.mocks.set("pnpapi", path.resolve(fixture, ".pnp.js"));
 		const fileDependencies = new Set();
@@ -112,29 +115,32 @@ describe("pnp", () => {
 			{ fileDependencies },
 			(err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(path.resolve(fixture, "pkg/dir/index.js"));
-				expect([...fileDependencies]).toContainEqual(
-					path.resolve(fixture, ".pnp.js"),
+				assert.deepStrictEqual(
+					result,
+					path.resolve(fixture, "pkg/dir/index.js"),
+				);
+				assert.ok(
+					[...fileDependencies].includes(path.resolve(fixture, ".pnp.js")),
 				);
 				done();
 			},
 		);
 	});
 
-	it("should resolve module names with package.json", (done) => {
+	it("should resolve module names with package.json", (t, done) => {
 		pnpApi.mocks.set("pkg", path.resolve(fixture, "pkg"));
 		resolver.resolve({}, __dirname, "pkg", {}, (err, result) => {
 			if (err) return done(err);
-			expect(result).toEqual(path.resolve(fixture, "pkg/main.js"));
+			assert.deepStrictEqual(result, path.resolve(fixture, "pkg/main.js"));
 			done();
 		});
 	});
 
-	it("should resolve namespaced module names", (done) => {
+	it("should resolve namespaced module names", (t, done) => {
 		pnpApi.mocks.set("@user/pkg", path.resolve(fixture, "pkg"));
 		resolver.resolve({}, __dirname, "@user/pkg", {}, (err, result) => {
 			if (err) return done(err);
-			expect(result).toEqual(path.resolve(fixture, "pkg/main.js"));
+			assert.deepStrictEqual(result, path.resolve(fixture, "pkg/main.js"));
 			done();
 		});
 	});
@@ -142,7 +148,7 @@ describe("pnp", () => {
 	it(
 		"should not resolve symlinks",
 		isAdmin
-			? (done) => {
+			? (t, done) => {
 					pnpApi.mocks.set("pkg", path.resolve(fixture, "pkg"));
 					resolverFuzzy.resolve(
 						{},
@@ -151,7 +157,8 @@ describe("pnp", () => {
 						{},
 						(err, result) => {
 							if (err) return done(err);
-							expect(result).toEqual(
+							assert.deepStrictEqual(
+								result,
 								path.resolve(fixture, "pkg/symlink/index.js"),
 							);
 							done();
@@ -161,7 +168,7 @@ describe("pnp", () => {
 			: undefined,
 	);
 
-	it("should properly deal with other extensions", (done) => {
+	it("should properly deal with other extensions", (t, done) => {
 		pnpApi.mocks.set("@user/pkg", path.resolve(fixture, "pkg"));
 		resolverFuzzy.resolve(
 			{},
@@ -170,7 +177,8 @@ describe("pnp", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.resolve(fixture, "pkg/typescript/index.ts"),
 				);
 				done();
@@ -178,7 +186,7 @@ describe("pnp", () => {
 		);
 	});
 
-	it("should properly deal package.json alias", (done) => {
+	it("should properly deal package.json alias", (t, done) => {
 		pnpApi.mocks.set("pkg", path.resolve(fixture, "pkg"));
 		resolverFuzzy.resolve(
 			{},
@@ -187,7 +195,8 @@ describe("pnp", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.resolve(fixture, "pkg/package-alias/browser.js"),
 				);
 				done();
@@ -195,7 +204,7 @@ describe("pnp", () => {
 		);
 	});
 
-	it("should prefer pnp resolves over normal modules", (done) => {
+	it("should prefer pnp resolves over normal modules", (t, done) => {
 		pnpApi.mocks.set("m1", path.resolve(fixture, "../node_modules/m2"));
 		resolver.resolve(
 			{},
@@ -204,7 +213,8 @@ describe("pnp", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.resolve(fixture, "../node_modules/m2/b.js"),
 				);
 				done();
@@ -212,7 +222,7 @@ describe("pnp", () => {
 		);
 	});
 
-	it("should prefer alternative module directories over pnp", (done) => {
+	it("should prefer alternative module directories over pnp", (t, done) => {
 		pnpApi.mocks.set("m1", path.resolve(fixture, "../node_modules/m2"));
 		resolver.resolve(
 			{},
@@ -221,7 +231,8 @@ describe("pnp", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.resolve(
 						__dirname,
 						"fixtures/prefer-pnp/alternative-modules/m1/b.js",
@@ -232,7 +243,7 @@ describe("pnp", () => {
 		);
 	});
 
-	it("should prefer alias over pnp resolves", (done) => {
+	it("should prefer alias over pnp resolves", (t, done) => {
 		pnpApi.mocks.set("alias", path.resolve(fixture, "pkg/dir"));
 		resolver.resolve(
 			{},
@@ -241,13 +252,13 @@ describe("pnp", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(path.resolve(fixture, "pkg/index.js"));
+				assert.deepStrictEqual(result, path.resolve(fixture, "pkg/index.js"));
 				done();
 			},
 		);
 	});
 
-	it("should prefer pnp over modules after node_modules", (done) => {
+	it("should prefer pnp over modules after node_modules", (t, done) => {
 		pnpApi.mocks.set("m2", path.resolve(fixture, "pkg"));
 		resolver.resolve(
 			{},
@@ -256,13 +267,13 @@ describe("pnp", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(path.resolve(fixture, "pkg/index.js"));
+				assert.deepStrictEqual(result, path.resolve(fixture, "pkg/index.js"));
 				done();
 			},
 		);
 	});
 
-	it("should fallback to alternatives when pnp resolving fails", (done) => {
+	it("should fallback to alternatives when pnp resolving fails", (t, done) => {
 		resolver.resolve(
 			{},
 			path.resolve(__dirname, "fixtures"),
@@ -270,13 +281,16 @@ describe("pnp", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(path.resolve(fixture, "../pnp-a/m2/a.js"));
+				assert.deepStrictEqual(
+					result,
+					path.resolve(fixture, "../pnp-a/m2/a.js"),
+				);
 				done();
 			},
 		);
 	});
 
-	it("should fallback to alternatives when pnp doesn't manage the issuer", (done) => {
+	it("should fallback to alternatives when pnp doesn't manage the issuer", (t, done) => {
 		pnpApi.ignoredIssuers.add(`${path.resolve(__dirname, "fixtures")}/`);
 		// Add the wrong path on purpose to make sure the issuer is ignored
 		pnpApi.mocks.set("m2", path.resolve(fixture, "pkg"));
@@ -287,7 +301,8 @@ describe("pnp", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(
+				assert.deepStrictEqual(
+					result,
 					path.resolve(__dirname, "fixtures/node_modules/m2/b.js"),
 				);
 				done();
@@ -295,7 +310,7 @@ describe("pnp", () => {
 		);
 	});
 
-	it("should handle the exports field when using PnP", (done) => {
+	it("should handle the exports field when using PnP", (t, done) => {
 		pnpApi.mocks.set("m1", path.resolve(fixture, "pkg3"));
 		resolver.resolve(
 			{},
@@ -304,13 +319,13 @@ describe("pnp", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(path.resolve(fixture, "pkg3/a.js"));
+				assert.deepStrictEqual(result, path.resolve(fixture, "pkg3/a.js"));
 				done();
 			},
 		);
 	});
 
-	it("should handle the exports field when using PnP (with sub path)", (done) => {
+	it("should handle the exports field when using PnP (with sub path)", (t, done) => {
 		pnpApi.mocks.set("@user/m1", path.resolve(fixture, "pkg3"));
 		resolver.resolve(
 			{},
@@ -319,13 +334,13 @@ describe("pnp", () => {
 			{},
 			(err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(path.resolve(fixture, "pkg3/a.js"));
+				assert.deepStrictEqual(result, path.resolve(fixture, "pkg3/a.js"));
 				done();
 			},
 		);
 	});
 
-	it("falls through when pnpApi throws an UNDECLARED_DEPENDENCY error and logs each line", (done) => {
+	it("falls through when pnpApi throws an UNDECLARED_DEPENDENCY error and logs each line", (t, done) => {
 		const pnpApi = {
 			resolveToUnqualified() {
 				const err =
@@ -349,16 +364,20 @@ describe("pnp", () => {
 			{ log: (m) => logs.push(m) },
 			(err, result) => {
 				if (err) return done(err);
-				expect(result).toEqual(path.resolve(fixture, "../pnp-a/m2/a.js"));
-				expect(
+				assert.deepStrictEqual(
+					result,
+					path.resolve(fixture, "../pnp-a/m2/a.js"),
+				);
+				assert.strictEqual(
 					logs.some((l) => l.includes("request is not managed by the pnpapi")),
-				).toBe(true);
+					true,
+				);
 				done();
 			},
 		);
 	});
 
-	it("propagates unexpected errors from pnpApi", (done) => {
+	it("propagates unexpected errors from pnpApi", (t, done) => {
 		const pnpApi = {
 			resolveToUnqualified() {
 				throw new Error("unexpected-pnp");
@@ -375,14 +394,17 @@ describe("pnp", () => {
 			"m2/a.js",
 			{},
 			(err) => {
-				expect(err).toBeTruthy();
-				expect(/** @type {Error} */ (err).message).toBe("unexpected-pnp");
+				assert.ok(err);
+				assert.strictEqual(
+					/** @type {Error} */ (err).message,
+					"unexpected-pnp",
+				);
 				done();
 			},
 		);
 	});
 
-	it("returns an error when neither pnp nor the alternate find a result", (done) => {
+	it("returns an error when neither pnp nor the alternate find a result", (t, done) => {
 		const pnpApi = {
 			resolveToUnqualified() {
 				return null;
@@ -399,7 +421,7 @@ describe("pnp", () => {
 			"no-such-package",
 			{},
 			(err) => {
-				expect(err).toBeInstanceOf(Error);
+				assert.ok(err instanceof Error);
 				done();
 			},
 		);
@@ -413,9 +435,9 @@ describe("pnp", () => {
 				value: "0.0.0",
 				configurable: true,
 			});
-			expect(() =>
+			assert.doesNotThrow(() =>
 				ResolverFactory.createResolver({ fileSystem: nodeFileSystem }),
-			).not.toThrow();
+			);
 		} finally {
 			if (originalPnp === undefined) {
 				// eslint-disable-next-line jsdoc/reject-any-type
