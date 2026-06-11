@@ -24,31 +24,46 @@ jobs:
       - run: npm ci
 
       - run: npm run lint
-  # TODO: drop this entire job once `engines.node` is bumped to >= 18.
-  # Removing the job also makes `jest.config.js`, `test/_runner.js`'s jest
-  # branch, and `test/polyfill-text-encoding.js` dead code.
-  #
-  # The `node:test` based suite needs Node.js 18+. The library itself still
-  # supports Node.js >= 10.13, so legacy versions run the same test files
-  # under jest, which the test runner shim (`test/_runner.js`) bridges to
-  # transparently. jest, memfs and the runtime deps are installed ad-hoc so
-  # the modern dev toolchain (eslint, typescript, prettier) is never required
-  # by the legacy matrix.
-  legacy-test:
+  test:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
-        node-version: [10.x, 12.x, 14.x, 16.x]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: [10.x, 12.x, 14.x, 16.x, 18.x, 20.x, 22.x, 24.x, 25.x]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      # macOS arm64 runners don't ship Node.js 10/12/14, so force x64.
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        id: calculate_architecture
+        with:
+          result-encoding: string
+          script: |
+            if ('${{ matrix.os }}' === 'macos-latest' && ('${{ matrix['node-version'] }}' === '10.x' || '${{ matrix['node-version'] }}' === '12.x' || '${{ matrix['node-version'] }}' === '14.x')) {
+              return "x64"
+            } else {
+              return ''
+            }
 
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: ${{ matrix.node-version }}
+          architecture: ${{ steps.calculate_architecture.outputs.result }}
+          # Legacy Node (10-16) reinstalls deps after dropping the lockfile,
+          # so there's nothing for setup-node's npm cache to key on.
+          cache: ${{ (matrix.node-version == '10.x' || matrix.node-version == '12.x' || matrix.node-version == '14.x' || matrix.node-version == '16.x') && '' || 'npm' }}
 
+      # TODO: drop the legacy install + jest steps below once `engines.node`
+      # is bumped to >= 18. That also makes `jest.config.js`, the jest branch
+      # of `test/_runner.js`, and `test/polyfill-text-encoding.js` dead code.
+      #
+      # The `node:test` based suite needs Node.js 18+; the library itself
+      # still supports Node.js >= 10.13, so legacy versions run the same test
+      # files under jest via the runner shim (`test/_runner.js`). jest, memfs
+      # and the runtime deps are installed ad-hoc so the modern dev toolchain
+      # (eslint, typescript, prettier) is never required by the legacy leg.
       - name: Install jest (Node 10)
         if: matrix.node-version == '10.x'
         shell: bash
@@ -58,7 +73,7 @@ jobs:
           yarn add -D jest@^27 memfs@^3 --ignore-scripts --ignore-engines
 
       - name: Install jest (Node 12-16)
-        if: matrix.node-version != '10.x'
+        if: matrix.node-version == '12.x' || matrix.node-version == '14.x' || matrix.node-version == '16.x'
         shell: bash
         run: |
           rm -f package-lock.json
@@ -66,40 +81,27 @@ jobs:
           npm install -g npm@7
           npm install -D jest@^27 memfs@^3 --ignore-scripts --no-audit --prefer-offline --no-save --no-package-lock
 
-      - name: Run jest
-        run: npx jest --ci
-  test:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        node-version: [18.x, 20.x, 22.x, 24.x, 25.x]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: npm
-
       - name: Install dependencies
+        if: matrix.node-version != '10.x' && matrix.node-version != '12.x' && matrix.node-version != '14.x' && matrix.node-version != '16.x'
         run: npm ci
 
+      - name: Run tests (legacy via jest)
+        if: matrix.node-version == '10.x' || matrix.node-version == '12.x' || matrix.node-version == '14.x' || matrix.node-version == '16.x'
+        run: npx jest --ci
+
       # The built-in coverage lcov reporter and `--test-coverage-include` are
-      # only available on Node.js 22+, so older versions run the suite without
+      # only available on Node.js 22+, so 18/20 run the suite without
       # collecting coverage.
       - name: Run tests
         if: matrix.node-version == '18.x' || matrix.node-version == '20.x'
         run: npm run test:only
 
       - name: Run tests with coverage
-        if: matrix.node-version != '18.x' && matrix.node-version != '20.x'
+        if: matrix.node-version == '22.x' || matrix.node-version == '24.x' || matrix.node-version == '25.x'
         run: npm run test:coverage
 
       - uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
-        if: matrix.node-version != '18.x' && matrix.node-version != '20.x'
+        if: matrix.node-version == '22.x' || matrix.node-version == '24.x' || matrix.node-version == '25.x'
         with:
           files: ./coverage/lcov.info
           flags: integration
