@@ -1,6 +1,7 @@
 "use strict";
 
 const assert = require("assert");
+const { createResolver } = require("../lib/ResolverFactory");
 const { parseIdentifier } = require("../lib/util/identifier");
 const { describe, it } = require("./_runner");
 
@@ -197,6 +198,28 @@ describe("identifier", () => {
 
 		it("returns null for an empty input", () => {
 			assert.strictEqual(parseIdentifier(""), null);
+		});
+	});
+
+	describe("Resolver.parse() output shape", () => {
+		// ParsePlugin manually assigns these fields instead of spreading
+		// the parse() result (see lib/ParsePlugin.js). If parse() gains or
+		// loses a field, this test will fail — update ParsePlugin to match.
+		it("should return exactly the expected keys", () => {
+			const resolver = createResolver({
+				fileSystem: /** @type {import("../lib/Resolver").FileSystem} */ ({}),
+			});
+			const parsed = resolver.parse("foo");
+			const keys = Object.keys(parsed).sort();
+			assert.deepStrictEqual(keys, [
+				"directory",
+				"file",
+				"fragment",
+				"internal",
+				"module",
+				"query",
+				"request",
+			]);
 		});
 	});
 });
