@@ -1,5 +1,11 @@
 # enhanced-resolve
 
+## 5.24.1
+
+### Patch Changes
+
+- Reduce hot-path allocations in the resolve pipeline. (by [@xiaoxiaojx](https://github.com/xiaoxiaojx) in [#615](https://github.com/webpack/enhanced-resolve/pull/615))
+
 ## 5.24.0
 
 ### Minor Changes
