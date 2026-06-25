@@ -2,10 +2,10 @@
   "name": "enhanced-resolve",
   "version": "5.24.1",
   "description": "Offers a async require.resolve function. It's highly configurable.",
-  "homepage": "http://github.com/webpack/enhanced-resolve",
+  "homepage": "https://github.com/webpack/enhanced-resolve#readme",
   "repository": {
     "type": "git",
-    "url": "git://github.com/webpack/enhanced-resolve.git"
+    "url": "git+https://github.com/webpack/enhanced-resolve.git"
   },
   "license": "MIT",
   "author": "Tobias Koppers @sokra",
