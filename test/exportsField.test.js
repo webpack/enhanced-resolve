@@ -1159,6 +1159,53 @@ describe("process exports field", () => {
 				["browser"],
 			],
 		},
+		{
+			name: "incorrect exports field #8 (subpath keys inside condition)",
+			expect: new Error(
+				'Conditional exports can\'t contain subpath keys (found "." in the conditional export "import")',
+			),
+			suite: [
+				{
+					import: {
+						".": "./esm/index.js",
+						"./*": "./esm/*.js",
+					},
+					require: "./build/bundle.js",
+				},
+				".",
+				["import"],
+			],
+		},
+		{
+			name: "incorrect exports field #9 (subpath keys inside nested condition)",
+			expect: new Error(
+				'Conditional exports can\'t contain subpath keys (found "./a" in the conditional export "node")',
+			),
+			suite: [
+				{
+					import: {
+						node: {
+							"./a": "./b.js",
+						},
+					},
+				},
+				"./a",
+				["import", "node"],
+			],
+		},
+		{
+			name: "incorrect exports field #10 (subpath keys inside condition in array)",
+			expect: new Error(
+				'Conditional exports can\'t contain subpath keys (found "./x" in the conditional export "browser")',
+			),
+			suite: [
+				{
+					import: [{ browser: { "./x": "./y.js" } }, "./fallback.js"],
+				},
+				".",
+				["import", "browser"],
+			],
+		},
 		// #endregion
 
 		// #region Incorrect request
@@ -2657,6 +2704,24 @@ describe("exportsFieldPlugin", () => {
 			);
 			done();
 		});
+	});
+
+	it("throw error if subpath keys are nested in conditions", (t, done) => {
+		resolver.resolve(
+			{},
+			fixture,
+			"conditions-with-subpaths/foo",
+			{},
+			(err, result) => {
+				if (!err) return done(new Error(`expect error, got ${result}`));
+				assert.ok(err instanceof Error);
+				assert.match(
+					err.message,
+					/Conditional exports can't contain subpath keys/,
+				);
+				done();
+			},
+		);
 	});
 
 	it("throw error if exports field is invalid", (t, done) => {
