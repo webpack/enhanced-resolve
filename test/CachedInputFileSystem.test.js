@@ -423,6 +423,39 @@ describe("cachedInputFileSystem CacheBackend", () => {
 		});
 	});
 
+	it("should call cached callbacks asynchronously and in order", (t, done) => {
+		fs.stat("a", () => {
+			// cache for "a" is now populated; a burst of cached calls must
+			// stay asynchronous and preserve issue order
+			/** @type {number[]} */
+			const order = [];
+			let sync = true;
+			fs.stat("a", () => order.push(1));
+			fs.stat("a", () => order.push(2));
+			fs.stat("a", () => {
+				order.push(3);
+				assert.strictEqual(sync, false);
+				assert.deepStrictEqual(order, [1, 2, 3]);
+				done();
+			});
+			assert.deepStrictEqual(order, []);
+			sync = false;
+		});
+	});
+
+	it("should stay asynchronous for cached calls made from a cached callback", (t, done) => {
+		fs.stat("a", () => {
+			fs.stat("a", () => {
+				let sync = true;
+				fs.stat("a", () => {
+					assert.strictEqual(sync, false);
+					done();
+				});
+				sync = false;
+			});
+		});
+	});
+
 	it("should cache undefined value", (t, done) => {
 		fs.stat(undefined, (_err, result) => {
 			assert.strictEqual(result, undefined);
