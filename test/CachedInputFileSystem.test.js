@@ -443,6 +443,26 @@ describe("cachedInputFileSystem CacheBackend", () => {
 		});
 	});
 
+	it("should deliver a giant burst of cached calls exactly once each", (t, done) => {
+		fs.stat("a", () => {
+			// 600 hits spill ~1800 queue elements, exercising the retained
+			// capacity cap after the drain
+			const total = 600;
+			let called = 0;
+			/**
+			 * @param {Error | null} err error
+			 * @param {unknown} result result
+			 */
+			const onStat = (err, result) => {
+				assert.strictEqual(err, null);
+				assert.notStrictEqual(result, undefined);
+				called++;
+				if (called === total) done();
+			};
+			for (let i = 0; i < total; i++) fs.stat("a", onStat);
+		});
+	});
+
 	it("should stay asynchronous for cached calls made from a cached callback", (t, done) => {
 		fs.stat("a", () => {
 			fs.stat("a", () => {
