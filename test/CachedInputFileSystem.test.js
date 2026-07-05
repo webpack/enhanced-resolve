@@ -449,17 +449,22 @@ describe("cachedInputFileSystem CacheBackend", () => {
 			// capacity cap after the drain
 			const total = 600;
 			let called = 0;
+			/** @type {boolean[]} */
+			const delivered = Array.from({ length: total }, () => false);
 			/**
-			 * @param {Error | null} err error
-			 * @param {unknown} result result
+			 * @param {number} index index
+			 * @returns {(err: Error | null, result: unknown) => void} callback
 			 */
-			const onStat = (err, result) => {
+			const makeCallback = (index) => (err, result) => {
 				assert.strictEqual(err, null);
 				assert.notStrictEqual(result, undefined);
+				// a duplicate delivery for this request fails here
+				assert.strictEqual(delivered[index], false);
+				delivered[index] = true;
 				called++;
 				if (called === total) done();
 			};
-			for (let i = 0; i < total; i++) fs.stat("a", onStat);
+			for (let i = 0; i < total; i++) fs.stat("a", makeCallback(i));
 		});
 	});
 
