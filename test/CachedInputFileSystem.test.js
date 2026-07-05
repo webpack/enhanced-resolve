@@ -423,6 +423,64 @@ describe("cachedInputFileSystem CacheBackend", () => {
 		});
 	});
 
+	it("should call cached callbacks asynchronously and in order", (t, done) => {
+		fs.stat("a", () => {
+			// cache for "a" is now populated; a burst of cached calls must
+			// stay asynchronous and preserve issue order
+			/** @type {number[]} */
+			const order = [];
+			let sync = true;
+			fs.stat("a", () => order.push(1));
+			fs.stat("a", () => order.push(2));
+			fs.stat("a", () => {
+				order.push(3);
+				assert.strictEqual(sync, false);
+				assert.deepStrictEqual(order, [1, 2, 3]);
+				done();
+			});
+			assert.deepStrictEqual(order, []);
+			sync = false;
+		});
+	});
+
+	it("should deliver a giant burst of cached calls exactly once each", (t, done) => {
+		fs.stat("a", () => {
+			// 600 hits spill ~1800 queue elements, exercising the retained
+			// capacity cap after the drain
+			const total = 600;
+			let called = 0;
+			/** @type {boolean[]} */
+			const delivered = Array.from({ length: total }, () => false);
+			/**
+			 * @param {number} index index
+			 * @returns {(err: Error | null, result: unknown) => void} callback
+			 */
+			const makeCallback = (index) => (err, result) => {
+				assert.strictEqual(err, null);
+				assert.notStrictEqual(result, undefined);
+				// a duplicate delivery for this request fails here
+				assert.strictEqual(delivered[index], false);
+				delivered[index] = true;
+				called++;
+				if (called === total) done();
+			};
+			for (let i = 0; i < total; i++) fs.stat("a", makeCallback(i));
+		});
+	});
+
+	it("should stay asynchronous for cached calls made from a cached callback", (t, done) => {
+		fs.stat("a", () => {
+			fs.stat("a", () => {
+				let sync = true;
+				fs.stat("a", () => {
+					assert.strictEqual(sync, false);
+					done();
+				});
+				sync = false;
+			});
+		});
+	});
+
 	it("should cache undefined value", (t, done) => {
 		fs.stat(undefined, (_err, result) => {
 			assert.strictEqual(result, undefined);
