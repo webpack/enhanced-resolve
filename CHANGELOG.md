@@ -1,5 +1,11 @@
 # enhanced-resolve
 
+## 5.24.2
+
+### Patch Changes
+
+- Batch cached filesystem callbacks from one synchronous burst into a single tick. (by [@alexander-akait](https://github.com/alexander-akait) in [#623](https://github.com/webpack/enhanced-resolve/pull/623))
+
 ## 5.24.1
 
 ### Patch Changes
