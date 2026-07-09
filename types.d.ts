@@ -652,13 +652,7 @@ declare interface JoinCacheEntry {
 }
 declare interface JsonObject {
 	[index: string]:
-		| undefined
-		| null
-		| string
-		| number
-		| boolean
-		| JsonObject
-		| JsonValue[];
+		undefined | null | string | number | boolean | JsonObject | JsonValue[];
 }
 type JsonValue = null | string | number | boolean | JsonObject | JsonValue[];
 declare interface KnownContext {
@@ -855,13 +849,73 @@ declare interface PnpApi {
 		options: { considerBuiltins: boolean },
 	) => null | string;
 }
+declare interface ProfileData {
+	/**
+	 * when the resolve started (Date.now() epoch)
+	 */
+	startTime: number;
+
+	/**
+	 * when the resolve completed
+	 */
+	endTime: number;
+
+	/**
+	 * total duration in milliseconds
+	 */
+	duration: number;
+
+	/**
+	 * the request string that was resolved
+	 */
+	specifier: string;
+
+	/**
+	 * the parent path resolution started from
+	 */
+	parent: string;
+
+	/**
+	 * whether the resolution succeeded
+	 */
+	success: boolean;
+
+	/**
+	 * the resolved path, or null on failure
+	 */
+	result: null | string;
+
+	/**
+	 * per-hook profiling data
+	 */
+	hooks: Map<string, ProfileHookEntry>;
+}
+declare interface ProfileHookEntry {
+	/**
+	 * hook name
+	 */
+	name: string;
+
+	/**
+	 * number of times this hook was entered
+	 */
+	count: number;
+
+	/**
+	 * total wall-clock time in milliseconds
+	 */
+	totalTime: number;
+}
+declare class ProfilerPlugin {
+	constructor(profileCallback?: (profile: ProfileData) => void);
+	profileCallback?: (profile: ProfileData) => void;
+	apply(resolver: Resolver): void;
+}
 declare interface ReadFile {
 	(
 		path: PathOrFileDescriptor,
 		options:
-			| undefined
-			| null
-			| ({ encoding?: null; flag?: string } & Abortable),
+			undefined | null | ({ encoding?: null; flag?: string } & Abortable),
 		callback: (err: null | NodeJS.ErrnoException, result?: Buffer) => void,
 	): void;
 	(
@@ -1209,6 +1263,11 @@ declare interface ResolveContext {
 	 * yield result, if provided plugins can return several results
 	 */
 	yield?: (request: ResolveRequest) => void;
+
+	/**
+	 * profile callback — called with timing data when resolve completes
+	 */
+	profile?: (profile: ProfileData) => void;
 }
 declare interface ResolveFunction {
 	(
@@ -1428,6 +1487,11 @@ declare interface ResolveOptionsResolverFactoryObject_1 {
 	 * tsconfig file path or config object
 	 */
 	tsconfig: string | boolean | TsconfigOptions;
+
+	/**
+	 * enable resolution profiling
+	 */
+	profile: boolean | ((profile: ProfileData) => void);
 }
 declare interface ResolveOptionsResolverFactoryObject_2 {
 	/**
@@ -1524,9 +1588,7 @@ declare interface ResolveOptionsResolverFactoryObject_2 {
 	 * A list of main fields in description files
 	 */
 	mainFields?: (
-		| string
-		| string[]
-		| { name: string | string[]; forceRelative: boolean }
+		string | string[] | { name: string | string[]; forceRelative: boolean }
 	)[];
 
 	/**
@@ -1583,6 +1645,11 @@ declare interface ResolveOptionsResolverFactoryObject_2 {
 	 * TypeScript config file path (or `file:` `URL` instance) or config object with configFile and references
 	 */
 	tsconfig?: string | boolean | URL_url | UserTsconfigOptions;
+
+	/**
+	 * Enable resolution profiling, optionally with a callback to receive profile data
+	 */
+	profile?: boolean | ((profile: ProfileData) => void);
 }
 type ResolveRequest = BaseResolveRequest & Partial<ParsedIdentifier>;
 declare abstract class Resolver {
@@ -1943,10 +2010,7 @@ declare interface UserAliasOptionEntry {
 	onlyModule?: boolean;
 }
 type UserAliasOptionNewRequest =
-	| string
-	| false
-	| URL_url
-	| (string | URL_url)[];
+	string | false | URL_url | (string | URL_url)[];
 declare interface UserAliasOptions {
 	[index: string]: UserAliasOptionNewRequest;
 }
@@ -2040,6 +2104,7 @@ declare namespace exports {
 		CachedInputFileSystem,
 		CloneBasenamePlugin,
 		LogInfoPlugin,
+		ProfilerPlugin,
 		TsconfigPathsPlugin,
 		ResolveOptionsOptionalFS,
 		BaseFileSystem,
