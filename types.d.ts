@@ -652,13 +652,7 @@ declare interface JoinCacheEntry {
 }
 declare interface JsonObject {
 	[index: string]:
-		| undefined
-		| null
-		| string
-		| number
-		| boolean
-		| JsonObject
-		| JsonValue[];
+		undefined | null | string | number | boolean | JsonObject | JsonValue[];
 }
 type JsonValue = null | string | number | boolean | JsonObject | JsonValue[];
 declare interface KnownContext {
@@ -859,9 +853,7 @@ declare interface ReadFile {
 	(
 		path: PathOrFileDescriptor,
 		options:
-			| undefined
-			| null
-			| ({ encoding?: null; flag?: string } & Abortable),
+			undefined | null | ({ encoding?: null; flag?: string } & Abortable),
 		callback: (err: null | NodeJS.ErrnoException, result?: Buffer) => void,
 	): void;
 	(
@@ -1524,9 +1516,7 @@ declare interface ResolveOptionsResolverFactoryObject_2 {
 	 * A list of main fields in description files
 	 */
 	mainFields?: (
-		| string
-		| string[]
-		| { name: string | string[]; forceRelative: boolean }
+		string | string[] | { name: string | string[]; forceRelative: boolean }
 	)[];
 
 	/**
@@ -1864,6 +1854,99 @@ declare interface SyncFileSystem {
 	 */
 	realpathSync?: RealPathSync;
 }
+
+/**
+ * A collector that stores structured trace entries during resolution.
+ */
+declare abstract class TraceCollector {
+	/**
+	 * Returns all collected trace entries.
+	 */
+	getEntries(): TraceEntry[];
+
+	/**
+	 * Clears all collected entries.
+	 */
+	clear(): void;
+}
+declare interface TraceEntry {
+	/**
+	 * which pipeline hook fired
+	 */
+	hook: string;
+
+	/**
+	 * snapshot of the request at this step
+	 */
+	request: TraceRequest;
+
+	/**
+	 * what this step produced (null = skipped)
+	 */
+	result: null | string | false;
+
+	/**
+	 * Date.now() when the step ran
+	 */
+	timestamp: number;
+}
+
+/**
+ * A plugin that records structured trace entries for every resolution step.
+ * Tap into `resolveStep` and `result` hooks to build a machine-readable
+ * trace of the resolution pipeline.
+ */
+declare class TracePlugin {
+	constructor(collector: TraceCollector);
+	collector: TraceCollector;
+	apply(resolver: Resolver): void;
+
+	/**
+	 * Creates a new TraceCollector instance.
+	 */
+	static createCollector(): TraceCollector;
+}
+declare interface TraceRequest {
+	/**
+	 * resolving directory
+	 */
+	path: string;
+
+	/**
+	 * request string
+	 */
+	request: string;
+
+	/**
+	 * query string
+	 */
+	query: string;
+
+	/**
+	 * fragment string
+	 */
+	fragment: string;
+
+	/**
+	 * is a module request
+	 */
+	module: boolean;
+
+	/**
+	 * is a directory request
+	 */
+	directory: boolean;
+
+	/**
+	 * path to description file if found
+	 */
+	descriptionFilePath?: string;
+
+	/**
+	 * relative path from description file
+	 */
+	relativePath?: string;
+}
 declare interface TsconfigOptions {
 	/**
 	 * A relative path to the tsconfig file based on cwd, or an absolute path of tsconfig file
@@ -1943,10 +2026,7 @@ declare interface UserAliasOptionEntry {
 	onlyModule?: boolean;
 }
 type UserAliasOptionNewRequest =
-	| string
-	| false
-	| URL_url
-	| (string | URL_url)[];
+	string | false | URL_url | (string | URL_url)[];
 declare interface UserAliasOptions {
 	[index: string]: UserAliasOptionNewRequest;
 }
@@ -2040,6 +2120,7 @@ declare namespace exports {
 		CachedInputFileSystem,
 		CloneBasenamePlugin,
 		LogInfoPlugin,
+		TracePlugin,
 		TsconfigPathsPlugin,
 		ResolveOptionsOptionalFS,
 		BaseFileSystem,
