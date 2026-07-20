@@ -1,5 +1,11 @@
 # enhanced-resolve
 
+## 5.24.3
+
+### Patch Changes
+
+- Resolve tsconfig `extends` package specifiers from ancestor node_modules directories (workspace hoisting). (by [@alexander-akait](https://github.com/alexander-akait) in [#631](https://github.com/webpack/enhanced-resolve/pull/631))
+
 ## 5.24.2
 
 ### Patch Changes
