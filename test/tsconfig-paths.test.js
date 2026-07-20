@@ -1650,6 +1650,31 @@ describe("TsconfigPathsPlugin", () => {
 		});
 	});
 
+	describe("extends a non-existent dot-prefixed value (not a package specifier)", () => {
+		const missingRelativeDir = path.resolve(
+			__dirname,
+			"fixtures",
+			"tsconfig-paths",
+			"extends-missing-relative",
+		);
+
+		it("surfaces the load error instead of searching node_modules", (t, done) => {
+			const resolver = ResolverFactory.createResolver({
+				fileSystem,
+				extensions: [".ts", ".tsx"],
+				mainFields: ["browser", "main"],
+				mainFiles: ["index"],
+				tsconfig: path.join(missingRelativeDir, "tsconfig.json"),
+			});
+
+			resolver.resolve({}, missingRelativeDir, "@x/y", {}, (err, result) => {
+				assert.ok(err instanceof Error);
+				assert.strictEqual(result, undefined);
+				done();
+			});
+		});
+	});
+
 	describe("bug: npm package in extends field hoisted to a parent node_modules (#21457)", () => {
 		it("should resolve a scoped package extends from a parent workspace node_modules", (t, done) => {
 			const appDir = path.join(extendsNpmWorkspaceDir, "packages", "app");
