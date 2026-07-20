@@ -1658,19 +1658,18 @@ describe("TsconfigPathsPlugin", () => {
 			"extends-missing-relative",
 		);
 
-		it("surfaces the load error instead of searching node_modules", (t, done) => {
+		it("surfaces the load error instead of searching node_modules", () => {
 			const resolver = ResolverFactory.createResolver({
 				fileSystem,
 				extensions: [".ts", ".tsx"],
 				mainFields: ["browser", "main"],
 				mainFiles: ["index"],
 				tsconfig: path.join(missingRelativeDir, "tsconfig.json"),
+				useSyncFileSystemCalls: true,
 			});
 
-			resolver.resolve({}, missingRelativeDir, "@x/y", {}, (err, result) => {
-				assert.ok(err instanceof Error);
-				assert.strictEqual(result, undefined);
-				done();
+			assert.throws(() => {
+				resolver.resolveSync({}, missingRelativeDir, "@x/y");
 			});
 		});
 	});
