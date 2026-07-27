@@ -11,6 +11,32 @@ const { after, describe, it } = require("./_runner");
 const fixture = path.resolve(__dirname, "fixtures", "restrictions");
 const nodeFileSystem = new CachedInputFileSystem(fs, 4000);
 
+const isWindows = process.platform === "win32";
+const describeOnPosix = isWindows ? describe.skip : describe;
+const describeOnWindows = isWindows ? describe : describe.skip;
+
+const createFileSystem = (files) => {
+	const existing = new Set(files);
+	const enoent = (file) => {
+		const err = /** @type {NodeJS.ErrnoException} */ (
+			new Error(`ENOENT: no such file or directory, '${file}'`)
+		);
+		err.code = "ENOENT";
+		throw err;
+	};
+	const fileSystem = {
+		statSync: (file) =>
+			existing.has(file)
+				? { isFile: () => true, isDirectory: () => false }
+				: enoent(file),
+		lstatSync: (file) => fileSystem.statSync(file),
+		readFileSync: enoent,
+		readdirSync: enoent,
+		readlinkSync: enoent,
+	};
+	return fileSystem;
+};
+
 describe("restrictions", () => {
 	it("should respect RegExp restriction", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
@@ -56,6 +82,42 @@ describe("restrictions", () => {
 			if (!err) return done(new Error(`expect error, got ${result}`));
 			assert.ok(err instanceof Error);
 			done();
+		});
+	});
+
+	describeOnPosix("on posix", () => {
+		it("should not treat a backslash as a path separator", (t, done) => {
+			const resolver = ResolverFactory.createResolver({
+				extensions: [".js"],
+				useSyncFileSystemCalls: true,
+				// @ts-expect-error for test
+				fileSystem: createFileSystem(["/a/b/c\\sibling.js"]),
+				restrictions: ["/a/b/c"],
+			});
+
+			resolver.resolve({}, "/a/b", "./c\\sibling.js", {}, (err, result) => {
+				if (!err) return done(new Error(`expect error, got ${result}`));
+				assert.ok(err instanceof Error);
+				done();
+			});
+		});
+	});
+
+	describeOnWindows("on windows", () => {
+		it("should treat a backslash as a path separator", (t, done) => {
+			const resolver = ResolverFactory.createResolver({
+				extensions: [".js"],
+				useSyncFileSystemCalls: true,
+				// @ts-expect-error for test
+				fileSystem: createFileSystem(["C:\\a\\b\\c\\index.js"]),
+				restrictions: ["C:\\a\\b\\c"],
+			});
+
+			resolver.resolve({}, "C:\\a\\b\\c", "./index.js", {}, (err, result) => {
+				if (err) return done(err);
+				assert.deepStrictEqual(result, "C:\\a\\b\\c\\index.js");
+				done();
+			});
 		});
 	});
 
