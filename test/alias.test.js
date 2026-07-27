@@ -291,6 +291,7 @@ describe("alias", () => {
 		};
 
 		it("should bucket aliases by first char code and set useBuckets when multiple distinct chars exist", () => {
+			// @ts-expect-error for tests
 			const compiled = compileAliasOptions(stubResolver, [
 				{ name: "alpha", alias: "/a" },
 				{ name: "bravo", alias: "/b" },
@@ -299,12 +300,17 @@ describe("alias", () => {
 			assert.strictEqual(compiled.useBuckets, true);
 			assert.strictEqual(compiled.hasAnyFirstChar, false);
 			assert.strictEqual(compiled.byFirstChar.size, 2);
-			assert.strictEqual(compiled.byFirstChar.get("a".charCodeAt(0)).length, 1);
-			assert.strictEqual(compiled.byFirstChar.get("b".charCodeAt(0)).length, 1);
+			const aBucket = compiled.byFirstChar.get("a".charCodeAt(0));
+			assert.ok(aBucket);
+			assert.strictEqual(aBucket.length, 1);
+			const bBucket = compiled.byFirstChar.get("b".charCodeAt(0));
+			assert.ok(bBucket);
+			assert.strictEqual(bBucket.length, 1);
 			assert.strictEqual(compiled.all.length, 2);
 		});
 
 		it("should disable useBuckets when all aliases share the same first char", () => {
+			// @ts-expect-error for tests
 			const compiled = compileAliasOptions(stubResolver, [
 				{ name: "alpha", alias: "/a" },
 				{ name: "ant", alias: "/b" },
@@ -315,6 +321,7 @@ describe("alias", () => {
 		});
 
 		it("should disable useBuckets when an empty-prefix wildcard is present", () => {
+			// @ts-expect-error for tests
 			const compiled = compileAliasOptions(stubResolver, [
 				{ name: "*", alias: "/*" },
 				{ name: "alpha", alias: "/a" },
@@ -325,6 +332,7 @@ describe("alias", () => {
 		});
 
 		it("should return empty compiled options for an empty input", () => {
+			// @ts-expect-error for tests
 			const compiled = compileAliasOptions(stubResolver, []);
 
 			assert.strictEqual(compiled.all.length, 0);
@@ -333,6 +341,7 @@ describe("alias", () => {
 		});
 
 		it("should precompute wildcardPrefix and wildcardSuffix", () => {
+			// @ts-expect-error for tests
 			const compiled = compileAliasOptions(stubResolver, [
 				{ name: "foo/*", alias: "/bar/*" },
 			]);
@@ -344,6 +353,7 @@ describe("alias", () => {
 		});
 
 		it("should set absolutePath for absolute alias names", () => {
+			// @ts-expect-error for tests
 			const compiled = compileAliasOptions(stubResolver, [
 				{ name: "/abs/path", alias: "/target" },
 			]);
@@ -352,6 +362,7 @@ describe("alias", () => {
 		});
 
 		it("should set firstCharCode to -1 for empty-name aliases", () => {
+			// @ts-expect-error for tests
 			const compiled = compileAliasOptions(stubResolver, [
 				{ name: "", alias: "/target" },
 			]);
