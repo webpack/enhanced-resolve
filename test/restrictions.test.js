@@ -85,6 +85,24 @@ describe("restrictions", () => {
 		});
 	});
 
+	it("should respect string restriction ending with a separator", (t, done) => {
+		const resolver = ResolverFactory.createResolver({
+			extensions: [".js"],
+			fileSystem: nodeFileSystem,
+			restrictions: [fixture + path.sep],
+		});
+
+		resolver.resolve({}, fixture, "pck1", {}, (err, result) => {
+			if (err) return done(err);
+			if (!result) return done(new Error("No result"));
+			assert.deepStrictEqual(
+				result,
+				path.resolve(fixture, "node_modules/pck1/index.js"),
+			);
+			done();
+		});
+	});
+
 	describeOnPosix("on posix", () => {
 		it("should not treat a backslash as a path separator", (t, done) => {
 			const resolver = ResolverFactory.createResolver({
