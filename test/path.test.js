@@ -10,8 +10,10 @@ const {
 	dirname,
 	getType,
 	invalidSegmentRegEx,
+	isInside,
 	isRelativeRequest,
 	isSubPath,
+	isWindowsPath,
 	join,
 	normalize,
 } = require("../lib/util/path");
@@ -321,6 +323,88 @@ describe("util/path isSubPath", () => {
 		assert.strictEqual(isSubPath("", "C:\\a"), false);
 		assert.strictEqual(isSubPath("", "foo"), false);
 		assert.strictEqual(isSubPath("", ""), false);
+	});
+
+	it("compares a Windows parent the way windows does", () => {
+		assert.strictEqual(isSubPath("C:\\a\\b", "C:/a/b/c"), true);
+		assert.strictEqual(isSubPath("C:/a/b", "C:\\a\\b/c"), true);
+		assert.strictEqual(isSubPath("C:\\a\\b", "c:\\A\\B\\c"), true);
+		assert.strictEqual(isSubPath("C:\\a\\b", "C:\\a\\b-other"), false);
+	});
+
+	it("keeps a backslash a filename character in a posix parent", () => {
+		assert.strictEqual(isSubPath("/a/b", "/a/b\\c"), false);
+		assert.strictEqual(isSubPath("/a/b\\c", "/a/b\\c\\d"), false);
+		assert.strictEqual(isSubPath("/a/b", "/A/b/c"), false);
+	});
+});
+
+describe("util/path isWindowsPath", () => {
+	it("detects a path rooted at a drive letter", () => {
+		assert.strictEqual(isWindowsPath("C:\\a"), true);
+		assert.strictEqual(isWindowsPath("C:/a"), true);
+		assert.strictEqual(isWindowsPath("c:a"), true);
+		assert.strictEqual(isWindowsPath("C:"), true);
+	});
+
+	it("detects a path rooted at a backslash", () => {
+		assert.strictEqual(isWindowsPath("\\a\\b"), true);
+		assert.strictEqual(isWindowsPath("\\\\server\\share"), true);
+		assert.strictEqual(isWindowsPath("\\\\?\\C:\\a"), true);
+	});
+
+	it("treats everything else as posix", () => {
+		assert.strictEqual(isWindowsPath("/a/b"), false);
+		assert.strictEqual(isWindowsPath("/a/b\\c"), false);
+		assert.strictEqual(isWindowsPath("a\\b"), false);
+		assert.strictEqual(isWindowsPath("1:\\a"), false);
+		assert.strictEqual(isWindowsPath(""), false);
+	});
+
+	it("treats a path starting with // as posix", () => {
+		// `path.win32` reads it as a UNC root, but here it cannot be told apart
+		// from a posix path, where `\` has to stay a filename character.
+		assert.strictEqual(isWindowsPath("//server/share"), false);
+	});
+});
+
+describe("util/path isInside", () => {
+	it("returns true for the parent itself", () => {
+		assert.strictEqual(isInside("/a/b", "/a/b"), true);
+		assert.strictEqual(isInside("/a/b/", "/a/b"), true);
+		assert.strictEqual(isInside("C:\\a\\", "C:\\a"), true);
+	});
+
+	it("ignores trailing separators on the parent", () => {
+		assert.strictEqual(isInside("/a/b/", "/a/b/c"), true);
+		assert.strictEqual(isInside("/", "/a"), true);
+		assert.strictEqual(isInside("C:\\a\\b\\", "C:\\a\\b\\c"), true);
+	});
+
+	it("requires a segment boundary", () => {
+		assert.strictEqual(isInside("/a/b", "/a/b-other"), false);
+		assert.strictEqual(isInside("/a/b", "/a"), false);
+		assert.strictEqual(isInside("C:\\a\\b", "C:\\a\\b-other"), false);
+	});
+
+	it("compares a Windows parent the way windows does", () => {
+		assert.strictEqual(isInside("C:\\a\\b", "C:/a/b/c"), true);
+		assert.strictEqual(isInside("C:/a/b", "C:\\a\\b/c"), true);
+		assert.strictEqual(isInside("C:\\a\\b", "c:\\A\\B\\c"), true);
+		assert.strictEqual(
+			isInside("\\\\server\\share\\a", "\\\\SERVER\\share\\a\\b"),
+			true,
+		);
+		assert.strictEqual(
+			isInside("\\\\server\\share\\a", "\\\\server\\other\\a\\b"),
+			false,
+		);
+	});
+
+	it("keeps a backslash a filename character in a posix parent", () => {
+		assert.strictEqual(isInside("/a/b", "/a/b\\c"), false);
+		assert.strictEqual(isInside("/a/b\\c", "/a/b\\c\\d"), false);
+		assert.strictEqual(isInside("/a/b", "/A/B/c"), false);
 	});
 });
 
