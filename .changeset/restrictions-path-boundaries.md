@@ -2,4 +2,4 @@
 "enhanced-resolve": patch
 ---
 
-Fix string `restrictions` boundary checks: a restriction ending with a separator no longer rejects everything inside it, `\` is only a separator in Windows paths, where `/` and `\` are interchangeable, and restrictions are normalized before they are compared.
+Fix string `restrictions` boundary checks: a restriction ending with a separator no longer rejects everything inside it, restrictions are normalized before they are compared, and a Windows restriction now matches the way `path.win32` does, treating `/` and `\` as interchangeable and comparing case-insensitively, while `\` stays a filename character in a posix path.

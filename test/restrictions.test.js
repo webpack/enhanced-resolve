@@ -326,6 +326,22 @@ describe("restrictions", () => {
 				file: "C:\\a\\b\\c\\index.js",
 				allowed: true,
 			},
+			{
+				title: "a file inside a windows restriction differing in case",
+				restriction: "C:\\A\\B\\C",
+				context: "c:\\a\\b\\c",
+				request: "./index.js",
+				file: "c:\\a\\b\\c\\index.js",
+				allowed: true,
+			},
+			{
+				title: "a file inside a posix restriction differing in case",
+				restriction: "/A/B/C",
+				context: "/a/b/c",
+				request: "./index.js",
+				file: "/a/b/c/index.js",
+				allowed: false,
+			},
 		];
 
 		for (const {
@@ -359,10 +375,11 @@ describe("restrictions", () => {
 		}
 	});
 
-	describe("mixed separators", () => {
-		// Windows accepts `/` and `\` interchangeably and mixed within one path.
-		// The plugin is driven directly because the resolver normalizes a path
-		// before it reaches the plugin, so a mixed one cannot arrive through it.
+	describe("windows and posix semantics", () => {
+		// Windows accepts `/` and `\` interchangeably and mixed within one path,
+		// and compares case-insensitively; posix does neither. The plugin is
+		// driven directly because the resolver normalizes a path before it
+		// reaches the plugin, so those forms cannot arrive through it.
 		const testCases = [
 			{
 				title: "a windows path using slashes under a backslash restriction",
@@ -383,6 +400,36 @@ describe("restrictions", () => {
 				inside: true,
 			},
 			{
+				title: "a windows path differing in case from its restriction",
+				restriction: "C:\\a\\b\\c",
+				path: "c:\\A\\B\\C\\index.js",
+				inside: true,
+			},
+			{
+				title: "the restricted directory itself",
+				restriction: "/a/b/c/",
+				path: "/a/b/c",
+				inside: true,
+			},
+			{
+				title: "a path inside a UNC restriction",
+				restriction: "\\\\server\\share\\a",
+				path: "\\\\SERVER\\share\\a\\index.js",
+				inside: true,
+			},
+			{
+				title: "a path inside a DOS device restriction",
+				restriction: "\\\\?\\C:\\a",
+				path: "\\\\?\\C:\\a\\index.js",
+				inside: true,
+			},
+			{
+				title: "a path on another share than the UNC restriction",
+				restriction: "\\\\server\\share\\a",
+				path: "\\\\server\\other\\a\\index.js",
+				inside: false,
+			},
+			{
 				title: "a sibling of a windows restriction written with slashes",
 				restriction: "C:\\a\\b\\c",
 				path: "C:/a/b/c-other.js",
@@ -393,6 +440,20 @@ describe("restrictions", () => {
 				title: "a posix sibling separated by a backslash",
 				restriction: "/a/b/c",
 				path: "/a/b/c\\sibling.js",
+				inside: false,
+			},
+			{
+				// the restriction contains a backslash but is still a posix path,
+				// so the backslash names a directory instead of separating one
+				title: "a posix sibling of a restriction containing a backslash",
+				restriction: "/a/b\\c",
+				path: "/a/b\\c\\sibling.js",
+				inside: false,
+			},
+			{
+				title: "a posix path differing in case from its restriction",
+				restriction: "/a/b/c",
+				path: "/A/B/C/index.js",
 				inside: false,
 			},
 		];
@@ -414,6 +475,121 @@ describe("restrictions", () => {
 				});
 			});
 		}
+	});
+
+	describe("compared with node's path api", () => {
+		// Containment is Node's answer, not ours: a target is inside a parent
+		// when `relative(parent, target)` neither escapes upward nor is absolute.
+		// Which flavor answers is where `win32` and `posix` disagree about the
+		// root of the restriction.
+		const isWindowsPath = (maybePath) =>
+			path.win32.parse(maybePath).root !== path.posix.parse(maybePath).root;
+
+		const nodeSaysInside = (parent, target) => {
+			const flavor = isWindowsPath(parent) ? path.win32 : path.posix;
+			const relative = flavor.relative(parent, target);
+			return (
+				relative === "" ||
+				(!relative.startsWith("..") && !flavor.isAbsolute(relative))
+			);
+		};
+
+		const restrictions = [
+			"/a/b/c",
+			"/a/b/c/",
+			"/a/b\\c",
+			"/",
+			"C:\\a\\b\\c",
+			"C:\\a\\b\\c\\",
+			"C:/a/b/c",
+			"C:\\",
+			"\\\\server\\share\\a",
+			"\\\\?\\C:\\a",
+		];
+
+		const swapSeparators = (maybePath) =>
+			maybePath.replace(/[\\/]/g, (char) => (char === "/" ? "\\" : "/"));
+
+		const targetsFor = (restriction) => {
+			const separator = isWindowsPath(restriction) ? "\\" : "/";
+			const other = separator === "\\" ? "/" : "\\";
+			const trimmed = restriction.replace(/[\\/]+$/, "") || separator;
+			const targets = new Set();
+			for (const base of [
+				trimmed,
+				swapSeparators(trimmed),
+				trimmed.toUpperCase(),
+				trimmed.toLowerCase(),
+			]) {
+				for (const suffix of [
+					"",
+					`${separator}index.js`,
+					`${other}index.js`,
+					`${separator}sub${other}index.js`,
+					"-other.js",
+					"\\sibling.js",
+				]) {
+					targets.add(base + suffix);
+				}
+			}
+			for (const unrelated of [
+				"/unrelated/index.js",
+				"D:\\unrelated\\index.js",
+				"\\\\server\\other\\index.js",
+			]) {
+				targets.add(unrelated);
+			}
+			return [...targets];
+		};
+
+		let insideCount = 0;
+		let outsideCount = 0;
+
+		for (const restriction of restrictions) {
+			for (const target of targetsFor(restriction)) {
+				const flavor = isWindowsPath(restriction) ? path.win32 : path.posix;
+				// `relative` resolves a non-absolute input against `process.cwd()`,
+				// which says nothing about containment
+				if (!flavor.isAbsolute(restriction) || !flavor.isAbsolute(target)) {
+					continue;
+				}
+				// a `.`/`..` segment or a doubled separator never reaches the plugin,
+				// the resolver normalizes those away first - a mixed separator does
+				// survive on windows, so only the separators are canonicalized here
+				const canonical = isWindowsPath(restriction)
+					? target.replace(/\//g, "\\")
+					: target;
+				if (flavor.normalize(canonical) !== canonical) continue;
+
+				const inside = nodeSaysInside(restriction, target);
+				if (inside) {
+					insideCount++;
+				} else {
+					outsideCount++;
+				}
+
+				it(`should ${inside ? "allow" : "reject"} ${JSON.stringify(target)} under ${JSON.stringify(restriction)}`, (t, done) => {
+					const hook = new AsyncSeriesBailHook(["request", "resolveContext"]);
+
+					new RestrictionsPlugin(hook, new Set([restriction])).apply(
+						// @ts-expect-error a minimal resolver is enough for this plugin
+						{ getHook: () => hook },
+					);
+
+					hook.callAsync({ path: target }, {}, (err, result) => {
+						if (err) return done(err);
+						assert.strictEqual(result !== null, inside);
+						done();
+					});
+				});
+			}
+		}
+
+		it("should have compared both verdicts", () => {
+			// guards against a generator change quietly emptying the matrix above
+			assert.ok(insideCount > 50, `only ${insideCount} inside cases`);
+			assert.ok(outsideCount > 50, `only ${outsideCount} outside cases`);
+		});
 	});
 
 	describe("with symlinks", () => {
