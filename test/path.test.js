@@ -75,18 +75,26 @@ describe("util/path getType", () => {
 		assert.strictEqual(getType("\\\\.\\"), PathType.AbsoluteWin);
 	});
 
-	it("does not classify non-DOS backslash paths as Windows-absolute", () => {
-		// Plain UNC (\\server\share) is not a DOS device path — don't
-		// misclassify it (its handling is out of scope of this change).
-		assert.strictEqual(getType("\\\\server\\share"), PathType.Normal);
-		// Too short to match a DOS device prefix.
-		assert.strictEqual(getType("\\\\?"), PathType.Normal);
-		assert.strictEqual(getType("\\\\."), PathType.Normal);
-		// Second char must also be a backslash.
+	it("classifies UNC paths as Windows-absolute", () => {
+		// `path.win32` roots every path starting with two backslashes, so a
+		// share belongs on win32 just like a DOS device path does.
+		assert.strictEqual(getType("\\\\server\\share"), PathType.AbsoluteWin);
+		assert.strictEqual(getType("\\\\server\\share\\a"), PathType.AbsoluteWin);
+		// Too short to name a share, still rooted.
+		assert.strictEqual(getType("\\\\"), PathType.AbsoluteWin);
+		assert.strictEqual(getType("\\\\?"), PathType.AbsoluteWin);
+		assert.strictEqual(getType("\\\\."), PathType.AbsoluteWin);
+	});
+
+	it("does not classify other backslash paths as Windows-absolute", () => {
+		// A single leading backslash is a rooted path only on Windows, and a
+		// filename character everywhere else — too ambiguous to reroute.
 		assert.strictEqual(getType("\\?\\C:\\foo"), PathType.Normal);
+		assert.strictEqual(getType("\\a\\b"), PathType.Normal);
 		// Forward-slash variants aren't equivalent — Windows won't normalize
-		// a DOS device path expressed with `/`.
+		// a DOS device path expressed with `/`, and `//a/b` is a posix path.
 		assert.strictEqual(getType("//?/C:/foo"), PathType.AbsolutePosix);
+		assert.strictEqual(getType("//server/share"), PathType.AbsolutePosix);
 	});
 });
 
@@ -110,6 +118,17 @@ describe("util/path normalize", () => {
 
 	it("normalizes normal paths through posix normalize", () => {
 		assert.strictEqual(normalize("a/b/../c"), "a/c");
+	});
+
+	it("normalizes UNC paths via win32", () => {
+		assert.strictEqual(
+			normalize("\\\\server\\share\\a\\..\\b"),
+			"\\\\server\\share\\b",
+		);
+		assert.strictEqual(
+			normalize("\\\\server\\share\\\\a"),
+			"\\\\server\\share\\a",
+		);
 	});
 
 	it("normalizes DOS device paths via win32", () => {
@@ -146,6 +165,18 @@ describe("util/path join", () => {
 		assert.strictEqual(join("C:\\a", "b"), "C:\\a\\b");
 	});
 
+	it("joins UNC paths with win32 semantics", () => {
+		assert.strictEqual(
+			join("\\\\server\\share\\a", "b"),
+			"\\\\server\\share\\a\\b",
+		);
+		// Absolute UNC request wins over any root.
+		assert.strictEqual(
+			join("/posix/root", "\\\\server\\share\\a"),
+			"\\\\server\\share\\a",
+		);
+	});
+
 	it("joins DOS device paths with win32 semantics", () => {
 		assert.strictEqual(join("\\\\?\\C:\\a", "b"), "\\\\?\\C:\\a\\b");
 		assert.strictEqual(join("\\\\.\\C:\\a", "b"), "\\\\.\\C:\\a\\b");
@@ -162,6 +193,15 @@ describe("util/path dirname", () => {
 
 	it("computes windows dirname for windows absolute paths", () => {
 		assert.strictEqual(dirname("C:\\foo\\bar"), "C:\\foo");
+	});
+
+	it("computes windows dirname for UNC paths", () => {
+		assert.strictEqual(
+			dirname("\\\\server\\share\\a\\b"),
+			"\\\\server\\share\\a",
+		);
+		// The share itself is the root, so walking up stops there.
+		assert.strictEqual(dirname("\\\\server\\share\\a"), "\\\\server\\share\\");
 	});
 
 	it("computes windows dirname for DOS device paths", () => {
