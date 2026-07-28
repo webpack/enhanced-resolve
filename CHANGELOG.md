@@ -1,5 +1,15 @@
 # enhanced-resolve
 
+## 5.24.4
+
+### Patch Changes
+
+- Keep the original request resolvable when `extensionAlias` lists its own extension. (by [@alexander-akait](https://github.com/alexander-akait) in [#641](https://github.com/webpack/enhanced-resolve/pull/641))
+
+- Fix string `restrictions` boundary checks: a restriction ending with a separator no longer rejects everything inside it, restrictions are normalized before they are compared, and a Windows path now matches the way `path.win32` does, treating `/` and `\` as interchangeable and comparing case-insensitively, while `\` stays a filename character in a posix path. The same comparison backs `tsconfig` path matching. (by [@alexander-akait](https://github.com/alexander-akait) in [#643](https://github.com/webpack/enhanced-resolve/pull/643))
+
+- Treat a UNC path (`\\server\share\…`) as a Windows path, so it normalizes, joins and walks up with `path.win32` semantics instead of being taken for a bare module request. (by [@alexander-akait](https://github.com/alexander-akait) in [#644](https://github.com/webpack/enhanced-resolve/pull/644))
+
 ## 5.24.3
 
 ### Patch Changes
