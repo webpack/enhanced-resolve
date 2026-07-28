@@ -205,6 +205,150 @@ describe("restrictions", () => {
 		);
 	});
 
+	describe("path boundaries", () => {
+		// The resolver handles both path flavors on every host, so a fake
+		// filesystem is used to run the posix and the Windows cases everywhere.
+		const createFileSystem = (file) => {
+			const enoent = (requested) => {
+				const err = /** @type {NodeJS.ErrnoException} */ (
+					new Error(`ENOENT: no such file or directory, '${requested}'`)
+				);
+				err.code = "ENOENT";
+				throw err;
+			};
+			const fileSystem = {
+				statSync: (requested) =>
+					requested === file
+						? {
+								isFile: () => true,
+								isDirectory: () => false,
+								isSymbolicLink: () => false,
+							}
+						: enoent(requested),
+				lstatSync: (requested) => fileSystem.statSync(requested),
+				readFileSync: enoent,
+				readdirSync: enoent,
+				readlinkSync: enoent,
+			};
+			return fileSystem;
+		};
+
+		const testCases = [
+			{
+				title: "a file inside a posix restriction",
+				restriction: "/a/b/c",
+				context: "/a/b/c",
+				request: "./index.js",
+				file: "/a/b/c/index.js",
+				allowed: true,
+			},
+			{
+				title: "a sibling of a posix restriction",
+				restriction: "/a/b/c",
+				context: "/a/b",
+				request: "./c-other.js",
+				file: "/a/b/c-other.js",
+				allowed: false,
+			},
+			{
+				// `\` is a regular filename character on posix, so this file is a
+				// sibling of the restriction and not inside of it
+				title: "a sibling of a posix restriction separated by a backslash",
+				restriction: "/a/b/c",
+				context: "/a/b",
+				request: "./c\\sibling.js",
+				file: "/a/b/c\\sibling.js",
+				allowed: false,
+			},
+			{
+				title: "a file inside a posix restriction ending with a separator",
+				restriction: "/a/b/c/",
+				context: "/a/b/c",
+				request: "./index.js",
+				file: "/a/b/c/index.js",
+				allowed: true,
+			},
+			{
+				title: "a file inside the posix root restriction",
+				restriction: "/",
+				context: "/a",
+				request: "./index.js",
+				file: "/a/index.js",
+				allowed: true,
+			},
+			{
+				title: "a file inside a non-normalized posix restriction",
+				restriction: "/a/x/../b/c",
+				context: "/a/b/c",
+				request: "./index.js",
+				file: "/a/b/c/index.js",
+				allowed: true,
+			},
+			{
+				title: "a file inside a windows restriction",
+				restriction: "C:\\a\\b\\c",
+				context: "C:\\a\\b\\c",
+				request: "./index.js",
+				file: "C:\\a\\b\\c\\index.js",
+				allowed: true,
+			},
+			{
+				title: "a sibling of a windows restriction",
+				restriction: "C:\\a\\b\\c",
+				context: "C:\\a\\b",
+				request: "./c-other.js",
+				file: "C:\\a\\b\\c-other.js",
+				allowed: false,
+			},
+			{
+				title: "a file inside a windows restriction ending with a separator",
+				restriction: "C:\\a\\b\\c\\",
+				context: "C:\\a\\b\\c",
+				request: "./index.js",
+				file: "C:\\a\\b\\c\\index.js",
+				allowed: true,
+			},
+			{
+				title: "a file inside a windows restriction written with slashes",
+				restriction: "C:/a/b/c",
+				context: "C:\\a\\b\\c",
+				request: "./index.js",
+				file: "C:\\a\\b\\c\\index.js",
+				allowed: true,
+			},
+		];
+
+		for (const {
+			title,
+			restriction,
+			context,
+			request,
+			file,
+			allowed,
+		} of testCases) {
+			it(`should ${allowed ? "resolve" : "not resolve"} ${title}`, (t, done) => {
+				const resolver = ResolverFactory.createResolver({
+					extensions: [".js"],
+					useSyncFileSystemCalls: true,
+					// @ts-expect-error a minimal filesystem is enough for these cases
+					fileSystem: createFileSystem(file),
+					restrictions: [restriction],
+				});
+
+				resolver.resolve({}, context, request, {}, (err, result) => {
+					if (allowed) {
+						if (err) return done(err);
+						assert.deepStrictEqual(result, file);
+					} else {
+						if (!err) return done(new Error(`expect error, got ${result}`));
+						assert.ok(err instanceof Error);
+					}
+					done();
+				});
+			});
+		}
+	});
+
 	describe("with symlinks", () => {
 		const symlinkRoot = path.resolve(__dirname, "temp-restrictions-symlink");
 		const allowed = path.join(symlinkRoot, "allowed");
