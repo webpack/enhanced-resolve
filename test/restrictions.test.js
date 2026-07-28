@@ -4,8 +4,10 @@ const assert = require("assert");
 const fs = require("fs");
 
 const path = require("path");
+const { AsyncSeriesBailHook } = require("tapable");
 const CachedInputFileSystem = require("../lib/CachedInputFileSystem");
 const ResolverFactory = require("../lib/ResolverFactory");
+const RestrictionsPlugin = require("../lib/RestrictionsPlugin");
 const { after, describe, it } = require("./_runner");
 
 const fixture = path.resolve(__dirname, "fixtures", "restrictions");
@@ -316,6 +318,14 @@ describe("restrictions", () => {
 				file: "C:\\a\\b\\c\\index.js",
 				allowed: true,
 			},
+			{
+				title: "a file inside a windows restriction from a mixed context",
+				restriction: "C:\\a\\b\\c",
+				context: "C:/a\\b",
+				request: "./c/index.js",
+				file: "C:\\a\\b\\c\\index.js",
+				allowed: true,
+			},
 		];
 
 		for (const {
@@ -343,6 +353,63 @@ describe("restrictions", () => {
 						if (!err) return done(new Error(`expect error, got ${result}`));
 						assert.ok(err instanceof Error);
 					}
+					done();
+				});
+			});
+		}
+	});
+
+	describe("mixed separators", () => {
+		// Windows accepts `/` and `\` interchangeably and mixed within one path.
+		// The plugin is driven directly because the resolver normalizes a path
+		// before it reaches the plugin, so a mixed one cannot arrive through it.
+		const testCases = [
+			{
+				title: "a windows path using slashes under a backslash restriction",
+				restriction: "C:\\a\\b\\c",
+				path: "C:/a/b/c/index.js",
+				inside: true,
+			},
+			{
+				title: "a windows path mixing separators under a slash restriction",
+				restriction: "C:/a/b/c",
+				path: "C:\\a\\b/c/index.js",
+				inside: true,
+			},
+			{
+				title: "a windows path under a restriction ending with a slash",
+				restriction: "C:\\a\\b\\c/",
+				path: "C:\\a\\b\\c\\index.js",
+				inside: true,
+			},
+			{
+				title: "a sibling of a windows restriction written with slashes",
+				restriction: "C:\\a\\b\\c",
+				path: "C:/a/b/c-other.js",
+				inside: false,
+			},
+			{
+				// separators are never interchangeable outside of windows paths
+				title: "a posix sibling separated by a backslash",
+				restriction: "/a/b/c",
+				path: "/a/b/c\\sibling.js",
+				inside: false,
+			},
+		];
+
+		for (const { title, restriction, path: requestPath, inside } of testCases) {
+			it(`should ${inside ? "allow" : "reject"} ${title}`, (t, done) => {
+				const hook = new AsyncSeriesBailHook(["request", "resolveContext"]);
+
+				new RestrictionsPlugin(hook, new Set([restriction])).apply(
+					// @ts-expect-error a minimal resolver is enough for this plugin
+					{ getHook: () => hook },
+				);
+
+				hook.callAsync({ path: requestPath }, {}, (err, result) => {
+					if (err) return done(err);
+					// the plugin bails with `null` when it filters a request out
+					assert.strictEqual(result !== null, inside);
 					done();
 				});
 			});
