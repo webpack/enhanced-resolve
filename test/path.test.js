@@ -1,6 +1,7 @@
 "use strict";
 
 const assert = require("assert");
+const nodePath = require("path");
 const {
 	PathType,
 	createCachedBasename,
@@ -398,5 +399,243 @@ describe("util/path join fallbacks for special rootPath types", () => {
 		// rootPath "#x" (Internal) and request "./foo" (Relative): returns
 		// posixNormalize(rootPath) ("#x"), not relative, so prefixed with "./".
 		assert.strictEqual(join("#x", "./foo"), "./#x");
+	});
+});
+
+// Node's own `path` is the reference for how a path behaves. These tests keep
+// `lib/util/path.js` answering the way `path.win32` and `path.posix` do, and
+// spell out every shape where it deliberately answers differently.
+describe("util/path alignment with node's path module", () => {
+	// Which flavor node reads a path as: the two parsers disagree about the
+	// root exactly when the path is Windows-specific.
+	const nodeReadsAsWindows = (maybePath) =>
+		nodePath.win32.parse(maybePath).root !==
+		nodePath.posix.parse(maybePath).root;
+
+	const nodeFlavor = (maybePath) =>
+		nodeReadsAsWindows(maybePath) ? nodePath.win32 : nodePath.posix;
+
+	// The shapes we answer differently on purpose, each asserted on its own in
+	// "documented divergences" below.
+	const isDocumentedDivergence = (maybePath) => {
+		// a leading forward slash is a posix root however the next separator is
+		// spelled, while `path.win32` reads two separators as a UNC root
+		if (maybePath.startsWith("//") || maybePath.startsWith("/\\")) return true;
+		// a single leading backslash roots a path only on windows
+		if (maybePath.startsWith("\\") && !maybePath.startsWith("\\\\")) {
+			return true;
+		}
+		// drive-relative (`C:foo`), which node roots but does not call absolute
+		if (/^[a-zA-Z]:[^\\/]/.test(maybePath)) return true;
+		// requests the resolver handles with its own semantics
+		const type = getType(maybePath);
+		return (
+			type === PathType.Relative ||
+			type === PathType.Empty ||
+			type === PathType.Internal
+		);
+	};
+
+	const requests = ["b", "./b", "../b", "b/c"];
+
+	const assertMatchesNode = (maybePath) => {
+		const flavor = nodeFlavor(maybePath);
+		const subject = JSON.stringify(maybePath);
+		assert.strictEqual(
+			getType(maybePath) === PathType.AbsoluteWin,
+			nodeReadsAsWindows(maybePath),
+			`flavor of ${subject}`,
+		);
+		assert.strictEqual(
+			normalize(maybePath),
+			flavor.normalize(maybePath),
+			`normalize(${subject})`,
+		);
+		assert.strictEqual(
+			dirname(maybePath),
+			flavor.dirname(maybePath),
+			`dirname(${subject})`,
+		);
+		for (const request of requests) {
+			assert.strictEqual(
+				join(maybePath, request),
+				flavor.join(maybePath, request),
+				`join(${subject}, ${JSON.stringify(request)})`,
+			);
+		}
+	};
+
+	const paths = [
+		// posix
+		"/",
+		"/a",
+		"/a/b/c",
+		"/a/b/c/",
+		"/a//b",
+		"/a/./b",
+		"/a/../b",
+		"/a/b\\c",
+		"/a/b c/d",
+		// windows drive
+		"C:",
+		"c:",
+		"C:\\",
+		"C:\\a",
+		"C:\\a\\b",
+		"C:/a/b",
+		"C:\\a/b",
+		"C:\\a\\..\\b",
+		"C:\\a\\.\\b",
+		"C:\\a\\\\b",
+		"C:\\a\\b\\",
+		"c:\\a",
+		// UNC
+		"\\\\server\\share",
+		"\\\\server\\share\\",
+		"\\\\server\\share\\a",
+		"\\\\server\\share\\a\\b",
+		"\\\\server\\share\\a\\..\\b",
+		"\\\\server\\share\\a\\.\\b",
+		"\\\\server\\share\\\\a",
+		"\\\\server\\share\\a/b",
+		"\\\\SERVER\\Share\\a",
+		// DOS device
+		"\\\\?\\C:\\a",
+		"\\\\?\\C:\\a\\..\\b",
+		"\\\\?\\UNC\\server\\share\\a",
+		"\\\\.\\C:\\a",
+		"\\\\.\\PhysicalDrive0",
+		"\\\\?\\Volume{abc}\\f",
+		"\\\\?\\",
+		"\\\\",
+		"\\\\?",
+		"\\\\.",
+		"\\\\a",
+		// module requests
+		"lodash",
+		"@scope/pkg",
+		"a",
+	];
+
+	for (const maybePath of paths) {
+		it(`answers like node for ${JSON.stringify(maybePath)}`, () => {
+			// a path listed here must not be one we diverge on
+			assert.strictEqual(
+				isDocumentedDivergence(maybePath),
+				false,
+				`${JSON.stringify(maybePath)} is a documented divergence`,
+			);
+			assertMatchesNode(maybePath);
+		});
+	}
+
+	it("answers like node for generated path shapes", () => {
+		// Seeded so a failure reproduces, and wide enough to reach shapes
+		// nobody enumerated by hand.
+		let seed = 42;
+		const random = (max) => {
+			seed = (seed + 0x6d2b79f5) | 0;
+			let t = seed;
+			t = Math.imul(t ^ (t >>> 15), t | 1);
+			t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+			return ((((t ^ (t >>> 14)) >>> 0) / 4294967296) * max) | 0;
+		};
+		const prefixes = [
+			"",
+			"/",
+			"//",
+			"\\",
+			"\\\\",
+			"C:\\",
+			"C:/",
+			"c:",
+			"\\\\server\\share\\",
+			"\\\\server\\share",
+			"\\\\?\\C:\\",
+			"\\\\.\\C:\\",
+			"\\\\?\\UNC\\server\\share\\",
+			"./",
+			"../",
+			"#",
+		];
+		const segments = [
+			"a",
+			"b",
+			"..",
+			".",
+			"sub dir",
+			"x.js",
+			"",
+			"node_modules",
+		];
+		const separators = ["/", "\\"];
+		const makePath = () => {
+			let result = prefixes[random(prefixes.length)];
+			const count = random(5);
+			for (let i = 0; i < count; i++) {
+				if (i > 0) result += separators[random(separators.length)];
+				result += segments[random(segments.length)];
+			}
+			if (random(4) === 0) result += separators[random(separators.length)];
+			return result;
+		};
+
+		let compared = 0;
+		for (let i = 0; i < 5000; i++) {
+			const maybePath = makePath();
+			if (isDocumentedDivergence(maybePath)) continue;
+			assertMatchesNode(maybePath);
+			compared++;
+		}
+		// guards against a generator change quietly emptying this
+		assert.ok(compared > 1000, `only ${compared} shapes compared`);
+	});
+
+	describe("documented divergences", () => {
+		it("reads a leading forward slash as a posix root", () => {
+			for (const maybePath of [
+				"//server/share",
+				"/\\server\\share",
+				"//?/C:/foo",
+			]) {
+				assert.strictEqual(getType(maybePath), PathType.AbsolutePosix);
+				// node takes any two leading separators for a UNC root
+				assert.strictEqual(nodeReadsAsWindows(maybePath), true);
+			}
+		});
+
+		it("keeps a single leading backslash a filename character", () => {
+			// rooted on windows, an ordinary character everywhere else, and
+			// nothing in the string tells the two apart
+			for (const maybePath of ["\\a\\b", "\\", "\\?\\C:\\foo"]) {
+				assert.notStrictEqual(getType(maybePath), PathType.AbsoluteWin);
+				assert.strictEqual(nodeReadsAsWindows(maybePath), true);
+			}
+		});
+
+		it("keeps a drive-relative path normal", () => {
+			// node roots `C:foo` at `C:` but does not call it absolute, and
+			// `PathType` has no windows-relative member — classifying it as
+			// `AbsoluteWin` would make `join` drop the root it is relative to
+			assert.strictEqual(getType("C:foo"), PathType.Normal);
+			assert.strictEqual(nodePath.win32.parse("C:foo").root, "C:");
+			assert.strictEqual(nodePath.win32.isAbsolute("C:foo"), false);
+		});
+
+		it("keeps the ./ prefix of a relative request", () => {
+			assert.strictEqual(normalize("./a/b"), "./a/b");
+			assert.strictEqual(nodePath.posix.normalize("./a/b"), "a/b");
+		});
+
+		it("keeps an empty path empty", () => {
+			assert.strictEqual(normalize(""), "");
+			assert.strictEqual(nodePath.posix.normalize(""), ".");
+		});
+
+		it("keeps an internal request out of path handling", () => {
+			assert.strictEqual(getType("#a/b"), PathType.Internal);
+			assert.strictEqual(join("#x", "foo"), "#x");
+			assert.strictEqual(nodePath.posix.join("#x", "foo"), "#x/foo");
+		});
 	});
 });
