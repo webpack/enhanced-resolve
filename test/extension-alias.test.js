@@ -67,6 +67,52 @@ describe("extension-alias", () => {
 		});
 	});
 
+	describe("fallback to the original request", () => {
+		it("should resolve a directory whose name ends with the aliased extension", (t, done) => {
+			resolver.resolve({}, fixture, "./dir3.js", {}, (err, result) => {
+				if (err) return done(err);
+				assert.deepStrictEqual(
+					result,
+					path.resolve(fixture, "dir3.js", "index.js"),
+				);
+				done();
+			});
+		});
+
+		it("should resolve a package whose name ends with the aliased extension behind an alias", (t, done) => {
+			const aliasResolver = ResolverFactory.createResolver({
+				extensions: [".js"],
+				fileSystem: nodeFileSystem,
+				mainFields: ["main"],
+				mainFiles: ["index"],
+				modules: ["node_modules"],
+				alias: { vendor: path.resolve(fixture, "node_modules") },
+				extensionAlias: { ".js": [".ts", ".js"] },
+			});
+			aliasResolver.resolve({}, fixture, "vendor/pkg.js", {}, (err, result) => {
+				if (err) return done(err);
+				assert.deepStrictEqual(
+					result,
+					path.resolve(fixture, "node_modules", "pkg.js", "dist", "main.js"),
+				);
+				done();
+			});
+		});
+
+		it("should not fall back when the original extension is not an alias", (t, done) => {
+			const strictResolver = ResolverFactory.createResolver({
+				extensions: [".js"],
+				fileSystem: nodeFileSystem,
+				mainFiles: ["index.js"],
+				extensionAlias: { ".js": [".ts"] },
+			});
+			strictResolver.resolve({}, fixture, "./dir3.js", {}, (err, _result) => {
+				assert.ok(err instanceof Error);
+				done();
+			});
+		});
+	});
+
 	it("should try multiple extension aliases in order and logs each failure", (t, done) => {
 		const resolver = ResolverFactory.createResolver({
 			fileSystem: nodeFileSystem,
