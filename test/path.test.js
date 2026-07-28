@@ -91,10 +91,11 @@ describe("util/path getType", () => {
 		// filename character everywhere else — too ambiguous to reroute.
 		assert.strictEqual(getType("\\?\\C:\\foo"), PathType.Normal);
 		assert.strictEqual(getType("\\a\\b"), PathType.Normal);
-		// Forward-slash variants aren't equivalent — Windows won't normalize
-		// a DOS device path expressed with `/`, and `//a/b` is a posix path.
+		// A leading forward slash is a posix root, however the separator after
+		// it is spelled — `path.win32` would read both as a UNC root.
 		assert.strictEqual(getType("//?/C:/foo"), PathType.AbsolutePosix);
 		assert.strictEqual(getType("//server/share"), PathType.AbsolutePosix);
+		assert.strictEqual(getType("/\\server\\share"), PathType.AbsolutePosix);
 	});
 });
 
