@@ -53,6 +53,12 @@ const extendsUnscopedPkgDir = path.resolve(
 	"tsconfig-paths",
 	"extends-unscoped-pkg",
 );
+const extendsNpmWorkspaceDir = path.resolve(
+	__dirname,
+	"fixtures",
+	"tsconfig-paths",
+	"extends-npm-workspace",
+);
 
 describe("TsconfigPathsPlugin", () => {
 	it("resolves exact mapped path '@components/*' via tsconfig option (example)", (t, done) => {
@@ -1641,6 +1647,60 @@ describe("TsconfigPathsPlugin", () => {
 					done();
 				},
 			);
+		});
+	});
+
+	describe("extends a non-existent dot-prefixed value (not a package specifier)", () => {
+		const missingRelativeDir = path.resolve(
+			__dirname,
+			"fixtures",
+			"tsconfig-paths",
+			"extends-missing-relative",
+		);
+
+		it("surfaces the load error instead of searching node_modules", () => {
+			const resolver = ResolverFactory.createResolver({
+				fileSystem,
+				extensions: [".ts", ".tsx"],
+				mainFields: ["browser", "main"],
+				mainFiles: ["index"],
+				tsconfig: path.join(missingRelativeDir, "tsconfig.json"),
+				useSyncFileSystemCalls: true,
+			});
+
+			assert.throws(() => {
+				resolver.resolveSync({}, missingRelativeDir, "@x/y");
+			});
+		});
+	});
+
+	describe("bug: npm package in extends field hoisted to a parent node_modules (#21457)", () => {
+		it("should resolve a scoped package extends from a parent workspace node_modules", (t, done) => {
+			const appDir = path.join(extendsNpmWorkspaceDir, "packages", "app");
+			const resolver = ResolverFactory.createResolver({
+				fileSystem,
+				extensions: [".ts", ".tsx"],
+				mainFields: ["browser", "main"],
+				mainFiles: ["index"],
+				tsconfig: path.join(appDir, "tsconfig.json"),
+			});
+
+			resolver.resolve({}, appDir, "@pkg/util", {}, (err, result) => {
+				if (err) return done(err);
+				if (!result) return done(new Error("No result"));
+				assert.deepStrictEqual(
+					result,
+					path.join(
+						extendsNpmWorkspaceDir,
+						"node_modules",
+						"@my-tsconfig",
+						"base",
+						"src",
+						"util.ts",
+					),
+				);
+				done();
+			});
 		});
 	});
 });

@@ -1,0 +1,8 @@
+{
+  "extends": ".missing-base",
+  "compilerOptions": {
+    "paths": {
+      "@x/*": ["./src/*"]
+    }
+  }
+}
