@@ -1703,4 +1703,139 @@ describe("TsconfigPathsPlugin", () => {
 			});
 		});
 	});
+
+	// Regression for webpack/webpack#21551: published packages often ship a
+	// monorepo tsconfig.json whose `extends` points at a repo-root file that
+	// is not published (e.g. `../../tsconfig-base.json`). With `tsconfig: true`,
+	// discovering that file must not abort ordinary resolution inside the package.
+	// Like TypeScript's findConfigFile, the first existing config wins — load
+	// failure soft-fails (no paths) and must not fall through to a parent
+	// tsconfig's path mappings.
+	describe("bug: published package tsconfig with missing relative extends (#21551)", () => {
+		const brokenPkgExtendsDir = path.resolve(
+			__dirname,
+			"fixtures",
+			"tsconfig-paths",
+			"broken-pkg-extends",
+		);
+		const pkgDir = path.join(
+			brokenPkgExtendsDir,
+			"node_modules",
+			"@scope",
+			"pkg",
+		);
+
+		it("should resolve a relative request inside the package when tsconfig: true finds its broken tsconfig.json", (t, done) => {
+			const resolver = ResolverFactory.createResolver({
+				fileSystem,
+				extensions: [".js"],
+				mainFields: ["main"],
+				mainFiles: ["index"],
+				tsconfig: true,
+			});
+
+			resolver.resolve(
+				{},
+				path.join(pkgDir, "dist"),
+				"./sibling",
+				{},
+				(err, result) => {
+					if (err) return done(err);
+					if (!result) return done(new Error("No result"));
+					assert.deepStrictEqual(
+						result,
+						path.join(pkgDir, "dist", "sibling.js"),
+					);
+					done();
+				},
+			);
+		});
+
+		it("must not apply a parent tsconfig's paths after the nearer config fails to load", (t, done) => {
+			const resolver = ResolverFactory.createResolver({
+				fileSystem,
+				extensions: [".js"],
+				mainFields: ["main"],
+				mainFiles: ["index"],
+				tsconfig: true,
+			});
+
+			resolver.resolve(
+				{},
+				path.join(pkgDir, "dist"),
+				"@app/hello",
+				{},
+				(err, result) => {
+					// Parent broken-pkg-extends/tsconfig.json maps @app/* → ./src/*,
+					// but TypeScript stops at the package's own (broken) config and
+					// does not adopt the parent's paths.
+					if (
+						!err &&
+						result === path.join(brokenPkgExtendsDir, "src", "hello.js")
+					) {
+						return done(
+							new Error(
+								"incorrectly applied parent tsconfig paths after load failure",
+							),
+						);
+					}
+					assert.ok(err, "expected @app/hello not to resolve via parent paths");
+					done();
+				},
+			);
+		});
+	});
+
+	describe("extends a missing relative path containing slashes", () => {
+		const missingRelativeSlashDir = path.resolve(
+			__dirname,
+			"fixtures",
+			"tsconfig-paths",
+			"extends-missing-relative-slash",
+		);
+
+		it("surfaces ENOENT for the joined relative path, not a mangled node_modules path", () => {
+			const resolver = ResolverFactory.createResolver({
+				fileSystem,
+				extensions: [".ts", ".tsx"],
+				mainFields: ["browser", "main"],
+				mainFiles: ["index"],
+				tsconfig: path.join(missingRelativeSlashDir, "tsconfig.json"),
+				useSyncFileSystemCalls: true,
+			});
+
+			const expectedMissing = path.resolve(
+				missingRelativeSlashDir,
+				"..",
+				"..",
+				"tsconfig-base.json",
+			);
+
+			let err;
+			try {
+				resolver.resolveSync({}, missingRelativeSlashDir, "@x/y");
+			} catch (err_) {
+				err = err_;
+			}
+			assert.ok(err);
+			assert.strictEqual(
+				/** @type {NodeJS.ErrnoException} */ (err).code,
+				"ENOENT",
+			);
+			assert.ok(
+				/** @type {Error} */ (err).message.includes(expectedMissing),
+				`expected error to mention ${expectedMissing}, got: ${
+					/** @type {Error} */ (err).message
+				}`,
+			);
+			assert.ok(
+				!(
+					/** @type {Error} */ (err).message.includes(
+						`${path.sep}tsconfig-paths${path.sep}tsconfig-base.json`,
+					)
+				),
+				"must not rewrite ../../tsconfig-base.json via node_modules fallback",
+			);
+		});
+	});
 });
