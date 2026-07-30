@@ -1,5 +1,11 @@
 # enhanced-resolve
 
+## 5.24.5
+
+### Patch Changes
+
+- Soft-fail when auto tsconfig discovery loads a broken config, and keep relative `extends` paths relative. (by [@xiaoxiaojx](https://github.com/xiaoxiaojx) in [#645](https://github.com/webpack/enhanced-resolve/pull/645))
+
 ## 5.24.4
 
 ### Patch Changes
