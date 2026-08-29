@@ -25,9 +25,15 @@ jobs:
         with:
           bun-version: latest
 
+      # Bun migrates `package-lock.json` when no bun lockfile is present. npm
+      # records the `tooling` git dependency with a `git+ssh://` resolved URL
+      # and an npm-computed integrity hash, but Bun fetches the GitHub tarball
+      # instead, so the hash never matches and the install fails with
+      # `IntegrityCheckFailed extracting tarball from tooling`. Drop the npm
+      # lockfile so Bun resolves from `package.json` directly.
       - name: Install dependencies
         run: |
-          rm -rf node_modules bun.lockb
+          rm -f package-lock.json
           bun install
         env:
           HUSKY: "0"
