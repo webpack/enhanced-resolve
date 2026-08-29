@@ -1,7 +1,10 @@
 /*
- * This file was automatically generated.
- * DO NOT MODIFY BY HAND.
- * Run `yarn fix:special` to update
+ * Public type declarations for enhanced-resolve.
+ *
+ * Maintained by hand: update this file in the same change as any public API
+ * change in `lib/`. `npm run lint:types-public` checks that it compiles, and
+ * `npm run lint:types-test` checks it against the test suite, which consumes
+ * the package through these declarations.
  */
 
 import { Buffer } from "buffer";
