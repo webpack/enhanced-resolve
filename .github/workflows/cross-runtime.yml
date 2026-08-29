@@ -31,7 +31,7 @@ jobs:
           HUSKY: "0"
 
       - name: Run tests
-        run: bun test test/
+        run: bun test --max-concurrency 1 test/
 
   deno:
     runs-on: ubuntu-latest
