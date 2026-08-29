@@ -27,7 +27,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          bun pm cache -g rm
+          rm -rf node_modules bun.lockb
           bun install
         env:
           HUSKY: "0"
