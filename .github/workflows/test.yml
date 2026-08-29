@@ -52,8 +52,10 @@ jobs:
           node-version: ${{ matrix.node-version }}
           architecture: ${{ steps.calculate_architecture.outputs.result }}
           # Legacy Node (10-16) reinstalls deps after dropping the lockfile,
-          # so there's nothing for setup-node's npm cache to key on.
-          cache: ${{ (matrix.node-version == '10.x' || matrix.node-version == '12.x' || matrix.node-version == '14.x' || matrix.node-version == '16.x') && '' || 'npm' }}
+          # so there's nothing for setup-node's npm cache to key on. The
+          # condition is written positively because `cond && '' || 'npm'`
+          # always yields 'npm' - an empty string is falsy in expressions.
+          cache: ${{ (matrix.node-version != '10.x' && matrix.node-version != '12.x' && matrix.node-version != '14.x' && matrix.node-version != '16.x') && 'npm' || '' }}
 
       # TODO: drop the legacy install + jest steps below once `engines.node`
       # is bumped to >= 18. That also makes `jest.config.js`, the jest branch
