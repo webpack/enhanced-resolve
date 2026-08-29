@@ -39,6 +39,14 @@ export default defineConfig([
 		},
 	},
 	{
+		// Repo maintenance scripts are CLIs: they report progress and failures on
+		// stdout/stderr rather than throwing.
+		files: ["scripts/**/*"],
+		rules: {
+			"no-console": "off",
+		},
+	},
+	{
 		// The test suite relies on `node:test` and modern `node:assert` helpers,
 		// which are newer than the `engines.node` range the published library
 		// targets. Tests are dev-only, so the builtin version check does not apply.
