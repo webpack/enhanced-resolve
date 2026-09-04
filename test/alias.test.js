@@ -282,6 +282,189 @@ describe("alias", () => {
 		);
 	});
 
+	describe("compileAliasOptions bucketing", () => {
+		const { compileAliasOptions } = require("../lib/AliasUtils");
+
+		/** Minimal resolver stub — only `join` is needed by `compileAliasOptions`. */
+		const stubResolver = {
+			join: (filePath, ext) => filePath + ext,
+		};
+
+		it("should bucket aliases by first char code and set useBuckets when multiple distinct chars exist", () => {
+			// @ts-expect-error for tests
+			const compiled = compileAliasOptions(stubResolver, [
+				{ name: "alpha", alias: "/a" },
+				{ name: "bravo", alias: "/b" },
+			]);
+
+			assert.strictEqual(compiled.useBuckets, true);
+			assert.strictEqual(compiled.hasAnyFirstChar, false);
+			assert.strictEqual(compiled.byFirstChar.size, 2);
+			const aBucket = compiled.byFirstChar.get("a".charCodeAt(0));
+			assert.ok(aBucket);
+			assert.strictEqual(aBucket.length, 1);
+			const bBucket = compiled.byFirstChar.get("b".charCodeAt(0));
+			assert.ok(bBucket);
+			assert.strictEqual(bBucket.length, 1);
+			assert.strictEqual(compiled.all.length, 2);
+		});
+
+		it("should disable useBuckets when all aliases share the same first char", () => {
+			// @ts-expect-error for tests
+			const compiled = compileAliasOptions(stubResolver, [
+				{ name: "alpha", alias: "/a" },
+				{ name: "ant", alias: "/b" },
+			]);
+
+			assert.strictEqual(compiled.useBuckets, false);
+			assert.strictEqual(compiled.byFirstChar.size, 1);
+		});
+
+		it("should disable useBuckets when an empty-prefix wildcard is present", () => {
+			// @ts-expect-error for tests
+			const compiled = compileAliasOptions(stubResolver, [
+				{ name: "*", alias: "/*" },
+				{ name: "alpha", alias: "/a" },
+			]);
+
+			assert.strictEqual(compiled.useBuckets, false);
+			assert.strictEqual(compiled.hasAnyFirstChar, true);
+		});
+
+		it("should return empty compiled options for an empty input", () => {
+			// @ts-expect-error for tests
+			const compiled = compileAliasOptions(stubResolver, []);
+
+			assert.strictEqual(compiled.all.length, 0);
+			assert.strictEqual(compiled.useBuckets, false);
+			assert.strictEqual(compiled.hasAnyFirstChar, false);
+		});
+
+		it("should precompute wildcardPrefix and wildcardSuffix", () => {
+			// @ts-expect-error for tests
+			const compiled = compileAliasOptions(stubResolver, [
+				{ name: "foo/*", alias: "/bar/*" },
+			]);
+
+			const [entry] = compiled.all;
+			assert.strictEqual(entry.wildcardPrefix, "foo/");
+			assert.strictEqual(entry.wildcardSuffix, "");
+			assert.strictEqual(entry.firstCharCode, "f".charCodeAt(0));
+		});
+
+		it("should set absolutePath for absolute alias names", () => {
+			// @ts-expect-error for tests
+			const compiled = compileAliasOptions(stubResolver, [
+				{ name: "/abs/path", alias: "/target" },
+			]);
+
+			assert.strictEqual(compiled.all[0].absolutePath, "/abs/path");
+		});
+
+		it("should set firstCharCode to -1 for empty-name aliases", () => {
+			// @ts-expect-error for tests
+			const compiled = compileAliasOptions(stubResolver, [
+				{ name: "", alias: "/target" },
+			]);
+
+			assert.strictEqual(compiled.all[0].firstCharCode, -1);
+		});
+	});
+
+	describe("onlyModule flag", () => {
+		const AliasPlugin = require("../lib/AliasPlugin");
+
+		it("should not alias relative paths when onlyModule is true", () => {
+			const fileSystem = Volume.fromJSON(
+				{
+					"/real/index": "",
+					"/real/sub/file": "",
+					"/mapped/index": "",
+				},
+				"/",
+			);
+			const res = ResolverFactory.createResolver({
+				extensions: [".js"],
+				modules: "/",
+				useSyncFileSystemCalls: true,
+				// @ts-expect-error for tests
+				fileSystem,
+				plugins: [
+					new AliasPlugin(
+						"described-resolve",
+						[{ name: "real", alias: "mapped", onlyModule: true }],
+						"resolve",
+					),
+				],
+			});
+
+			assert.strictEqual(res.resolveSync({}, "/", "real"), "/mapped/index");
+			assert.strictEqual(
+				res.resolveSync({}, "/", "./real/index"),
+				"/real/index",
+			);
+		});
+
+		it("should not alias path-prefixed requests when onlyModule is true", () => {
+			const fileSystem = Volume.fromJSON(
+				{
+					"/real/index": "",
+					"/real/sub/file": "",
+					"/mapped/index": "",
+				},
+				"/",
+			);
+			const res = ResolverFactory.createResolver({
+				extensions: [".js"],
+				modules: "/",
+				useSyncFileSystemCalls: true,
+				// @ts-expect-error for tests
+				fileSystem,
+				plugins: [
+					new AliasPlugin(
+						"described-resolve",
+						[{ name: "real", alias: "mapped", onlyModule: true }],
+						"resolve",
+					),
+				],
+			});
+
+			assert.strictEqual(res.resolveSync({}, "/", "real"), "/mapped/index");
+			assert.strictEqual(res.resolveSync({}, "/", "real/index"), "/real/index");
+		});
+
+		it("should alias both module and path requests when onlyModule is false", () => {
+			const fileSystem = Volume.fromJSON(
+				{
+					"/real/index": "",
+					"/real/sub/file": "",
+					"/mapped/index": "",
+				},
+				"/",
+			);
+			const res = ResolverFactory.createResolver({
+				extensions: [".js"],
+				modules: "/",
+				useSyncFileSystemCalls: true,
+				// @ts-expect-error for tests
+				fileSystem,
+				plugins: [
+					new AliasPlugin(
+						"described-resolve",
+						[{ name: "real", alias: "mapped" }],
+						"resolve",
+					),
+				],
+			});
+
+			assert.strictEqual(res.resolveSync({}, "/", "real"), "/mapped/index");
+			assert.strictEqual(
+				res.resolveSync({}, "/", "real/index"),
+				"/mapped/index",
+			);
+		});
+	});
+
 	// Absolute-path aliasing — OS-native (posix on Linux CI, backslash
 	// on Windows CI).
 	//
