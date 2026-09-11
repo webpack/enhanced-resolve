@@ -61,8 +61,25 @@ jobs:
         with:
           deno-version: v2.x
 
+      # jest clears mocks by walking the sandbox globals and testing
+      # `"_isMockFunction" in value`. On `localStorage` that opens Deno's
+      # SQLite-backed web storage, and the jest workers - separate Deno
+      # processes - race to create that database on a cold cache, failing a
+      # random suite with "database is locked". The preload swaps in an
+      # in-memory `Storage`; the workers inherit `NODE_OPTIONS`, so it reaches
+      # all of them.
       - name: Run tests (jest via Deno node compatibility)
-        run: deno run -A --node-modules-dir=auto node_modules/jest/bin/jest.js
+        env:
+          DENO_DIR: ${{ runner.temp }}/deno
+          NODE_OPTIONS: --require ./test/deno-web-storage-shim.js
+        run: |
+          deno run -A --node-modules-dir=auto node_modules/jest/bin/jest.js
+          # A preload that stops being applied fails silently, so assert that
+          # the web storage database really was never opened.
+          if [ -d "$DENO_DIR/location_data" ]; then
+            echo "::error::Deno opened its SQLite web storage - test/deno-web-storage-shim.js was not applied"
+            exit 1
+          fi
 
   browser:
     runs-on: ubuntu-latest
