@@ -71,7 +71,9 @@ class MemoryStorage {
 	}
 }
 
-if (typeof Deno !== "undefined") {
+// `"Deno" in global` rather than a bare `Deno` reference: the suite is
+// type-checked with the Node.js types only, which do not declare that global.
+if ("Deno" in global) {
 	for (const name of ["localStorage", "sessionStorage"]) {
 		Object.defineProperty(global, name, {
 			configurable: true,
