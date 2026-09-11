@@ -1,0 +1,33 @@
+{
+  "packages": {
+    "app": {
+      "url": "./packages/app",
+      "dependencies": {
+        "@acme/utils": "utils",
+        "component": "component-v2",
+        "lib": "lib-new"
+      }
+    },
+    "utils": {
+      "url": "./packages/utils"
+    },
+    "lib-old": {
+      "url": "./lib",
+      "dependencies": {
+        "component": "component-v1"
+      }
+    },
+    "lib-new": {
+      "url": "./lib",
+      "dependencies": {
+        "component": "component-v2"
+      }
+    },
+    "component-v1": {
+      "url": "./vendor/component-v1"
+    },
+    "component-v2": {
+      "url": "./vendor/component-v2"
+    }
+  }
+}
