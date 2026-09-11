@@ -7,6 +7,14 @@ export default defineConfig([
 		extends: [config],
 	},
 	{
+		// `@changesets/get-github-info` is ESM-only and reachable only through its
+		// `exports` map, which `eslint-plugin-import`'s node resolver cannot follow.
+		files: [".changeset/*.mjs"],
+		rules: {
+			"import/no-unresolved": "off",
+		},
+	},
+	{
 		files: ["benchmark/**/*"],
 		languageOptions: {
 			parserOptions: {

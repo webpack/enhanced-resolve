@@ -30,14 +30,13 @@ jobs:
 
       - run: npm ci
 
+      # Inputs are the v2 ones (`*-script`, `commit-message`, `pr-title`); the
+      # v1 names are rejected by the action. `github-token` defaults to `github.token`.
       - name: Create Release Pull Request or Publish to npm
         id: changesets
-        uses: changesets/action@8488615a623b1b9c987934bb89eae8af6a946ac1 # v2.1.1
+        uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
         with:
-          version: npm run version
-          publish: npm run release
-          commit: "chore(release): new release"
-          title: "chore(release): new release"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: "" # https://github.com/changesets/changesets/issues/1152#issuecomment-3190884868
+          version-script: npm run version
+          publish-script: npm run release
+          commit-message: "chore(release): new release"
+          pr-title: "chore(release): new release"
