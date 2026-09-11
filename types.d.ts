@@ -652,13 +652,7 @@ declare interface JoinCacheEntry {
 }
 declare interface JsonObject {
 	[index: string]:
-		| undefined
-		| null
-		| string
-		| number
-		| boolean
-		| JsonObject
-		| JsonValue[];
+		undefined | null | string | number | boolean | JsonObject | JsonValue[];
 }
 type JsonValue = null | string | number | boolean | JsonObject | JsonValue[];
 declare interface KnownContext {
@@ -859,9 +853,7 @@ declare interface ReadFile {
 	(
 		path: PathOrFileDescriptor,
 		options:
-			| undefined
-			| null
-			| ({ encoding?: null; flag?: string } & Abortable),
+			undefined | null | ({ encoding?: null; flag?: string } & Abortable),
 		callback: (err: null | NodeJS.ErrnoException, result?: Buffer) => void,
 	): void;
 	(
@@ -1524,9 +1516,7 @@ declare interface ResolveOptionsResolverFactoryObject_2 {
 	 * A list of main fields in description files
 	 */
 	mainFields?: (
-		| string
-		| string[]
-		| { name: string | string[]; forceRelative: boolean }
+		string | string[] | { name: string | string[]; forceRelative: boolean }
 	)[];
 
 	/**
@@ -1943,10 +1933,7 @@ declare interface UserAliasOptionEntry {
 	onlyModule?: boolean;
 }
 type UserAliasOptionNewRequest =
-	| string
-	| false
-	| URL_url
-	| (string | URL_url)[];
+	string | false | URL_url | (string | URL_url)[];
 declare interface UserAliasOptions {
 	[index: string]: UserAliasOptionNewRequest;
 }
