@@ -1,5 +1,11 @@
 # enhanced-resolve
 
+## 5.25.0
+
+### Minor Changes
+
+- Accept `file:` URL strings wherever an option or the context path takes a path. (by [@alexander-akait](https://github.com/alexander-akait) in [#668](https://github.com/webpack/enhanced-resolve/pull/668))
+
 ## 5.24.5
 
 ### Patch Changes
