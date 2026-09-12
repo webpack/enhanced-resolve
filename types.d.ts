@@ -1508,7 +1508,7 @@ declare interface ResolveOptionsResolverFactoryObject_2 {
 	resolver?: Resolver;
 
 	/**
-	 * A list of directories to resolve modules from, can be absolute path, folder name, or a `file:` `URL` instance
+	 * A list of directories to resolve modules from, can be absolute path, folder name, or a `file:` URL
 	 */
 	modules?: string | URL_url | (string | URL_url)[];
 
@@ -1535,7 +1535,7 @@ declare interface ResolveOptionsResolverFactoryObject_2 {
 	pnpApi?: null | PnpApi;
 
 	/**
-	 * A list of root paths, each an absolute path or a `file:` `URL` instance
+	 * A list of root paths, each an absolute path or a `file:` URL
 	 */
 	roots?: (string | URL_url)[];
 
@@ -1550,7 +1550,7 @@ declare interface ResolveOptionsResolverFactoryObject_2 {
 	resolveToContext?: boolean;
 
 	/**
-	 * A list of resolve restrictions, each an absolute path, a `file:` `URL` instance, or a RegExp
+	 * A list of resolve restrictions, each an absolute path, a `file:` URL, or a RegExp
 	 */
 	restrictions?: (string | RegExp | URL_url)[];
 
@@ -1570,7 +1570,7 @@ declare interface ResolveOptionsResolverFactoryObject_2 {
 	preferAbsolute?: boolean;
 
 	/**
-	 * TypeScript config file path (or `file:` `URL` instance) or config object with configFile and references
+	 * TypeScript config file path (or `file:` URL) or config object with configFile and references
 	 */
 	tsconfig?: string | boolean | URL_url | UserTsconfigOptions;
 }
@@ -1939,17 +1939,17 @@ declare interface UserAliasOptions {
 }
 declare interface UserTsconfigOptions {
 	/**
-	 * A path, or `file:` `URL` instance, pointing at the tsconfig file
+	 * A path, or `file:` URL, pointing at the tsconfig file
 	 */
 	configFile?: string | URL_url;
 
 	/**
-	 * References to other tsconfig files. 'auto' inherits from TypeScript config, or an array of relative/absolute paths or `file:` `URL` instances
+	 * References to other tsconfig files. 'auto' inherits from TypeScript config, or an array of relative/absolute paths or `file:` URLs
 	 */
 	references?: (string | URL_url)[] | "auto";
 
 	/**
-	 * Override baseUrl from tsconfig.json with a path or `file:` `URL` instance
+	 * Override baseUrl from tsconfig.json with a path or `file:` URL
 	 */
 	baseUrl?: string | URL_url;
 }
