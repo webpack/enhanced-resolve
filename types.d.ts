@@ -68,6 +68,11 @@ declare interface BaseResolveRequest {
 	fullySpecified?: boolean;
 
 	/**
+	 * package id the request was resolved to in the package map, to be propagated to resolutions made from the resulting file (`@experimental`, see the `packageMap` option)
+	 */
+	packageId?: string;
+
+	/**
 	 * inner request for internal usage
 	 */
 	__innerRequest?: string;
@@ -660,6 +665,11 @@ declare interface KnownContext {
 	 * environments
 	 */
 	environments?: string[];
+
+	/**
+	 * package id of the importing file in the package map, propagated from a previous result to disambiguate package entries that share a location (`@experimental`, see the `packageMap` option)
+	 */
+	packageId?: string;
 }
 declare interface KnownHooks {
 	/**
@@ -776,6 +786,38 @@ declare interface ObjectEncodingOptions {
 		| "latin1"
 		| "binary"
 		| "hex";
+}
+declare interface PackageMapDependencies {
+	[index: string]: string;
+}
+
+/**
+ * A single entry of the configuration file's `packages` object.
+ */
+declare interface PackageMapPackage {
+	/**
+	 * an absolute or relative `file:` URL, resolved against the configuration file
+	 */
+	url: string;
+
+	/**
+	 * bare specifier to package id
+	 */
+	dependencies?: PackageMapDependencies;
+}
+declare interface PackageMapOptions {
+	/**
+	 * absolute path of the configuration file, read lazily when `packages` is not given
+	 */
+	configFile: null | string;
+
+	/**
+	 * an already-parsed `packages` object, used instead of reading `configFile`
+	 */
+	packages: null | PackageMapPackages;
+}
+declare interface PackageMapPackages {
+	[index: string]: PackageMapPackage;
 }
 declare interface ParsedIdentifier {
 	/**
@@ -1382,6 +1424,11 @@ declare interface ResolveOptionsResolverFactoryObject_1 {
 	plugins: Plugin[];
 
 	/**
+	 * package map
+	 */
+	packageMap: null | PackageMapOptions;
+
+	/**
 	 * pnp API
 	 */
 	pnpApi: null | PnpApi;
@@ -1528,6 +1575,11 @@ declare interface ResolveOptionsResolverFactoryObject_2 {
 	 * A list of additional resolve plugins which should be applied
 	 */
 	plugins?: Plugin[];
+
+	/**
+	 * A Node.js package map file path (or `file:` `URL` instance), or an object with the already-parsed `packages`. When set, bare specifiers resolve through the map instead of `node_modules` (`@experimental`)
+	 */
+	packageMap?: string | URL_url | UserPackageMapOptions;
 
 	/**
 	 * A PnP API that should be used - null is "never", undefined is "auto"
@@ -1936,6 +1988,22 @@ type UserAliasOptionNewRequest =
 	string | false | URL_url | (string | URL_url)[];
 declare interface UserAliasOptions {
 	[index: string]: UserAliasOptionNewRequest;
+}
+/**
+ * A Node.js package map (https://nodejs.org/api/packages.html#package-maps),
+ * either as the path of the configuration file or as its already-parsed
+ * contents.
+ */
+declare interface UserPackageMapOptions {
+	/**
+	 * A path, or `file:` `URL` instance, pointing at the package map file. Required together with `packages`, whose relative `url` values are resolved against it
+	 */
+	configFile?: string | URL_url;
+
+	/**
+	 * An already-parsed `packages` object, used instead of reading `configFile` from disk
+	 */
+	packages?: PackageMapPackages;
 }
 declare interface UserTsconfigOptions {
 	/**

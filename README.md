@@ -334,6 +334,7 @@ const filepath = myResolver.resolveSync(context, parent, specifier);
 | mainFields               | ["main"]                    | A list of main fields in description files                                                                                                                                                                                                                                                  |
 | mainFiles                | ["index"]                   | A list of main files in directories                                                                                                                                                                                                                                                         |
 | modules                  | ["node_modules"]            | A list of directories to resolve modules from, can be absolute path or folder name                                                                                                                                                                                                          |
+| packageMap               | undefined                   | **Experimental.** A [Node.js package map](https://nodejs.org/api/packages.html#package-maps): a path (or `file:` URL) to the configuration file, or an object with `configFile` and already-parsed `packages`. Bare specifiers then resolve through the map instead of `node_modules`.      |
 | plugins                  | []                          | A list of additional resolve plugins which should be applied                                                                                                                                                                                                                                |
 | resolver                 | undefined                   | A prepared Resolver to which the plugins are attached                                                                                                                                                                                                                                       |
 | resolveToContext         | false                       | Resolve to a context instead of a file                                                                                                                                                                                                                                                      |
@@ -511,6 +512,48 @@ The `name` argument is the cache id — a `JSON.stringify`'d object containing `
 const options = { fileSystem: new CachedInputFileSystem(require("fs"), 4000) };
 ```
 
+**`packageMap`** (**experimental**) — resolve bare specifiers through a [Node.js package map](https://nodejs.org/api/packages.html#package-maps) instead of walking `node_modules`. Each package entry declares where it lives and which package id every bare specifier of its own maps to:
+
+```json
+{
+	"packages": {
+		"app": {
+			"url": "./packages/app",
+			"dependencies": { "@acme/utils": "utils" }
+		},
+		"utils": { "url": "./packages/utils" }
+	}
+}
+```
+
+```js
+const options = { packageMap: path.resolve("./package-map.json") };
+// or, with the map already in memory:
+const options2 = {
+	packageMap: {
+		// relative `url` values are resolved against this path
+		configFile: path.resolve("./package-map.json"),
+		packages: {/* ... */},
+	},
+};
+```
+
+The map is authoritative: when it is set, a bare specifier that the importing package does not declare is reported as unresolved rather than looked up in `node_modules`. Relative and absolute requests, and `node:` builtins, are unaffected.
+
+Because a package map may point several package ids at the same `url` (the same sources used with different dependency tables), the importing package cannot always be derived from the file path alone. Pass the package id along to remove the ambiguity — it is available on every result as `packageId`:
+
+```js
+resolver({}, parent, specifier, {}, (err, result, request) => {
+	// `request.packageId` is the package the request resolved into; pass it
+	// back in as `context.packageId` for resolutions made from `result`.
+	resolver({ packageId: request.packageId }, result, next, {}, callback);
+});
+```
+
+Resolution fails with an error (rather than silently picking one) when the importing file lies outside every mapped package (`ERR_PACKAGE_MAP_EXTERNAL_FILE`) or when several package ids share its location and no package id was given (`ERR_PACKAGE_MAP_AMBIGUOUS_PACKAGE`).
+
+> Package maps are stability 1 (experimental) in Node.js, where they are only reachable behind `--experimental-package-map`. This option tracks that specification and may change with it, including in a patch release.
+
 **`plugins`** — additional plugin instances appended to the pipeline. See [Plugins](#plugins):
 
 ```js
@@ -552,6 +595,7 @@ Plugins are executed in a pipeline, and register which event they should be exec
 | `ModulesInHierarchicalDirectoriesPlugin` | Searches for a module by walking up parent directories (the standard `node_modules` lookup). Powers `modules`.                       |
 | `ModulesInRootPlugin`                    | Searches for a module in a single absolute directory. Powers absolute-path entries in `modules`.                                     |
 | `NextPlugin`                             | Forwards the request from one hook to another without modification — glue between pipeline steps.                                    |
+| `PackageMapPlugin`                       | Resolves bare specifiers through a Node.js package map instead of `node_modules`. Powers `packageMap`. **Experimental.**             |
 | `ParsePlugin`                            | Parses a raw request string into its components (path, query, fragment, module flag, etc.).                                          |
 | `PnpPlugin`                              | Resolves module requests through a Yarn PnP API when one is available.                                                               |
 | `RestrictionsPlugin`                     | Rejects results that don't match a list of path restrictions (strings or regular expressions). Powers `restrictions`.                |
@@ -586,6 +630,7 @@ One-line goal and default wiring (`source → target`) for each plugin. `*` mean
 - **`ModulesInHierarchicalDirectoriesPlugin`** — Goal: search for a module by walking up parent directories (the standard `node_modules` lookup). `raw-module` → `module`; when PnP is enabled, `alternate-raw-module` → `module` too.
 - **`ModulesInRootPlugin`** — Goal: search for a module in a single absolute directory (powers absolute-path entries in `modules`). `raw-module` → `module`.
 - **`NextPlugin`** — Goal: glue — forward the current request unchanged from one hook to another. Used across the pipeline wherever two hooks should run sequentially.
+- **`PackageMapPlugin`** — Goal: resolve bare specifiers through a [Node.js package map](https://nodejs.org/api/packages.html#package-maps) rather than `node_modules` (powers `packageMap`, experimental). `raw-module` → `undescribed-resolve-in-package`.
 - **`ParsePlugin`** — Goal: split the raw request string into path / query / fragment / `module` / `directory` / `internal` flags. `resolve` → `parsed-resolve`; also wired on `internal-resolve` and `imports-resolve`.
 - **`PnpPlugin`** — Goal: resolve bare-module requests through Yarn's PnP API when available. `raw-module` → `undescribed-resolve-in-package` on hit, `alternate-raw-module` on miss.
 - **`RestrictionsPlugin`** — Goal: reject resolved paths that don't satisfy at least one string prefix or RegExp. Tapped on `resolved`.
@@ -629,7 +674,7 @@ Listed roughly in the order the default pipeline visits them. Full wiring lives 
 | `normal-resolve`                 | Default resolution starts. Branches into `relative` (for `./`, `../`, absolute), `raw-module` (bare modules), or `internal` (`#imports`).                                                 |
 | `internal`                       | `#name` imports-field entry. `ImportsFieldPlugin` maps the specifier and forwards to `imports-field-relative` or `imports-resolve`.                                                       |
 | `imports-field-relative`         | Concrete path from an `imports`-field match, before the normal `relative` flow. `ExtensionAliasPlugin` taps here so `.js` → `.ts` also fires for `#name` targets. Forwards to `relative`. |
-| `raw-module`                     | Bare-module lookup. `SelfReferencePlugin`, `ModulesInHierarchicalDirectoriesPlugin`, `ModulesInRootPlugin`, and `PnpPlugin` all tap here.                                                 |
+| `raw-module`                     | Bare-module lookup. `SelfReferencePlugin`, `ModulesInHierarchicalDirectoriesPlugin`, `ModulesInRootPlugin`, `PackageMapPlugin`, and `PnpPlugin` all tap here.                             |
 | `alternate-raw-module`           | Fallback module lookup used by `PnpPlugin` when PnP can't resolve and `node_modules` should be tried.                                                                                     |
 | `module`                         | A candidate module directory was built. `JoinRequestPartPlugin` splits off the inner request and forwards to `resolve-as-module`.                                                         |
 | `resolve-as-module`              | Treat candidate as a package. `DirectoryExistsPlugin` gates on existence; short single-file modules may re-enter via `undescribed-raw-file`.                                              |
