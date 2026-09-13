@@ -201,6 +201,50 @@ describe("identifier", () => {
 		});
 	});
 
+	describe("parse identifier. `file:` in a path segment", () => {
+		/** @type {TestSuite[]} */
+		const tests = [
+			{
+				input: "/foo/file:bar.js",
+				expected: ["/foo/file:bar.js", "", ""],
+			},
+			{
+				input: "./a/file:b.js",
+				expected: ["./a/file:b.js", "", ""],
+			},
+			{
+				input: "/tmp/profile:1.js",
+				expected: ["/tmp/profile:1.js", "", ""],
+			},
+			{
+				input: "./file:foo?query#fragment",
+				expected: ["./file:foo", "?query", "#fragment"],
+			},
+		];
+
+		run(tests);
+	});
+
+	describe("parse identifier. `file:` URLs", () => {
+		/** @type {TestSuite[]} */
+		const tests = [
+			{
+				input: "file:///foo/bar.js",
+				expected: ["/foo/bar.js", "", ""],
+			},
+			{
+				input: "file:///foo/a%20b.js",
+				expected: ["/foo/a b.js", "", ""],
+			},
+			{
+				input: "FILE:///foo/bar.js",
+				expected: ["/foo/bar.js", "", ""],
+			},
+		];
+
+		run(tests);
+	});
+
 	describe("Resolver.parse() output shape", () => {
 		// ParsePlugin manually assigns these fields instead of spreading
 		// the parse() result (see lib/ParsePlugin.js). If parse() gains or
