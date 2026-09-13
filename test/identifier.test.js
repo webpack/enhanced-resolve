@@ -1,6 +1,9 @@
 "use strict";
 
 const assert = require("assert");
+
+const path = require("path");
+const { pathToFileURL } = require("url");
 const { createResolver } = require("../lib/ResolverFactory");
 const { parseIdentifier } = require("../lib/util/identifier");
 const { describe, it } = require("./_runner");
@@ -199,6 +202,73 @@ describe("identifier", () => {
 		it("returns null for an empty input", () => {
 			assert.strictEqual(parseIdentifier(""), null);
 		});
+	});
+
+	describe("parse identifier. `file:` in a path segment", () => {
+		/** @type {TestSuite[]} */
+		const tests = [
+			{
+				input: "/foo/file:bar.js",
+				expected: ["/foo/file:bar.js", "", ""],
+			},
+			{
+				input: "./a/file:b.js",
+				expected: ["./a/file:b.js", "", ""],
+			},
+			{
+				input: "/tmp/profile:1.js",
+				expected: ["/tmp/profile:1.js", "", ""],
+			},
+			{
+				input: "./file:foo?query#fragment",
+				expected: ["./file:foo", "?query", "#fragment"],
+			},
+		];
+
+		run(tests);
+	});
+
+	describe("parse identifier. `file:` URLs", () => {
+		// Built from real paths, so the drive letter Windows needs is there
+		const file = path.resolve(__dirname, "fixtures", "a.js");
+		const spaced = path.resolve(__dirname, "fixtures", "a b.js");
+		const url = pathToFileURL(file).href;
+
+		/** @type {TestSuite[]} */
+		const tests = [
+			{
+				input: url,
+				expected: [file, "", ""],
+			},
+			{
+				input: pathToFileURL(spaced).href,
+				expected: [spaced, "", ""],
+			},
+			{
+				input: `FILE:${url.slice("file:".length)}`,
+				expected: [file, "", ""],
+			},
+			{
+				// Node's URL parser normalizes a single slash to three
+				input: `file:${url.slice("file://".length)}`,
+				expected: [file, "", ""],
+			},
+		];
+
+		run(tests);
+	});
+
+	describe("parse identifier. `file:` without a slash", () => {
+		/** @type {TestSuite[]} */
+		const tests = [
+			{
+				// Node reads this as `/a/b.js`; a request keeps its own meaning
+				input: "file:a/b.js",
+				expected: ["file:a/b.js", "", ""],
+			},
+		];
+
+		run(tests);
 	});
 
 	describe("Resolver.parse() output shape", () => {
