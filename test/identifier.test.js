@@ -248,6 +248,24 @@ describe("identifier", () => {
 				input: `FILE:${url.slice("file:".length)}`,
 				expected: [file, "", ""],
 			},
+			{
+				// Node's URL parser normalizes a single slash to three
+				input: `file:${url.slice("file://".length)}`,
+				expected: [file, "", ""],
+			},
+		];
+
+		run(tests);
+	});
+
+	describe("parse identifier. `file:` without a slash", () => {
+		/** @type {TestSuite[]} */
+		const tests = [
+			{
+				// Node reads this as `/a/b.js`; a request keeps its own meaning
+				input: "file:a/b.js",
+				expected: ["file:a/b.js", "", ""],
+			},
 		];
 
 		run(tests);
