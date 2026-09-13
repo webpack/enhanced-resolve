@@ -1,6 +1,9 @@
 "use strict";
 
 const assert = require("assert");
+
+const path = require("path");
+const { pathToFileURL } = require("url");
 const { createResolver } = require("../lib/ResolverFactory");
 const { parseIdentifier } = require("../lib/util/identifier");
 const { describe, it } = require("./_runner");
@@ -226,19 +229,24 @@ describe("identifier", () => {
 	});
 
 	describe("parse identifier. `file:` URLs", () => {
+		// Built from real paths, so the drive letter Windows needs is there
+		const file = path.resolve(__dirname, "fixtures", "a.js");
+		const spaced = path.resolve(__dirname, "fixtures", "a b.js");
+		const url = pathToFileURL(file).href;
+
 		/** @type {TestSuite[]} */
 		const tests = [
 			{
-				input: "file:///foo/bar.js",
-				expected: ["/foo/bar.js", "", ""],
+				input: url,
+				expected: [file, "", ""],
 			},
 			{
-				input: "file:///foo/a%20b.js",
-				expected: ["/foo/a b.js", "", ""],
+				input: pathToFileURL(spaced).href,
+				expected: [spaced, "", ""],
 			},
 			{
-				input: "FILE:///foo/bar.js",
-				expected: ["/foo/bar.js", "", ""],
+				input: `FILE:${url.slice("file:".length)}`,
+				expected: [file, "", ""],
 			},
 		];
 
