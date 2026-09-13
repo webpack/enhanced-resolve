@@ -1,5 +1,11 @@
 # enhanced-resolve
 
+## 5.25.1
+
+### Patch Changes
+
+- Read a `file:` URL the way Node does when parsing a request. (by [@alexander-akait](https://github.com/alexander-akait) in [#670](https://github.com/webpack/enhanced-resolve/pull/670))
+
 ## 5.25.0
 
 ### Minor Changes
