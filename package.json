@@ -76,7 +76,7 @@
     "prettier": "^3.7.4",
     "tinybench": "^6.0.0",
     "tooling": "https://codeload.github.com/webpack/tooling/tar.gz/refs/tags/v1.26.4",
-    "typescript": "^6.0.2",
+    "typescript": "^7.0.2",
     "webpack": "^5.107.2"
   },
   "engines": {
