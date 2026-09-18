@@ -6,6 +6,12 @@ on:
   pull_request:
     branches: [main]
 
+# A new commit supersedes the previous one's jobs, so stop paying for them.
+# Only pull request runs share a group — see the note in `test.yml`.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 permissions:
   contents: read
 
