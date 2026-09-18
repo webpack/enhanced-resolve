@@ -100,6 +100,39 @@ describe("package map", () => {
 		});
 	});
 
+	describe("precedence", () => {
+		it("should not let a self-reference bypass the dependency table", () => {
+			// `packages/utils` has a `name` and an `exports` map, so without the
+			// package map it could import itself. The map does not declare that
+			// dependency, so it must not resolve.
+			const resolver = createResolver();
+			const utilsDir = path.resolve(fixture, "packages", "utils");
+			const err = catchError(() => resolver(utilsDir, "@acme/utils/sub"));
+
+			assert.match(err.message, /Can't resolve '@acme\/utils\/sub'/);
+		});
+
+		it("should resolve a self-reference the map declares", () => {
+			const resolver = resolve.create.sync({
+				packageMap: {
+					configFile,
+					packages: {
+						utils: {
+							url: "./packages/utils",
+							dependencies: { "@acme/utils": "utils" },
+						},
+					},
+				},
+			});
+			const utilsDir = path.resolve(fixture, "packages", "utils");
+
+			assert.strictEqual(
+				resolver(utilsDir, "@acme/utils/sub"),
+				path.resolve(fixture, "packages/utils/sub.js"),
+			);
+		});
+	});
+
 	describe("package identity", () => {
 		it("should report an importer outside every mapped package", () => {
 			const resolver = createResolver();
@@ -126,6 +159,30 @@ describe("package map", () => {
 			assert.strictEqual(
 				resolver({ packageId: "lib-new" }, libDir, "component"),
 				path.resolve(fixture, "vendor/component-v2/index.js"),
+			);
+		});
+
+		it("should accept the empty string as a package id", () => {
+			const resolver = resolve.create.sync({
+				packageMap: {
+					configFile,
+					packages: {
+						"": {
+							url: "./lib",
+							dependencies: { component: "component-v1" },
+						},
+						"lib-other": { url: "./lib" },
+						"component-v1": { url: "./vendor/component-v1" },
+					},
+				},
+			});
+			const libDir = path.resolve(fixture, "lib");
+
+			// Two ids share `./lib`, so the empty id has to survive being
+			// propagated or this would report ambiguity instead.
+			assert.strictEqual(
+				resolver({ packageId: "" }, libDir, "component"),
+				path.resolve(fixture, "vendor/component-v1/index.js"),
 			);
 		});
 
@@ -180,6 +237,26 @@ describe("package map", () => {
 			assert.match(err.message, /unknown package id "gone"/);
 		});
 
+		it("should reject an empty url", () => {
+			const err = catchError(() =>
+				parsePackageMap({ packages: { app: { url: "" } } }, configFile),
+			);
+
+			assert.strictEqual(err.code, "ERR_INVALID_PACKAGE_MAP");
+			assert.match(err.message, /non-empty string "url"/);
+		});
+
+		it("should resolve a relative config file against the working directory", () => {
+			const cwd = process.cwd();
+			const relative = `.${path.sep}${path.relative(cwd, configFile)}`;
+			const resolver = resolve.create.sync({ packageMap: relative });
+
+			assert.strictEqual(
+				resolver(appDir, "@acme/utils"),
+				path.resolve(fixture, "packages/utils/index.js"),
+			);
+		});
+
 		it("should reject a non-file url", () => {
 			const err = catchError(() =>
 				parsePackageMap(
@@ -227,7 +304,7 @@ describe("package map", () => {
 			[
 				"an entry without a url",
 				{ packages: { app: {} } },
-				/entry "app" must have a string "url"/,
+				/entry "app" must have a non-empty string "url"/,
 			],
 			[
 				"a non-object dependencies",
