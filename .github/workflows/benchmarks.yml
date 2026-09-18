@@ -7,9 +7,12 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Runs for `main` are never cancelled: CodSpeed compares a pull request against
+# the benchmark result of its base commit, so cancelling those would leave later
+# comparisons without a baseline to use.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   benchmark:

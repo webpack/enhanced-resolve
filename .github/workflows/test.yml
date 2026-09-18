@@ -6,6 +6,15 @@ on:
   pull_request:
     branches: [main]
 
+# A new commit supersedes the previous one's jobs, so stop paying for them —
+# this workflow alone fans out across three operating systems and ten Node.js
+# versions. Runs for `main` are never cancelled: they are the baseline Codecov
+# and the benchmarks compare against, and a cancelled one would hide a breakage
+# that is already on the default branch.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 permissions:
   contents: read
 
