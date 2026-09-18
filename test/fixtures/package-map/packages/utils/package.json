@@ -1,0 +1,8 @@
+{
+  "name": "@acme/utils",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./sub": "./sub.js"
+  }
+}
