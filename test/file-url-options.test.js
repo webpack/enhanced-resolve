@@ -32,6 +32,17 @@ describe("file: URL path options", () => {
 				done();
 			});
 		});
+
+		it("should accept a file: URL string", (t, done) => {
+			const resolver = makeResolver({
+				roots: [String(pathToFileURL(fixtures))],
+			});
+			resolver.resolve({}, fixtures, "/b.js", {}, (err, result) => {
+				if (err) return done(err);
+				assert.deepStrictEqual(result, path.resolve(fixtures, "b.js"));
+				done();
+			});
+		});
 	});
 
 	describe("modules", () => {
@@ -46,6 +57,28 @@ describe("file: URL path options", () => {
 
 		it("should accept a single URL instance", (t, done) => {
 			const resolver = makeResolver({ modules: pathToFileURL(modulesDir) });
+			resolver.resolve({}, fixtures, "m1/a", {}, (err, result) => {
+				if (err) return done(err);
+				assert.deepStrictEqual(result, path.resolve(modulesDir, "m1/a.js"));
+				done();
+			});
+		});
+
+		it("should accept a file: URL string", (t, done) => {
+			const resolver = makeResolver({
+				modules: [String(pathToFileURL(modulesDir))],
+			});
+			resolver.resolve({}, fixtures, "m1/a", {}, (err, result) => {
+				if (err) return done(err);
+				assert.deepStrictEqual(result, path.resolve(modulesDir, "m1/a.js"));
+				done();
+			});
+		});
+
+		it("should accept a single file: URL string", (t, done) => {
+			const resolver = makeResolver({
+				modules: String(pathToFileURL(modulesDir)),
+			});
 			resolver.resolve({}, fixtures, "m1/a", {}, (err, result) => {
 				if (err) return done(err);
 				assert.deepStrictEqual(result, path.resolve(modulesDir, "m1/a.js"));
@@ -97,12 +130,25 @@ describe("file: URL path options", () => {
 			});
 		});
 
-		// A `file:` string target is not converted here (strings stay literal),
-		// but the rewritten request still resolves because the request side
-		// (`parseIdentifier`) converts `file:` request strings.
-		it("should still resolve a file: string target via request parsing", (t, done) => {
+		it("should accept a file: URL string as the target", (t, done) => {
 			const resolver = makeResolver({
 				alias: { "@": String(pathToFileURL(fixtures)) },
+			});
+			resolver.resolve({}, fixtures, "@/b.js", {}, (err, result) => {
+				if (err) return done(err);
+				assert.deepStrictEqual(result, path.resolve(fixtures, "b.js"));
+				done();
+			});
+		});
+
+		it("should accept a file: URL string in an array target", (t, done) => {
+			const resolver = makeResolver({
+				alias: {
+					"@": [
+						String(pathToFileURL(modulesDir)),
+						String(pathToFileURL(fixtures)),
+					],
+				},
 			});
 			resolver.resolve({}, fixtures, "@/b.js", {}, (err, result) => {
 				if (err) return done(err);
@@ -133,11 +179,20 @@ describe("file: URL path options", () => {
 			});
 		});
 
-		// A `file:` string restriction stays literal, so no real path is ever
-		// "inside" it and resolution is blocked — use a URL instance or a path.
-		it("should treat a file: string restriction as a literal path", (t, done) => {
+		it("should accept a file: URL string", (t, done) => {
 			const resolver = makeResolver({
 				restrictions: [String(pathToFileURL(fixtures))],
+			});
+			resolver.resolve({}, fixtures, "./b.js", {}, (err, result) => {
+				if (err) return done(err);
+				assert.deepStrictEqual(result, path.resolve(fixtures, "b.js"));
+				done();
+			});
+		});
+
+		it("should still block a request outside a file: URL string", (t, done) => {
+			const resolver = makeResolver({
+				restrictions: [String(pathToFileURL(modulesDir))],
 			});
 			resolver.resolve({}, fixtures, "./b.js", {}, (err) => {
 				assert.ok(err instanceof Error);
@@ -157,6 +212,30 @@ describe("file: URL path options", () => {
 				mainFields: ["browser", "main"],
 				mainFiles: ["index"],
 				tsconfig: pathToFileURL(tsconfigFile),
+			});
+			resolver.resolve(
+				{},
+				tsconfigDir,
+				"@components/button",
+				{},
+				(err, result) => {
+					if (err) return done(err);
+					assert.deepStrictEqual(
+						result,
+						path.join(tsconfigDir, "src", "components", "button.ts"),
+					);
+					done();
+				},
+			);
+		});
+
+		it("should accept a file: URL string as the config file", (t, done) => {
+			const resolver = ResolverFactory.createResolver({
+				fileSystem,
+				extensions: [".ts", ".tsx"],
+				mainFields: ["browser", "main"],
+				mainFiles: ["index"],
+				tsconfig: String(pathToFileURL(tsconfigFile)),
 			});
 			resolver.resolve(
 				{},
@@ -204,11 +283,29 @@ describe("file: URL path options", () => {
 			assert.strictEqual(toPath(pathToFileURL(modulesDir)), modulesDir);
 		});
 
-		// A string is always a literal path (matches Node fs, nodejs/node#17658),
-		// so a directory literally named `file:` is never mistaken for a URL.
-		it("should leave strings untouched, including `file:`-prefixed ones", () => {
+		it("should convert a file: URL string to a path", () => {
+			assert.strictEqual(toPath(String(pathToFileURL(modulesDir))), modulesDir);
+		});
+
+		it("should decode a percent-encoded file: URL string", () => {
+			const encoded = path.resolve(fixtures, "a directory");
+			assert.strictEqual(toPath(String(pathToFileURL(encoded))), encoded);
+		});
+
+		it("should accept an upper-case scheme", () => {
+			const url = String(pathToFileURL(modulesDir));
+			assert.strictEqual(
+				toPath(`FILE://${url.slice("file://".length)}`),
+				modulesDir,
+			);
+		});
+
+		// Only the `file://` prefix names a URL, so a path spelled `file:`
+		// stays a path — as it does for Node `fs` (nodejs/node#17658).
+		it("should leave paths untouched, `file:`-prefixed ones included", () => {
 			assert.strictEqual(toPath("file:foo"), "file:foo");
-			assert.strictEqual(toPath("file:///abs"), "file:///abs");
+			assert.strictEqual(toPath("filesystem"), "filesystem");
+			assert.strictEqual(toPath(""), "");
 			assert.strictEqual(toPath(modulesDir), modulesDir);
 		});
 	});
@@ -247,6 +344,33 @@ describe("file: URL resolve context and request", () => {
 			});
 		});
 
+		it("should accept a file: URL string as the context path", (t, done) => {
+			resolver.resolve(
+				{},
+				String(pathToFileURL(fixtures)),
+				"./b.js",
+				{},
+				(err, result) => {
+					if (err) return done(err);
+					assert.deepStrictEqual(result, bFile);
+					done();
+				},
+			);
+		});
+
+		it("should accept a file: URL string when the context object is omitted", (t, done) => {
+			resolver.resolve(
+				String(pathToFileURL(fixtures)),
+				"./b.js",
+				{},
+				(err, result) => {
+					if (err) return done(err);
+					assert.deepStrictEqual(result, bFile);
+					done();
+				},
+			);
+		});
+
 		it("should still reject a non-string, non-URL context path", (t, done) => {
 			// @ts-expect-error for tests
 			resolver.resolve({}, 42, "./b.js", {}, (err) => {
@@ -266,6 +390,20 @@ describe("file: URL resolve context and request", () => {
 				{},
 				fixtures,
 				pathToFileURL(bFile),
+				{},
+				(err, result) => {
+					if (err) return done(err);
+					assert.deepStrictEqual(result, bFile);
+					done();
+				},
+			);
+		});
+
+		it("should accept a file: URL string as the request", (t, done) => {
+			resolver.resolve(
+				{},
+				fixtures,
+				String(pathToFileURL(bFile)),
 				{},
 				(err, result) => {
 					if (err) return done(err);
@@ -314,6 +452,35 @@ describe("file: URL resolve context and request", () => {
 				assert.deepStrictEqual(result, bFile);
 				done();
 			});
+		});
+
+		it("resolve should accept a file: URL string context with the context object omitted", (t, done) => {
+			enhancedResolve(
+				String(pathToFileURL(fixtures)),
+				"./b.js",
+				(err, result) => {
+					if (err) return done(err);
+					assert.deepStrictEqual(result, bFile);
+					done();
+				},
+			);
+		});
+
+		it("resolveSync should accept a file: URL string context", () => {
+			assert.deepStrictEqual(
+				enhancedResolve.sync(String(pathToFileURL(fixtures)), "./b.js"),
+				bFile,
+			);
+		});
+
+		it("resolvePromise should accept a file: URL string context", async () => {
+			assert.deepStrictEqual(
+				await enhancedResolve.promise(
+					String(pathToFileURL(fixtures)),
+					"./b.js",
+				),
+				bFile,
+			);
 		});
 
 		it("resolveSync should accept a URL context", () => {
