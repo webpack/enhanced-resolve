@@ -790,21 +790,6 @@ declare interface ObjectEncodingOptions {
 declare interface PackageMapDependencies {
 	[index: string]: string;
 }
-
-/**
- * A single entry of the configuration file's `packages` object.
- */
-declare interface PackageMapPackage {
-	/**
-	 * an absolute or relative `file:` URL, resolved against the configuration file
-	 */
-	url: string;
-
-	/**
-	 * bare specifier to package id
-	 */
-	dependencies?: PackageMapDependencies;
-}
 declare interface PackageMapOptions {
 	/**
 	 * absolute path of the configuration file, read lazily when `packages` is not given
@@ -815,6 +800,17 @@ declare interface PackageMapOptions {
 	 * an already-parsed `packages` object, used instead of reading `configFile`
 	 */
 	packages: null | PackageMapPackages;
+}
+declare interface PackageMapPackage {
+	/**
+	 * an absolute or relative `file:` URL, resolved against the configuration file
+	 */
+	url: string;
+
+	/**
+	 * bare specifier to package id
+	 */
+	dependencies?: PackageMapDependencies;
 }
 declare interface PackageMapPackages {
 	[index: string]: PackageMapPackage;
@@ -1989,11 +1985,6 @@ type UserAliasOptionNewRequest =
 declare interface UserAliasOptions {
 	[index: string]: UserAliasOptionNewRequest;
 }
-/**
- * A Node.js package map (https://nodejs.org/api/packages.html#package-maps),
- * either as the path of the configuration file or as its already-parsed
- * contents.
- */
 declare interface UserPackageMapOptions {
 	/**
 	 * A path, or `file:` `URL` instance, pointing at the package map file. Required together with `packages`, whose relative `url` values are resolved against it
