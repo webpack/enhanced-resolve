@@ -79,17 +79,6 @@ describe("package map", () => {
 			);
 		});
 
-		it("should accept a `file:` URL as the config file", () => {
-			const resolver = resolve.create.sync({
-				packageMap: new URL(`file://${configFile.replace(/\\/g, "/")}`),
-			});
-
-			assert.strictEqual(
-				resolver(appDir, "@acme/utils"),
-				path.resolve(fixture, "packages/utils/index.js"),
-			);
-		});
-
 		it("should accept an already-parsed packages object", () => {
 			const resolver = resolve.create.sync({
 				packageMap: {

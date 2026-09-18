@@ -278,6 +278,79 @@ describe("file: URL path options", () => {
 		});
 	});
 
+	describe("packageMap", () => {
+		const packageMapDir = path.resolve(fixtures, "package-map");
+		const packageMapFile = path.join(packageMapDir, "package-map.json");
+		const appDir = path.join(packageMapDir, "packages", "app");
+		const expected = path.join(packageMapDir, "packages", "utils", "index.js");
+
+		it("should accept a URL instance as the config file", (t, done) => {
+			const resolver = makeResolver({
+				packageMap: pathToFileURL(packageMapFile),
+			});
+			resolver.resolve({}, appDir, "@acme/utils", {}, (err, result) => {
+				if (err) return done(err);
+				assert.deepStrictEqual(result, expected);
+				done();
+			});
+		});
+
+		it("should accept a file: URL string as the config file", (t, done) => {
+			const resolver = makeResolver({
+				packageMap: String(pathToFileURL(packageMapFile)),
+			});
+			resolver.resolve({}, appDir, "@acme/utils", {}, (err, result) => {
+				if (err) return done(err);
+				assert.deepStrictEqual(result, expected);
+				done();
+			});
+		});
+
+		it("should accept a URL instance as options.configFile", (t, done) => {
+			const resolver = makeResolver({
+				packageMap: {
+					configFile: pathToFileURL(packageMapFile),
+					packages: {
+						app: {
+							url: "./packages/app",
+							dependencies: { "@acme/utils": "utils" },
+						},
+						utils: { url: "./packages/utils" },
+					},
+				},
+			});
+			resolver.resolve({}, appDir, "@acme/utils", {}, (err, result) => {
+				if (err) return done(err);
+				assert.deepStrictEqual(result, expected);
+				done();
+			});
+		});
+
+		it("should accept a file: URL as a package entry url", (t, done) => {
+			const resolver = makeResolver({
+				packageMap: {
+					configFile: packageMapFile,
+					packages: {
+						app: {
+							url: String(pathToFileURL(appDir)),
+							dependencies: { "@acme/utils": "utils" },
+						},
+						utils: {
+							url: String(
+								pathToFileURL(path.join(packageMapDir, "packages", "utils")),
+							),
+						},
+					},
+				},
+			});
+			resolver.resolve({}, appDir, "@acme/utils", {}, (err, result) => {
+				if (err) return done(err);
+				assert.deepStrictEqual(result, expected);
+				done();
+			});
+		});
+	});
+
 	describe("toPath", () => {
 		it("should convert a file: URL instance to a path", () => {
 			assert.strictEqual(toPath(pathToFileURL(modulesDir)), modulesDir);
