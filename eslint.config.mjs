@@ -2,7 +2,7 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import config from "eslint-config-webpack";
 
 export default defineConfig([
-	globalIgnores(["benchmark/**/fixture/**"]),
+	globalIgnores(["benchmark/**/fixture/**", "test/types/**", "types/**"]),
 	{
 		extends: [config],
 	},
@@ -44,6 +44,14 @@ export default defineConfig([
 			"n/no-unsupported-features/es-syntax": "off",
 			"n/no-unsupported-features/node-builtins": "off",
 			"no-console": "off",
+		},
+	},
+	{
+		// Repo-local development scripts run on the contributor's Node.js, not on
+		// the `engines.node` range the published library supports.
+		files: ["scripts/*.js"],
+		rules: {
+			"n/no-unsupported-features/node-builtins": "off",
 		},
 	},
 	{

@@ -4,4 +4,4 @@ test/**/*.*
 !test/*.js
 
 # Generated files
-types.d.ts
+types/
