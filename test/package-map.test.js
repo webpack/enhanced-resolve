@@ -5,7 +5,7 @@ const fs = require("fs");
 const path = require("path");
 const resolve = require("../");
 const { findPackageIds, parsePackageMap } = require("../lib/util/packageMap");
-const { describe, it } = require("./_runner");
+const { after, describe, it } = require("./_runner");
 
 const fixture = path.resolve(__dirname, "fixtures", "package-map");
 const configFile = path.resolve(fixture, "package-map.json");
@@ -470,6 +470,64 @@ describe("package map", () => {
 			const err = catchError(() => resolver(appDir, "missing"));
 
 			assert.match(err.message, /Can't resolve 'missing'/);
+		});
+	});
+
+	describe("symlinked configuration", () => {
+		// Creating a symlink needs privileges on Windows, so probe first and
+		// skip the way `test/symlink.test.js` does.
+		const tempDir = path.join(__dirname, "temp-package-map");
+		const linkPath = path.join(tempDir, "linked");
+		let canSymlink = true;
+
+		try {
+			fs.mkdirSync(tempDir);
+			fs.symlinkSync(fixture, linkPath, "dir");
+		} catch (_err) {
+			canSymlink = false;
+		}
+
+		after(() => {
+			try {
+				fs.unlinkSync(linkPath);
+			} catch (_err) {
+				// already gone
+			}
+			try {
+				fs.rmdirSync(tempDir);
+			} catch (_err) {
+				// already gone
+			}
+		});
+
+		const maybe = canSymlink ? describe : describe.skip;
+
+		maybe("with a config file behind a symlink", () => {
+			it("should accept an importer spelled as the real path", () => {
+				// The default `symlinks: true` hands resolved (real) paths to the
+				// next resolution, so package locations have to be spelled the
+				// same way or a valid importer is reported as external.
+				const resolver = resolve.create.sync({
+					packageMap: path.join(linkPath, "package-map.json"),
+				});
+
+				assert.strictEqual(
+					resolver(appDir, "@acme/utils"),
+					path.resolve(fixture, "packages/utils/index.js"),
+				);
+			});
+
+			it("should keep the symlinked spelling when symlinks are off", () => {
+				const resolver = resolve.create.sync({
+					symlinks: false,
+					packageMap: path.join(linkPath, "package-map.json"),
+				});
+
+				assert.strictEqual(
+					resolver(path.join(linkPath, "packages", "app"), "@acme/utils"),
+					path.join(linkPath, "packages", "utils", "index.js"),
+				);
+			});
 		});
 	});
 
