@@ -1,6 +1,7 @@
 "use strict";
 
 const assert = require("assert");
+const fs = require("fs");
 const path = require("path");
 const resolve = require("../");
 const { findPackageIds, parsePackageMap } = require("../lib/util/packageMap");
@@ -215,6 +216,194 @@ describe("package map", () => {
 			const err = catchError(() => resolver(appDir, "component"));
 
 			assert.strictEqual(err.code, "ENOENT");
+		});
+	});
+
+	describe("invalid configuration", () => {
+		/** @type {[string, unknown, RegExp][]} */
+		const invalid = [
+			["non-object contents", "not an object", /must contain a JSON object/],
+			["an array", [], /must contain a JSON object/],
+			["a missing packages object", {}, /must contain a "packages" object/],
+			[
+				"a non-object packages",
+				{ packages: [] },
+				/must contain a "packages" object/,
+			],
+			[
+				"a non-object entry",
+				{ packages: { app: "./app" } },
+				/entry "app" must be an object/,
+			],
+			[
+				"an entry without a url",
+				{ packages: { app: {} } },
+				/entry "app" must have a string "url"/,
+			],
+			[
+				"a non-object dependencies",
+				{ packages: { app: { url: "./app", dependencies: [] } } },
+				/entry "app" has a non-object "dependencies"/,
+			],
+			[
+				"a non-string dependency target",
+				{ packages: { app: { url: "./app", dependencies: { x: 1 } } } },
+				/maps "x" to a non-string package id/,
+			],
+		];
+
+		for (const [name, data, expected] of invalid) {
+			it(`should reject ${name}`, () => {
+				const err = catchError(() =>
+					parsePackageMap(
+						/** @type {import("../lib/Resolver").JsonObject} */ (data),
+						configFile,
+					),
+				);
+
+				assert.strictEqual(err.code, "ERR_INVALID_PACKAGE_MAP");
+				assert.match(err.message, expected);
+			});
+		}
+
+		it("should reject a url the URL parser cannot read", () => {
+			const err = catchError(() =>
+				parsePackageMap({ packages: { app: { url: "http://[" } } }, configFile),
+			);
+
+			assert.strictEqual(err.code, "ERR_INVALID_PACKAGE_MAP");
+			assert.match(err.message, /invalid "url"/);
+		});
+
+		it("should reject an inline packages object that is invalid", () => {
+			const resolver = resolve.create.sync({
+				packageMap: { configFile, packages: { app: { url: "https://x/a" } } },
+			});
+			const err = catchError(() => resolver(appDir, "component"));
+
+			assert.strictEqual(err.code, "ERR_INVALID_PACKAGE_MAP");
+		});
+
+		it("should reject a config file that is valid JSON but not a package map", () => {
+			const resolver = resolve.create.sync({
+				packageMap: path.resolve(fixture, "invalid-map.json"),
+			});
+			const err = catchError(() => resolver(appDir, "component"));
+
+			assert.strictEqual(err.code, "ERR_INVALID_PACKAGE_MAP");
+			assert.match(err.message, /must use a "file:" url/);
+		});
+
+		it("should reject a config file that is not valid JSON", () => {
+			const resolver = resolve.create.sync({
+				packageMap: path.resolve(fixture, "packages", "app", "index.js"),
+			});
+
+			assert.throws(() => resolver(appDir, "component"));
+		});
+
+		it("should require a config file or packages", () => {
+			const err = catchError(() => resolve.create.sync({ packageMap: {} }));
+
+			assert.match(err.message, /needs either a 'configFile' or 'packages'/);
+		});
+	});
+
+	describe("resolve context", () => {
+		it("should record the config file as a dependency", (t, done) => {
+			const resolver = resolve.create({ packageMap: configFile });
+			const fileDependencies = new Set();
+
+			resolver({}, appDir, "component", { fileDependencies }, (err, result) => {
+				if (err) return done(err);
+				assert.ok(result);
+				assert.ok(fileDependencies.has(configFile));
+				done();
+			});
+		});
+
+		it("should log an undeclared specifier", (t, done) => {
+			const resolver = resolve.create({ packageMap: configFile });
+			/** @type {string[]} */
+			const log = [];
+
+			resolver({}, appDir, "m1", { log: (line) => log.push(line) }, (err) => {
+				assert.ok(err);
+				assert.ok(
+					log.some((line) =>
+						line.includes('"m1" is not a dependency of package "app"'),
+					),
+					`expected a log line about "m1", got:\n${log.join("\n")}`,
+				);
+				done();
+			});
+		});
+
+		it("should read the config file once for concurrent resolutions", (t, done) => {
+			let reads = 0;
+			const fileSystem = {
+				...fs,
+				readFile(/** @type {string} */ file, /** @type {unknown[]} */ ...args) {
+					if (file === configFile) reads++;
+					// @ts-expect-error forwarding the original overloads
+					return fs.readFile(file, ...args);
+				},
+			};
+			const resolver = resolve.create({
+				packageMap: configFile,
+				fileSystem:
+					/** @type {import("../lib/Resolver").FileSystem} */
+					(/** @type {unknown} */ (fileSystem)),
+			});
+
+			let pending = 3;
+			/**
+			 * @param {(null | Error)=} err resolve error
+			 * @returns {void}
+			 */
+			const next = (err) => {
+				if (err) return done(err);
+				if (--pending === 0) {
+					// The first request starts the read; the other two queue behind
+					// it rather than each reading the file again.
+					assert.strictEqual(reads, 1);
+					done();
+				}
+			};
+
+			for (let i = 0; i < 3; i++) {
+				resolver({}, appDir, "component", {}, next);
+			}
+		});
+
+		it("should not treat a node: specifier as a package", (t, done) => {
+			const resolver = resolve.create({ packageMap: configFile });
+
+			resolver({}, appDir, "node:fs", {}, (err) => {
+				// The package map leaves builtins alone, so this falls through to
+				// the regular module lookup and simply is not found on disk.
+				assert.ok(err);
+				assert.doesNotMatch(String(err.message), /package map/);
+				done();
+			});
+		});
+
+		it("should fail when the mapped package has nothing to resolve", () => {
+			const resolver = resolve.create.sync({
+				packageMap: {
+					configFile,
+					packages: {
+						app: {
+							url: "./packages/app",
+							dependencies: { missing: "missing" },
+						},
+						missing: { url: "./does-not-exist" },
+					},
+				},
+			});
+			const err = catchError(() => resolver(appDir, "missing"));
+
+			assert.match(err.message, /Can't resolve 'missing'/);
 		});
 	});
 
