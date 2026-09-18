@@ -1,26 +1,26 @@
 export type CachedJoin = {
-    fn: (rootPath: string, request: string) => string;
-    cache: Map<string, Map<string, string | undefined>>;
+	fn: (rootPath: string, request: string) => string;
+	cache: Map<string, Map<string, string | undefined>>;
 };
 export type CachedDirname = {
-    fn: (maybePath: string) => string;
-    cache: Map<string, string>;
+	fn: (maybePath: string) => string;
+	cache: Map<string, string>;
 };
 export type CachedBasename = {
-    fn: (maybePath: string, suffix?: string) => string;
-    cache: Map<string, Map<string | undefined, string | undefined>>;
+	fn: (maybePath: string, suffix?: string) => string;
+	cache: Map<string, Map<string | undefined, string | undefined>>;
 };
 export type PathType = number;
 /**
  * @enum {number}
  */
 export const PathType: Readonly<{
-    Empty: 0;
-    Normal: 1;
-    Relative: 2;
-    AbsoluteWin: 3;
-    AbsolutePosix: 4;
-    Internal: 5;
+	Empty: 0;
+	Normal: 1;
+	Relative: 2;
+	AbsoluteWin: 3;
+	AbsolutePosix: 4;
+	Internal: 5;
 }>;
 /** @typedef {{ fn: (maybePath: string, suffix?: string) => string, cache: Map<string, Map<string | undefined, string | undefined>> }} CachedBasename */
 /**

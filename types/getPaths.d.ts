@@ -13,7 +13,7 @@ export = getPaths;
  */
 declare function getPaths(path: string): GetPathsResult;
 declare namespace getPaths {
-    export { getPathsCached, FileSystem, GetPathsResult };
+	export { getPathsCached, FileSystem, GetPathsResult };
 }
 /**
  * Memoized `getPaths`. The returned object is shared across callers — do
@@ -23,9 +23,12 @@ declare namespace getPaths {
  * @param {string} path path
  * @returns {GetPathsResult} paths and segments
  */
-declare function getPathsCached(fileSystem: FileSystem, path: string): GetPathsResult;
+declare function getPathsCached(
+	fileSystem: FileSystem,
+	path: string,
+): GetPathsResult;
 type FileSystem = import("./Resolver").FileSystem;
 type GetPathsResult = {
-    paths: string[];
-    segments: string[];
+	paths: string[];
+	segments: string[];
 };

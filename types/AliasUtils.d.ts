@@ -1,4 +1,7 @@
-export type InnerCallback = (err?: null | Error, result?: null | ResolveRequest) => void;
+export type InnerCallback = (
+	err?: null | Error,
+	result?: null | ResolveRequest,
+) => void;
 export type Resolver = import("./Resolver");
 export type ResolveRequest = import("./Resolver").ResolveRequest;
 export type ResolveContext = import("./Resolver").ResolveContext;
@@ -6,47 +9,47 @@ export type ResolveStepHook = import("./Resolver").ResolveStepHook;
 export type ResolveCallback = import("./Resolver").ResolveCallback;
 export type Alias = string | string[] | false;
 export type AliasOption = {
-    alias: Alias;
-    name: string;
-    onlyModule?: boolean;
+	alias: Alias;
+	name: string;
+	onlyModule?: boolean;
 };
 export type CompiledAliasOption = {
-    /**
-     * original alias name
-     */
-    name: string;
-    /**
-     * name + "/" — precomputed to avoid per-resolve concat
-     */
-    nameWithSlash: string;
-    /**
-     * alias target(s)
-     */
-    alias: Alias;
-    /**
-     * normalized onlyModule flag
-     */
-    onlyModule: boolean;
-    /**
-     * absolute form of `name` (with slash ending), null when not absolute
-     */
-    absolutePath: string | null;
-    /**
-     * substring before the single "*" in `name`, null when no wildcard
-     */
-    wildcardPrefix: string | null;
-    /**
-     * substring after the single "*" in `name`, null when no wildcard
-     */
-    wildcardSuffix: string | null;
-    /**
-     * first character code of `name` — used as a cheap screen on the hot path. `-1` indicates "matches any first char" (empty wildcard prefix).
-     */
-    firstCharCode: number;
-    /**
-     * true when `alias` is an array — precomputed so the hot path skips `Array.isArray`
-     */
-    arrayAlias: boolean;
+	/**
+	 * original alias name
+	 */
+	name: string;
+	/**
+	 * name + "/" — precomputed to avoid per-resolve concat
+	 */
+	nameWithSlash: string;
+	/**
+	 * alias target(s)
+	 */
+	alias: Alias;
+	/**
+	 * normalized onlyModule flag
+	 */
+	onlyModule: boolean;
+	/**
+	 * absolute form of `name` (with slash ending), null when not absolute
+	 */
+	absolutePath: string | null;
+	/**
+	 * substring before the single "*" in `name`, null when no wildcard
+	 */
+	wildcardPrefix: string | null;
+	/**
+	 * substring after the single "*" in `name`, null when no wildcard
+	 */
+	wildcardSuffix: string | null;
+	/**
+	 * first character code of `name` — used as a cheap screen on the hot path. `-1` indicates "matches any first char" (empty wildcard prefix).
+	 */
+	firstCharCode: number;
+	/**
+	 * true when `alias` is an array — precomputed so the hot path skips `Array.isArray`
+	 */
+	arrayAlias: boolean;
 };
 /**
  * Bucketed view of compiled options used by `aliasResolveHandler` to avoid
@@ -68,22 +71,22 @@ export type CompiledAliasOption = {
  * regression on `pathological-deep-stack`.
  */
 export type CompiledAliasOptions = {
-    /**
-     * declaration-ordered list
-     */
-    all: CompiledAliasOption[];
-    /**
-     * bucketed by first char code
-     */
-    byFirstChar: Map<number, CompiledAliasOption[]>;
-    /**
-     * true when an empty-prefix wildcard is present
-     */
-    hasAnyFirstChar: boolean;
-    /**
-     * true when the bucket fast-path should be used at resolve time
-     */
-    useBuckets: boolean;
+	/**
+	 * declaration-ordered list
+	 */
+	all: CompiledAliasOption[];
+	/**
+	 * bucketed by first char code
+	 */
+	byFirstChar: Map<number, CompiledAliasOption[]>;
+	/**
+	 * true when an empty-prefix wildcard is present
+	 */
+	hasAnyFirstChar: boolean;
+	/**
+	 * true when the bucket fast-path should be used at resolve time
+	 */
+	useBuckets: boolean;
 };
 /** @typedef {(err?: null | Error, result?: null | ResolveRequest) => void} InnerCallback */
 /**
@@ -95,7 +98,14 @@ export type CompiledAliasOptions = {
  * @param {InnerCallback} callback callback
  * @returns {void}
  */
-export function aliasResolveHandler(resolver: Resolver, options: CompiledAliasOptions, target: ResolveStepHook, request: ResolveRequest, resolveContext: ResolveContext, callback: InnerCallback): void;
+export function aliasResolveHandler(
+	resolver: Resolver,
+	options: CompiledAliasOptions,
+	target: ResolveStepHook,
+	request: ResolveRequest,
+	resolveContext: ResolveContext,
+	callback: InnerCallback,
+): void;
 /**
  * Precompute per-option strings used on every resolve so the hot path in
  * `aliasResolveHandler` does no string concatenation / split work per entry.
@@ -112,4 +122,7 @@ export function aliasResolveHandler(resolver: Resolver, options: CompiledAliasOp
  * @param {AliasOption[]} options options
  * @returns {CompiledAliasOptions} compiled options
  */
-export function compileAliasOptions(resolver: Resolver, options: AliasOption[]): CompiledAliasOptions;
+export function compileAliasOptions(
+	resolver: Resolver,
+	options: AliasOption[],
+): CompiledAliasOptions;

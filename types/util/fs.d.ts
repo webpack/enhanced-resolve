@@ -1,10 +1,10 @@
 export type FileSystem = import("../Resolver").FileSystem;
 export type JsonObject = import("../Resolver").JsonObject;
 export type ReadJsonOptions = {
-    /**
-     * Whether to strip JSONC comments
-     */
-    stripComments?: boolean | undefined;
+	/**
+	 * Whether to strip JSONC comments
+	 */
+	stripComments?: boolean | undefined;
 };
 /**
  * Decode a file's raw contents to text without assuming a Node runtime. A
@@ -27,4 +27,12 @@ export function decodeText(data: string | Buffer | Uint8Array): string;
  * @param {(err: NodeJS.ErrnoException | Error | null, content?: JsonObject) => void} callback callback
  * @returns {void}
  */
-export function readJson(fileSystem: FileSystem, jsonFilePath: string, options: ReadJsonOptions, callback: (err: NodeJS.ErrnoException | Error | null, content?: JsonObject) => void): void;
+export function readJson(
+	fileSystem: FileSystem,
+	jsonFilePath: string,
+	options: ReadJsonOptions,
+	callback: (
+		err: NodeJS.ErrnoException | Error | null,
+		content?: JsonObject,
+	) => void,
+): void;

@@ -4,6 +4,11 @@ export = pathToFileURL;
  * @param {{ windows?: boolean }=} options force the platform branch
  * @returns {URL} the `file:` URL
  */
-declare function pathToFileURL(filepath: string, options?: {
-    windows?: boolean;
-} | undefined): URL;
+declare function pathToFileURL(
+	filepath: string,
+	options?:
+		| {
+				windows?: boolean;
+		  }
+		| undefined,
+): URL;

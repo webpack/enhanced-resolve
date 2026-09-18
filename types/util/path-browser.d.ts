@@ -35,11 +35,11 @@ declare function win32Normalize(path: string): string;
  */
 declare function win32Dirname(path: string): string;
 export declare namespace posix {
-    export { posixNormalize as normalize };
-    export { posixDirname as dirname };
+	export { posixNormalize as normalize };
+	export { posixDirname as dirname };
 }
 export declare namespace win32 {
-    export { win32Normalize as normalize };
-    export { win32Dirname as dirname };
+	export { win32Normalize as normalize };
+	export { win32Dirname as dirname };
 }
 export {};

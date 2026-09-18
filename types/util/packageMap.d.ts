@@ -1,58 +1,58 @@
 export type JsonObject = import("../Resolver").JsonObject;
 export type PackageMapDependencies = {
-    [specifier: string]: string;
+	[specifier: string]: string;
 };
 /**
  * A single entry of the configuration file's `packages` object.
  */
 export type PackageMapPackage = {
-    /**
-     * an absolute or relative `file:` URL, resolved against the configuration file
-     */
-    url: string;
-    /**
-     * bare specifier to package id
-     */
-    dependencies?: PackageMapDependencies | undefined;
+	/**
+	 * an absolute or relative `file:` URL, resolved against the configuration file
+	 */
+	url: string;
+	/**
+	 * bare specifier to package id
+	 */
+	dependencies?: PackageMapDependencies | undefined;
 };
 export type PackageMapPackages = {
-    [id: string]: PackageMapPackage;
+	[id: string]: PackageMapPackage;
 };
 /**
  * The parsed contents of a package map configuration file.
  */
 export type PackageMapJson = {
-    /**
-     * package entries by package id
-     */
-    packages: PackageMapPackages;
+	/**
+	 * package entries by package id
+	 */
+	packages: PackageMapPackages;
 };
 export type PackageMapEntry = {
-    /**
-     * the package id this entry is keyed by
-     */
-    id: string;
-    /**
-     * absolute filesystem path the entry's `url` points at
-     */
-    path: string;
-    /**
-     * bare specifier to package id
-     */
-    dependencies: Map<string, string>;
+	/**
+	 * the package id this entry is keyed by
+	 */
+	id: string;
+	/**
+	 * absolute filesystem path the entry's `url` points at
+	 */
+	path: string;
+	/**
+	 * bare specifier to package id
+	 */
+	dependencies: Map<string, string>;
 };
 export type PackageMap = {
-    /**
-     * entries by package id
-     */
-    packages: Map<string, PackageMapEntry>;
-    /**
-     * package ids by location, longest path first
-     */
-    locations: {
-        path: string;
-        ids: string[];
-    }[];
+	/**
+	 * entries by package id
+	 */
+	packages: Map<string, PackageMapEntry>;
+	/**
+	 * package ids by location, longest path first
+	 */
+	locations: {
+		path: string;
+		ids: string[];
+	}[];
 };
 /** @typedef {import("../Resolver").JsonObject} JsonObject */
 /** @typedef {{ [specifier: string]: string }} PackageMapDependencies */
@@ -84,8 +84,11 @@ export type PackageMap = {
  * @param {string} code error code
  * @returns {Error & { code: string }} the error
  */
-export function createError(message: string, code: string): Error & {
-    code: string;
+export function createError(
+	message: string,
+	code: string,
+): Error & {
+	code: string;
 };
 /**
  * Find the package ids whose location contains `filePath`. More than one id is
@@ -95,7 +98,10 @@ export function createError(message: string, code: string): Error & {
  * @param {string} filePath an absolute filesystem path
  * @returns {string[]} the matching package ids, empty when the path is outside every package
  */
-export function findPackageIds(packageMap: PackageMap, filePath: string): string[];
+export function findPackageIds(
+	packageMap: PackageMap,
+	filePath: string,
+): string[];
 /**
  * Parse and validate a package map configuration file.
  *
@@ -106,4 +112,7 @@ export function findPackageIds(packageMap: PackageMap, filePath: string): string
  * @param {string} configFilePath absolute path of the configuration file, used as the base for relative urls
  * @returns {PackageMap} the parsed package map
  */
-export function parsePackageMap(data: JsonObject, configFilePath: string): PackageMap;
+export function parsePackageMap(
+	data: JsonObject,
+	configFilePath: string,
+): PackageMap;

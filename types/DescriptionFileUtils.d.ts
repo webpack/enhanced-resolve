@@ -4,33 +4,36 @@ export type JsonValue = import("./Resolver").JsonValue;
 export type ResolveContext = import("./Resolver").ResolveContext;
 export type ResolveRequest = import("./Resolver").ResolveRequest;
 export type DescriptionFileInfo = {
-    /**
-     * content
-     */
-    content?: JsonObject | undefined;
-    /**
-     * path
-     */
-    path: string;
-    /**
-     * directory
-     */
-    directory: string;
+	/**
+	 * content
+	 */
+	content?: JsonObject | undefined;
+	/**
+	 * path
+	 */
+	path: string;
+	/**
+	 * directory
+	 */
+	directory: string;
 };
-export type ErrorFirstCallback = (error?: (Error | null) | undefined, result?: DescriptionFileInfo | undefined) => any;
+export type ErrorFirstCallback = (
+	error?: (Error | null) | undefined,
+	result?: DescriptionFileInfo | undefined,
+) => any;
 export type Result = {
-    /**
-     * path to description file
-     */
-    path: string;
-    /**
-     * directory of description file
-     */
-    directory: string;
-    /**
-     * content of description file
-     */
-    content: JsonObject;
+	/**
+	 * path to description file
+	 */
+	path: string;
+	/**
+	 * directory of description file
+	 */
+	directory: string;
+	/**
+	 * content of description file
+	 */
+	content: JsonObject;
 };
 /**
  * Walk up one directory. Called once per package-root candidate and once per
@@ -58,7 +61,10 @@ export function cdUp(directory: string): string | null;
  * @param {string | string[]} field field
  * @returns {JsonValue | undefined} field data
  */
-export function getField(content: JsonObject, field: string | string[]): JsonValue | undefined;
+export function getField(
+	content: JsonObject,
+	field: string | string[],
+): JsonValue | undefined;
 /**
  * @param {Resolver} resolver resolver
  * @param {string} directory directory
@@ -67,4 +73,11 @@ export function getField(content: JsonObject, field: string | string[]): JsonVal
  * @param {ResolveContext} resolveContext resolveContext
  * @param {ErrorFirstCallback} callback callback
  */
-export function loadDescriptionFile(resolver: Resolver, directory: string, filenames: string[], oldInfo: DescriptionFileInfo | undefined, resolveContext: ResolveContext, callback: ErrorFirstCallback): void;
+export function loadDescriptionFile(
+	resolver: Resolver,
+	directory: string,
+	filenames: string[],
+	oldInfo: DescriptionFileInfo | undefined,
+	resolveContext: ResolveContext,
+	callback: ErrorFirstCallback,
+): void;
