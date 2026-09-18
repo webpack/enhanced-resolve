@@ -7,12 +7,15 @@ on:
     branches: [main]
 
 # A new commit supersedes the previous one's jobs, so stop paying for them —
-# this workflow alone fans out across three operating systems and ten Node.js
-# versions. Runs for `main` are never cancelled: they are the baseline Codecov
-# and the benchmarks compare against, and a cancelled one would hide a breakage
-# that is already on the default branch.
+# this workflow alone fans out across three operating systems and nine Node.js
+# versions. Only pull request runs share a group; every other run gets a group
+# of its own (`github.run_id`), because a group holds at most one pending run
+# and a later push would otherwise evict the one waiting — `cancel-in-progress`
+# protects the running run, not the queued one. `main` runs are the baseline
+# Codecov and the benchmarks compare against, and losing one would also hide a
+# breakage that is already on the default branch.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
