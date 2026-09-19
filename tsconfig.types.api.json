@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig",
+  "compilerOptions": {
+    "allowJs": false,
+    "checkJs": false,
+    "paths": {
+      "enhanced-resolve": ["./types.d.ts"]
+    }
+  },
+  "include": ["test/types/*.ts"]
+}

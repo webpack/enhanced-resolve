@@ -1,3 +1,10 @@
 {
-  "extends": "./tsconfig"
+  "extends": "./tsconfig",
+  "compilerOptions": {
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "rootDir": "lib",
+    "declarationDir": "types"
+  }
 }

@@ -36,6 +36,21 @@ jobs:
       - run: npm ci
 
       - run: npm run lint
+
+      - name: Build types
+        run: npm run build:types
+
+      # `types/` is generated from the JSDoc in `lib/`, so a checkout whose
+      # declarations were never regenerated ships types that do not describe
+      # the code. Regenerating above and diffing here is what catches that.
+      - name: Check types
+        run: |
+          if [ -n "$(git status types --porcelain)" ]; then
+            git status types --porcelain
+            echo "::error::Generated types are out of date - run 'npm run build:types' and commit the result"
+            exit 1
+          fi
+          echo "All types are up to date"
   test:
     strategy:
       fail-fast: false
