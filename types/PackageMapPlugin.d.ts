@@ -76,7 +76,7 @@ type PackageMapOptions = {
 	/**
 	 * absolute path of the configuration file, read lazily when `packages` is not given
 	 */
-	configFile: string | null;
+	configFile: string;
 	/**
 	 * an already-parsed `packages` object, used instead of reading `configFile`
 	 */

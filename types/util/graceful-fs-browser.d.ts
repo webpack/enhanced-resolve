@@ -1,7 +1,11 @@
 /**
+ * Takes the arguments its callers pass - `readFile(path, callback)` and the
+ * rest - so the declaration describes a call that actually compiles, even
+ * though every one of them throws.
+ * @param {...unknown} _args arguments, ignored
  * @returns {never} always throws
  */
-declare function unavailable(): never;
+declare function unavailable(..._args: unknown[]): never;
 export {
 	unavailable as lstat,
 	unavailable as lstatSync,

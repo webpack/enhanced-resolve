@@ -16,30 +16,33 @@ const path = require("path");
 const root = path.join(__dirname, "..");
 
 /**
- * @param {string} command binary to run, relative to `node_modules/.bin`
+ * Runs a tool's JavaScript entry point under this Node.js, rather than its
+ * `node_modules/.bin` shim. The shims are `.cmd` files on Windows, which need
+ * a shell to run - and a shell gets the command line verbatim, so a checkout
+ * under a path containing a space would not start.
+ * @param {string} entry module path of the tool's entry point
  * @param {string[]} args arguments
  * @returns {void}
  */
-const run = (command, args) => {
-	const binary = path.join(
-		root,
-		"node_modules",
-		".bin",
-		process.platform === "win32" ? `${command}.cmd` : command,
+const run = (entry, args) => {
+	const { status } = spawnSync(
+		process.execPath,
+		[require.resolve(entry), ...args],
+		{ cwd: root, stdio: "inherit" },
 	);
-	const { status } = spawnSync(binary, args, {
-		cwd: root,
-		stdio: "inherit",
-		shell: process.platform === "win32",
-	});
 
 	if (status !== 0) {
 		throw new Error(
-			`${command} exited with ${status === null ? "a signal" : status}`,
+			`${entry} exited with ${status === null ? "a signal" : status}`,
 		);
 	}
 };
 
 rmSync(path.join(root, "types"), { recursive: true, force: true });
-run("tsc", ["-p", "tsconfig.types.json"]);
-run("prettier", ["--log-level", "warn", "--write", "types/**/*.d.ts"]);
+run("typescript/bin/tsc", ["-p", "tsconfig.types.json"]);
+run("prettier/bin/prettier.cjs", [
+	"--log-level",
+	"warn",
+	"--write",
+	"types/**/*.d.ts",
+]);
