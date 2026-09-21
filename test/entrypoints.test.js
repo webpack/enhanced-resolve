@@ -2,6 +2,7 @@
 
 const assert = require("assert");
 const {
+	explainSubpathsInConditions,
 	processExportsField,
 	processImportsField,
 } = require("../lib/util/entrypoints");
@@ -94,5 +95,82 @@ describe("util/entrypoints processImportsField", () => {
 		const processor = processImportsField({ "#a": "./main.js" });
 		const [paths] = processor("#a", new Set(["node"]));
 		assert.deepStrictEqual(paths, ["./main.js"]);
+	});
+});
+
+// https://github.com/webpack/enhanced-resolve/issues/325
+describe("util/entrypoints explainSubpathsInConditions", () => {
+	it("explains a condition that wraps subpaths", () => {
+		const explanation = explainSubpathsInConditions(
+			{
+				import: { ".": "./esm/index.js", "./*": "./esm/*.js" },
+				require: "./build/bundle.js",
+			},
+			true,
+		);
+		assert.match(
+			/** @type {string} */ (explanation),
+			/the value at "import" is an object with subpath keys \(".", ".\/\*"\)/,
+		);
+		// and shows the arrangement that works
+		assert.match(
+			/** @type {string} */ (explanation),
+			/"\.": \{ "import": \.\.\. \}, ".\/\*": \{ "import": \.\.\. \}/,
+		);
+	});
+
+	it("reports the full path to a nested offender", () => {
+		const explanation = explainSubpathsInConditions(
+			{ "./foo": { node: { import: { "./x": "./x.js" } } } },
+			true,
+		);
+		assert.match(
+			/** @type {string} */ (explanation),
+			/the value at ".\/foo" -> "node" -> "import"/,
+		);
+	});
+
+	it("looks inside array targets", () => {
+		const explanation = explainSubpathsInConditions(
+			{ "./foo": ["./a.js", { node: { "./x": "./x.js" } }] },
+			true,
+		);
+		assert.match(
+			/** @type {string} */ (explanation),
+			/the value at ".\/foo" -> "node"/,
+		);
+	});
+
+	it("explains the imports counterpart", () => {
+		const explanation = explainSubpathsInConditions(
+			{ "#a": { node: { "#b": "./x.js" } } },
+			false,
+		);
+		assert.match(
+			/** @type {string} */ (explanation),
+			/the value at "#a" -> "node" is an object with subpath keys \("#b"\)/,
+		);
+	});
+
+	it("returns null for a well-formed exports field", () => {
+		assert.strictEqual(
+			explainSubpathsInConditions(
+				{
+					".": { import: "./esm/index.js", require: "./cjs/index.js" },
+					"./*": { import: "./esm/*.js", require: "./cjs/*.js" },
+				},
+				true,
+			),
+			null,
+		);
+	});
+
+	it("returns null for a well-formed imports field and for non-objects", () => {
+		assert.strictEqual(
+			explainSubpathsInConditions({ "#a": { node: "./x.js" } }, false),
+			null,
+		);
+		assert.strictEqual(explainSubpathsInConditions("./index.js", true), null);
+		assert.strictEqual(explainSubpathsInConditions(null, true), null);
 	});
 });
