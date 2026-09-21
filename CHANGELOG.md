@@ -1,5 +1,15 @@
 # enhanced-resolve
 
+## 5.26.0
+
+### Minor Changes
+
+- Add experimental support for [Node.js package maps](https://nodejs.org/api/packages.html#package-maps) through a new `packageMap` option, which takes the path of the configuration file (or a `file:` `URL`) or an already-parsed `packages` object. When it is set, a bare specifier is resolved through the importing package's `dependencies` table and the target package's location is handed to the regular pipeline, instead of walking `node_modules`; relative and absolute requests and `node:` builtins are unaffected. Because several package entries may share one `url`, the package a request resolved into is exposed as `packageId` on the result and can be passed back in as `context.packageId` to resolve from that package unambiguously. Package maps are stability 1 (experimental) in Node.js, and this option tracks that specification and may change with it. (by [@alexander-akait](https://github.com/alexander-akait) in [#667](https://github.com/webpack/enhanced-resolve/pull/667))
+
+- Explain an `exports`/`imports` field whose conditions wrap subpaths, instead of failing with a message that points at the request. A field shaped like `{ "import": { ".": "./esm/index.js", "./*": "./esm/*.js" }, "require": "./build/bundle.js" }` is not supported by Node.js: the subpaths inside a condition are read as condition names, so they match nothing, and every request into the package failed as `"./foo" is not exported under the conditions [...]` — which reads as though the package forgot to export `./foo`. Such a failure now names the offending keys and shows the arrangement that works, with the subpaths at the top level and the conditions nested inside them. Resolution itself is unchanged: the diagnosis runs only on a request that has already failed, so nothing that resolves today starts failing, and a successful resolve does no extra work. Errors raised while processing either field also name the `package.json` they came from, which previously only appeared in the resolver log. (by [@alexander-akait](https://github.com/alexander-akait) in [#676](https://github.com/webpack/enhanced-resolve/pull/676))
+
+- Generate the published type declarations with TypeScript instead of `webpack/tooling`, which is no longer a dependency. Every name the package exported before is still exported, and `types.d.ts` is still the entry point, but the declarations themselves now live in `types/` and are emitted by `tsc` from the JSDoc in `lib/`. Two shapes follow the sources more closely than the previous generator did: the object form of `Plugin` no longer declares `this: Resolver` on `apply` (it is called as `plugin.apply(resolver)`, so `this` is the plugin), and the entries of `ResolveContext.stack` declare `name: string | undefined` rather than an optional `name`. Class fields that the old generator dropped, such as the cache backends on `CachedInputFileSystem`, are now part of the declarations. (by [@alexander-akait](https://github.com/alexander-akait) in [#675](https://github.com/webpack/enhanced-resolve/pull/675))
+
 ## 5.25.1
 
 ### Patch Changes
