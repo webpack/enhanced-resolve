@@ -282,6 +282,242 @@ describe("alias", () => {
 		);
 	});
 
+	// `compileAliasOptions` runs once per plugin apply and computes up
+	// front everything `aliasResolveHandler` reads on the hot path, so its
+	// shape is what the resolve-time fast paths are written against. These
+	// assert that shape directly — the resolve-level tests above can only
+	// observe it indirectly, since both bucket layouts resolve identically.
+	describe("compileAliasOptions", () => {
+		const { compileAliasOptions } = require("../lib/AliasUtils");
+
+		// A real resolver rather than a `join` stub: `absolutePath` is built
+		// as `join(name, "_").slice(0, -1)`, so a stub that concatenated
+		// would pin a shape the resolver never produces.
+		const compileResolver = ResolverFactory.createResolver({
+			fileSystem: nodeFileSystem,
+		});
+
+		/**
+		 * @param {import("../lib/AliasUtils").AliasOption[]} options alias options
+		 * @returns {import("../lib/AliasUtils").CompiledAliasOptions} compiled options
+		 */
+		const compile = (options) => compileAliasOptions(compileResolver, options);
+
+		/**
+		 * @param {import("../lib/AliasUtils").CompiledAliasOptions} compiled compiled options
+		 * @param {string} char first character of the bucket
+		 * @returns {string[]} alias names in that bucket, in declaration order
+		 */
+		const bucketNames = (compiled, char) => {
+			const bucket = compiled.byFirstChar.get(char.charCodeAt(0));
+			assert.ok(bucket, `expected a bucket for ${JSON.stringify(char)}`);
+			return bucket.map((item) => item.name);
+		};
+
+		it("should bucket by first char code and enable buckets for distinct first chars", () => {
+			const compiled = compile([
+				{ name: "alpha", alias: "/a" },
+				{ name: "avocado", alias: "/a2" },
+				{ name: "bravo", alias: "/b" },
+			]);
+
+			assert.strictEqual(compiled.useBuckets, true);
+			assert.strictEqual(compiled.hasAnyFirstChar, false);
+			assert.strictEqual(compiled.byFirstChar.size, 2);
+			// Declaration order is preserved inside a bucket — alias
+			// precedence depends on it.
+			assert.deepStrictEqual(bucketNames(compiled, "a"), ["alpha", "avocado"]);
+			assert.deepStrictEqual(bucketNames(compiled, "b"), ["bravo"]);
+			assert.deepStrictEqual(
+				compiled.all.map((item) => item.name),
+				["alpha", "avocado", "bravo"],
+			);
+		});
+
+		it("should disable buckets when every alias shares one first char", () => {
+			const compiled = compile([
+				{ name: "alpha", alias: "/a" },
+				{ name: "ant", alias: "/b" },
+			]);
+
+			// One bucket discriminates nothing, so the resolve path walks
+			// `all` with the char-code screen instead of paying for `Map.get`.
+			assert.strictEqual(compiled.useBuckets, false);
+			assert.strictEqual(compiled.byFirstChar.size, 1);
+			assert.deepStrictEqual(bucketNames(compiled, "a"), ["alpha", "ant"]);
+		});
+
+		it("should disable buckets when an empty-prefix wildcard is present", () => {
+			const compiled = compile([
+				{ name: "*", alias: "/*" },
+				{ name: "alpha", alias: "/a" },
+				{ name: "bravo", alias: "/b" },
+			]);
+
+			// `*` can match any first char, so a bucket scan would drop it
+			// from every resolve.
+			assert.strictEqual(compiled.hasAnyFirstChar, true);
+			assert.strictEqual(compiled.useBuckets, false);
+			assert.strictEqual(compiled.all[0].firstCharCode, -1);
+			// The any-char entry is kept out of the buckets entirely.
+			assert.strictEqual(compiled.byFirstChar.size, 2);
+		});
+
+		it("should return empty compiled options for an empty list", () => {
+			const compiled = compile([]);
+
+			assert.strictEqual(compiled.all.length, 0);
+			assert.strictEqual(compiled.byFirstChar.size, 0);
+			assert.strictEqual(compiled.hasAnyFirstChar, false);
+			assert.strictEqual(compiled.useBuckets, false);
+		});
+
+		it("should precompute the wildcard prefix and suffix", () => {
+			const compiled = compile([
+				{ name: "foo/*", alias: "/bar/*" },
+				{ name: "page/*.js", alias: "/pages/*.js" },
+			]);
+
+			const [prefixOnly, prefixAndSuffix] = compiled.all;
+
+			assert.strictEqual(prefixOnly.wildcardPrefix, "foo/");
+			assert.strictEqual(prefixOnly.wildcardSuffix, "");
+			assert.strictEqual(prefixOnly.firstCharCode, "f".charCodeAt(0));
+
+			assert.strictEqual(prefixAndSuffix.wildcardPrefix, "page/");
+			assert.strictEqual(prefixAndSuffix.wildcardSuffix, ".js");
+		});
+
+		it("should not treat a name with two wildcards as a wildcard alias", () => {
+			const compiled = compile([{ name: "a/*/b/*", alias: "/target" }]);
+
+			assert.strictEqual(compiled.all[0].wildcardPrefix, null);
+			assert.strictEqual(compiled.all[0].wildcardSuffix, null);
+		});
+
+		it("should normalize an absolute alias name into `absolutePath`", () => {
+			const compiled = compile([
+				{ name: "/abs/path", alias: "/target" },
+				// Windows-style names are normalized with backslashes
+				// regardless of the host OS, so this case runs everywhere.
+				{ name: "C:\\abs\\path", alias: "/target" },
+				{ name: "relative", alias: "/target" },
+			]);
+
+			const [posix, win, relative] = compiled.all;
+
+			// Normalized through `resolver.join`, so it ends with a
+			// separator — that is what the resolve-time `startsWith`
+			// comparison expects.
+			assert.strictEqual(posix.absolutePath, "/abs/path/");
+			// `nameWithSlash` always appends "/", so for a native windows
+			// name the two forms diverge — which is why the resolve path
+			// tests both.
+			assert.strictEqual(win.absolutePath, "C:\\abs\\path\\");
+			assert.strictEqual(win.nameWithSlash, "C:\\abs\\path/");
+			assert.strictEqual(relative.absolutePath, null);
+		});
+
+		it("should flag array aliases and normalize `onlyModule`", () => {
+			const compiled = compile([
+				{ name: "single", alias: "/a" },
+				{ name: "multiple", alias: ["/a", "/b"] },
+				{ name: "ignored", alias: false, onlyModule: true },
+			]);
+
+			assert.strictEqual(compiled.all[0].arrayAlias, false);
+			assert.strictEqual(compiled.all[0].onlyModule, false);
+			assert.strictEqual(compiled.all[1].arrayAlias, true);
+			assert.strictEqual(compiled.all[2].onlyModule, true);
+		});
+
+		it("should use -1 as the first char code of an empty name", () => {
+			const compiled = compile([{ name: "", alias: "/target" }]);
+
+			assert.strictEqual(compiled.all[0].firstCharCode, -1);
+			assert.strictEqual(compiled.hasAnyFirstChar, true);
+			assert.strictEqual(compiled.byFirstChar.size, 0);
+		});
+	});
+
+	// `onlyModule` restricts an alias to the exact request, so neither a
+	// subpath of the alias name nor a relative request that merely contains
+	// it is rewritten.
+	describe("onlyModule", () => {
+		const AliasPlugin = require("../lib/AliasPlugin");
+
+		/**
+		 * @param {boolean} onlyModule whether the alias is module-only
+		 * @returns {import("../").Resolver} resolver
+		 */
+		const createResolver = (onlyModule) => {
+			const fileSystem = Volume.fromJSON(
+				{
+					"/real/index": "",
+					"/real/sub/file": "",
+					"/mapped/index": "",
+					"/mapped/sub/file": "",
+				},
+				"/",
+			);
+
+			return ResolverFactory.createResolver({
+				extensions: [".js"],
+				modules: "/",
+				useSyncFileSystemCalls: true,
+				// @ts-expect-error for tests
+				fileSystem,
+				plugins: [
+					new AliasPlugin(
+						"described-resolve",
+						[{ name: "real", alias: "mapped", onlyModule }],
+						"resolve",
+					),
+				],
+			});
+		};
+
+		it("should alias the exact request when `onlyModule` is true", () => {
+			const resolver = createResolver(true);
+
+			assert.strictEqual(
+				resolver.resolveSync({}, "/", "real"),
+				"/mapped/index",
+			);
+		});
+
+		it("should not alias a subpath request when `onlyModule` is true", () => {
+			const resolver = createResolver(true);
+
+			assert.strictEqual(
+				resolver.resolveSync({}, "/", "real/sub/file"),
+				"/real/sub/file",
+			);
+		});
+
+		it("should not alias a relative request when `onlyModule` is true", () => {
+			const resolver = createResolver(true);
+
+			assert.strictEqual(
+				resolver.resolveSync({}, "/", "./real/index"),
+				"/real/index",
+			);
+		});
+
+		it("should alias the exact request and subpaths when `onlyModule` is false", () => {
+			const resolver = createResolver(false);
+
+			assert.strictEqual(
+				resolver.resolveSync({}, "/", "real"),
+				"/mapped/index",
+			);
+			assert.strictEqual(
+				resolver.resolveSync({}, "/", "real/sub/file"),
+				"/mapped/sub/file",
+			);
+		});
+	});
+
 	// Absolute-path aliasing — OS-native (posix on Linux CI, backslash
 	// on Windows CI).
 	//
