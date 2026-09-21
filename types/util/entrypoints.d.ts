@@ -1,3 +1,7 @@
+export function explainSubpathsInConditions(
+	field: ExportsField | ImportsField | null | undefined,
+	isExports: boolean,
+): string | null;
 export function processExportsField(exportsField: ExportsField): FieldProcessor;
 export function processImportsField(importsField: ImportsField): FieldProcessor;
 export type DirectMapping = string | (string | ConditionalMapping)[];
