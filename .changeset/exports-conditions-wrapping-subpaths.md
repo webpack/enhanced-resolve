@@ -1,5 +1,0 @@
----
-"enhanced-resolve": minor
----
-
-Explain an `exports`/`imports` field whose conditions wrap subpaths, instead of failing with a message that points at the request. A field shaped like `{ "import": { ".": "./esm/index.js", "./*": "./esm/*.js" }, "require": "./build/bundle.js" }` is not supported by Node.js: the subpaths inside a condition are read as condition names, so they match nothing, and every request into the package failed as `"./foo" is not exported under the conditions [...]` — which reads as though the package forgot to export `./foo`. Such a failure now names the offending keys and shows the arrangement that works, with the subpaths at the top level and the conditions nested inside them. Resolution itself is unchanged: the diagnosis runs only on a request that has already failed, so nothing that resolves today starts failing, and a successful resolve does no extra work. Errors raised while processing either field also name the `package.json` they came from, which previously only appeared in the resolver log.
