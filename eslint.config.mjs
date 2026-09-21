@@ -2,7 +2,7 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import config from "eslint-config-webpack";
 
 export default defineConfig([
-	globalIgnores(["benchmark/**/fixture/**"]),
+	globalIgnores(["benchmark/**/fixture/**", "types/**"]),
 	{
 		extends: [config],
 	},
