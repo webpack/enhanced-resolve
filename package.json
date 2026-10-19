@@ -64,7 +64,7 @@
   "devDependencies": {
     "@changesets/cli": "^3.0.2",
     "@changesets/get-github-info": "^1.0.1",
-    "@codspeed/core": "^5.7.1",
+    "@codspeed/core": "^6.0.1",
     "@types/graceful-fs": "^4.1.6",
     "@types/node": "^24.10.4",
     "cspell": "^10.0.0",
