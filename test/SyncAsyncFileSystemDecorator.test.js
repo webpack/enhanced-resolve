@@ -35,9 +35,9 @@ describe("SyncAsyncFileSystemDecorator", () => {
 				"bigint",
 			);
 			// Literal `bigint` values keep their exact result types.
-			/** @type {{ atimeNs: bigint }} */
-			const { atimeNs } = decorated.statSync(file, { bigint: true });
-			assert.strictEqual(typeof atimeNs, "bigint");
+			/** @type {{ size: bigint }} */
+			const { size: bigSize } = decorated.statSync(file, { bigint: true });
+			assert.strictEqual(typeof bigSize, "bigint");
 			/** @type {{ size: number }} */
 			const { size } = decorated.statSync(file, { bigint: false });
 			assert.strictEqual(size, content.length);
