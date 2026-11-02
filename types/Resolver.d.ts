@@ -441,6 +441,7 @@ declare namespace Resolver {
  * (path: PathLike, options?: undefined): IStats,
  * (path: PathLike, options?: StatSyncOptions & { bigint?: false | undefined, throwIfNoEntry: false }): IStats | undefined,
  * (path: PathLike, options: StatSyncOptions & { bigint: true, throwIfNoEntry: false }): IBigIntStats | undefined,
+ * (path: PathLike, options: StatSyncOptions & { bigint: boolean, throwIfNoEntry?: undefined }): IStats | IBigIntStats,
  * (path: PathLike, options?: StatSyncOptions & { bigint?: false | undefined, throwIfNoEntry?: true | undefined }): IStats,
  * (path: PathLike, options: StatSyncOptions & { bigint: true, throwIfNoEntry?: true | undefined }): IBigIntStats,
  * (path: PathLike, options?: StatSyncOptions): IStats | IBigIntStats | undefined,
@@ -459,6 +460,7 @@ declare namespace Resolver {
  * (path: PathLike, options?: undefined): IStats,
  * (path: PathLike, options?: StatSyncOptions & { bigint?: false | undefined, throwIfNoEntry: false }): IStats | undefined,
  * (path: PathLike, options: StatSyncOptions & { bigint: true, throwIfNoEntry: false }): IBigIntStats | undefined,
+ * (path: PathLike, options: StatSyncOptions & { bigint: boolean, throwIfNoEntry?: undefined }): IStats | IBigIntStats,
  * (path: PathLike, options?: StatSyncOptions & { bigint?: false | undefined, throwIfNoEntry?: true | undefined }): IStats,
  * (path: PathLike, options: StatSyncOptions & { bigint: true, throwIfNoEntry?: true | undefined }): IBigIntStats,
  * (path: PathLike, options?: StatSyncOptions): IStats | IBigIntStats | undefined,
@@ -1229,6 +1231,13 @@ type LStatSync = {
 	): IBigIntStats | undefined;
 	(
 		path: PathLike,
+		options: StatSyncOptions & {
+			bigint: boolean;
+			throwIfNoEntry?: undefined;
+		},
+	): IStats | IBigIntStats;
+	(
+		path: PathLike,
 		options?: StatSyncOptions & {
 			bigint?: false | undefined;
 			throwIfNoEntry?: true | undefined;
@@ -1286,6 +1295,13 @@ type StatSync = {
 			throwIfNoEntry: false;
 		},
 	): IBigIntStats | undefined;
+	(
+		path: PathLike,
+		options: StatSyncOptions & {
+			bigint: boolean;
+			throwIfNoEntry?: undefined;
+		},
+	): IStats | IBigIntStats;
 	(
 		path: PathLike,
 		options?: StatSyncOptions & {

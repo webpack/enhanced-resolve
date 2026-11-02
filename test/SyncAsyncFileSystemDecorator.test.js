@@ -34,6 +34,9 @@ describe("SyncAsyncFileSystemDecorator", () => {
 				typeof decorated.statSync(file, { bigint: true }).size,
 				"bigint",
 			);
+			// A `bigint` known only as a boolean still yields defined stats.
+			const bigint = /** @type {boolean} */ (process.env.NEVER_SET === "1");
+			assert.ok(decorated.statSync(file, { bigint }).isFile());
 		});
 
 		it("should stat through a callback with and without options", (t, done) => {
