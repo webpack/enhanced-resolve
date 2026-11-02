@@ -38,7 +38,8 @@ jobs:
         with:
           # Pinned: the `@codspeed/core` native add-on fails to load on Node.js 26
           # (undefined symbol `v8::String::Utf8Length`), which `lts/*` now resolves to.
-          node-version: "24.22.0"
+          # 24.21.0 is the version the last `main` baseline was measured with.
+          node-version: "24.21.0"
           cache: npm
 
       - run: npm ci
