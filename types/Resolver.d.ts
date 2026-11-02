@@ -385,7 +385,7 @@ declare namespace Resolver {
  * @typedef {{
  * (path: PathOrFileDescriptor, options?: { encoding?: null | undefined, flag?: string | undefined } | null): Buffer,
  * (path: PathOrFileDescriptor, options: { encoding: BufferEncoding, flag?: string | undefined } | BufferEncoding): string,
- * (path: PathOrFileDescriptor, options?: (ObjectEncodingOptions & { flag?: string | undefined }) | BufferEncoding | null): string | Buffer,
+ * (path: PathOrFileDescriptor, options: ObjectEncodingOptions & { flag?: string | undefined }): string | Buffer,
  * }} ReadFileSync
  */
 /**
@@ -441,9 +441,8 @@ declare namespace Resolver {
  * (path: PathLike, options?: undefined): IStats,
  * (path: PathLike, options?: StatSyncOptions & { bigint?: false | undefined, throwIfNoEntry: false }): IStats | undefined,
  * (path: PathLike, options: StatSyncOptions & { bigint: true, throwIfNoEntry: false }): IBigIntStats | undefined,
- * (path: PathLike, options?: StatSyncOptions & { bigint?: false | undefined }): IStats,
- * (path: PathLike, options: StatSyncOptions & { bigint: true }): IBigIntStats,
- * (path: PathLike, options: StatSyncOptions & { bigint: boolean, throwIfNoEntry?: false | undefined }): IStats | IBigIntStats,
+ * (path: PathLike, options?: StatSyncOptions & { bigint?: false | undefined, throwIfNoEntry?: true | undefined }): IStats,
+ * (path: PathLike, options: StatSyncOptions & { bigint: true, throwIfNoEntry?: true | undefined }): IBigIntStats,
  * (path: PathLike, options?: StatSyncOptions): IStats | IBigIntStats | undefined,
  * }} LStatSync
  */
@@ -460,9 +459,8 @@ declare namespace Resolver {
  * (path: PathLike, options?: undefined): IStats,
  * (path: PathLike, options?: StatSyncOptions & { bigint?: false | undefined, throwIfNoEntry: false }): IStats | undefined,
  * (path: PathLike, options: StatSyncOptions & { bigint: true, throwIfNoEntry: false }): IBigIntStats | undefined,
- * (path: PathLike, options?: StatSyncOptions & { bigint?: false | undefined }): IStats,
- * (path: PathLike, options: StatSyncOptions & { bigint: true }): IBigIntStats,
- * (path: PathLike, options: StatSyncOptions & { bigint: boolean, throwIfNoEntry?: false | undefined }): IStats | IBigIntStats,
+ * (path: PathLike, options?: StatSyncOptions & { bigint?: false | undefined, throwIfNoEntry?: true | undefined }): IStats,
+ * (path: PathLike, options: StatSyncOptions & { bigint: true, throwIfNoEntry?: true | undefined }): IBigIntStats,
  * (path: PathLike, options?: StatSyncOptions): IStats | IBigIntStats | undefined,
  * }} StatSync
  */
@@ -1044,12 +1042,9 @@ type ReadFileSync = {
 	): string;
 	(
 		path: PathOrFileDescriptor,
-		options?:
-			| (ObjectEncodingOptions & {
-					flag?: string | undefined;
-			  })
-			| BufferEncoding
-			| null,
+		options: ObjectEncodingOptions & {
+			flag?: string | undefined;
+		},
 	): string | Buffer;
 };
 type Readdir = {
@@ -1236,21 +1231,16 @@ type LStatSync = {
 		path: PathLike,
 		options?: StatSyncOptions & {
 			bigint?: false | undefined;
+			throwIfNoEntry?: true | undefined;
 		},
 	): IStats;
 	(
 		path: PathLike,
 		options: StatSyncOptions & {
 			bigint: true;
+			throwIfNoEntry?: true | undefined;
 		},
 	): IBigIntStats;
-	(
-		path: PathLike,
-		options: StatSyncOptions & {
-			bigint: boolean;
-			throwIfNoEntry?: false | undefined;
-		},
-	): IStats | IBigIntStats;
 	(
 		path: PathLike,
 		options?: StatSyncOptions,
@@ -1300,21 +1290,16 @@ type StatSync = {
 		path: PathLike,
 		options?: StatSyncOptions & {
 			bigint?: false | undefined;
+			throwIfNoEntry?: true | undefined;
 		},
 	): IStats;
 	(
 		path: PathLike,
 		options: StatSyncOptions & {
 			bigint: true;
+			throwIfNoEntry?: true | undefined;
 		},
 	): IBigIntStats;
-	(
-		path: PathLike,
-		options: StatSyncOptions & {
-			bigint: boolean;
-			throwIfNoEntry?: false | undefined;
-		},
-	): IStats | IBigIntStats;
 	(
 		path: PathLike,
 		options?: StatSyncOptions,
