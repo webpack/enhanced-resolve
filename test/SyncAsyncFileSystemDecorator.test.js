@@ -178,7 +178,9 @@ describe("SyncAsyncFileSystemDecorator", () => {
 		});
 
 		after(() => {
-			if (dir) fs.rmSync(dir, { recursive: true, force: true });
+			// `fs.rmSync` needs Node.js 14.14, older runtimes run this suite too.
+			if (link) fs.unlinkSync(link);
+			if (dir) fs.rmdirSync(dir);
 		});
 
 		it("should read a link synchronously and through a callback", (t, done) => {
