@@ -441,9 +441,9 @@ declare namespace Resolver {
  * (path: PathLike, options?: undefined): IStats,
  * (path: PathLike, options?: StatSyncOptions & { bigint?: false | undefined, throwIfNoEntry: false }): IStats | undefined,
  * (path: PathLike, options: StatSyncOptions & { bigint: true, throwIfNoEntry: false }): IBigIntStats | undefined,
- * (path: PathLike, options: StatSyncOptions & { bigint: boolean, throwIfNoEntry?: undefined }): IStats | IBigIntStats,
  * (path: PathLike, options?: StatSyncOptions & { bigint?: false | undefined, throwIfNoEntry?: true | undefined }): IStats,
  * (path: PathLike, options: StatSyncOptions & { bigint: true, throwIfNoEntry?: true | undefined }): IBigIntStats,
+ * (path: PathLike, options: StatSyncOptions & { bigint: boolean, throwIfNoEntry?: undefined }): IStats | IBigIntStats,
  * (path: PathLike, options?: StatSyncOptions): IStats | IBigIntStats | undefined,
  * }} LStatSync
  */
@@ -460,9 +460,9 @@ declare namespace Resolver {
  * (path: PathLike, options?: undefined): IStats,
  * (path: PathLike, options?: StatSyncOptions & { bigint?: false | undefined, throwIfNoEntry: false }): IStats | undefined,
  * (path: PathLike, options: StatSyncOptions & { bigint: true, throwIfNoEntry: false }): IBigIntStats | undefined,
- * (path: PathLike, options: StatSyncOptions & { bigint: boolean, throwIfNoEntry?: undefined }): IStats | IBigIntStats,
  * (path: PathLike, options?: StatSyncOptions & { bigint?: false | undefined, throwIfNoEntry?: true | undefined }): IStats,
  * (path: PathLike, options: StatSyncOptions & { bigint: true, throwIfNoEntry?: true | undefined }): IBigIntStats,
+ * (path: PathLike, options: StatSyncOptions & { bigint: boolean, throwIfNoEntry?: undefined }): IStats | IBigIntStats,
  * (path: PathLike, options?: StatSyncOptions): IStats | IBigIntStats | undefined,
  * }} StatSync
  */
@@ -1231,13 +1231,6 @@ type LStatSync = {
 	): IBigIntStats | undefined;
 	(
 		path: PathLike,
-		options: StatSyncOptions & {
-			bigint: boolean;
-			throwIfNoEntry?: undefined;
-		},
-	): IStats | IBigIntStats;
-	(
-		path: PathLike,
 		options?: StatSyncOptions & {
 			bigint?: false | undefined;
 			throwIfNoEntry?: true | undefined;
@@ -1250,6 +1243,13 @@ type LStatSync = {
 			throwIfNoEntry?: true | undefined;
 		},
 	): IBigIntStats;
+	(
+		path: PathLike,
+		options: StatSyncOptions & {
+			bigint: boolean;
+			throwIfNoEntry?: undefined;
+		},
+	): IStats | IBigIntStats;
 	(
 		path: PathLike,
 		options?: StatSyncOptions,
@@ -1297,13 +1297,6 @@ type StatSync = {
 	): IBigIntStats | undefined;
 	(
 		path: PathLike,
-		options: StatSyncOptions & {
-			bigint: boolean;
-			throwIfNoEntry?: undefined;
-		},
-	): IStats | IBigIntStats;
-	(
-		path: PathLike,
 		options?: StatSyncOptions & {
 			bigint?: false | undefined;
 			throwIfNoEntry?: true | undefined;
@@ -1316,6 +1309,13 @@ type StatSync = {
 			throwIfNoEntry?: true | undefined;
 		},
 	): IBigIntStats;
+	(
+		path: PathLike,
+		options: StatSyncOptions & {
+			bigint: boolean;
+			throwIfNoEntry?: undefined;
+		},
+	): IStats | IBigIntStats;
 	(
 		path: PathLike,
 		options?: StatSyncOptions,
