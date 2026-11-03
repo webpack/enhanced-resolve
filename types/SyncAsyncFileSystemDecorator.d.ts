@@ -1,20 +1,10 @@
 export = SyncAsyncFileSystemDecorator;
-/** @typedef {import("./Resolver").FileSystem} FileSystem */
-/** @typedef {import("./Resolver").StringCallback} StringCallback */
-/** @typedef {import("./Resolver").SyncFileSystem} SyncFileSystem */
-/** @typedef {Function} SyncOrAsyncFunction */
-/** @typedef {any} ResultOfSyncOrAsyncFunction */
 /**
  * @param {SyncFileSystem} fs file system implementation
  * @constructor
  */
 declare function SyncAsyncFileSystemDecorator(fs: SyncFileSystem): void;
 declare class SyncAsyncFileSystemDecorator {
-	/** @typedef {import("./Resolver").FileSystem} FileSystem */
-	/** @typedef {import("./Resolver").StringCallback} StringCallback */
-	/** @typedef {import("./Resolver").SyncFileSystem} SyncFileSystem */
-	/** @typedef {Function} SyncOrAsyncFunction */
-	/** @typedef {any} ResultOfSyncOrAsyncFunction */
 	/**
 	 * @param {SyncFileSystem} fs file system implementation
 	 * @constructor
@@ -43,6 +33,9 @@ declare namespace SyncAsyncFileSystemDecorator {
 		SyncFileSystem,
 		SyncOrAsyncFunction,
 		ResultOfSyncOrAsyncFunction,
+		ObjectEncodingOptions,
+		PathOrFileDescriptor,
+		ReadFileSyncOptions,
 	};
 }
 type FileSystem = import("./Resolver").FileSystem;
@@ -50,3 +43,14 @@ type StringCallback = import("./Resolver").StringCallback;
 type SyncFileSystem = import("./Resolver").SyncFileSystem;
 type SyncOrAsyncFunction = Function;
 type ResultOfSyncOrAsyncFunction = any;
+type ObjectEncodingOptions = import("./Resolver").ObjectEncodingOptions;
+type PathOrFileDescriptor = import("./Resolver").PathOrFileDescriptor;
+/**
+ * Every option `readFileSync` accepts, as `readFile` passes it through.
+ */
+type ReadFileSyncOptions =
+	| (ObjectEncodingOptions & {
+			flag?: string | undefined;
+	  })
+	| BufferEncoding
+	| null;
