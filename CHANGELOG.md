@@ -1,5 +1,11 @@
 # enhanced-resolve
 
+## 5.26.1
+
+### Patch Changes
+
+- Accept `fs` typed by `@types/node` 26 in the file system types. (by [@alexander-akait](https://github.com/alexander-akait) in [#700](https://github.com/webpack/enhanced-resolve/pull/700))
+
 ## 5.26.0
 
 ### Minor Changes
