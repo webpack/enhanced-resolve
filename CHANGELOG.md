@@ -1,5 +1,11 @@
 # enhanced-resolve
 
+## 5.26.2
+
+### Patch Changes
+
+- Export the `UnsafeCache` type of the `unsafeCache` option. (by [@alexander-akait](https://github.com/alexander-akait) in [#703](https://github.com/webpack/enhanced-resolve/pull/703))
+
 ## 5.26.1
 
 ### Patch Changes
