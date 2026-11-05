@@ -16,6 +16,7 @@ declare namespace _exports {
 		Plugin,
 		ResolveOptions,
 		TsconfigPathsPlugin,
+		UnsafeCache,
 		ResolveFunctionAsync,
 		ResolveFunction,
 		ResolveFunctionPromise,
@@ -57,6 +58,7 @@ type SyncFileSystem = import("./Resolver").SyncFileSystem;
 type Plugin = import("./ResolverFactory").Plugin;
 type ResolveOptions = import("./ResolverFactory").UserResolveOptions;
 type TsconfigPathsPlugin = import("./TsconfigPathsPlugin");
+type UnsafeCache = import("./UnsafeCachePlugin").Cache;
 type ResolveFunctionAsync = {
 	(
 		context: Context,

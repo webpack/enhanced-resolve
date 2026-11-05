@@ -11,7 +11,7 @@ const { describe, it } = require("./_runner");
 
 /** @typedef {import("../lib/Resolver").ResolveRequest} ResolveRequest */
 /** @typedef {import("../lib/Resolver").ResolveContext} ResolveContext */
-/** @typedef {import("../lib/UnsafeCachePlugin").Cache} Cache */
+/** @typedef {import("../").UnsafeCache} Cache */
 /** @typedef {ResolveContext & Required<Pick<ResolveContext, "yield" | "fileDependencies" | "contextDependencies" | "missingDependencies">>} StrictResolveContext */
 
 const nodeFileSystem = new CachedInputFileSystem(fs, 4000);
