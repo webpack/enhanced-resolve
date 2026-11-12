@@ -1,5 +1,15 @@
 # enhanced-resolve
 
+## 5.26.2
+
+### Patch Changes
+
+- Export the `UnsafeCache` type of the `unsafeCache` option. (by [@alexander-akait](https://github.com/alexander-akait) in [#703](https://github.com/webpack/enhanced-resolve/pull/703))
+
+- Resolve tsconfig `extends` the way tsc does, including package `exports`. (by [@abrahamguo](https://github.com/abrahamguo) in [#709](https://github.com/webpack/enhanced-resolve/pull/709))
+
+- Resolve `paths` inherited through `extends` (with no `baseUrl`) relative to the tsconfig that declares them, substitute `${configDir}` in an inherited `baseUrl`, treat an empty `baseUrl` as the directory of its tsconfig, like tsc, and stop extending a tsconfig from changing it for later loads that share the file system cache. (by [@alexander-akait](https://github.com/alexander-akait) in [#711](https://github.com/webpack/enhanced-resolve/pull/711))
+
 ## 5.26.1
 
 ### Patch Changes
