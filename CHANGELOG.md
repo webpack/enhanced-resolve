@@ -1,5 +1,11 @@
 # enhanced-resolve
 
+## 5.27.0
+
+### Minor Changes
+
+- Add a `readdirPrefix` option to `CachedInputFileSystem#purge` that, with `exact: true`, still removes the cached directory listings below `what`. (by [@alexander-akait](https://github.com/alexander-akait) in [#712](https://github.com/webpack/enhanced-resolve/pull/712))
+
 ## 5.26.2
 
 ### Patch Changes
