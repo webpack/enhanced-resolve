@@ -29,7 +29,7 @@ declare class CachedInputFileSystem {
 	realpathSync: import("./Resolver").RealPathSync | undefined;
 	/**
 	 * @param {(string | Buffer | URL | number | (string | URL | Buffer | number)[] | Set<string | URL | Buffer | number>)=} what what to purge
-	 * @param {{ exact?: boolean }=} options options; `exact: true` removes only cache entries whose key matches `what` exactly instead of any entry whose key starts with `what`
+	 * @param {{ exact?: boolean, readdirPrefix?: boolean }=} options options; `exact: true` removes only cache entries whose key matches `what` exactly instead of any entry whose key starts with `what`; with `exact: true`, `readdirPrefix: true` still removes every `readdir` entry whose key starts with `what`, so the listings of directories below a changed directory are dropped while their file stats are kept
 	 */
 	purge(
 		what?:
@@ -45,6 +45,7 @@ declare class CachedInputFileSystem {
 		options?:
 			| {
 					exact?: boolean;
+					readdirPrefix?: boolean;
 			  }
 			| undefined,
 	): void;
