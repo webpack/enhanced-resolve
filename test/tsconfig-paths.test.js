@@ -1876,4 +1876,58 @@ describe("TsconfigPathsPlugin", () => {
 			});
 		}
 	});
+
+	describe("paths and baseUrl inherited through extends", () => {
+		const extendsPathsBaseDir = path.resolve(
+			__dirname,
+			"fixtures",
+			"tsconfig-paths",
+			"extends-paths-base",
+		);
+
+		/**
+		 * @param {string} name fixture directory name
+		 * @param {string} request request to resolve
+		 * @returns {string} resolved path
+		 */
+		const resolveIn = (name, request) => {
+			const dir = path.join(extendsPathsBaseDir, name);
+			const resolver = ResolverFactory.createResolver({
+				fileSystem,
+				extensions: [".ts"],
+				useSyncFileSystemCalls: true,
+				tsconfig: path.join(dir, "tsconfig.json"),
+			});
+			return /** @type {string} */ (resolver.resolveSync({}, dir, request));
+		};
+
+		it("should resolve inherited paths without baseUrl relative to the config that declares them", () => {
+			assert.strictEqual(
+				resolveIn("relative", "@/foo"),
+				path.join(extendsPathsBaseDir, "relative", "src", "foo.ts"),
+			);
+		});
+
+		it("should resolve inherited paths without baseUrl from a package config relative to that config", () => {
+			assert.strictEqual(
+				resolveIn("package", "@/foo"),
+				path.join(extendsPathsBaseDir, "package", "src", "foo.ts"),
+			);
+		});
+
+		// eslint-disable-next-line no-template-curly-in-string
+		it("should substitute ${configDir} in an inherited baseUrl with the root config directory", () => {
+			assert.strictEqual(
+				resolveIn("config-dir-base-url", "foo"),
+				path.join(extendsPathsBaseDir, "config-dir-base-url", "src", "foo.ts"),
+			);
+		});
+
+		it("should resolve inherited paths relative to the baseUrl of the root config", () => {
+			assert.strictEqual(
+				resolveIn("root-base-url", "@/foo"),
+				path.join(extendsPathsBaseDir, "root-base-url", "lib", "foo.ts"),
+			);
+		});
+	});
 });
