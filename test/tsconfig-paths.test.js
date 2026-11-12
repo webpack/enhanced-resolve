@@ -1937,6 +1937,13 @@ describe("TsconfigPathsPlugin", () => {
 			);
 		});
 
+		it("should resolve non-relative requests from an empty baseUrl in the root config", () => {
+			assert.strictEqual(
+				resolveIn("empty-base-url-root", "src/foo"),
+				path.join(extendsPathsBaseDir, "empty-base-url-root", "src", "foo.ts"),
+			);
+		});
+
 		it("should treat an empty inherited baseUrl as the directory of the config that declares it", () => {
 			assert.strictEqual(
 				resolveIn("empty-base-url-inherited", "@/foo"),
