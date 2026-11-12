@@ -165,6 +165,10 @@ type TsconfigCompilerOptions = {
 				[key: string]: string[];
 		  }
 		| undefined;
+	/**
+	 * directory of the config file that declares `paths`, used when there is no `baseUrl`
+	 */
+	pathsBasePath?: string | undefined;
 };
 type TsconfigReference = {
 	/**

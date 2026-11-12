@@ -1876,4 +1876,219 @@ describe("TsconfigPathsPlugin", () => {
 			});
 		}
 	});
+
+	describe("paths and baseUrl inherited through extends", () => {
+		const extendsPathsBaseDir = path.resolve(
+			__dirname,
+			"fixtures",
+			"tsconfig-paths",
+			"extends-paths-base",
+		);
+
+		/**
+		 * @param {string} name fixture directory name
+		 * @param {string} request request to resolve
+		 * @returns {string} resolved path
+		 */
+		const resolveIn = (name, request) => {
+			const dir = path.join(extendsPathsBaseDir, name);
+			const resolver = ResolverFactory.createResolver({
+				fileSystem,
+				extensions: [".ts"],
+				useSyncFileSystemCalls: true,
+				tsconfig: path.join(dir, "tsconfig.json"),
+			});
+			return /** @type {string} */ (resolver.resolveSync({}, dir, request));
+		};
+
+		/**
+		 * @param {string[]} segments path segments inside the fixtures directory
+		 * @returns {string} absolute fixture path
+		 */
+		const fixture = (...segments) =>
+			path.join(extendsPathsBaseDir, ...segments);
+
+		it("should resolve inherited paths without baseUrl relative to the config that declares them", () => {
+			assert.strictEqual(
+				resolveIn("relative", "@/foo"),
+				path.join(extendsPathsBaseDir, "relative", "src", "foo.ts"),
+			);
+		});
+
+		it("should resolve inherited paths without baseUrl from a package config relative to that config", () => {
+			assert.strictEqual(
+				resolveIn("package", "@/foo"),
+				path.join(extendsPathsBaseDir, "package", "src", "foo.ts"),
+			);
+		});
+
+		// eslint-disable-next-line no-template-curly-in-string
+		it("should substitute ${configDir} in an inherited baseUrl with the root config directory", () => {
+			assert.strictEqual(
+				resolveIn("config-dir-base-url", "foo"),
+				path.join(extendsPathsBaseDir, "config-dir-base-url", "src", "foo.ts"),
+			);
+		});
+
+		it("should resolve inherited paths relative to the baseUrl of the root config", () => {
+			assert.strictEqual(
+				resolveIn("root-base-url", "@/foo"),
+				path.join(extendsPathsBaseDir, "root-base-url", "lib", "foo.ts"),
+			);
+		});
+
+		it("should treat an empty baseUrl in the root config as the root config directory", () => {
+			assert.strictEqual(
+				resolveIn("empty-base-url-root", "@/foo"),
+				path.join(extendsPathsBaseDir, "empty-base-url-root", "src", "foo.ts"),
+			);
+		});
+
+		it("should resolve non-relative requests from an empty baseUrl in the root config", () => {
+			assert.strictEqual(
+				resolveIn("empty-base-url-root", "src/foo"),
+				path.join(extendsPathsBaseDir, "empty-base-url-root", "src", "foo.ts"),
+			);
+		});
+
+		it("should treat an empty inherited baseUrl as the directory of the config that declares it", () => {
+			assert.strictEqual(
+				resolveIn("empty-base-url-inherited", "@/foo"),
+				path.join(
+					extendsPathsBaseDir,
+					"empty-base-url-inherited",
+					"configs",
+					"src",
+					"foo.ts",
+				),
+			);
+		});
+
+		it("should resolve paths declared in the middle of an extends chain relative to that config", () => {
+			assert.strictEqual(
+				resolveIn("chain-paths-middle", "@/foo"),
+				fixture("chain-paths-middle", "src", "foo.ts"),
+			);
+		});
+
+		it("should resolve paths declared at the end of an extends chain relative to that config", () => {
+			assert.strictEqual(
+				resolveIn("chain-paths-leaf", "@/foo"),
+				fixture("chain-paths-leaf", "src", "foo.ts"),
+			);
+		});
+
+		it("should resolve inherited paths relative to a baseUrl inherited from further up the chain", () => {
+			assert.strictEqual(
+				resolveIn("chain-base-url-leaf", "@/foo"),
+				fixture("chain-base-url-leaf", "configs", "base", "src", "foo.ts"),
+			);
+		});
+
+		it("should resolve paths from an earlier extends entry relative to a baseUrl from a later one", () => {
+			assert.strictEqual(
+				resolveIn("array-paths-then-base-url", "@/foo"),
+				fixture("array-paths-then-base-url", "b", "src", "foo.ts"),
+			);
+		});
+
+		it("should use the paths of the last extends entry relative to that config", () => {
+			assert.strictEqual(
+				resolveIn("array-later-paths-win", "@/foo"),
+				fixture("array-later-paths-win", "src", "foo.ts"),
+			);
+		});
+
+		// eslint-disable-next-line no-template-curly-in-string
+		it("should resolve inherited paths relative to an inherited ${configDir} baseUrl", () => {
+			assert.strictEqual(
+				resolveIn("config-dir-base-url-with-paths", "@/foo"),
+				fixture("config-dir-base-url-with-paths", "src", "foo.ts"),
+			);
+		});
+
+		// eslint-disable-next-line no-template-curly-in-string
+		it("should substitute ${configDir} in a baseUrl from a package resolved through exports", () => {
+			assert.strictEqual(
+				resolveIn("package-exports-config-dir", "foo"),
+				fixture("package-exports-config-dir", "src", "foo.ts"),
+			);
+		});
+
+		it("should resolve an inherited catch-all pattern without baseUrl relative to its config", () => {
+			assert.strictEqual(
+				resolveIn("wildcard-only", "foo"),
+				fixture("wildcard-only", "src", "foo.ts"),
+			);
+		});
+
+		it("should not use inherited paths when the root config sets empty paths", () => {
+			assert.throws(
+				() => resolveIn("root-clears-paths", "@/foo"),
+				/Can't resolve '@\/foo'/,
+			);
+		});
+
+		it("should resolve inherited paths of a referenced project relative to their config", () => {
+			const resolver = ResolverFactory.createResolver({
+				fileSystem,
+				extensions: [".ts"],
+				useSyncFileSystemCalls: true,
+				tsconfig: {
+					configFile: fixture("reference", "tsconfig.json"),
+					references: "auto",
+				},
+			});
+			assert.strictEqual(
+				resolver.resolveSync({}, fixture("reference", "app"), "@/foo"),
+				fixture("reference", "app", "src", "foo.ts"),
+			);
+		});
+
+		it("should keep the references of a config for later loads after another config extends it", () => {
+			const sharedFileSystem = new CachedInputFileSystem(fs, 4000);
+			const extending = ResolverFactory.createResolver({
+				fileSystem: sharedFileSystem,
+				extensions: [".ts"],
+				useSyncFileSystemCalls: true,
+				tsconfig: fixture("reference", "extends-root.json"),
+			});
+			extending.resolveSync({}, fixture("reference"), "./extends-root.json");
+			const referencing = ResolverFactory.createResolver({
+				fileSystem: sharedFileSystem,
+				extensions: [".ts"],
+				useSyncFileSystemCalls: true,
+				tsconfig: {
+					configFile: fixture("reference", "tsconfig.json"),
+					references: "auto",
+				},
+			});
+			assert.strictEqual(
+				referencing.resolveSync({}, fixture("reference", "app"), "@/foo"),
+				fixture("reference", "app", "src", "foo.ts"),
+			);
+		});
+
+		it("should resolve inherited paths with asynchronous file system calls", (t, done) => {
+			const resolver = ResolverFactory.createResolver({
+				fileSystem,
+				extensions: [".ts"],
+				tsconfig: fixture("chain-paths-middle", "tsconfig.json"),
+			});
+			resolver.resolve(
+				{},
+				fixture("chain-paths-middle"),
+				"@/foo",
+				{},
+				(err, result) => {
+					if (err) return done(err);
+					assert.strictEqual(
+						result,
+						fixture("chain-paths-middle", "src", "foo.ts"),
+					);
+					done();
+				},
+			);
+		});
+	});
 });
