@@ -1838,4 +1838,42 @@ describe("TsconfigPathsPlugin", () => {
 			);
 		});
 	});
+
+	describe("extends resolution (#706)", () => {
+		const extendsResolutionDir = path.resolve(
+			__dirname,
+			"fixtures",
+			"tsconfig-paths",
+			"extends-resolution",
+		);
+
+		for (const [description, project] of [
+			["a package subpath mapped by `exports`", "pkg-exports"],
+			["the `tsconfig` field of a package", "pkg-tsconfig-field"],
+			["a relative file without a .json name", "non-json-name"],
+			["'..' as a directory, not a sibling '<dir>.json'", "parent-dir/app"],
+			["a bare file name, which tsc rejects", "bare-file-name"],
+		]) {
+			it(`should resolve paths inherited from ${description}`, (t, done) => {
+				const projectDir = path.join(extendsResolutionDir, project);
+				const resolver = ResolverFactory.createResolver({
+					fileSystem,
+					extensions: [".ts", ".tsx"],
+					mainFields: ["browser", "main"],
+					mainFiles: ["index"],
+					tsconfig: path.join(projectDir, "tsconfig.json"),
+				});
+
+				resolver.resolve({}, projectDir, "@app/util", {}, (err, result) => {
+					if (err) return done(err);
+					if (!result) return done(new Error("No result"));
+					assert.deepStrictEqual(
+						result,
+						path.join(projectDir, "src", "util.ts"),
+					);
+					done();
+				});
+			});
+		}
+	});
 });

@@ -87,22 +87,6 @@ declare class TsconfigPathsPlugin {
 		callback: (err: Error | null, result?: Tsconfig) => void,
 	): void;
 	/**
-	 * Walk up from startDir looking for `<dir>/<subPath>` (a
-	 * `node_modules/...` sub-path), matching Node.js module resolution so a
-	 * package hoisted to a parent workspace's node_modules is found.
-	 * @param {Resolver} resolver the resolver
-	 * @param {string} startDir directory to start searching from
-	 * @param {string} subPath node_modules-relative sub-path to look for
-	 * @param {(found: string | null) => void} callback receives the found path or null
-	 * @returns {void}
-	 */
-	_findExtendsInNodeModules(
-		resolver: Resolver,
-		startDir: string,
-		subPath: string,
-		callback: (found: string | null) => void,
-	): void;
-	/**
 	 * Load referenced tsconfig projects and store in referenceMatchMap
 	 * Simple implementation matching tsconfig-paths-webpack-plugin:
 	 * Just load each reference and store independently
