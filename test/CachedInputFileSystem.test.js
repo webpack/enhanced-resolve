@@ -638,6 +638,24 @@ describe("cachedInputFileSystem CacheBackend", () => {
 		});
 	});
 
+	it("should prefix-purge readdir but keep stats with readdirPrefix: true", (t, done) => {
+		fs.readdir("/test/path/sub", (err, r1) => {
+			assert.strictEqual(r1[0], "0");
+			fs.stat("/test/path/sub/file", (err, r2) => {
+				r2.cached = true;
+				fs.purge("/test/path", { exact: true, readdirPrefix: true });
+				fs.readdir("/test/path/sub", (err, r3) => {
+					// the listing below the purged directory is fetched again
+					assert.strictEqual(r3[0], "1");
+					fs.stat("/test/path/sub/file", (err, r4) => {
+						assert.strictEqual(r4.cached, true);
+						done();
+					});
+				});
+			});
+		});
+	});
+
 	it("should accept Buffer with exact: true", (t, done) => {
 		fs.stat("/test/path", (err, r1) => {
 			r1.cached = true;
