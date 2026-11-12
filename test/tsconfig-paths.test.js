@@ -1929,5 +1929,25 @@ describe("TsconfigPathsPlugin", () => {
 				path.join(extendsPathsBaseDir, "root-base-url", "lib", "foo.ts"),
 			);
 		});
+
+		it("should treat an empty baseUrl in the root config as the root config directory", () => {
+			assert.strictEqual(
+				resolveIn("empty-base-url-root", "@/foo"),
+				path.join(extendsPathsBaseDir, "empty-base-url-root", "src", "foo.ts"),
+			);
+		});
+
+		it("should treat an empty inherited baseUrl as the directory of the config that declares it", () => {
+			assert.strictEqual(
+				resolveIn("empty-base-url-inherited", "@/foo"),
+				path.join(
+					extendsPathsBaseDir,
+					"empty-base-url-inherited",
+					"configs",
+					"src",
+					"foo.ts",
+				),
+			);
+		});
 	});
 });
